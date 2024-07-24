@@ -57,7 +57,14 @@ const CommonForm = ({ alignLogo }: commonFormPropsType) => {
             <p>{EnterEmailPasswordLogin}</p>
             <FormGroup>
               <Label className="col-form-label">{EmailAddress}</Label>
-              <Input type="email" required placeholder="Test@gmail.com" />
+              <Input
+                type="email"
+                required
+                placeholder="Test@gmail.com"
+                value={email}
+                name="email"
+                onChange={handleUserValue}
+              />
             </FormGroup>
             <FormGroup>
               <Label className="col-form-label">{Password}</Label>
@@ -65,6 +72,9 @@ const CommonForm = ({ alignLogo }: commonFormPropsType) => {
                 <Input
                   type={showPassWord ? "text" : "password"}
                   placeholder="*********"
+                  onChange={handleUserValue}
+                  value={password}
+                  name="password"
                 />
                 <div className="show-hide">
                   <span
