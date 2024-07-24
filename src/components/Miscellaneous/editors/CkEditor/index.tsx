@@ -13,6 +13,7 @@ const CkEditorContainer = () => {
             <CommonCardHeading smallHeading={CKEditorExample} />
             <CardBody>
               <CKEditor
+                //@ts-ignore
                 editor={ClassicEditor}
                 data="<p>Hello from CKEditor 5!</p>"
               />
@@ -21,7 +22,6 @@ const CkEditorContainer = () => {
         </Col>
       </Row>
     </Container>
-
   );
 };
 
