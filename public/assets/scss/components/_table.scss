@@ -129,18 +129,18 @@ th {
 			vertical-align: middle;
 
 			td {
-				svg {
-					width: 30px;
-					height: 30px;
-					padding: 5px;
-					border-radius: 4px;
-					margin-right: 10px;
-
-					[dir="rtl"] & {
-						margin-right: unset;
-						margin-left: 10px;
-					}
-				}
+				//svg {
+				//	width: 30px;
+				//	height: 30px;
+				//	padding: 5px;
+				//	border-radius: 4px;
+				//	margin-right: 10px;
+				//
+				//	[dir="rtl"] & {
+				//		margin-right: unset;
+				//		margin-left: 10px;
+				//	}
+				//}
 			}
 		}
 	}

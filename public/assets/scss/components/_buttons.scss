@@ -186,6 +186,13 @@
   }
 }
 
+.btn-group{
+  .btn {
+    padding: $btn-item-padding;
+  }
+}
+
+
 .btn-lg {
   font-size: $btn-lg-font-size;
 }
@@ -402,7 +409,7 @@ $btn-color in (primary, $primary-color),
   }
 }
 
-// Default button on hover 
+// Default button on hover
 .card-header-right-icon {
   .btn {
     &.badge-light-primary {

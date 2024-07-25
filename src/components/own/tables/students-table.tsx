@@ -4,11 +4,15 @@ import {
   hoverTableData,
   studentsData,
 } from "../../../../Data/table/ReactStrapTableData";
+import TableActionButtons from "@/components/own/table-action-buttons/table-action-buttons";
 
 const StudentsTable = () => {
   return (
     <div className="table-responsive signal-table">
-      <Table hover={true} className="table-border-horizontal">
+      <Table
+        hover={true}
+        className="table table-hover table-responsive uppercase-table"
+      >
         <thead>
           <tr>
             <th scope="col">Acciones</th>
@@ -25,14 +29,28 @@ const StudentsTable = () => {
         <tbody>
           {studentsData.map((item) => (
             <tr key={item.id}>
-              <td></td>
+              <td>
+                <TableActionButtons />
+              </td>
               <td>
                 {item.name}&nbsp;{item.lastName}
               </td>
-              <td>{item.isActive ? "Activo" : "Desactivo"}</td>
+              <td>
+                <span
+                  className={`badge ${item.isActive ? "badge-success" : "badge-danger"}`}
+                >
+                  {item.isActive ? "Activo" : "Desactivo"}
+                </span>{" "}
+              </td>
               <td>{item.paymentMethod}</td>
               <td>{item.paymentDate}</td>
-              <td>{item.paymentStatus ? "Pagado" : "No Pagado"}</td>
+              <td>
+                <span
+                  className={`badge ${item.isActive ? "badge-success" : "badge-danger"}`}
+                >
+                  {item.paymentStatus ? "Pagado" : "No Pagado"}{" "}
+                </span>
+              </td>
               <td>{item.paymentAmount}</td>
               <td>{item.course}</td>
               <td>{item.level}</td>
