@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import React, { ReactNode, useContext, useEffect } from "react";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
@@ -107,7 +107,7 @@ const Layout = ({ children }: layoutProps) => {
           <Footer />
         </div>
       </div>
-      <ThemeCustomizer />
+      {/*<ThemeCustomizer />*/}
       <Taptop />
     </NoSsr>
   );

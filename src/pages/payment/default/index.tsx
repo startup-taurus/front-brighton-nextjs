@@ -15,7 +15,7 @@ import TableHeaderActions from "@/components/own/table-header-actions/table-head
 import { FaChevronDown, FaFilter } from "react-icons/fa6";
 import { studentsData } from "../../../../Data/table/ReactStrapTableData";
 
-const Students = () => {
+const Payment = () => {
   const [isOpen, setIsOpen] = useState(false);
 
   const handleCollapse = () => {
@@ -162,4 +162,4 @@ const Students = () => {
   );
 };
 
-export default Students;
+export default Payment;

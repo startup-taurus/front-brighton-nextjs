@@ -177,6 +177,16 @@
 
 .btn {
   padding: $btn-padding;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  transition: all 0.4s ease;
+
+  span {
+    margin-left: 0.5rem;
+  }
+
 
   &.bg-light-primary {
     &:hover {
@@ -184,6 +194,14 @@
       color: $white !important;
     }
   }
+
+  &.btn-collapse {
+    transform: rotate(180deg);
+  }
+}
+
+.small-btn {
+  padding: $btn-item-padding;
 }
 
 .btn-group{
