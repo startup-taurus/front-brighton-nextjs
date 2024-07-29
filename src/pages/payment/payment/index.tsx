@@ -14,9 +14,16 @@ import StudentsTable from "@/components/own/tables/students-table";
 import TableHeaderActions from "@/components/own/table-header-actions/table-header-actions";
 import { FaChevronDown, FaFilter } from "react-icons/fa6";
 import { studentsData } from "../../../../Data/table/ReactStrapTableData";
+import StudentForm from "@/components/own/student-form/student-form";
+import PaymentTable from "@/components/own/payment-table/payments-table";
 
 const Payment = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isOpenModal, setIsOpenModal] = useState(false);
+
+  const toggle = () => {
+    setIsOpenModal(!isOpenModal);
+  };
 
   const handleCollapse = () => {
     setIsOpen(!isOpen);
@@ -104,30 +111,17 @@ const Payment = () => {
                       </Input>
                     </Col>
                     <Col xs={12} sm={4} md={3} className="mb-3">
-                      <Label for="studentFilter">Estado del pago</Label>
+                      <Label for="studentFilter">Mes de pago</Label>
                       <Input type="select" name="student" id="studentFilter">
                         <option value="" disabled>
-                          Seleccione el estado del pago
+                          Seleccione el mes de pago
                         </option>
-                        <option value="active">Pagado</option>
-                        <option value="active">No Pagado</option>
-                      </Input>
-                    </Col>
-                    <Col xs={12} sm={4} md={3} className="mb-3">
-                      <Label for="studentFilter">Promoción</Label>
-                      <Input
-                        type="select"
-                        name="student"
-                        id="studentFilter"
-                        placeholder="Seleccione una promoción"
-                      >
-                        <option value="" disabled>
-                          Seleccione una promoción
-                        </option>
-                        <option value="na">Sin Promoción</option>
-                        <option value="active">2x1</option>
-                        <option value="active">Navidad</option>
-                        <option value="active">Año nuevo</option>
+                        <option value="active">Enero</option>
+                        <option value="active">Febrero</option>
+                        <option value="active">Marzo</option>
+                        <option value="active">Abril</option>
+                        <option value="active">Junio</option>
+                        <option value="active">Julio</option>
                       </Input>
                     </Col>
                   </Row>
@@ -149,15 +143,19 @@ const Payment = () => {
             <CardHeader className="d-flex justify-content-end">
               <TableHeaderActions
                 onReload={() => {}}
-                addButton={{ title: "Nuevo Estudiante", onClick: () => {} }}
+                addButton={{
+                  title: "Nuevo Pago",
+                  onClick: () => toggle(),
+                }}
               />
             </CardHeader>
             <div className="pb-4">
-              <StudentsTable />
+              <PaymentTable />
             </div>
           </Card>
         </Row>
       </Container>
+      <StudentForm isOpen={isOpenModal} toggle={toggle} data={null} />
     </div>
   );
 };

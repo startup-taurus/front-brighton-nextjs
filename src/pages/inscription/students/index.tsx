@@ -14,9 +14,16 @@ import StudentsTable from "@/components/own/tables/students-table";
 import TableHeaderActions from "@/components/own/table-header-actions/table-header-actions";
 import { FaChevronDown, FaFilter } from "react-icons/fa6";
 import { studentsData } from "../../../../Data/table/ReactStrapTableData";
+import StudentForm from "@/components/own/student-form/student-form";
+import Swal from "sweetalert2";
 
 const Students = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const [isOpenModal, setIsOpenModal] = useState(false);
+
+  const toggle = () => {
+    setIsOpenModal(!isOpenModal);
+  };
 
   const handleCollapse = () => {
     setIsOpen(!isOpen);
@@ -149,7 +156,10 @@ const Students = () => {
             <CardHeader className="d-flex justify-content-end">
               <TableHeaderActions
                 onReload={() => {}}
-                addButton={{ title: "Nuevo Estudiante", onClick: () => {} }}
+                addButton={{
+                  title: "Nuevo Estudiante",
+                  onClick: () => toggle(),
+                }}
               />
             </CardHeader>
             <div className="pb-4">
@@ -158,6 +168,7 @@ const Students = () => {
           </Card>
         </Row>
       </Container>
+      <StudentForm isOpen={isOpenModal} toggle={toggle} data={null} />
     </div>
   );
 };

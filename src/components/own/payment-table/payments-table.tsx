@@ -10,7 +10,7 @@ import StudentForm from "@/components/own/student-form/student-form";
 import Swal from "sweetalert2";
 import StudentDetail from "@/components/own/student-detail/student-datail";
 
-const StudentsTable = () => {
+const PaymentTable = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenDetail, setIsOpenDetail] = useState(false);
 
@@ -58,12 +58,10 @@ const StudentsTable = () => {
               <th scope="col">Estudiante</th>
               <th scope="col">Estado</th>
               <th scope="col">Metodo de pago</th>
-              <th scope="col">Promoción</th>
-              <th scope="col">Fecha de pago</th>
-              <th scope="col">Estado de pago</th>
-              <th scope="col">Pensión</th>
               <th scope="col">Curso</th>
               <th scope="col">Nivel</th>
+              <th scope="col">Monto de Pago</th>
+              <th scope="col">Mes de Pago</th>
             </tr>
           </thead>
           <tbody>
@@ -87,18 +85,11 @@ const StudentsTable = () => {
                   </span>{" "}
                 </td>
                 <td>{item.paymentMethod}</td>
-                <td>{item.promotion}</td>
-                <td>{item.paymentDate}</td>
-                <td>
-                  <span
-                    className={`badge ${item.paymentStatus ? "badge-success" : "badge-danger"}`}
-                  >
-                    {item.paymentStatus ? "Pagado" : "No Pagado"}{" "}
-                  </span>
-                </td>
-                <td>{item.paymentAmount}</td>
+
                 <td>{item.course}</td>
                 <td>{item.level}</td>
+                <td>{item.paymentAmount}</td>
+                <td>{item.payment}</td>
               </tr>
             ))}
           </tbody>
@@ -116,4 +107,4 @@ const StudentsTable = () => {
   );
 };
 
-export default StudentsTable;
+export default PaymentTable;

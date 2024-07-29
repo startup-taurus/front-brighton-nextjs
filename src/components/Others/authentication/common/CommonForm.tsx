@@ -105,37 +105,37 @@ const CommonForm = ({ alignLogo }: commonFormPropsType) => {
               </div>
             </FormGroup>
             <h6 className="text-muted mt-4 or">{SignInWith}</h6>
-            <div className="social mt-4">
-              <div className="btn-showcase">
-                <a
-                  className="btn btn-light"
-                  href="https://www.linkedin.com/login"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  <Linkedin className="txt-linkedin" />
-                  {linkedInHeading}
-                </a>
-                <a
-                  className="btn btn-light"
-                  href="https://twitter.com/login?lang=en"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  <Twitter className="txt-twitter" />
-                  {TwitterHeading}
-                </a>
-                <a
-                  className="btn btn-light"
-                  href="https://www.facebook.com/"
-                  target="_blank"
-                  rel="noreferrer"
-                >
-                  <Facebook className="txt-fb" />
-                  {FacebookHeading}
-                </a>
-              </div>
-            </div>
+            {/*<div className="social mt-4">*/}
+            {/*  <div className="btn-showcase">*/}
+            {/*    <a*/}
+            {/*      className="btn btn-light"*/}
+            {/*      href="https://www.linkedin.com/login"*/}
+            {/*      target="_blank"*/}
+            {/*      rel="noreferrer"*/}
+            {/*    >*/}
+            {/*      <Linkedin className="txt-linkedin" />*/}
+            {/*      {linkedInHeading}*/}
+            {/*    </a>*/}
+            {/*    <a*/}
+            {/*      className="btn btn-light"*/}
+            {/*      href="https://twitter.com/login?lang=en"*/}
+            {/*      target="_blank"*/}
+            {/*      rel="noreferrer"*/}
+            {/*    >*/}
+            {/*      <Twitter className="txt-twitter" />*/}
+            {/*      {TwitterHeading}*/}
+            {/*    </a>*/}
+            {/*    <a*/}
+            {/*      className="btn btn-light"*/}
+            {/*      href="https://www.facebook.com/"*/}
+            {/*      target="_blank"*/}
+            {/*      rel="noreferrer"*/}
+            {/*    >*/}
+            {/*      <Facebook className="txt-fb" />*/}
+            {/*      {FacebookHeading}*/}
+            {/*    </a>*/}
+            {/*  </div>*/}
+            {/*</div>*/}
             <p className="mt-4 mb-0 text-center">
               {DoNotAccount}
               <Link

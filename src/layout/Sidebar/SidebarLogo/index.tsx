@@ -13,15 +13,8 @@ const SidebarLogo = () => {
           className="img-fluid for-light"
           src={"/assets/images/logo/logo.png"}
           alt="icon"
-          width={121}
-          height={100}
-        />
-        <Image
-          className="img-fluid for-dark"
-          src={"/assets/images/logo/logo_dark.png"}
-          alt="icon"
-          width={121}
-          height={100}
+          width={60}
+          height={60}
         />
       </Link>
       <div

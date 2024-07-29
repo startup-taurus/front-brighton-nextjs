@@ -536,6 +536,7 @@ export const studentsData = [
     paymentAmount: 56,
     course: "B-16",
     level: "A2 Elementary",
+    payment: "Junio",
   },
   {
     id: 2,
@@ -549,6 +550,7 @@ export const studentsData = [
     paymentAmount: 56,
     course: "B-16",
     level: "A2 Elementary",
+    payment: "Junio",
   },
   {
     id: 3,
@@ -562,6 +564,7 @@ export const studentsData = [
     paymentAmount: 56,
     course: "B-16",
     level: "A2 Elementary",
+    payment: "Junio",
   },
   {
     id: 4,
@@ -575,6 +578,7 @@ export const studentsData = [
     paymentAmount: 56,
     course: "B-16",
     level: "A2 Elementary",
+    payment: "Mayo",
   },
   {
     id: 5,
@@ -588,6 +592,7 @@ export const studentsData = [
     paymentAmount: 56,
     course: "B-16",
     level: "A2 Elementary",
+    payment: "Marzo",
   },
   {
     id: 6,
@@ -601,5 +606,6 @@ export const studentsData = [
     paymentAmount: 56,
     course: "B-16",
     level: "A2 Elementary",
+    payment: "Mayo",
   },
 ];

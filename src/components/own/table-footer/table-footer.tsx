@@ -26,6 +26,7 @@ const TableFooter = ({ totalItems, setPage, setItemPerPage }: any) => {
           <div>
             <Input value={1} style={{ maxWidth: "40px" }} />
           </div>
+          de 4
         </PaginationItem>
         <PaginationItem>
           <PaginationLink next />

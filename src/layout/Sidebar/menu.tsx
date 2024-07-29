@@ -90,12 +90,12 @@ export const MenuList: sidebarMenuType[] = [
     Items: [
       {
         title: "Pagos",
-        id: 1,
+        id: 10,
         icon: "icons",
-        pathSlice: "students",
+        pathSlice: "payment",
         type: "link",
         badge: "badge badge-light-primary",
-        path: "/payment/default",
+        path: "/payment/payment",
       },
     ],
   },
@@ -416,28 +416,26 @@ export const MenuList: sidebarMenuType[] = [
       //     { path: "/bonus-ui/timeline", title: "Timeline", type: "link" },
       //   ],
       // },
-
-      {
-        title: "Icons",
-        icon: "icons",
-        id: 21,
-        type: "sub",
-        pathSlice: "icons",
-        active: false,
-        children: [
-          { path: "/icons/flagIcons", title: "Flag Icon", type: "link" },
-          {
-            path: "/icons/fontawesome-icon",
-            title: "Fontawesome Icon",
-            type: "link",
-          },
-          { path: "/icons/ico-icon", title: "Ico_Icon", type: "link" },
-          { path: "/icons/themify-icon", title: "Themify Icon", type: "link" },
-          { path: "/icons/feather-icon", title: "Feather Icon", type: "link" },
-          { path: "/icons/weather-icon", title: "Weather Icons", type: "link" },
-        ],
-      },
-
+      // {
+      //   title: "Icons",
+      //   icon: "icons",
+      //   id: 21,
+      //   type: "sub",
+      //   pathSlice: "icons",
+      //   active: false,
+      //   children: [
+      //     { path: "/icons/flagIcons", title: "Flag Icon", type: "link" },
+      //     {
+      //       path: "/icons/fontawesome-icon",
+      //       title: "Fontawesome Icon",
+      //       type: "link",
+      //     },
+      //     { path: "/icons/ico-icon", title: "Ico_Icon", type: "link" },
+      //     { path: "/icons/themify-icon", title: "Themify Icon", type: "link" },
+      //     { path: "/icons/feather-icon", title: "Feather Icon", type: "link" },
+      //     { path: "/icons/weather-icon", title: "Weather Icons", type: "link" },
+      //   ],
+      // },
       // {
       //   title: "Buttons",
       //   icon: "button",
