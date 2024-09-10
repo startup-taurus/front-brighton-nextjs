@@ -609,3 +609,46 @@ export const studentsData = [
     payment: "Mayo",
   },
 ];
+
+export const teachersData = [
+  {
+    id: 1,
+    name: "Martin",
+    lastName: "Lopez",
+    dni: "131032345",
+    email: "martinlpz@gmail.com",
+    phone: "09879099889",
+    status: true,
+    lastLoginDate: "10/20/2001 20:00:10",
+  },
+  {
+    id: 2,
+    name: "Roberto",
+    lastName: "Ibarra",
+    dni: "131032345",
+    email: "roberto@gmail.com",
+    phone: "09879099889",
+    status: true,
+    lastLoginDate: "10/20/2001 20:00:10",
+  },
+  {
+    id: 3,
+    name: "Karen",
+    lastName: "Delgado",
+    dni: "1234533333",
+    email: "karen@gmail.com",
+    phone: "09879099889",
+    status: true,
+    lastLoginDate: "10/20/2001 20:00:10",
+  },
+  {
+    id: 4,
+    name: "Ana",
+    lastName: "Lopez",
+    dni: "131032345",
+    email: "martinlpz@gmail.com",
+    phone: "09879099889",
+    status: true,
+    lastLoginDate: "10/20/2001 20:00:10",
+  },
+];

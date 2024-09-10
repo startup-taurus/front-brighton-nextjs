@@ -1,8 +1,4 @@
-import TableHeaderActions from "@/components/own/table-header-actions/table-header-actions";
-import TeachersTable from "@/components/own/tables/teachers-table";
-import TeachersForm from "@/components/own/teachers-form/teachers-form";
-import { useState } from "react";
-import { FaChevronDown, FaFilter } from "react-icons/fa6";
+import React, { useState } from "react";
 import {
   Card,
   CardBody,
@@ -14,20 +10,30 @@ import {
   Label,
   Row,
 } from "reactstrap";
+import StudentsTable from "@/components/own/tables/students-table";
+import TableHeaderActions from "@/components/own/table-header-actions/table-header-actions";
+import { FaChevronDown, FaFilter } from "react-icons/fa6";
+import { studentsData } from "../../../../Data/table/ReactStrapTableData";
+import StudentForm from "@/components/own/student-form/student-form";
+import Swal from "sweetalert2";
+import Breadcrumbs from "CommonElements/Breadcrumbs";
 
-const Teachers = () => {
+const Students = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isOpenNew, setIsOpenNew] = useState(false);
+  const [isOpenModal, setIsOpenModal] = useState(false);
 
-  const toggle = (data: any) => {
-    setIsOpenNew(!isOpenNew);
+  const toggle = () => {
+    setIsOpenModal(!isOpenModal);
   };
 
   const handleCollapse = () => {
     setIsOpen(!isOpen);
   };
+
   return (
     <div className="page-body">
+      {/* <Breadcrumbs title={"Cursos"} mainTitle={"Cursos"} parent={"Dashboard"} /> */}
+
       <Container className="basic_table" fluid>
         <Row>
           <Card>
@@ -85,23 +91,10 @@ const Teachers = () => {
             </Collapse>
           </Card>
         </Row>
-        <Row>
-          <Card>
-            <CardHeader className="d-flex justify-content-end">
-              <TableHeaderActions
-                onReload={() => {}}
-                addButton={{ title: "Nuevo Docente", onClick: () => {} }}
-              />
-            </CardHeader>
-            <div className="pb-4">
-              <TeachersTable />
-            </div>
-          </Card>
-        </Row>
       </Container>
-      <TeachersForm isOpen={isOpenNew} toggle={toggle} />
+      <StudentForm isOpen={isOpenModal} toggle={toggle} data={null} />
     </div>
   );
 };
 
-export default Teachers;
+export default Students;

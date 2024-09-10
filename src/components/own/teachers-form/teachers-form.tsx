@@ -11,11 +11,11 @@ import {
   ModalHeader,
 } from "reactstrap";
 
-const StudentForm = ({ data, isOpen, toggle }: any) => {
+const TeachersForm = ({ data, isOpen, toggle }: any) => {
   return (
     <Modal isOpen={isOpen} toggle={toggle} size="lg">
       <ModalHeader toggle={toggle}>
-        {data ? "Editar Estudiante" : "Agregar estudiante"}
+        {data ? "Editar Docente" : "Agregar Docente"}
       </ModalHeader>
       <ModalBody>
         <Formik
@@ -35,13 +35,6 @@ const StudentForm = ({ data, isOpen, toggle }: any) => {
                   observations: "",
                   status: "",
                   hasPendingPayments: false,
-                  // paymentMethod: "",
-                  // promotion: "",
-                  // paymentDate: "",
-                  // paymentStatus: "",
-                  // paymentAmount: undefined,
-                  // course: "",
-                  // isActive: false,
                   submit: null,
                 }
           }
@@ -73,26 +66,20 @@ const StudentForm = ({ data, isOpen, toggle }: any) => {
                   <ErrorMessage name="lastName" component={FormFeedback} />
                 </Col>
                 <Col xs={6}>
-                  <Label for="course">Curso</Label>
-                  <Field name="course" as={Input} type="select">
-                    <option value="" disabled>
-                      Seleccione el curso
-                    </option>
-                    <option value="b16">B-16</option>
-                    <option value="b20">B-20</option>
-                    <option value="b30">B-30</option>
-                  </Field>
-                  <ErrorMessage name="course" component={FormFeedback} />
+                  <Label for="dni">Cédula</Label>
+                  <Field name="dni" as={Input} />
+                  <ErrorMessage name="dni" id="dni" component={FormFeedback} />
                 </Col>
                 <Col xs={6}>
-                  <Label for="profession">Profesión</Label>
-                  <Field name="profession" as={Input} />
+                  <Label for="phone">Teléfono</Label>
+                  <Field name="phone" as={Input} />
                   <ErrorMessage
-                    name="profession"
-                    id="profession"
+                    name="phone"
+                    id="phone"
                     component={FormFeedback}
                   />
                 </Col>
+
                 <Col xs={6}>
                   <Label for="status">Estado</Label>
                   <Field
@@ -102,11 +89,10 @@ const StudentForm = ({ data, isOpen, toggle }: any) => {
                     id="studentFilter"
                   >
                     <option value="" disabled>
-                      Seleccione el estado del estudiante
+                      Seleccione el estado del docente
                     </option>
                     <option value="true">Activo</option>
                     <option value="false">Retirado</option>
-                    <option value="active">Transferido</option>
                   </Field>
                   <ErrorMessage name="status" component={FormFeedback} />
                 </Col>
@@ -137,58 +123,4 @@ const StudentForm = ({ data, isOpen, toggle }: any) => {
   );
 };
 
-export default StudentForm;
-
-// <Col xs={6}>
-//   <Label for="promotion">Promoción</Label>
-//   <Field
-//     name="promotion"
-//     as={Input}
-//     type="select"
-//     id="promotion"
-//   >
-//     <option value="" disabled>
-//       Seleccione una promoción
-//     </option>
-//     <option value="na">Sin Promoción</option>
-//     <option value="active">2x1</option>
-//     <option value="active">Navidad</option>
-//     <option value="active">Año nuevo</option>
-//   </Field>
-//   <ErrorMessage name="dni" component={FormFeedback} />
-// </Col>
-// <Col xs={6}>
-//   <Label for="paymentDate">Fecha de Pago</Label>
-//   <Field name="paymentDate" as={Input} />
-//   <ErrorMessage name="paymentDate" component={FormFeedback} />
-// </Col>
-// <Col xs={6}>
-//   <Label for="paymentStatus">Estado del Pago</Label>
-//   <Field name="paymentStatus" as={Input} type="select">
-//     <option value="" disabled>
-//       Seleccione el estado del pago
-//     </option>
-//     <option value="active">Pagado</option>
-//     <option value="active">No Pagado</option>
-//   </Field>
-//   <ErrorMessage name="paymentStatus" component={FormFeedback} />
-// </Col>
-// <Col xs={6}>
-//   <Label for="paymentAmount">Monto del Pago</Label>
-//   <Field name="paymentAmount" as={Input} />
-//   <ErrorMessage name="email" component={FormFeedback} />
-// </Col>
-// <Col xs={6}>
-//   <Label for="level">Nivel</Label>
-//   <Field name="level" as={Input} type="select">
-//     <option value="" disabled>
-//       Seleccione el nivel
-//     </option>
-//     <option value="active">A1 Elementary</option>
-//     <option value="active">A2 Elementary</option>
-//     <option value="active">B1</option>
-//     <option value="active">B1 +</option>
-//     <option value="active">B2</option>
-//   </Field>
-//   <ErrorMessage name="level" component={FormFeedback} />
-// </Col>
+export default TeachersForm;
