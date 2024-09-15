@@ -195,3 +195,148 @@
 /**=====================
     5.3 Header CSS Ends
 ==========================**/
+
+/*=======Header Teacher css start=======*/
+.header-card-container {
+  padding-top: 10px;
+  position: relative;
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  padding: 0 2%;
+}
+
+.logo-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.course-details-box {
+  display: flex;
+  align-items: center;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.header-body {
+  position: relative;
+  width: 100%;
+  height: auto;
+  overflow: hidden;
+}
+
+.background-header-image {
+  position: relative;
+  width: 100%;
+  height: auto;
+}
+.teacher-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #ff9700;
+  position: absolute;
+  top: -4%;
+  left: 1.4%;
+
+}
+
+.teacher-details-box {
+  position: absolute;
+  top: 45%;
+  left: 1.4%;
+  width: 30%;
+  height: 40%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.teacher-students-info {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.teacher-students-data {
+  display: flex;
+  justify-content: space-between;
+}
+
+.info-title {
+  font-size: 12px;
+  font-weight: 300;
+}
+
+.info-description {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* Responsividad */
+@media (max-width: 768px) {
+  .teacher-details-box {
+    top: 30%;
+    left: 1%;
+    width: 20%;
+  }
+  .teacher-title {
+    font-size: 16px;
+    top: -5%;
+    left: 0.5%;
+    max-width: 70%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .info-title {
+    font-size: 10px;
+  }
+  
+  .info-description {
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .teacher-details-box {
+    top: 47%;
+    left: 1%;
+    width: 31%;
+  }
+  .teacher-students-info{
+    margin-bottom: 0px;
+  }
+  .info-title {
+    font-size: 10px;
+  }
+  
+  .info-description {
+    font-size: 11px;
+    max-width: 50%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .img-sm{
+    height: 20px !important;
+  }
+
+  .small {
+    max-width:100%;
+  }
+
+  .pad {
+    padding-right: 1px !important;
+    padding-left: 15px !important;
+  }
+}
+
+
+
+/*=======Header Teacher css end=======*/

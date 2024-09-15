@@ -394,3 +394,43 @@ th {
 	border-bottom: 1px solid #dee2e6;
 	padding: 14px 10px;
 }
+
+//table of students
+.table-container-student {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 20px;
+  }
+  
+  .decorative-image-container {
+	position: relative;
+	margin-left: 20px;
+  }
+  
+  .decorative-image {
+	width: 300px !important;
+	height: auto !important;
+  }
+  
+  .border-table {
+	border: 2px solid #ff9700;
+	border-radius: 8px;
+  }
+
+  .status-cell {
+	background-color: #E0E8D0;
+	padding: 5px;
+	border-radius: 4px;
+	text-align: center;
+  }
+  @media (max-width: 768px) {
+	.decorative-image-container {
+	  display: none;
+	}
+  }
+  
+ .table-container-student .rdt_TableHeadRow{
+	min-height: 25px !important;
+	line-height: 1.2; 
+  }

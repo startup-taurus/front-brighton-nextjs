@@ -94,6 +94,40 @@ export const MenuList: sidebarMenuType[] = [
       },
     ],
   },
+  {
+    title: "Home",
+    menucontent: "Módulo de inicio",
+    Items: [
+      {
+        title: "🏠 HOME",
+        id: 4,
+       // icon: "home",
+        pathSlice: "home",
+        type: "link",
+        badge: "badge badge-light-primary",
+        path: "teachers/home",
+      },
+      {
+        title:"📋 ATTENDANCE",
+        id: 5,
+        //icon: "home",
+        pathSlice: "home",
+        type: "link",
+        badge: "badge badge-light-primary",
+        path: "teachers/attendance",
+      },
+      {
+        title: "🌴 HOLIDAYS",
+        id: 6,
+       // icon: "home",
+        pathSlice: "home",
+        type: "link",
+        badge: "badge badge-light-primary",
+        path: "teachers/holidays",
+      }
+
+    ],
+  },
 
   // {
   //   title: "Applications",
