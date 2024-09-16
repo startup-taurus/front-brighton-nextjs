@@ -8,13 +8,13 @@ const SidebarLogo = () => {
   const { setSideBarToggle, sideBarToggle } = useContext(layoutContext);
   return (
     <div className="logo-wrapper">
-      <Link href={"/dashboard/default"}>
+      <Link href={"/teachers/dashboard"}>
         <Image
-          className="img-fluid for-light"
-          src={"/assets/images/logo/logo.png"}
+          className="for-light"
+          src={"/assets/images/logo/large-logo.png"}
           alt="icon"
-          width={60}
-          height={60}
+          width={135}
+          height={40}
         />
       </Link>
       <div

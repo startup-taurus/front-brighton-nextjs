@@ -1,0 +1,50 @@
+.link-list,
+th,
+td {
+  border: 1px solid white;
+  border-collapse: collapse;
+}
+
+.link-list-small,
+.link-list {
+  max-width: 100%;
+  width: 600px;
+
+  margin-top: 1rem;
+  background-color: $brighton-secondary-color;
+
+  td.col-bg-primary {
+    background-color: $brighton-primary-color;
+  }
+  td {
+    text-align: center;
+    font-size: 1rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  a.col-icon {
+    font-size: 1.5rem;
+    line-height: 0;
+  }
+
+  &.tertiary-bg {
+    background-color: $brighton-tertiary-light-color;
+
+    td {
+      text-align: left;
+    }
+
+    td.col-bg-primary {
+      background-color: $brighton-tertiary-color;
+    }
+  }
+}
+
+.link-list-small {
+  max-width: 100%;
+  width: 300px;
+}
+
+// $brighton-tertiary-color
+// $brighton-tertiary-light-color

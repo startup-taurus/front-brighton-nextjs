@@ -1,0 +1,23 @@
+:root {
+  --fc-button-bg-color: #ffa300;
+  --fc-button-border-color: #ffa300;
+  --fc-button-active-bg-color: #ffa300;
+  --fc-button-active-border-color: #ffa300;
+}
+
+.fc-v-event {
+  background-color: var(--fc-button-bg-color);
+  border-color: var(--fc-button-bg-color);
+}
+
+.fc-timegrid-axis {
+  background-color: $brighton-secondary-color;
+}
+th.fc-timegrid-axis,
+.fc-col-header-cell {
+  background-color: var(--fc-button-bg-color);
+  text-transform: uppercase;
+  a {
+    color: $white;
+  }
+}

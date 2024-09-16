@@ -39,7 +39,7 @@ const CommonForm = ({ alignLogo }: commonFormPropsType) => {
     event.preventDefault();
     if (email === "Test@gmail.com" && password === "Test@123") {
       Cookies.set("token", JSON.stringify(true));
-      router.push("/dashboard/default");
+      router.push("/teachers/dashboard");
       toast.success("login successful");
     } else {
       toast.error("wrong");
@@ -104,7 +104,7 @@ const CommonForm = ({ alignLogo }: commonFormPropsType) => {
                 </Button>
               </div>
             </FormGroup>
-            <h6 className="text-muted mt-4 or">{SignInWith}</h6>
+            {/* <h6 className="text-muted mt-4 or">{SignInWith}</h6> */}
             {/*<div className="social mt-4">*/}
             {/*  <div className="btn-showcase">*/}
             {/*    <a*/}
@@ -136,7 +136,7 @@ const CommonForm = ({ alignLogo }: commonFormPropsType) => {
             {/*    </a>*/}
             {/*  </div>*/}
             {/*</div>*/}
-            <p className="mt-4 mb-0 text-center">
+            {/* <p className="mt-4 mb-0 text-center">
               {DoNotAccount}
               <Link
                 className="ms-2"
@@ -144,7 +144,7 @@ const CommonForm = ({ alignLogo }: commonFormPropsType) => {
               >
                 {CreateAccount}
               </Link>
-            </p>
+            </p> */}
           </form>
         </div>
       </div>

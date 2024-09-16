@@ -1,6 +1,6 @@
 import ConfigDB from "config/ThemeConfig";
 
-export const Footertext: string = "Copyright 2023 © Cuba theme by pixelstrap";
+export const Footertext: string = "Copyright 2023 © Brighton";
 export const ImgPath: string = "/assets/images";
 export const Href: string = "#javascript";
 export const StarColor = "var(--theme-deafult)";
@@ -2525,4 +2525,4 @@ export const QrCodeAlertText: string =
   "If your qr code is not working then enter this code in your input field.";
 export const ScrollableDropDownMenu: string = "Scrollable Dropdown Menu";
 export const Firstname: string = "First name";
-export const RTLSupport : string = "RTL Support";
+export const RTLSupport: string = "RTL Support";

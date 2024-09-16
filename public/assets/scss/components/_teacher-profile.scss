@@ -1,0 +1,57 @@
+.profile-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    
+    .profile-image{
+        border: 2px solid $brighton-primary-color;
+        border-radius: 100px;
+        width: 150px;
+        height: 150px;
+    }
+
+    .profile-description {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+
+        h3, p{
+            font-weight: 700;
+            letter-spacing: 1;
+            text-transform: uppercase;
+        }
+
+        h3 {
+            font-size: 2.5rem;
+        }
+        p {
+            font-size: 1rem;           
+        }
+    }
+
+    .profile-statistics{
+        border: 3px solid $brighton-primary-color;
+        border-radius: 10px;
+        padding: 1.5rem;
+
+        display: flex;
+        justify-content: space-between;        
+        gap: 1rem;
+
+        .statistics-item{
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            .statistics-icon{
+                width: 70px;
+                height: 70px;
+            }
+            .statistics-qty{
+                font-weight: 700;
+            }
+            .statistics-description{
+                text-transform: uppercase;
+            }
+        }
+    }
+}
