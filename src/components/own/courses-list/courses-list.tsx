@@ -11,7 +11,7 @@ interface CoursesListProps {
   }[];
 }
 
-const CoursesList: React.FC<CoursesListProps> = ({ title, coursesList }) => {
+const CoursesList = ({ title, coursesList }: CoursesListProps) => {
   return (
     <div>
       <h2 className="main-title">{title}</h2>

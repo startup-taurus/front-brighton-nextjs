@@ -13,7 +13,7 @@ type TeacherProfileProps = {
   };
 };
 
-const TeacherProfile: React.FC<TeacherProfileProps> = ({ profileData }) => {
+const TeacherProfile = ({ profileData }: TeacherProfileProps) => {
   if (!profileData) return;
 
   const {

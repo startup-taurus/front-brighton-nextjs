@@ -14,11 +14,11 @@ interface CoursesListProps {
   otherLinks: LinkElement[];
 }
 
-const QuickLinksList: React.FC<CoursesListProps> = ({
+const QuickLinksList = ({
   title,
   quickLinks,
   otherLinks,
-}) => {
+}: CoursesListProps) => {
   return (
     <div>
       <h2 className="main-title text-lg-end">{title}</h2>
