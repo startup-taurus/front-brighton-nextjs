@@ -14,7 +14,7 @@ type TeacherProfileProps = {
 };
 
 const TeacherProfile = ({ profileData }: TeacherProfileProps) => {
-  if (!profileData) return;
+  if (!profileData) return null;
 
   const {
     profileImage,
@@ -35,6 +35,7 @@ const TeacherProfile = ({ profileData }: TeacherProfileProps) => {
             alt="image profile"
             width={100}
             height={100}
+            quality={100}
           />
         )}
         <div>
