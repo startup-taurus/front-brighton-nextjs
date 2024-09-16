@@ -23,36 +23,39 @@ const INITIAL_EVENTS: EventSourceInput = [
 
 const ScheduleCalendar = () => {
   return (
-    <Row>
-      <Col xs={12} lg={8}>
-        <FullCalendar
-          plugins={[timeGridPlugin]}
-          headerToolbar={{
-            left: "prev,next today",
-            center: "title",
-            right: "timeGridWeek",
-          }}
-          initialView="timeGridWeek"
-          weekends={true}
-          expandRows={false}
-          allDaySlot={false}
-          nowIndicator={true}
-          initialEvents={INITIAL_EVENTS}
-          slotMinTime="07:00:00"
-          slotMaxTime="22:00:00"
-          height="auto"
-        />
-      </Col>
-      <Col xs={0} lg={4}>
-        <Image
-          src={`${ImgPath}/own/team-bg.png`}
-          alt="image team"
-          quality={100}
-          layout="fill"
-          fill={true}
-        />
-      </Col>
-    </Row>
+    <div>
+      <h2 className="main-title mb-4">Calendar</h2>
+      <Row>
+        <Col xs={12} lg={8}>
+          <FullCalendar
+            plugins={[timeGridPlugin]}
+            headerToolbar={{
+              left: "prev,next today",
+              center: "title",
+              right: "timeGridWeek",
+            }}
+            initialView="timeGridWeek"
+            weekends={true}
+            expandRows={false}
+            allDaySlot={false}
+            nowIndicator={true}
+            initialEvents={INITIAL_EVENTS}
+            slotMinTime="07:00:00"
+            slotMaxTime="22:00:00"
+            height="auto"
+          />
+        </Col>
+        <Col xs={0} lg={4}>
+          <Image
+            src={`${ImgPath}/own/team-bg.png`}
+            alt="image team"
+            quality={100}
+            layout="fill"
+            fill={true}
+          />
+        </Col>
+      </Row>
+    </div>
   );
 };
 
