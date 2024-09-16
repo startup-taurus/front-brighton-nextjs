@@ -55,7 +55,7 @@ const TeachersHeader = ({
             objectFit="cover"
             className="background-header-image"
           />
-          <div className="teacher-title">{nameCourse}</div>
+          <div className="teacher-title home-title">{nameCourse}</div>
           <div className="teacher-details-box">
             <div className="teacher-students-info">
               <div className="info-title">

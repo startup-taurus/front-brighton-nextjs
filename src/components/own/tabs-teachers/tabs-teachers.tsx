@@ -40,7 +40,7 @@ const TabsTeachers = ({ numberOfClass, tabsName }: any) => {
           </div>
         </div>
         <div className="header-body pad px-4 pb-3">
-          <div className="row">
+          <div className="row align-items-center">
             <div className="col-4 col-md-3 ">
               <div className="teacher-title small">{tabsName}</div>
             </div>
