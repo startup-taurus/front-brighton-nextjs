@@ -1,0 +1,44 @@
+.holiday-table-header {
+  background-color: $brighton-primary-color;
+  border: 1px solid $brighton-border-color;
+  padding: 1rem;
+  h3 {
+    font-size: 1.5rem;
+    color: $white;
+    font-weight: 700;
+  }
+}
+
+
+.warning-messages{
+  border: 2px solid $brighton-border-color;
+  border-radius: 20px;
+  padding: 1rem;
+  width: 100%;
+  max-width: 390px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  p{
+    font-size: 1.1rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: 0.01rem;
+    text-align: center;
+
+    span{
+      color: $brighton-primary-color;
+      text-transform: uppercase;
+    }
+  }
+}
+
+
+@media screen and (max-width: 600px) {
+  .warning-messages {
+    max-width: 100%;
+  }
+
+  }

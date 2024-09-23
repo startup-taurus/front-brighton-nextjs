@@ -2,6 +2,7 @@ import React from "react";
 import DataTable from "react-data-table-component";
 import Image from "next/image";
 import { ImgPath } from "utils/Constant";
+import CustomTable from "@/components/own/custom-table/custom-table";
 
 const columns = [
   {
@@ -13,19 +14,9 @@ const columns = [
     name: "STATUS",
     selector: (row: { status: any }) => row.status,
     sortable: true,
-    compact : true,
+    compact: true,
     width: "100px",
-    cell: (row: {
-      status:
-        | string
-        | number
-        | boolean
-        | React.ReactElement<any, string | React.JSXElementConstructor<any>>
-        | Iterable<React.ReactNode>
-        | React.ReactPortal
-        | null
-        | undefined;
-    }) => <div className="status-cell">{row.status}</div>,
+    cell: (row: any) => <div className="status-cell">{row.status}</div>,
   },
 ];
 
@@ -70,16 +61,10 @@ const data = [
 const StudentTable = () => {
   return (
     <div className="table-container-student">
-      <DataTable
-        columns={columns}
-        data={data}
-        customStyles={customStyles}
-        className="border-table"
-        highlightOnHover
-      />
+      <CustomTable columns={columns} data={data} />
       <div className="decorative-image-container">
         <Image
-         className="decorative-image"
+          className="decorative-image"
           src={`${ImgPath}/course/image-of-table.png`}
           alt="logo"
           layout="responsive"
@@ -89,29 +74,6 @@ const StudentTable = () => {
       </div>
     </div>
   );
-};
-
-const customStyles = {
-  headCells: {
-    style: {
-      backgroundColor: "#F9A825",
-      fontWeight: "bold",
-      fontSize: "16px",
-      color: "#ffffff",
-      paddingTop: '0px',  
-    },
-  },
-
-  cells: {
-    style: {
-      padding: "10px",
-    },
-  },
-  rows: {
-    style: {
-        minHeight: '25px',
-    },
-},
 };
 
 export default StudentTable;

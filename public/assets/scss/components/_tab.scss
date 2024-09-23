@@ -502,6 +502,7 @@ $dark-color;
 .justify-tab-wrapper {
   .nav-item {
     .nav-link {
+
       border: 0;
     }
   }
@@ -517,6 +518,13 @@ $dark-color;
   }
 }
 
+
+.nav-link {
+  color: #222222;
+  &:hover {
+    color: black;
+  }
+}
 /**=====================
     2.29 Tab CSS Ends
 ==========================**/

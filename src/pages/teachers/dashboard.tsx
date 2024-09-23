@@ -7,6 +7,7 @@ import { ImgPath } from "utils/Constant";
 import CoursesList from "@/components/own/courses-list/courses-list";
 import QuickLinksList from "@/components/own/quick-links-list/quick-links-list";
 import ScheduleCalendar from "@/components/own/schedule-calendar/schedule-calendar";
+import TeacherNavMenu from "@/components/own/teacher-nav-menu/teacher-nav-menu";
 
 const COURSES = [
   {
@@ -79,7 +80,8 @@ const OTHER_LINKS = [
 
 const Dashboard = () => {
   return (
-    <div className="page-body">
+    <div className="page-body pt-2">
+      <TeacherNavMenu />
       <Card>
         <CardBody>
           <SectionTitle title="Dashboard" />
