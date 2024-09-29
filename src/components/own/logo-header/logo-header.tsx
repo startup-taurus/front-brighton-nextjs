@@ -4,7 +4,7 @@ import { ImgPath } from "../../../../utils/Constant";
 
 const LogoHeader = () => {
   return (
-    <div className="logo-wrapper mb-4">
+    <div className="logo-wrapper">
       <Image
         className="for-light"
         src={`${ImgPath}/logo/logo.png`}

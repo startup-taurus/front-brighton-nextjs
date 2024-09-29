@@ -1,9 +1,6 @@
 const nextConfig = {
   env: {
-    // un comment when you run in deploy
-    // API_URL: "https://cuba-nextjs.vercel.app/api",
-    //  comment when you run in local below down
-    API_URL: "https://cuba-next-five.vercel.app/api",
+    API_URL: "http://localhost:3000/v1/api",
   },
   redirects: async () => {
     return [

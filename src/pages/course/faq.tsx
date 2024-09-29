@@ -8,7 +8,9 @@ const Faq: NextPageWithLayout = () => {
   return (
     <Card className="faq">
       <CardBody>
-        <LogoHeader />
+        <div className="mb-4">
+          <LogoHeader />
+        </div>
         <div className="faq-content">
           <h2>COURSE REPORT TEMPLATE (V 3.00)</h2>
           <p>This is the last major revision of the "attendance reports".</p>
