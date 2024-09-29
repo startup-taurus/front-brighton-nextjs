@@ -1,24 +1,32 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Card, CardBody, Nav, NavItem, NavLink } from "reactstrap";
 import { useRouter } from "next/router";
 import Link from "next/link";
 
 const NAV_ITEMS = [
   {
-    name: "‍🏫 DASHBOARD",
-    link: "/teachers/dashboard",
-  },
-  {
     name: "🏠 HOME",
-    link: "/teachers/home",
+    link: "/course/home",
   },
   {
     name: "📋 ATTENDANCE",
-    link: "/teachers/attendance",
+    link: "/course/attendance",
   },
   {
     name: "‍🌴 HOLIDAYS",
-    link: "/teachers/holidays",
+    link: "/course/holidays",
+  },
+  {
+    name: "📚 GRADEBOOK",
+    link: "/course/gradebook",
+  },
+  {
+    name: "👨‍🎓 STUDENT REPORT",
+    link: "/course/student-report",
+  },
+  {
+    name: "❓ FAQ",
+    link: "/course/faq",
   },
 ];
 
@@ -26,6 +34,11 @@ const TeacherNavMenu = () => {
   const router = useRouter();
   const pathname = router.asPath;
   const [active, setActive] = useState(pathname ? pathname : "");
+
+  useEffect(() => {
+    setActive(pathname);
+  }, [pathname]);
+
   return (
     <Card className="px-4 py-2 ">
       <Nav fill pills>

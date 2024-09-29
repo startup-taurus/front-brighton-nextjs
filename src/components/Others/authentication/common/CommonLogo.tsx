@@ -7,10 +7,7 @@ interface propsType {
 }
 const CommonLogo = ({ alignLogo }: propsType) => {
   return (
-    <Link
-      className={`logo ${alignLogo ? alignLogo : ""} `}
-      href="/teachers/dashboard"
-    >
+    <Link className={`logo ${alignLogo ? alignLogo : ""} `} href="/teachers">
       <Image
         width={121}
         height={35}

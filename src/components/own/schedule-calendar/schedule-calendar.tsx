@@ -26,7 +26,7 @@ const ScheduleCalendar = () => {
     <div>
       <h2 className="main-title mb-4">Calendar</h2>
       <Row>
-        <Col xs={12} lg={8}>
+        <Col xs={12} lg={12}>
           <FullCalendar
             plugins={[timeGridPlugin]}
             headerToolbar={{
@@ -45,7 +45,7 @@ const ScheduleCalendar = () => {
             height="auto"
           />
         </Col>
-        <Col xs={0} lg={4}>
+        {/* <Col xs={0} lg={4}>
           <Image
             src={`${ImgPath}/own/team-bg.png`}
             alt="image team"
@@ -53,7 +53,7 @@ const ScheduleCalendar = () => {
             layout="fill"
             fill={true}
           />
-        </Col>
+        </Col> */}
       </Row>
     </div>
   );

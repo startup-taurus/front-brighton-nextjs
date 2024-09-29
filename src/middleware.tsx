@@ -10,7 +10,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/authentication/login", request.url));
   }
   if (path.split("/")[1] === "authentication" && request.cookies.has("token")) {
-    return NextResponse.redirect(new URL(`/teachers/dashboard`, request.url));
+    return NextResponse.redirect(new URL(`/teachers`, request.url));
   }
 }
 

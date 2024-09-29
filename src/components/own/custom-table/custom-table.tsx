@@ -9,6 +9,8 @@ const CustomTable = ({ columns, data }: any) => {
       customStyles={customStyles}
       className="border-table"
       highlightOnHover
+      pointerOnHover
+      dense={false}
     />
   );
 };

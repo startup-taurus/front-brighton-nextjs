@@ -1,16 +1,14 @@
 "use client";
-import React, { ReactNode, useContext, useEffect } from "react";
-import Header from "./Header";
-import Sidebar from "./Sidebar";
-import ThemeCustomizer from "./ThemeCustomizer";
 import Footer from "CommonElements/Footer";
 import CustomizerContext from "helper/Customizer";
 import layoutContext, { searchableMenuType } from "helper/Layout";
 import Head from "next/head";
+import { ReactNode, useContext, useEffect, useState } from "react";
 import { sidebarItemType } from "Types/LayoutDataType";
-import { MenuList } from "./Sidebar/menu";
-import Loader from "./loader";
 import NoSsr from "utils/NoSsr";
+import Header from "./Header";
+import Sidebar from "./Sidebar";
+import { TeacherMenuList } from "./Sidebar/menu";
 import Taptop from "./Taptop";
 
 interface layoutProps {
@@ -19,6 +17,7 @@ interface layoutProps {
 
 const Layout = ({ children }: layoutProps) => {
   const { layout, setLayout } = useContext(CustomizerContext);
+  const [user] = useState<string>("teacher");
   const {
     sideBarToggle,
     setSideBarToggle,
@@ -82,7 +81,7 @@ const Layout = ({ children }: layoutProps) => {
       }
     };
 
-    MenuList.forEach((item) => {
+    TeacherMenuList.forEach((item) => {
       item.Items?.map((child) => {
         getAllLink(child, child.icon);
       });
@@ -94,20 +93,21 @@ const Layout = ({ children }: layoutProps) => {
   return (
     <NoSsr>
       <Head>
-        <title>Cuba - Premium Admin Template</title>
+        <title>Brighton School</title>
       </Head>
       {/* <Loader /> */}
       <div
-        className={`page-wrapper ${sideBarToggle ? "compact-wrapper" : layout}`}
+        className={`page-wrapper ${user === "admin" ? "compact-wrapper" : "horizontal-wrapper"}`}
       >
         <Header />
         <div className="page-body-wrapper">
           <Sidebar />
+
           {children}
           <Footer />
         </div>
       </div>
-      {/*<ThemeCustomizer />*/}
+      {/* <ThemeCustomizer /> */}
       <Taptop />
     </NoSsr>
   );

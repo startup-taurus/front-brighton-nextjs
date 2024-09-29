@@ -39,7 +39,7 @@ const CommonForm = ({ alignLogo }: commonFormPropsType) => {
     event.preventDefault();
     if (email === "Test@gmail.com" && password === "Test@123") {
       Cookies.set("token", JSON.stringify(true));
-      router.push("/teachers/dashboard");
+      router.push("/teachers");
       toast.success("login successful");
     } else {
       toast.error("wrong");
