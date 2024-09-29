@@ -2,8 +2,9 @@ import React, { ReactElement } from "react";
 import { Card, CardBody } from "reactstrap";
 import CourseLayout from "@/components/own/course-layout/course-layout";
 import LogoHeader from "@/components/own/logo-header/logo-header";
+import { NextPageWithLayout } from "@/pages/_app";
 
-const Faq = () => {
+const Faq: NextPageWithLayout = () => {
   return (
     <Card className="faq">
       <CardBody>

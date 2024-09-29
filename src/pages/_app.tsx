@@ -9,15 +9,15 @@ import "../../public/assets/scss/app.scss";
 import Layout from "../layout";
 import { ReactElement, ReactNode } from "react";
 import { NextPage } from "next";
-import { AppProps } from "next/app"
+import { AppProps } from "next/app";
 
 export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
   getLayout?: (page: ReactElement) => ReactNode;
 };
 
 type AppPropsWithLayout = AppProps & {
-  Component: NextPageWithLayout
-}
+  Component: NextPageWithLayout;
+};
 
 const Myapp = ({ Component, pageProps }: AppPropsWithLayout) => {
   const getLayout =
@@ -31,8 +31,6 @@ const Myapp = ({ Component, pageProps }: AppPropsWithLayout) => {
   } else {
     updatedPath = currentUrl;
   }
-
-  console.log(Component);
 
   return (
     <NoSsr>

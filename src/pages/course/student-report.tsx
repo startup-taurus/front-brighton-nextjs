@@ -4,11 +4,12 @@ import TabsTeachers from "@/components/own/tabs-teachers/tabs-teachers";
 import TeacherNavMenu from "@/components/own/teacher-nav-menu/teacher-nav-menu";
 import { ReactElement } from "react";
 import { Card, CardBody } from "reactstrap";
+import { NextPageWithLayout } from "@/pages/_app";
 
 const tabsName = "ATTENDANCE";
 const numberOfClass = "F-16°";
 
-const Gradebook = () => {
+const Gradebook: NextPageWithLayout = () => {
   return (
     <Card tag="section">
       <CardBody>

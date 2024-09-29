@@ -7,6 +7,7 @@ import { ImgPath } from "../../../utils/Constant";
 import Image from "next/image";
 import Layout from "@/layout";
 import CourseLayout from "@/components/own/course-layout/course-layout";
+import { NextPageWithLayout } from "@/pages/_app";
 
 const tabsName = "HOLIDAYS";
 const numberOfClass = "F-16°";
@@ -59,7 +60,7 @@ const cancelClassesCols = [
     sortable: true,
   },
 ];
-const TeachersHolidays = () => {
+const TeachersHolidays: NextPageWithLayout = () => {
   return (
     <Card>
       <CardBody>
