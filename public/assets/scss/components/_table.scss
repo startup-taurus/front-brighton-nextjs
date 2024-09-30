@@ -402,17 +402,17 @@ th {
 	align-items: center;
 	padding: 20px;
   }
-  
+
   .decorative-image-container {
 	position: relative;
 	margin-left: 20px;
   }
-  
+
   .decorative-image {
 	width: 300px !important;
 	height: auto !important;
   }
-  
+
   .border-table {
 	border: 2px solid #ff9700;
 	border-radius: 8px;
@@ -429,8 +429,43 @@ th {
 	  display: none;
 	}
   }
-  
+
  .table-container-student .rdt_TableHeadRow{
 	min-height: 25px !important;
-	line-height: 1.2; 
+	line-height: 1.2;
   }
+
+ .main-table {
+	 .main-col-title {
+		 background: $brighton-font-primary-color;
+		 padding: 1.5rem;
+		 color: $white;
+		 text-align: center;
+		 font-weight: 700;
+		 font-size: 1.25rem;
+	 }
+
+	 .student-col{
+		 min-width: 320px;
+	 }
+
+	 .col-vertical {
+		 text-align: center;
+		 vertical-align: middle;
+		 writing-mode: vertical-rl;
+		 transform: rotate(180deg);
+		 line-height: 0.001;
+		 position: relative;
+	 }
+ }
+
+ .add-col-btn {
+	 position: absolute;
+	 top: 0;
+	 right: 0;
+
+	 svg {
+		 width: 20px;
+		 height: 20px;
+	 }
+ }

@@ -1,5 +1,5 @@
 import CourseLayout from "@/components/own/course-layout/course-layout";
-import AttendanceTable from "@/components/own/table-attendence/table-attendence";
+import AttendanceTable from "@/components/own/table-attendance/table-attendance";
 import TabsTeachers from "@/components/own/tabs-teachers/tabs-teachers";
 import { ReactElement } from "react";
 import { Card, CardBody } from "reactstrap";
