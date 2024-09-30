@@ -1,6 +1,8 @@
 import { Card, CardBody } from "reactstrap";
 import Image from "next/image";
 import { ImgPath } from "utils/Constant";
+import LogoHeader from "@/components/own/logo-header/logo-header";
+import React from "react";
 
 const TeachersHeader = ({
   numberOfClass,
@@ -11,23 +13,8 @@ const TeachersHeader = ({
   return (
     <>
       <div className="header-card-container">
-        <CardBody className="header-content py-0">
-          <div className="logo-wrapper">
-            <Image
-              className="for-light"
-              src={`${ImgPath}/logo/logo.png`}
-              alt="logo"
-              width={60}
-              height={60}
-            />
-            <Image
-              className="img-fluid for-light"
-              src={`${ImgPath}/logo/logo-brighton.png`}
-              alt="logo"
-              width={100}
-              height={80}
-            />
-          </div>
+        <CardBody className="header-content pb-0">
+          <LogoHeader />
           <div className="course-details-box">
             <Image
               src={`${ImgPath}/logo/right.png`}

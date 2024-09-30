@@ -435,6 +435,9 @@ th {
 	line-height: 1.2;
   }
 
+.table-responsive {
+	padding-top: 0.85rem;
+}
  .main-table {
 	 .main-col-title {
 		 background: $brighton-font-primary-color;
@@ -461,8 +464,9 @@ th {
 
  .add-col-btn {
 	 position: absolute;
-	 top: 0;
-	 right: 0;
+	 bottom: -14px;
+	 left: -10px;
+	cursor: pointer;
 
 	 svg {
 		 width: 20px;
