@@ -2,6 +2,7 @@ import Cookies from "js-cookie";
 import { toast } from "react-toastify";
 import { ERROR_MESSAGE } from "./constants";
 import { NextRouter } from "next/router";
+import { eachDayOfInterval } from "date-fns";
 
 export const isBrowser = () => typeof window !== "undefined";
 
@@ -57,4 +58,8 @@ export const textEllipsis = (
     }
   }
   return str;
+};
+
+export const getDayOfClasses = ({ startDay, endDay, dayOfClasses }: any) => {
+  // eachDayOfInterval({});
 };

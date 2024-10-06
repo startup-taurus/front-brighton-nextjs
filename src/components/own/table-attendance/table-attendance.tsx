@@ -4,7 +4,13 @@ import { MouseEvent, useEffect, useState } from "react";
 import { format, nextDay } from "date-fns";
 import { FaCirclePlus } from "react-icons/fa6";
 
-const TableAttendance = () => {
+type TableAttendance = {
+  startDate: Date;
+  endDate: Date;
+  dayOfClass: Array<number>;
+};
+
+const TableAttendance = ({ startDate, endDate }: any) => {
   const [dates, setDates] = useState<any>({});
   const handleAddDate = (e: MouseEvent<SVGAElement>) => {
     const currentDate = nextDay(new Date(), 5).toISOString();

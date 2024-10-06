@@ -22,7 +22,7 @@ const SidebarMenu = () => {
   const [active, setActive] = useState(pathname ? pathname : "");
   const [prev, setPrev] = useState<number | undefined>();
   const [activeLink, setActiveLink] = useState<string | undefined>(
-    active.split("/")[active.split("/").length - 1]
+    active.split("/")[active.split("/").length - 1],
   );
 
   const handleActive = (title: string, level: number) => {
@@ -77,7 +77,7 @@ const SidebarMenu = () => {
   };
   const shouldHideMenu = (mainMenu: sidebarMenuType) => {
     return mainMenu.Items.map((data) => data.title).every((tittles) =>
-      pinedMenu.includes(tittles || "")
+      pinedMenu.includes(tittles || ""),
     );
   };
   const { t } = useTranslation();
@@ -91,7 +91,7 @@ const SidebarMenu = () => {
           id="left-arrow"
           onClick={scrollToLeft}
         >
-          <ArrowLeft />
+          {/*<ArrowLeft />*/}
         </div>
       ) : (
         ""
@@ -165,7 +165,7 @@ const SidebarMenu = () => {
           className={`right-arrow ${rightArrow ? "disabled" : ""}`}
           onClick={scrollToRight}
         >
-          <ArrowRight />
+          {/*<ArrowRight />*/}
         </div>
       ) : (
         ""

@@ -4,7 +4,6 @@ import TableStudents from "@/components/own/table-students/table-students";
 import { ReactElement } from "react";
 import { Card } from "reactstrap";
 import { NextPageWithLayout } from "@/pages/_app";
-import TeacherNavMenu from "@/components/own/teacher-nav-menu/teacher-nav-menu";
 
 const numberOfClass = "F-16°";
 const nameTeacher = "KAORI FUKASAWA";

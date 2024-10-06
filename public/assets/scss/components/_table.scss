@@ -462,6 +462,37 @@ th {
 	 }
  }
 
+ .report-table {
+	 border: 2px solid $brighton-font-primary-color;
+	 margin-bottom: 1rem;
+
+	 th,td {
+		 padding: 0.5rem;
+	 }
+
+	.col-title {
+		background: $brighton-font-primary-color;
+		color: $white;
+		text-align: center;
+		font-weight: 700;
+		font-size: 1.25rem;
+	}
+
+	 .highlighted-col {
+		 background: $brighton-secondary-color;
+	 }
+
+	 .resume-title-col {
+		 font-weight: 700;
+		 text-align: right;
+
+		 &.text-center {
+			 text-align: center;
+		 }
+	 }
+ }
+
+
  .add-col-btn {
 	 position: absolute;
 	 bottom: -14px;

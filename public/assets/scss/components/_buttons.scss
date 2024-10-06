@@ -498,6 +498,19 @@ $btn-color in (primary, $primary-color),
   }
 }
 
+
+.download-container{
+  margin-bottom: 1rem;
+}
+
+.brighton-download-btn {
+  padding: 0.5rem 1rem;
+  font-size: 1.25rem;
+  text-decoration: underline;
+  color: $white;
+  background: $red;
+}
+
 /**=====================
     2.9 Buttons CSS end
 ==========================**/

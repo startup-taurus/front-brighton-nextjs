@@ -1,0 +1,75 @@
+.report-container{
+  border: 2px solid $brighton-border-color;
+  padding: 1rem 1rem 2rem 2rem;
+  background: url("../../../assets/images/own/report-img.png") no-repeat bottom right;
+
+  .field-description-small,
+  .field-value-small,
+  .field-value,
+  .field-description{
+    border: 2px solid $brighton-border-color;
+  }
+
+  .field-value, .field-description  {
+    font-size: 1.25rem;
+    padding: 0.5rem 1rem;
+    margin: 0;
+  }
+
+  .field-description-small,
+  .field-description {
+    background: $brighton-font-primary-color;
+    color: $white;
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.25rem;
+    width: auto;
+    display: inline;
+
+  }
+
+  .field-status-small,
+  .field-value-small,
+  .field-description-small{
+    font-size: 1rem;
+    padding: 0 1rem;
+  }
+
+  .field-status-small {
+    background: $brighton-gray;
+    border: 2px solid $brighton-gray;
+  }
+
+  .attendance-resume {
+    font-size: 1.25rem;
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+
+    p{
+      font-weight: 700;
+      margin-bottom: 0;
+    }
+  }
+
+  .student-selector{
+    display: flex;
+    align-items: center;
+    .report-student-filter{
+      border: none;
+      background-color: $brighton-gray;
+      padding: 0;
+      margin-left: 0.5rem;
+      height: 40px;
+      text-align: center;
+      font-weight: 700;
+      border-radius: 100px;
+    }
+  }
+
+  .chart-container {
+    border: 2px solid $brighton-border-color;
+    padding: 2rem;
+    border-radius: 40px;
+  }
+}
