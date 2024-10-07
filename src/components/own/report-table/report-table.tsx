@@ -19,7 +19,7 @@ const ReportTable = ({ columns = [], data = [], resumeRowTitle }: any) => {
         {!data || data.length === 0 ? (
           <tr>
             <td colSpan={columns.length} className="text-center">
-              No data to show
+              There are no records to display
             </td>
           </tr>
         ) : (
