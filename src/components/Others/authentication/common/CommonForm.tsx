@@ -1,26 +1,20 @@
 import Link from "next/link";
 import { ChangeEvent, FormEvent, useState } from "react";
-import { Facebook, Linkedin, Twitter } from "react-feather";
 import { Button, FormGroup, Input, Label } from "reactstrap";
 import {
-  CreateAccount,
-  DoNotAccount,
   EmailAddress,
   EnterEmailPasswordLogin,
-  FacebookHeading,
   ForgotPassword,
   Password,
   RememberPassword,
   SignIn,
   SignInAccount,
-  SignInWith,
-  TwitterHeading,
-  linkedInHeading,
 } from "utils/Constant";
-import CommonLogo from "./CommonLogo";
-import { useRouter } from "next/router";
+
 import Cookies from "js-cookie";
 import { toast } from "react-toastify";
+import CommonLogo from "./CommonLogo";
+import { useRouter } from "next/router";
 export interface commonFormPropsType {
   alignLogo?: string;
 }
@@ -38,7 +32,7 @@ const CommonForm = ({ alignLogo }: commonFormPropsType) => {
   const formSubmitHandle = (event: FormEvent) => {
     event.preventDefault();
     if (email === "Test@gmail.com" && password === "Test@123") {
-      Cookies.set("token", JSON.stringify(true));
+      // Cookies.set("token", JSON.stringify(true));
       router.push("/teachers");
       toast.success("login successful");
     } else {
