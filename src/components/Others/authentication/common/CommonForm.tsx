@@ -32,7 +32,7 @@ const CommonForm = ({ alignLogo }: commonFormPropsType) => {
   const formSubmitHandle = (event: FormEvent) => {
     event.preventDefault();
     if (email === "Test@gmail.com" && password === "Test@123") {
-      // Cookies.set("token", JSON.stringify(true));
+      Cookies.set("token", JSON.stringify(true));
       router.push("/teachers");
       toast.success("login successful");
     } else {
