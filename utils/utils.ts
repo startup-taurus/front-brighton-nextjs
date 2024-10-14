@@ -2,7 +2,19 @@ import Cookies from "js-cookie";
 import { toast } from "react-toastify";
 import { ERROR_MESSAGE } from "./constants";
 import { NextRouter } from "next/router";
-import { eachDayOfInterval } from "date-fns";
+import {
+  addDays,
+  addWeeks,
+  differenceInBusinessDays,
+  eachDayOfInterval,
+  endOfWeek,
+  format,
+  formatDistance,
+  isBefore,
+  parse,
+  parseISO,
+  startOfWeek,
+} from "date-fns";
 
 export const isBrowser = () => typeof window !== "undefined";
 
@@ -60,6 +72,109 @@ export const textEllipsis = (
   return str;
 };
 
-export const getDayOfClasses = ({ startDay, endDay, dayOfClasses }: any) => {
-  // eachDayOfInterval({});
+const getDayNumber = (dayName: string) => {
+  const days = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+  ];
+  return days.indexOf(dayName);
+};
+
+export const getDayOfClassesOfWeek = (courses: any): any[] => {
+  const today = new Date();
+  const weekStart = startOfWeek(today, { weekStartsOn: 0 });
+  const formattedCourse = courses.map((course: any) => {
+    return course?.schedule?.map((item: any, index: number) => {
+      const dayNumber = getDayNumber(item.day);
+      const date = addDays(weekStart, dayNumber);
+      const startDateTime = `${format(date, "yyyy-MM-dd")}T${item.startTime}:00`;
+      const endDateTime = `${format(date, "yyyy-MM-dd")}T${item.endTime}:00`;
+
+      return {
+        id: index,
+        title: course?.course_name,
+        start: startDateTime,
+        end: endDateTime,
+      };
+    });
+  });
+
+  return formattedCourse.flat().map((event: any, index: number) => ({
+    ...event,
+    id: index,
+  }));
+};
+
+export const getAllCourseDays = (
+  startDate: any,
+  endDate: any,
+  schedule: any,
+) => {
+  let currentDate = new Date(startDate);
+  let daysOfClasses: any = [];
+  while (isBefore(currentDate, new Date(endDate))) {
+    schedule.forEach((weekDay: any) =>
+      daysOfClasses.push(
+        format(getDateByDateAndDayName(currentDate, weekDay.day), "EEE, MMM d"),
+      ),
+    );
+    currentDate = addWeeks(currentDate, 1);
+  }
+  daysOfClasses.push(format(new Date(endDate), "EEE, MMM d"));
+  return daysOfClasses;
+};
+
+const getDateByDateAndDayName = (date: any, day: string) => {
+  const dayNumber = getDayNumber(day);
+  const weekStart = startOfWeek(date, { weekStartsOn: 0 });
+  return addDays(weekStart, dayNumber);
+};
+
+const formatDate = (date: string): string =>
+  format(parseISO(date), "EEE, MMM d");
+
+export const getUniqueStudents = (attendanceList: any[]): string[] =>
+  Array.from(new Set(attendanceList?.map((record) => record.student)));
+
+const initializeAttendanceStructure = (
+  dates: string[],
+  students: string[],
+): any => {
+  const attendanceByDate: any = {};
+  dates?.forEach((date) => {
+    attendanceByDate[date] = {};
+    students.forEach((student) => {
+      attendanceByDate[date][student] = "";
+    });
+  });
+  return attendanceByDate;
+};
+
+const mapAttendanceToDates = (
+  attendanceList: any[],
+  attendanceByDate: any,
+): any => {
+  attendanceList?.forEach((record) => {
+    const formattedDate = formatDate(record.attendance_date);
+    const statusSymbol = record.status === "Present" ? "P" : "F";
+
+    if (attendanceByDate[formattedDate]) {
+      attendanceByDate[formattedDate][record.student] = statusSymbol;
+    }
+  });
+  return attendanceByDate;
+};
+
+export const buildAttendanceStructure = (
+  dates: string[],
+  attendanceList: any[],
+): any => {
+  const students = getUniqueStudents(attendanceList);
+  let attendanceByDate = initializeAttendanceStructure(dates, students);
+  return mapAttendanceToDates(attendanceList, attendanceByDate);
 };

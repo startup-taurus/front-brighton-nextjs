@@ -460,6 +460,19 @@ th {
 		 line-height: 0.001;
 		 position: relative;
 	 }
+
+	 .td-attendance {
+		 padding: 0;
+	 }
+
+	 .inner-input {
+		 border-color: transparent;
+		 padding: 0;
+		 height: 40px;
+		 width: 30px;
+		 margin: 1px;
+		 text-align: center;
+	 }
  }
 
  .report-table {

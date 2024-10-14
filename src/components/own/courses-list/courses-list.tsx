@@ -4,11 +4,7 @@ import { Table } from "reactstrap";
 
 interface CoursesListProps {
   title: string;
-  coursesList: {
-    classRoom: string;
-    level: string;
-    link: string;
-  }[];
+  coursesList: any;
 }
 
 const CoursesList = ({ title, coursesList }: CoursesListProps) => {
@@ -17,12 +13,15 @@ const CoursesList = ({ title, coursesList }: CoursesListProps) => {
       <h2 className="main-title">{title}</h2>
       <Table className="link-list">
         <tbody>
-          {coursesList?.map((course, index) => (
+          {coursesList?.map((course: any, index: number) => (
             <tr key={`dashboard-course-${index}`}>
-              <td>{course.classRoom}</td>
-              <td>{course.level}</td>
+              <td>{course?.course_number}</td>
+              <td>{course?.course_name}</td>
               <td className="col-bg-primary ">
-                <Link href={course.link} className="w-100 h-100 col-icon">
+                <Link
+                  href={`/course/${course?.course_id}/home`}
+                  className="w-100 h-100 col-icon"
+                >
                   📁
                 </Link>
               </td>

@@ -3,7 +3,7 @@ import { Card, CardBody, Col, Row } from "reactstrap";
 import TeacherNavMenu from "@/components/own/teacher-nav-menu/teacher-nav-menu";
 import CustomTable from "@/components/own/custom-table/custom-table";
 import React, { ReactElement } from "react";
-import { ImgPath } from "../../../utils/Constant";
+import { ImgPath } from "../../../../utils/Constant";
 import Image from "next/image";
 import Layout from "@/layout";
 import CourseLayout from "@/components/own/course-layout/course-layout";

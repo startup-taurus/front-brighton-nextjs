@@ -1,14 +1,16 @@
 import Image from "next/image";
 import Link from "next/link";
 import FeatherIconCom from "CommonElements/Icons/FeatherIconCom";
-import React from "react";
+import React, { useContext } from "react";
 import { Admin, EmayWalter, ImgPath } from "utils/Constant";
 import { profileListData } from "Data/HeaderData";
 import { Logout } from "../../../../utils/Constant/index";
 import { useRouter } from "next/router";
 import Cookies from "js-cookie";
+import { UserContext } from "../../../../helper/User";
 
 const Profile = () => {
+  const { user } = useContext(UserContext);
   const router = useRouter();
 
   const handleLogOut = () => {
@@ -26,9 +28,9 @@ const Profile = () => {
           height={35}
         />
         <div className="media-body">
-          <span>Kaori Fukasawa</span>
+          <span>{user.name}</span>
           <p className="mb-0 font-roboto">
-            Teacher <i className="middle fa fa-angle-down" />
+            {user.role} <i className="middle fa fa-angle-down" />
           </p>
         </div>
       </div>

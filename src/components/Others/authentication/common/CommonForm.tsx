@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ChangeEvent, FormEvent, useState } from "react";
+import { ChangeEvent, FormEvent, useContext, useState } from "react";
 import { Button, FormGroup, Input, Label } from "reactstrap";
 import {
   EmailAddress,
@@ -15,28 +15,33 @@ import Cookies from "js-cookie";
 import { toast } from "react-toastify";
 import CommonLogo from "./CommonLogo";
 import { useRouter } from "next/router";
+import { postLogin } from "helper/api-data/user";
+import { UserContext } from "helper/User";
 export interface commonFormPropsType {
   alignLogo?: string;
 }
 const CommonForm = ({ alignLogo }: commonFormPropsType) => {
+  const { login } = useContext(UserContext);
+
   const [showPassWord, setShowPassWord] = useState(false);
   const [formValues, setFormValues] = useState({
-    email: "Test@gmail.com",
-    password: "Test@123",
+    username: "jean",
+    password: "123",
   });
-  const { email, password } = formValues;
+  const { username, password } = formValues;
   const router = useRouter();
   const handleUserValue = (event: ChangeEvent<HTMLInputElement>) => {
     setFormValues({ ...formValues, [event.target.name]: event.target.value });
   };
-  const formSubmitHandle = (event: FormEvent) => {
+  const formSubmitHandle = async (event: FormEvent) => {
     event.preventDefault();
-    if (email === "Test@gmail.com" && password === "Test@123") {
-      Cookies.set("token", JSON.stringify(true));
+    const response = await postLogin({ username, password });
+
+    if (response?.status === "success") {
+      Cookies.set("token", JSON.stringify(response?.data));
+      login(response.data);
       router.push("/teachers");
-      toast.success("login successful");
-    } else {
-      toast.error("wrong");
+      toast.success("Login Success");
     }
   };
   return (
@@ -52,11 +57,11 @@ const CommonForm = ({ alignLogo }: commonFormPropsType) => {
             <FormGroup>
               <Label className="col-form-label">{EmailAddress}</Label>
               <Input
-                type="email"
+                type="text"
                 required
-                placeholder="Test@gmail.com"
-                value={email}
-                name="email"
+                placeholder="Test"
+                value={username}
+                name="username"
                 onChange={handleUserValue}
               />
             </FormGroup>
@@ -98,47 +103,6 @@ const CommonForm = ({ alignLogo }: commonFormPropsType) => {
                 </Button>
               </div>
             </FormGroup>
-            {/* <h6 className="text-muted mt-4 or">{SignInWith}</h6> */}
-            {/*<div className="social mt-4">*/}
-            {/*  <div className="btn-showcase">*/}
-            {/*    <a*/}
-            {/*      className="btn btn-light"*/}
-            {/*      href="https://www.linkedin.com/login"*/}
-            {/*      target="_blank"*/}
-            {/*      rel="noreferrer"*/}
-            {/*    >*/}
-            {/*      <Linkedin className="txt-linkedin" />*/}
-            {/*      {linkedInHeading}*/}
-            {/*    </a>*/}
-            {/*    <a*/}
-            {/*      className="btn btn-light"*/}
-            {/*      href="https://twitter.com/login?lang=en"*/}
-            {/*      target="_blank"*/}
-            {/*      rel="noreferrer"*/}
-            {/*    >*/}
-            {/*      <Twitter className="txt-twitter" />*/}
-            {/*      {TwitterHeading}*/}
-            {/*    </a>*/}
-            {/*    <a*/}
-            {/*      className="btn btn-light"*/}
-            {/*      href="https://www.facebook.com/"*/}
-            {/*      target="_blank"*/}
-            {/*      rel="noreferrer"*/}
-            {/*    >*/}
-            {/*      <Facebook className="txt-fb" />*/}
-            {/*      {FacebookHeading}*/}
-            {/*    </a>*/}
-            {/*  </div>*/}
-            {/*</div>*/}
-            {/* <p className="mt-4 mb-0 text-center">
-              {DoNotAccount}
-              <Link
-                className="ms-2"
-                href="/pages/authentication/register-simple"
-              >
-                {CreateAccount}
-              </Link>
-            </p> */}
           </form>
         </div>
       </div>

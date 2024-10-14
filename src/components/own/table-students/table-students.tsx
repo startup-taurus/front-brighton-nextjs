@@ -1,5 +1,4 @@
 import React from "react";
-import DataTable from "react-data-table-component";
 import Image from "next/image";
 import { ImgPath } from "utils/Constant";
 import CustomTable from "@/components/own/custom-table/custom-table";
@@ -7,7 +6,7 @@ import CustomTable from "@/components/own/custom-table/custom-table";
 const columns = [
   {
     name: "STUDENT",
-    selector: (row: { student: any }) => row.student,
+    selector: (row: { name: any }) => row?.name,
     sortable: true,
   },
   {
@@ -16,7 +15,9 @@ const columns = [
     sortable: true,
     compact: true,
     width: "100px",
-    cell: (row: any) => <div className="status-cell">{row.status}</div>,
+    cell: (row: any) => (
+      <div className="status-cell text-uppercase">{row.status}</div>
+    ),
   },
 ];
 
@@ -58,10 +59,10 @@ const data = [
   },
 ];
 
-const StudentTable = () => {
+const StudentTable = ({ students }: any) => {
   return (
     <div className="table-container-student">
-      <CustomTable columns={columns} data={data} />
+      <CustomTable columns={columns} data={students} />
       <div className="decorative-image-container">
         <Image
           className="decorative-image"

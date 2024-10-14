@@ -3,6 +3,7 @@ import Footer from "CommonElements/Footer";
 import { ReactNode } from "react";
 import TeacherNavMenu from "../teacher-nav-menu/teacher-nav-menu";
 import Layout from "@/layout";
+import { useRouter } from "next/router";
 
 interface layoutProps {
   children: ReactNode;

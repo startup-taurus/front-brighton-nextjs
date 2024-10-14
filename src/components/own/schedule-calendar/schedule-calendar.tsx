@@ -1,12 +1,9 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import FullCalendar from "@fullcalendar/react";
-import dayGridPlugin from "@fullcalendar/daygrid";
 import timeGridPlugin from "@fullcalendar/timegrid";
-import interactionPlugin from "@fullcalendar/interaction";
 import { EventSourceInput } from "@fullcalendar/core";
 import { Col, Row } from "reactstrap";
-import Image from "next/image";
-import { ImgPath } from "utils/Constant";
+import { getDayOfClassesOfWeek } from "../../../../utils/utils";
 
 const INITIAL_EVENTS: EventSourceInput = [
   {
@@ -21,7 +18,17 @@ const INITIAL_EVENTS: EventSourceInput = [
   },
 ];
 
-const ScheduleCalendar = () => {
+const ScheduleCalendar = ({ courses }: any) => {
+  const [daysOfClasses, setDayOfClasses] = useState([]);
+
+  useEffect(() => {
+    const schedule = getDayOfClassesOfWeek(courses);
+    setDayOfClasses(schedule);
+  }, [courses]);
+
+  if (!courses || courses?.length === 0) return null;
+  if (!daysOfClasses || daysOfClasses?.length === 0) return null;
+
   return (
     <div>
       <h2 className="main-title mb-4">Calendar</h2>
@@ -30,16 +37,16 @@ const ScheduleCalendar = () => {
           <FullCalendar
             plugins={[timeGridPlugin]}
             headerToolbar={{
-              left: "prev,next today",
+              left: "",
               center: "title",
-              right: "timeGridWeek",
+              right: "",
             }}
             initialView="timeGridWeek"
             weekends={true}
             expandRows={false}
             allDaySlot={false}
             nowIndicator={true}
-            initialEvents={INITIAL_EVENTS}
+            initialEvents={daysOfClasses}
             slotMinTime="07:00:00"
             slotMaxTime="22:00:00"
             height="auto"

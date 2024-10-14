@@ -1,5 +1,4 @@
 import { withoutLayoutThemePath } from "Data/OthersPageData";
-import { CustomizerProvider } from "helper/Customizer/CustomizerProvider";
 import LayoutProvider from "helper/Layout/LayoutProvider";
 import { useRouter } from "next/router";
 import { ToastContainer } from "react-toastify";
@@ -10,6 +9,7 @@ import Layout from "../layout";
 import { ReactElement, ReactNode } from "react";
 import { NextPage } from "next";
 import { AppProps } from "next/app";
+import UserProvider from "helper/User/UserProvider";
 
 export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
   getLayout?: (page: ReactElement) => ReactNode;
@@ -34,16 +34,16 @@ const Myapp = ({ Component, pageProps }: AppPropsWithLayout) => {
 
   return (
     <NoSsr>
-      {withoutLayoutThemePath.includes(updatedPath) ? (
-        <Component {...pageProps} />
-      ) : (
-        <CustomizerProvider>
+      <UserProvider>
+        {withoutLayoutThemePath.includes(updatedPath) ? (
+          <Component {...pageProps} />
+        ) : (
           <LayoutProvider>
             {getLayout(<Component {...pageProps} />)}
           </LayoutProvider>
-        </CustomizerProvider>
-      )}
-      <ToastContainer />
+        )}
+        <ToastContainer />
+      </UserProvider>
     </NoSsr>
   );
 };

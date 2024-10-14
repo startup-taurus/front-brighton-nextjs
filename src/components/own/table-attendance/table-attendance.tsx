@@ -1,60 +1,80 @@
 import React from "react";
 import { Table } from "reactstrap";
-import { MouseEvent, useEffect, useState } from "react";
-import { format, nextDay } from "date-fns";
-import { FaCirclePlus } from "react-icons/fa6";
+import { useEffect, useState } from "react";
+import { format } from "date-fns";
+import {
+  buildAttendanceStructure,
+  getAllCourseDays,
+  getUniqueStudents,
+} from "../../../../utils/utils";
+import { createAttendance } from "../../../../helper/api-data/attendance";
+import { useRouter } from "next/router";
+import logoHeader from "@/components/own/logo-header/logo-header";
+import { mutate } from "swr";
 
 type TableAttendance = {
   startDate: Date;
   endDate: Date;
-  dayOfClass: Array<number>;
+  schedule: Array<any>;
+  studentsAttendance: Array<any>;
+  students: Array<any>;
 };
 
-const TableAttendance = ({ startDate, endDate }: any) => {
-  const [dates, setDates] = useState<any>({});
-  const handleAddDate = (e: MouseEvent<SVGAElement>) => {
-    const currentDate = nextDay(new Date(), 5).toISOString();
-    setDates((dates: any) => ({
-      ...dates,
+const TableAttendance = ({
+  startDate,
+  endDate,
+  schedule,
+  studentsAttendance,
+  students,
+}: TableAttendance) => {
+  const router = useRouter();
+  const courseId = router.query.id;
+  const [dates, setDates] = useState<any>([]);
+  const [daysOfClasses, setDaysOfClasses] = useState([]);
+
+  useEffect(() => {
+    const datesOfClasses = getAllCourseDays(startDate, endDate, schedule);
+    setDaysOfClasses(datesOfClasses);
+    const attendance = buildAttendanceStructure(
+      datesOfClasses,
+      studentsAttendance,
+    );
+    setDates(attendance);
+    // console.log(attendance);
+  }, [startDate, endDate, schedule]);
+
+  const changeAttendance = async (
+    event: any,
+    currentDate: any,
+    student: any,
+  ) => {
+    // await createAttendance({
+    //   course_id: Number(courseId),
+    //   student_id: student.id,
+    //   attendance_date: format(new Date(currentDate), "yyyy-MM-dd").split(
+    //     "T",
+    //   )[0],
+    //   status: "Present",
+    // });
+
+    setDates((date: any) => ({
+      ...date,
       [currentDate]: {
-        "PIERINA VALENTINA CEVALLOS MALDONA": "P",
-        "ENRIQUE LEONARDO GARCIA CARRILLO": "F",
-        "MATEO NICOLAS MALDONADO PALMA": "R",
+        ...date[currentDate],
+        [student?.name]: event.target.value,
       },
     }));
   };
 
-  useEffect(() => {
-    const currentDate = new Date().toISOString();
-    setDates({
-      [currentDate]: {
-        "PIERINA VALENTINA CEVALLOS MALDONA": "P",
-        "ENRIQUE LEONARDO GARCIA CARRILLO": "F",
-        "MATEO NICOLAS MALDONADO PALMA": "R",
-      },
-    });
-  }, []);
-
-  const datesArray = Object.keys(dates);
-  const students = Array.from(
-    new Set(datesArray.flatMap((date) => Object.keys(dates[date]))),
-  );
-
   return (
     <div>
-      <Table responsive bordered className="main-table w-auto">
+      <Table responsive bordered className="main-table w-100">
         <thead>
           <tr>
             <th className="main-col-title student-col">STUDENT</th>
-            {Object.keys(dates).map((date, index) => (
-              <th className="col-vertical" key={`date-attendence-${index}`}>
-                {format(new Date(date), "EEE, MMM d")}
-
-                {index === Object.keys(dates).length - 1 && (
-                  <div className="add-col-btn">
-                    <FaCirclePlus onClick={handleAddDate} />
-                  </div>
-                )}
+            {daysOfClasses.map((date, index) => (
+              <th className="col-vertical" key={`date-attendance-${index}`}>
+                {date}
               </th>
             ))}
             <th className="main-col-title" colSpan={2}>
@@ -66,12 +86,19 @@ const TableAttendance = ({ startDate, endDate }: any) => {
           </tr>
         </thead>
         <tbody>
-          {students.map((student: any, index) => (
+          {students?.map((student: any, index) => (
             <tr key={`date-student-${index}`}>
-              <td>{student}</td>
-              {datesArray.map((currentDate: any, index2) => (
-                <td key={`attendance-${index2}`}>
-                  {dates[currentDate][student]}
+              <td>{student?.name}</td>
+              {Object.keys(dates).map((currentDate: any, index2) => (
+                <td key={`attendance-${index2}`} className="td-attendance">
+                  <input
+                    type="text"
+                    className="inner-input"
+                    value={dates[currentDate][student?.name]}
+                    onChange={(event) =>
+                      changeAttendance(event, currentDate, student)
+                    }
+                  />
                 </td>
               ))}
               <td>18</td>

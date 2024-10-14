@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useContext } from "react";
 
 import SectionTitle from "@/components/own/section-title/section-title";
 import { Card, CardBody, Col, Row } from "reactstrap";
@@ -7,7 +7,9 @@ import { ImgPath } from "utils/Constant";
 import CoursesList from "@/components/own/courses-list/courses-list";
 import QuickLinksList from "@/components/own/quick-links-list/quick-links-list";
 import ScheduleCalendar from "@/components/own/schedule-calendar/schedule-calendar";
-import TeacherNavMenu from "@/components/own/teacher-nav-menu/teacher-nav-menu";
+import useSWR from "swr";
+import { UserContext } from "../../../helper/User";
+import { getProfessorCourses } from "../../../helper/api-data/professor";
 
 const COURSES = [
   {
@@ -79,6 +81,14 @@ const OTHER_LINKS = [
 ];
 
 const Dashboard = () => {
+  const { user } = useContext(UserContext);
+  const courses = useSWR(
+    user?.id ? `/professor/${user?.id}/courses` : null,
+    () => getProfessorCourses(user?.id),
+  );
+
+  if (!courses?.data?.data?.courses) return null;
+
   return (
     <div className="page-body pt-2">
       <Card>
@@ -87,16 +97,19 @@ const Dashboard = () => {
           <TeacherProfile
             profileData={{
               profileImage: `${ImgPath}/own/profile-image.png`,
-              firstName: "Kaori",
-              lastName: "Fukasawa",
-              position: "Teacher",
-              studentQty: 30,
-              coursesQty: 3,
+              firstName: user?.name?.split(" ")[0],
+              lastName: user?.name?.split(" ")[1],
+              position: user?.role,
+              studentQty: courses?.data?.data?.total_students,
+              coursesQty: courses?.data?.data?.total_courses,
             }}
           />
           <div className="divider"></div>
           <div className="d-flex flex-column flex-lg-row justify-content-between pb-5">
-            <CoursesList title="Courses" coursesList={COURSES} />
+            <CoursesList
+              title="Courses"
+              coursesList={courses?.data?.data?.courses}
+            />
             <QuickLinksList
               title="Quick Links"
               quickLinks={QUICK_LINKS}
@@ -104,7 +117,7 @@ const Dashboard = () => {
             />
           </div>
           <div className="divider"></div>
-          <ScheduleCalendar />
+          <ScheduleCalendar courses={courses?.data?.data?.courses} />
         </CardBody>
       </Card>
     </div>

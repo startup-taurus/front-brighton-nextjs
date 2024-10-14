@@ -6,33 +6,34 @@ import Link from "next/link";
 const NAV_ITEMS = [
   {
     name: "🏠 HOME",
-    link: "/course/home",
+    link: "/course/${id}/home",
   },
   {
     name: "📋 ATTENDANCE",
-    link: "/course/attendance",
+    link: "/course/${id}/attendance",
   },
   {
     name: "‍🌴 HOLIDAYS",
-    link: "/course/holidays",
+    link: "/course/${id}/holidays",
   },
   {
     name: "📚 GRADEBOOK",
-    link: "/course/gradebook",
+    link: "/course/${id}/gradebook",
   },
   {
     name: "👨‍🎓 STUDENT REPORT",
-    link: "/course/student-report",
+    link: "/course/${id}/student-report",
   },
   {
     name: "❓ FAQ",
-    link: "/course/faq",
+    link: "/course/${id}/faq",
   },
 ];
 
 const TeacherNavMenu = () => {
   const router = useRouter();
   const pathname = router.asPath;
+  const courseId = router.query.id ?? 0;
   const [active, setActive] = useState(pathname ? pathname : "");
 
   useEffect(() => {
@@ -44,7 +45,7 @@ const TeacherNavMenu = () => {
       <Nav fill pills>
         {NAV_ITEMS.map(({ name, link }, index) => (
           <NavItem key={`teacher-nav-${index}`}>
-            <Link href={link}>
+            <Link href={link.replace("${id}", courseId.toString())}>
               <NavLink active={active === link}>{name}</NavLink>
             </Link>
           </NavItem>
