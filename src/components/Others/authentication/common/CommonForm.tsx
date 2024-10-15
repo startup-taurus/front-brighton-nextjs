@@ -40,12 +40,12 @@ const CommonForm = ({ alignLogo }: commonFormPropsType) => {
     if (response?.status === "success") {
       Cookies.set("token", JSON.stringify(response?.data));
       login(response.data);
-      router.push("/inscription/students");
-      // if (response.data.role === "admin") {
-      //   router.push("/inscription/courses");
-      // } else {
-      //   router.push("/teachers");
-      // }
+
+      if (response.data.role === "admin_staff") {
+        router.push("/inscription/students");
+      } else {
+        router.push("/teachers");
+      }
 
       toast.success("Login Success");
     }
