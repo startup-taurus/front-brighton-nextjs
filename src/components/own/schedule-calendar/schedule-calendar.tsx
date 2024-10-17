@@ -19,7 +19,7 @@ const INITIAL_EVENTS: EventSourceInput = [
 ];
 
 const ScheduleCalendar = ({ courses }: any) => {
-  const [daysOfClasses, setDayOfClasses] = useState([]);
+  const [daysOfClasses, setDayOfClasses] = useState<any[]>([]);
 
   useEffect(() => {
     const schedule = getDayOfClassesOfWeek(courses);
