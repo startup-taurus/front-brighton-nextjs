@@ -120,12 +120,16 @@ export const getAllCourseDays = (
   while (isBefore(currentDate, new Date(endDate))) {
     schedule.forEach((weekDay: any) =>
       daysOfClasses.push(
-        format(getDateByDateAndDayName(currentDate, weekDay.day), "EEE, MMM d"),
+        format(
+          getDateByDateAndDayName(currentDate, weekDay.day),
+          "EEE, MMM d, yy",
+        ),
       ),
     );
     currentDate = addWeeks(currentDate, 1);
   }
-  daysOfClasses.push(format(new Date(endDate), "EEE, MMM d"));
+  daysOfClasses.push(format(new Date(endDate), "EEE, MMM d, yy"));
+  console.log(daysOfClasses);
   return daysOfClasses;
 };
 
@@ -136,10 +140,10 @@ const getDateByDateAndDayName = (date: any, day: string) => {
 };
 
 const formatDate = (date: string): string =>
-  format(parseISO(date), "EEE, MMM d");
+  format(parseISO(date), "EEE, MMM d, yy");
 
 export const getUniqueStudents = (attendanceList: any[]): string[] =>
-  Array.from(new Set(attendanceList?.map((record) => record.student)));
+  Array.from(new Set(attendanceList?.map((record) => record.student_id)));
 
 const initializeAttendanceStructure = (
   dates: string[],
@@ -161,10 +165,10 @@ const mapAttendanceToDates = (
 ): any => {
   attendanceList?.forEach((record) => {
     const formattedDate = formatDate(record.attendance_date);
-    const statusSymbol = record.status === "Present" ? "P" : "F";
+    const status = record.status;
 
     if (attendanceByDate[formattedDate]) {
-      attendanceByDate[formattedDate][record.student] = statusSymbol;
+      attendanceByDate[formattedDate][record.student_id] = status;
     }
   });
   return attendanceByDate;

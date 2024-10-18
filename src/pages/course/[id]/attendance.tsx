@@ -32,7 +32,12 @@ const TeachersAttendance: NextPageWithLayout = () => {
     () => getCourseWithStudents(courseId!.toString()),
   );
 
-  if (!courseDetail?.data?.data || !courseStudents?.data?.data) return null;
+  if (
+    !courseDetail?.data?.data ||
+    !courseStudents?.data?.data ||
+    !courseAttendance?.data?.data
+  )
+    return null;
   const { course_number, start_date, end_date, schedule } =
     courseDetail?.data?.data;
   const studentsAttendance = courseAttendance?.data?.data;

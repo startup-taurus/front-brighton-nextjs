@@ -465,13 +465,19 @@ th {
 		 padding: 0;
 	 }
 
-	 .inner-input {
+	 .attendance-input {
 		 border-color: transparent;
 		 padding: 0;
 		 height: 40px;
-		 width: 30px;
+		 width: 100%;
 		 margin: 1px;
 		 text-align: center;
+		 --bs-form-select-bg-img: none !important;
+	 }
+
+	 .attendance-input:focus {
+		 outline: none;
+		 box-shadow: none !important;
 	 }
  }
 
