@@ -1,6 +1,6 @@
 import { Fragment, useContext, useState } from "react";
 import Menulist from "./Menulist";
-import { TeacherMenuList } from "../menu";
+import { AdminMenuList, TeacherMenuList } from "../menu";
 import { useTranslation } from "react-i18next";
 import { Pinned } from "utils/Constant";
 import layoutContext from "helper/Layout";
@@ -9,10 +9,12 @@ import { ArrowLeft, ArrowRight } from "react-feather";
 import ConfigDB from "config/ThemeConfig";
 import CustomizerContext from "helper/Customizer";
 import { useRouter } from "next/router";
+import { UserContext } from "../../../../helper/User";
 
 const SidebarMenu = () => {
   const { pinedMenu } = useContext(layoutContext);
   const { layoutName } = useContext(CustomizerContext);
+  const { user } = useContext(UserContext);
   const wrapper = ConfigDB.data.settings.layout_class;
   const [margin, setMargin] = useState(0);
   const [leftArrow, setLeftArrow] = useState(true);
@@ -24,6 +26,9 @@ const SidebarMenu = () => {
   const [activeLink, setActiveLink] = useState<string | undefined>(
     active.split("/")[active.split("/").length - 1],
   );
+
+  const menuByUser =
+    user?.role === "admin_staff" ? AdminMenuList : TeacherMenuList;
 
   const handleActive = (title: string, level: number) => {
     if (active.includes(title)) {
@@ -128,8 +133,8 @@ const SidebarMenu = () => {
                         <h6>{Pinned}</h6>
                       </div>
                     </li>
-                    {TeacherMenuList &&
-                      TeacherMenuList.map((mainMenu, i) => (
+                    {menuByUser &&
+                      menuByUser.map((mainMenu, i) => (
                         <Fragment key={i}>
                           <li
                             className={`sidebar-main-title ${shouldHideMenu(mainMenu) ? "d-none" : ""}`}

@@ -31,7 +31,7 @@ export const AdminMenuList: sidebarMenuType[] = [
     menucontent: "Módulo de inicio",
     Items: [
       {
-        title: "👩‍🏫 DASHBOARD",
+        title: "👩‍🏫 Hola",
         id: 1,
         pathSlice: "dashboard",
         type: "link",

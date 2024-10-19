@@ -10,6 +10,7 @@ import Header from "./Header";
 import Sidebar from "./Sidebar";
 import { TeacherMenuList } from "./Sidebar/menu";
 import Taptop from "./Taptop";
+import { UserContext } from "../../helper/User";
 
 interface layoutProps {
   children: ReactNode;
@@ -17,7 +18,8 @@ interface layoutProps {
 
 const Layout = ({ children }: layoutProps) => {
   const { layout, setLayout } = useContext(CustomizerContext);
-  const [user] = useState<string>("teacher");
+  const { user } = useContext(UserContext);
+  console.log(user);
   const {
     sideBarToggle,
     setSideBarToggle,
@@ -97,7 +99,7 @@ const Layout = ({ children }: layoutProps) => {
       </Head>
       {/* <Loader /> */}
       <div
-        className={`page-wrapper ${user === "admin" ? "compact-wrapper" : "horizontal-wrapper"}`}
+        className={`page-wrapper  ${user?.role === "admin_staff" ? "compact-wrapper" : "horizontal-wrapper"}`}
       >
         <Header />
         <div className="page-body-wrapper">
