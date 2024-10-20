@@ -1,20 +1,19 @@
 import React, { useState } from "react";
-import { Table } from "reactstrap";
-import {
-  hoverTableData,
-  studentsData,
-} from "../../../../Data/table/ReactStrapTableData";
+import useSWR from "swr";
+import { useRouter } from "next/router";
+import { getAllStudent } from "helper/api-data/student";
 import TableActionButtons from "@/components/own/table-action-buttons/table-action-buttons";
-import TableFooter from "@/components/own/table-footer/table-footer";
-import StudentForm from "@/components/own/student-form/student-form";
 import Swal from "sweetalert2";
-import StudentDetail from "@/components/own/student-detail/student-datail";
+import StudentForm from "../student-form/student-form";
+import StudentDetail from "../student-detail/student-datail";
+import DataTable from "react-data-table-component";
 
 const StudentsTable = () => {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenDetail, setIsOpenDetail] = useState(false);
-
   const [selectedData, setSelectedData] = useState(null);
+
   const toggle = (data: any) => {
     setSelectedData(data);
     setIsOpen(!isOpen);
@@ -45,74 +44,115 @@ const StudentsTable = () => {
     });
   };
 
-  return (
-    <>
-      <div className="table-responsive signal-table">
-        <Table
-          hover={true}
-          className="table table-hover table-responsive uppercase-table"
-        >
-          <thead>
-            <tr>
-              <th scope="col">Acciones</th>
-              <th scope="col">Estudiante</th>
-              <th scope="col">Estado</th>
-              <th scope="col">Metodo de pago</th>
-              <th scope="col">Promoción</th>
-              <th scope="col">Fecha de pago</th>
-              <th scope="col">Estado de pago</th>
-              <th scope="col">Pensión</th>
-              <th scope="col">Curso</th>
-              <th scope="col">Nivel</th>
-            </tr>
-          </thead>
-          <tbody>
-            {studentsData.map((item) => (
-              <tr key={item.id}>
-                <td>
-                  <TableActionButtons
-                    onView={() => toggleDetail(item)}
-                    onBlock={() => handleAlert()}
-                    onEdit={() => toggle(item)}
-                  />
-                </td>
-                <td>
-                  {item.name}&nbsp;{item.lastName}
-                </td>
-                <td>
-                  <span
-                    className={`badge ${item.isActive ? "badge-success" : "badge-danger"}`}
-                  >
-                    {item.isActive ? "Activo" : "Desactivo"}
-                  </span>{" "}
-                </td>
-                <td>{item.paymentMethod}</td>
-                <td>{item.promotion}</td>
-                <td>{item.paymentDate}</td>
-                <td>
-                  <span
-                    className={`badge ${item.paymentStatus ? "badge-success" : "badge-danger"}`}
-                  >
-                    {item.paymentStatus ? "Pagado" : "No Pagado"}{" "}
-                  </span>
-                </td>
-                <td>{item.paymentAmount}</td>
-                <td>{item.course}</td>
-                <td>{item.level}</td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-      </div>
-      <TableFooter />
+  const page = router.query.page ? Number(router.query.page) : 1;
+  const rowPerPage = router.query.rowPerPage
+    ? Number(router.query.rowPerPage)
+    : 5;
 
+  const {
+    data: users,
+    error,
+    isLoading,
+  } = useSWR([`/student/get-all`, page, rowPerPage], () =>
+    getAllStudent(page, rowPerPage)
+  );
+
+  if (!users?.data?.result) return null;
+
+  const columns = [
+    {
+      name: "Acción",
+      cell: (row: any) => (
+        <TableActionButtons
+          onView={() => toggleDetail(row)}
+          onBlock={() => handleAlert()}
+          onEdit={() => toggle(row)}
+        />
+      ),
+      sortable: false,
+      center: false,
+    },
+    {
+      name: "CI",
+      selector: (row: any) => `${row.cedula}`,
+      sortable: true,
+      center: false,
+    },
+    {
+      name: "Estudiante",
+      selector: (row: any) => `${row.user.name}`,
+      sortable: true,
+      center: false,
+    },
+    {
+      name: "Estado",
+      cell: (row: any) => (
+        <span
+          className={`badge ${row.status === "active" ? "badge-success" : "badge-danger"}`}
+        >
+          {row?.status?.charAt(0).toUpperCase() + row?.status?.slice(1)}
+        </span>
+      ),
+      sortable: true,
+      center: false,
+    },
+    {
+      name: "Estado de pago",
+      cell: (row: any) => (
+        <span
+          className={`badge ${row.pending_payments ? "badge-success" : "badge-danger"}`}
+        >
+          {row.pending_payments ? "Pagado" : "No Pagado"}
+        </span>
+      ),
+      sortable: true,
+      center: false,
+    },
+    {
+      name: "Curso",
+      selector: (row: any) =>
+        row.course[0]?.course_name ? row.course[0].course_name : "",
+      sortable: true,
+      center: false,
+    },
+    {
+      name: "Nivel",
+      selector: (row: any) => `${row.level}`,
+      sortable: true,
+      center: false,
+    },
+  ];
+
+  return (
+    <div className="table-responsive signal-table">
+      <DataTable
+        columns={columns}
+        data={users.data.result}
+        pagination
+        paginationServer
+        paginationTotalRows={users.data.totalCount}
+        onChangePage={(page) => {
+          router.push({
+            pathname: router.pathname,
+            query: { ...router.query, page },
+          });
+        }}
+        onChangeRowsPerPage={(newPerPage) => {
+          router.push({
+            pathname: router.pathname,
+            query: { ...router.query, rowPerPage: newPerPage },
+          });
+        }}
+        highlightOnHover
+        selectableRows={false}
+      />
       <StudentForm isOpen={isOpen} toggle={toggle} data={selectedData} />
       <StudentDetail
         isOpen={isOpenDetail}
         toggle={toggleDetail}
         data={selectedData}
       />
-    </>
+    </div>
   );
 };
 

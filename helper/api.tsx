@@ -6,7 +6,7 @@ export const postFetcher = (
   data: any,
   token?: string,
   hideError?: boolean,
-  stopRedirect?: boolean,
+  stopRedirect?: boolean
 ) => {
   return axios
     .post(`${process.env.API_URL}${url}`, data, {
@@ -33,7 +33,7 @@ export const getFetcher = (
   url: string,
   addLevel?: boolean,
   token?: string,
-  stopRedirect?: boolean,
+  stopRedirect?: boolean
 ) => {
   return axios
     .get(`${process.env.API_URL}${url}`, {

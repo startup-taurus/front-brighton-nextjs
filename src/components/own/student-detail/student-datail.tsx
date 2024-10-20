@@ -20,32 +20,38 @@ const StudentDetail = ({ data, isOpen, toggle }: any) => {
             <Col xs={6}>
               <div className="table-bottom-divider">
                 <td>
-                  <strong>Nombre:</strong> &nbsp; {data.name} {data.lastName}
+                  <strong>CI:</strong> &nbsp; {data.cedula}
+                </td>
+              </div>
+              <div className="table-bottom-divider">
+                <td>
+                  <strong>Name:</strong> &nbsp; {data?.user?.name}
+                </td>
+              </div>
+              <div className="table-bottom-divider">
+                <td>
+                  <strong>Profession:</strong> &nbsp; {data.profession}
                 </td>
               </div>
               <div className="table-bottom-divider">
                 <td>
                   <strong>Estado:</strong> &nbsp;{" "}
                   <span
-                    className={`badge ${data.isActive ? "badge-success" : "badge-danger"}`}
+                    className={`badge ${data.status ? "badge-success" : "badge-danger"}`}
                   >
-                    {data.isActive ? "Activo" : "Desactivo"}
+                    {data?.status?.charAt(0).toUpperCase() +
+                      data?.status?.slice(1)}
                   </span>
                 </td>
               </div>
               <div className="table-bottom-divider">
                 <td>
-                  <strong>Metodo de Pago:</strong> &nbsp; {data.paymentMethod}
-                </td>
-              </div>
-              <div className="table-bottom-divider">
-                <td>
-                  <strong>Promoción:</strong> &nbsp; {data.promotion}
-                </td>
-              </div>
-              <div className="table-bottom-divider">
-                <td>
-                  <strong>Fecha de Pago:</strong> &nbsp; {data.paymentDate}
+                  <strong>Book delivered:</strong>&nbsp;{" "}
+                  <span
+                    className={`badge ${data.book_given ? "badge-success" : "badge-danger"}`}
+                  >
+                    {data.book_given ? "Yes" : "No"}
+                  </span>
                 </td>
               </div>
             </Col>
@@ -67,7 +73,10 @@ const StudentDetail = ({ data, isOpen, toggle }: any) => {
               </div>
               <div className="table-bottom-divider">
                 <td>
-                  <strong>Curso:</strong> &nbsp; {data.course}
+                  <strong>Curso:</strong> &nbsp;{" "}
+                  {data?.course?.length > 0
+                    ? data.course[0]?.course_name
+                    : "Curso no disponible"}
                 </td>
               </div>
               <div className="table-bottom-divider">
@@ -75,6 +84,51 @@ const StudentDetail = ({ data, isOpen, toggle }: any) => {
                   <strong>Nivel:</strong> &nbsp; {data.level}
                 </td>
               </div>
+            </Col>
+            <Col xs={12}>
+              <strong>Emergency contact</strong> &nbsp;{" "}
+              <div className="table-bottom-divider d-flex gap-3">
+                <div>
+                  {" "}
+                  <strong>Name:</strong> &nbsp; {data.emergency_contact_name}
+                </div>
+                <div>
+                  {" "}
+                  <strong>Phone:</strong> &nbsp; {data.emergency_contact_phone}
+                </div>
+                <div>
+                  {" "}
+                  <strong>Relationship:</strong> &nbsp;{" "}
+                  {data.emergency_contact_relationship}
+                </div>
+              </div>
+              <div className="border-bottom p-2">
+                <td>
+                  <strong>Observación:</strong> &nbsp; {data.observations}
+                </td>
+              </div>
+            </Col>
+            <Col xs={12}>
+              <strong>Payments</strong> &nbsp;{" "}
+              <Table responsive>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Method</th>
+                    <th>Total</th>
+                  </tr>
+                </thead>
+                {Array.isArray(data.payments) &&
+                  data.payments.map((payment: any) => (
+                    <tbody>
+                      <tr>
+                        <td>{payment.payment_date}</td>
+                        <td>{payment.payment_method}</td>
+                        <td>{payment.total_payment}</td>
+                      </tr>
+                    </tbody>
+                  ))}
+              </Table>
             </Col>
           </Row>
           <div className="d-flex justify-content-end py-4">

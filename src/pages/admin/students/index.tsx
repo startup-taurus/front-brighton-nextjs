@@ -15,7 +15,6 @@ import TableHeaderActions from "@/components/own/table-header-actions/table-head
 import { FaChevronDown, FaFilter } from "react-icons/fa6";
 import { studentsData } from "../../../../Data/table/ReactStrapTableData";
 import StudentForm from "@/components/own/student-form/student-form";
-import Swal from "sweetalert2";
 
 const Students = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -24,10 +23,11 @@ const Students = () => {
   const toggle = () => {
     setIsOpenModal(!isOpenModal);
   };
-
+  
   const handleCollapse = () => {
     setIsOpen(!isOpen);
   };
+  
 
   return (
     <div className="page-body">
