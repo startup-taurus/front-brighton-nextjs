@@ -8,6 +8,7 @@ interface CoursesListProps {
 }
 
 const CoursesList = ({ title, coursesList }: CoursesListProps) => {
+  console.log(coursesList);
   return (
     <div>
       <h2 className="main-title">{title}</h2>
@@ -16,7 +17,7 @@ const CoursesList = ({ title, coursesList }: CoursesListProps) => {
           {coursesList?.map((course: any, index: number) => (
             <tr key={`dashboard-course-${index}`}>
               <td>{course?.course_number}</td>
-              <td>{course?.course_name}</td>
+              <td>{`${course?.course_name} - ${course.classSchedule}`}</td>
               <td className="col-bg-primary ">
                 <Link
                   href={`/course/${course?.course_id}/home`}

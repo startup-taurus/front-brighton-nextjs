@@ -29,10 +29,10 @@ const CourseHome: NextPageWithLayout = () => {
   return (
     <Card className="mt-2">
       <TeachersHeader
-        numberOfClass={total_students}
+        numberOfClass={course_number}
         nameCourse={course_name}
         nameTeacher={professor?.name}
-        numberOfStudents={course_number}
+        numberOfStudents={total_students}
       />
 
       <TableStudents students={students}></TableStudents>

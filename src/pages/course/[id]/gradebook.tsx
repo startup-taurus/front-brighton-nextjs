@@ -3,8 +3,10 @@ import TabsTeachers from "@/components/own/tabs-teachers/tabs-teachers";
 import React, { ReactElement } from "react";
 import { Card, CardBody, Table } from "reactstrap";
 import { NextPageWithLayout } from "@/pages/_app";
-import CustomTable from "@/components/own/custom-table/custom-table";
 import { tr } from "date-fns/locale";
+import { useRouter } from "next/router";
+import useSWR from "swr";
+import { getCourseById } from "../../../../helper/api-data/course";
 
 const tabsName = "GRADEBOOK";
 const numberOfClass = "F-16°";
@@ -45,10 +47,21 @@ const studentsCols = [
 ];
 
 const Gradebook: NextPageWithLayout = () => {
+  const router = useRouter();
+  const courseId = router.query.id as string;
+
+  const courseDetail = useSWR(
+    courseId ? `/course/get-one/${courseId}` : null,
+    () => getCourseById(courseId),
+  );
+
+  if (!courseDetail?.data?.data) return null;
+  const { course_number } = courseDetail?.data?.data;
+
   return (
     <Card tag="section" className="gradebook">
       <CardBody>
-        <TabsTeachers numberOfClass={numberOfClass} tabsName={tabsName} />
+        <TabsTeachers numberOfClass={course_number} tabsName={tabsName} />
         <Table responsive bordered className="report-table">
           <thead>
             <tr>

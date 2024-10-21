@@ -1,7 +1,7 @@
 import CourseLayout from "@/components/own/course-layout/course-layout";
 import AttendanceTable from "@/components/own/table-attendance/table-attendance";
 import TabsTeachers from "@/components/own/tabs-teachers/tabs-teachers";
-import { ReactElement, useEffect } from "react";
+import React, { ReactElement, useEffect } from "react";
 import { Card, CardBody } from "reactstrap";
 import { NextPageWithLayout } from "@/pages/_app";
 import { useRouter } from "next/router";
@@ -11,6 +11,9 @@ import {
   getCourseWithStudents,
 } from "../../../../helper/api-data/course";
 import { getAttendance } from "../../../../helper/api-data/attendance";
+import Image from "next/image";
+import { ImgPath } from "../../../../utils/Constant";
+import AttendanceHelpBox from "@/components/own/attendance-help-box/attendance-help-box";
 
 const tabsName = "ATTENDANCE";
 
@@ -32,19 +35,15 @@ const TeachersAttendance: NextPageWithLayout = () => {
     () => getCourseWithStudents(courseId!.toString()),
   );
 
-  if (
-    !courseDetail?.data?.data ||
-    !courseStudents?.data?.data ||
-    !courseAttendance?.data?.data
-  )
-    return null;
+  if (!courseDetail?.data?.data) return null;
+
   const { course_number, start_date, end_date, schedule } =
     courseDetail?.data?.data;
   const studentsAttendance = courseAttendance?.data?.data;
-  const { students } = courseStudents?.data?.data;
+  const students = courseStudents?.data?.data?.students;
 
   return (
-    <Card tag="section">
+    <Card tag="section" className="attendance">
       <CardBody>
         <TabsTeachers numberOfClass={course_number} tabsName={tabsName} />
         <AttendanceTable
@@ -54,6 +53,7 @@ const TeachersAttendance: NextPageWithLayout = () => {
           studentsAttendance={studentsAttendance}
           students={students}
         />
+        <AttendanceHelpBox />
       </CardBody>
     </Card>
   );
