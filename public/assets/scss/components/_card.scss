@@ -155,7 +155,9 @@
 }
 
 .page-body-wrapper {
+  padding-top: 1rem;
   .card {
+    overflow: hidden;
     .sub-title {
       font-family: $font-rubik, $font-serif;
       font-weight: normal;
