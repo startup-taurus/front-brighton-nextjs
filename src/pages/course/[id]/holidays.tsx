@@ -1,17 +1,16 @@
+import { useRouter } from "next/router";
+import useSWR from "swr";
 import TabsTeachers from "@/components/own/tabs-teachers/tabs-teachers";
 import { Card, CardBody, Col, Row } from "reactstrap";
-import TeacherNavMenu from "@/components/own/teacher-nav-menu/teacher-nav-menu";
 import CustomTable from "@/components/own/custom-table/custom-table";
 import React, { ReactElement } from "react";
 import { ImgPath } from "../../../../utils/Constant";
 import Image from "next/image";
-import Layout from "@/layout";
 import CourseLayout from "@/components/own/course-layout/course-layout";
 import { NextPageWithLayout } from "@/pages/_app";
+import { getCourseById } from "../../../../helper/api-data/course";
 
 const tabsName = "HOLIDAYS";
-const numberOfClass = "F-16°";
-
 const holidayCols = [
   {
     name: "DATE",
@@ -27,24 +26,56 @@ const holidayCols = [
 
 const holidayData = [
   {
-    date: "Mon, Feb 12",
-    festivity: "CARNIVALS",
+    date: "Mon, Jan 01",
+    festivity: "NEW YEAR'S DAY",
   },
   {
-    date: "Mon, Feb 12",
-    festivity: "CARNIVALS",
+    date: "Fri, Feb 09",
+    festivity: "CARNIVAL",
   },
   {
-    date: "Mon, Feb 12",
-    festivity: "CARNIVALS",
+    date: "Tue, Feb 13",
+    festivity: "CARNIVAL",
   },
   {
-    date: "Mon, Feb 12",
-    festivity: "CARNIVALS",
+    date: "Fri, Mar 29",
+    festivity: "GOOD FRIDAY",
   },
   {
-    date: "Mon, Feb 12",
-    festivity: "CARNIVALS",
+    date: "Wed, May 01",
+    festivity: "LABOR DAY",
+  },
+  {
+    date: "Sun, May 26",
+    festivity: "BATTLE OF PICHINCHA",
+  },
+  {
+    date: "Sat, Aug 10",
+    festivity: "FIRST CRY OF INDEPENDENCE",
+  },
+  {
+    date: "Wed, Oct 09",
+    festivity: "GUAYAQUIL'S INDEPENDENCE",
+  },
+  {
+    date: "Sat, Nov 02",
+    festivity: "ALL SOULS' DAY",
+  },
+  {
+    date: "Sun, Nov 03",
+    festivity: "CUENCA'S INDEPENDENCE",
+  },
+  {
+    date: "Tue, Dec 24",
+    festivity: "CHRISTMAS EVE",
+  },
+  {
+    date: "Wed, Dec 25",
+    festivity: "CHRISTMAS",
+  },
+  {
+    date: "Tue, Dec 31",
+    festivity: "NEW YEAR'S EVE",
   },
 ];
 
@@ -61,10 +92,21 @@ const cancelClassesCols = [
   },
 ];
 const TeachersHolidays: NextPageWithLayout = () => {
+  const router = useRouter();
+  const courseId = router.query.id as string;
+
+  const courseDetail = useSWR(
+    courseId ? `/course/get-one/${courseId}` : null,
+    () => getCourseById(courseId),
+  );
+
+  if (!courseDetail?.data?.data) return null;
+  const { course_number } = courseDetail?.data?.data;
+
   return (
     <Card>
       <CardBody>
-        <TabsTeachers numberOfClass={numberOfClass} tabsName={tabsName} />
+        <TabsTeachers numberOfClass={course_number} tabsName={tabsName} />
         <Row>
           <Col xs={12} sm={12} md={6} lg={4}>
             <div className="holiday-table-header">

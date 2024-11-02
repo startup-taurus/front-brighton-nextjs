@@ -52,15 +52,6 @@ const ScheduleCalendar = ({ courses }: any) => {
             height="auto"
           />
         </Col>
-        {/* <Col xs={0} lg={4}>
-          <Image
-            src={`${ImgPath}/own/team-bg.png`}
-            alt="image team"
-            quality={100}
-            layout="fill"
-            fill={true}
-          />
-        </Col> */}
       </Row>
     </div>
   );

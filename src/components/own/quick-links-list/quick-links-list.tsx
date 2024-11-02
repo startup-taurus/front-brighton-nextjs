@@ -42,9 +42,13 @@ const QuickLinksList = ({
             <tr key={`dashboard-course-${index}`}>
               <td>{link.title}</td>
               <td className="col-bg-primary ">
-                <Link href={link.link} className="w-100 h-100 col-icon">
+                <a
+                  href={link.link}
+                  target="_blank"
+                  className="w-100 h-100 col-icon"
+                >
                   {link.icon}
-                </Link>
+                </a>
               </td>
             </tr>
           ))}

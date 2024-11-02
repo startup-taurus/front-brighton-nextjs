@@ -42,7 +42,7 @@ const TableAttendance = ({
       studentsAttendance,
     );
     setDates(attendance);
-  }, [startDate, endDate, daysOfClasses]);
+  }, [startDate, endDate, daysOfClasses, studentsAttendance]);
 
   const changeAttendance = async (
     event: any,
@@ -120,29 +120,40 @@ const TableAttendance = ({
           </tr>
         </thead>
         <tbody>
-          {students?.map((student: any, index) => (
-            <tr key={`date-student-${index}`}>
-              <td>{student?.name}</td>
-              {Object.keys(dates).map((currentDate: any, index2) => (
-                <td key={`attendance-${index2}`} className="td-attendance">
-                  <Input
-                    type="select"
-                    className="attendance-input"
-                    value={dates[currentDate][student?.id]}
-                    onChange={(event) =>
-                      changeAttendance(event, currentDate, student)
-                    }
-                  >
-                    <option value="">&nbsp;</option>
-                    <option value="Present">P</option>
-                    <option value="Excused">R</option>
-                    <option value="Absent">A</option>
-                  </Input>
-                </td>
-              ))}
-              {renderStatisticsCol(student?.id)}
+          {students && students.length > 0 ? (
+            students?.map((student: any, index) => (
+              <tr key={`date-student-${index}`}>
+                <td>{student?.name}</td>
+                {Object.keys(dates).map((currentDate: any, index2) => (
+                  <td key={`attendance-${index2}`} className={`td-attendance`}>
+                    <Input
+                      type="select"
+                      className="attendance-input"
+                      value={dates[currentDate][student?.id]}
+                      onChange={(event) =>
+                        changeAttendance(event, currentDate, student)
+                      }
+                    >
+                      <option value="">&nbsp;</option>
+                      <option value="Present">P</option>
+                      <option value="Excused">R</option>
+                      <option value="Absent">A</option>
+                    </Input>
+                  </td>
+                ))}
+                {renderStatisticsCol(student?.id)}
+              </tr>
+            ))
+          ) : (
+            <tr>
+              <td
+                colSpan={Object.keys(dates).length + 4}
+                className="text-center"
+              >
+                This course doesn't have student
+              </td>
             </tr>
-          ))}
+          )}
         </tbody>
       </Table>
     </div>

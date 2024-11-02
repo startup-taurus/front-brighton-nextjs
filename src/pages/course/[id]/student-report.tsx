@@ -12,6 +12,13 @@ import { barChartOptions } from "../../../../Data/Charts/ChartJsData";
 import ReportStatus from "@/components/own/report-status/report-status";
 import Link from "next/link";
 import { FaRegFilePdf } from "react-icons/fa";
+import { useRouter } from "next/router";
+import useSWR from "swr";
+import {
+  getCourseById,
+  getCourseWithStudents,
+} from "../../../../helper/api-data/course";
+import Select from "react-select";
 
 const tabsName = "STUDENT REPORT";
 const numberOfClass = "F-16°";
@@ -70,26 +77,52 @@ const barChartData = {
   ],
 };
 
-const Gradebook: NextPageWithLayout = () => {
+const StudentReport: NextPageWithLayout = () => {
+  const router = useRouter();
+  const courseId = router.query.id as string;
+
+  const courseDetail = useSWR(
+    courseId ? `/course/get-one/${courseId}` : null,
+    () => getCourseById(courseId),
+  );
+
+  const courseStudents = useSWR(
+    courseId ? `/course/get-students/${courseId}` : null,
+    () => getCourseWithStudents(courseId!.toString()),
+  );
+
+  if (!courseDetail?.data?.data) return null;
+  const { course_number } = courseDetail?.data?.data;
+  const students = courseStudents?.data?.data?.students;
+
   return (
     <Card tag="section">
       <CardBody>
-        <TabsTeachers numberOfClass={numberOfClass} tabsName={tabsName} />
+        <TabsTeachers numberOfClass={course_number} tabsName={tabsName} />
         <div className="report-container">
           <Row>
-            <Col xs={12} sm={12} lg={8}>
+            <Col xs={12} sm={12} md={12} lg={8}>
               <div className="student-selector">
                 <p className="field-description">STUDENT</p>
+
                 <Input
                   type="select"
                   name="student"
                   id="studentFilter"
                   className="report-student-filter"
+                  defaultValue={""}
                 >
                   <option value="" disabled>
-                    Seleccione al estudiante
+                    Select the student
                   </option>
-                  <option value={1}>JEAN PAUL SANTOS CUADROS</option>
+                  {students.map((student: any) => (
+                    <option
+                      value={student?.id}
+                      key={`student-report-${student?.id}`}
+                    >
+                      {student?.name}
+                    </option>
+                  ))}
                 </Input>
                 <Image
                   src={`${ImgPath}/course/warning-icon.png`}
@@ -123,6 +156,7 @@ const Gradebook: NextPageWithLayout = () => {
                 <div className="d-flex download-container gap-2">
                   <Link
                     className="brighton-download-btn"
+                    target="_blank"
                     href="https://chiispiitas.github.io/Brighton/Certificate%20Generator/index.html?student=JEAN%20PAUL%20SANTOS%20CUADROS&program=General%20English&level=B1%20PRE-INTERMEDIATE&short-level=B1&assignments=90%&assignments-total=22.5%&assignments-status=PASS&tests=0&tests-status=FAIL&exam=PRELIM.&reading=0%&reading-status=&listening=0%&listening-status=&writing=0%&writing-status=&speaking=0%&speaking-status=&general-exams-total=0%&gpa=4.5%%20(NOT%20REPORTED)&final=NOT%20REPORTED&password=Brighton1234@"
                   >
                     Download
@@ -131,13 +165,14 @@ const Gradebook: NextPageWithLayout = () => {
                 </div>
               </div>
             </Col>
-            <Col xs={12} sm={12} lg={4}>
+            <Col xs={12} sm={12} md={12} lg={4}>
               <div className="chart-container">
                 <Bar
                   data={barChartData}
                   options={barChartOptions}
                   width={778}
                   height={400}
+                  style={{ width: "100%" }}
                 />
               </div>
             </Col>
@@ -148,8 +183,8 @@ const Gradebook: NextPageWithLayout = () => {
   );
 };
 
-Gradebook.getLayout = function getLayout(page: ReactElement) {
+StudentReport.getLayout = function getLayout(page: ReactElement) {
   return <CourseLayout>{page}</CourseLayout>;
 };
 
-export default Gradebook;
+export default StudentReport;

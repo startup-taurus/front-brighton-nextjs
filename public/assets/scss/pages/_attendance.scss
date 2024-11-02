@@ -1,0 +1,37 @@
+.attendance {
+    background: url("../../../assets/images/own/gradebook-report.png") no-repeat bottom right;
+    //padding-bottom: 4rem;
+}
+
+.attendance-help {
+    border: 3px solid $brighton-primary-color;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-top: 1rem;
+    width: auto;
+    display: inline-block;
+
+    .attendance-help-inner{
+        display: flex;
+        justify-content: space-between;
+        gap: 1rem;
+
+        .help-description {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            align-items: center;
+        }
+
+        .help-description-text {
+            font-size: 1rem;
+            font-weight: 700;
+            margin: 0;
+            span{
+                color: $brighton-primary-color;
+                margin-right: 0.5rem;
+            }
+        }
+
+    }
+
+}
