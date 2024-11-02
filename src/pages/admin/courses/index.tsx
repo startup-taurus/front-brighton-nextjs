@@ -10,13 +10,10 @@ import {
   Label,
   Row,
 } from "reactstrap";
-import StudentsTable from "@/components/own/tables/students-table";
-import TableHeaderActions from "@/components/own/table-header-actions/table-header-actions";
 import { FaChevronDown, FaFilter } from "react-icons/fa6";
-import { studentsData } from "../../../../Data/table/ReactStrapTableData";
-import StudentForm from "@/components/own/student-form/student-form";
-import Swal from "sweetalert2";
-import Breadcrumbs from "CommonElements/Breadcrumbs";
+import TableHeaderActions from "@/components/own/table-header-actions/table-header-actions";
+import CoursesTable from "@/components/own/tables/courses-table";
+import CourseForm from "@/components/own/form/course-form";
 
 const Students = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -91,8 +88,24 @@ const Students = () => {
             </Collapse>
           </Card>
         </Row>
+        <Row>
+          <Card>
+            <CardHeader className="d-flex justify-content-end">
+              <TableHeaderActions
+                onReload={() => {}}
+                addButton={{
+                  title: "Create Course",
+                  onClick: () => toggle(),
+                }}
+              />
+            </CardHeader>
+            <div className="pb-4">
+              <CoursesTable />
+            </div>
+          </Card>
+        </Row>
       </Container>
-      <StudentForm isOpen={isOpenModal} toggle={toggle} data={null} />
+      <CourseForm isOpen={isOpenModal} toggle={toggle} data={null} />
     </div>
   );
 };

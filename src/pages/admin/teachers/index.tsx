@@ -1,6 +1,6 @@
+import TeacherForm from "@/components/own/form/teacher-form";
 import TableHeaderActions from "@/components/own/table-header-actions/table-header-actions";
 import TeachersTable from "@/components/own/tables/teachers-table";
-import TeachersForm from "@/components/own/teachers-form/teachers-form";
 import { useState } from "react";
 import { FaChevronDown, FaFilter } from "react-icons/fa6";
 import {
@@ -19,13 +19,14 @@ const Teachers = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenNew, setIsOpenNew] = useState(false);
 
-  const toggle = (data: any) => {
+  const toggle = () => {
     setIsOpenNew(!isOpenNew);
   };
 
   const handleCollapse = () => {
     setIsOpen(!isOpen);
   };
+  
   return (
     <div className="page-body">
       <Container className="basic_table" fluid>
@@ -90,7 +91,10 @@ const Teachers = () => {
             <CardHeader className="d-flex justify-content-end">
               <TableHeaderActions
                 onReload={() => {}}
-                addButton={{ title: "Nuevo Docente", onClick: () => {} }}
+                addButton={{
+                  title: "Create Teacher",
+                  onClick: () => toggle(),
+                }}
               />
             </CardHeader>
             <div className="pb-4">
@@ -99,7 +103,7 @@ const Teachers = () => {
           </Card>
         </Row>
       </Container>
-      <TeachersForm isOpen={isOpenNew} toggle={toggle} />
+      <TeacherForm isOpen={isOpenNew} toggle={toggle} data={null} />
     </div>
   );
 };

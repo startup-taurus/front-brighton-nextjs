@@ -1,26 +1,19 @@
 import React, { useState } from "react";
 import useSWR from "swr";
 import { useRouter } from "next/router";
-import { getAllProfessors } from "helper/api-data/professor";
+import { getAllCourses } from "helper/api-data/course";
 import TableActionButtons from "@/components/own/table-action-buttons/table-action-buttons";
 import Swal from "sweetalert2";
 import DataTable from "react-data-table-component";
-import TeacherForm from "../form/teacher-form";
 
-const ProfessorsTable = () => {
+const CoursesTable = () => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  const [isOpenDetail, setIsOpenDetail] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
 
   const toggle = (data: any) => {
     setSelectedData(data);
     setIsOpen(!isOpen);
-  };
-
-  const toggleDetail = (data: any) => {
-    setSelectedData(data);
-    setIsOpenDetail(!isOpenDetail);
   };
 
   const buttonStyle = Swal.mixin({
@@ -46,59 +39,51 @@ const ProfessorsTable = () => {
   const page = router.query.page ? Number(router.query.page) : 1;
   const rowPerPage = router.query.rowPerPage
     ? Number(router.query.rowPerPage)
-    : 5;
+    : 10;
 
   const {
-    data: professors,
+    data: courses,
     error,
     isLoading,
-  } = useSWR([`/professor/get-all`, page, rowPerPage], () =>
-    getAllProfessors(page, rowPerPage)
+  } = useSWR([`/course/get-all`, page, rowPerPage], () =>
+    getAllCourses(page, rowPerPage)
   );
-  console.log(professors?.data?.result);
 
-  if (!professors?.data?.result) return null;
+  if (!courses?.data?.result) return null;
 
   const columns = [
     {
       name: "Acción",
       cell: (row: any) => (
         <TableActionButtons
-          onView={() => toggleDetail(row)}
-          onBlock={() => handleAlert()}
           onEdit={() => toggle(row)}
+          onBlock={() => handleAlert()}
         />
       ),
       sortable: false,
       center: false,
     },
     {
-      name: "Cédula",
-      selector: (row: any) => `${row.cedula}`,
+      name: "Código",
+      selector: (row: any) => `${row.course_number}`,
       sortable: true,
       center: false,
     },
     {
-      name: "Nombre",
-      selector: (row: any) => `${row.user.name}`,
+      name: "Nombre del Curso",
+      selector: (row: any) => `${row.course_name}`,
       sortable: true,
       center: false,
     },
     {
-      name: "Email",
-      selector: (row: any) => `${row.email}`,
+      name: "Fecha de Inicio",
+      selector: (row: any) => `${row.start_date}`,
       sortable: true,
       center: false,
     },
     {
-      name: "Teléfono",
-      selector: (row: any) => `${row.phone}`,
-      sortable: true,
-      center: false,
-    },
-    {
-      name: "Tarifa por hora",
-      selector: (row: any) => `${row.hourly_rate}`,
+      name: "Fecha de Fin",
+      selector: (row: any) => `${row.end_date}`,
       sortable: true,
       center: false,
     },
@@ -115,8 +100,14 @@ const ProfessorsTable = () => {
       center: false,
     },
     {
-      name: "Último inicio de sesión",
-      selector: (row: any) => new Date(row.user.last_login).toLocaleString(),
+      name: "Nivel",
+      selector: (row: any) => `${row.course_type}`,
+      sortable: true,
+      center: false,
+    },
+    {
+      name: "Horario",
+      selector: (row: any) => `${row.schedule}`,
       sortable: true,
       center: false,
     },
@@ -126,10 +117,10 @@ const ProfessorsTable = () => {
     <div className="table-responsive signal-table">
       <DataTable
         columns={columns}
-        data={professors.data.result}
+        data={courses.data.result}
         pagination
         paginationServer
-        paginationTotalRows={professors.data.totalCount}
+        paginationTotalRows={courses.data.totalCount}
         onChangePage={(page) => {
           router.push({
             pathname: router.pathname,
@@ -145,14 +136,8 @@ const ProfessorsTable = () => {
         highlightOnHover
         selectableRows={false}
       />
-      <TeacherForm isOpen={isOpen} toggle={toggle} data={selectedData} />
-      {/* <TeacherDetail
-        isOpen={isOpenDetail}
-        toggle={toggleDetail}
-        data={selectedData}
-      /> */}
     </div>
   );
 };
 
-export default ProfessorsTable;
+export default CoursesTable;

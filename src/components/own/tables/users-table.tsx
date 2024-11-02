@@ -1,26 +1,20 @@
 import React, { useState } from "react";
 import useSWR from "swr";
 import { useRouter } from "next/router";
-import { getAllProfessors } from "helper/api-data/professor";
+import { getAllUsers } from "helper/api-data/user";
 import TableActionButtons from "@/components/own/table-action-buttons/table-action-buttons";
 import Swal from "sweetalert2";
 import DataTable from "react-data-table-component";
-import TeacherForm from "../form/teacher-form";
+import UserForm from "../form/user-form";
 
-const ProfessorsTable = () => {
+const UsersTable = () => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  const [isOpenDetail, setIsOpenDetail] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
 
   const toggle = (data: any) => {
     setSelectedData(data);
     setIsOpen(!isOpen);
-  };
-
-  const toggleDetail = (data: any) => {
-    setSelectedData(data);
-    setIsOpenDetail(!isOpenDetail);
   };
 
   const buttonStyle = Swal.mixin({
@@ -46,41 +40,39 @@ const ProfessorsTable = () => {
   const page = router.query.page ? Number(router.query.page) : 1;
   const rowPerPage = router.query.rowPerPage
     ? Number(router.query.rowPerPage)
-    : 5;
+    : 10;
 
   const {
-    data: professors,
+    data: users,
     error,
     isLoading,
-  } = useSWR([`/professor/get-all`, page, rowPerPage], () =>
-    getAllProfessors(page, rowPerPage)
+  } = useSWR([`/user/get-all`, page, rowPerPage], () =>
+    getAllUsers(page, rowPerPage)
   );
-  console.log(professors?.data?.result);
 
-  if (!professors?.data?.result) return null;
+  if (!users?.data?.result) return null;
 
   const columns = [
     {
       name: "Acción",
       cell: (row: any) => (
         <TableActionButtons
-          onView={() => toggleDetail(row)}
-          onBlock={() => handleAlert()}
           onEdit={() => toggle(row)}
+          onBlock={() => handleAlert()}
         />
       ),
       sortable: false,
       center: false,
     },
     {
-      name: "Cédula",
-      selector: (row: any) => `${row.cedula}`,
+      name: "Nombre",
+      selector: (row: any) => `${row.name}`,
       sortable: true,
       center: false,
     },
     {
-      name: "Nombre",
-      selector: (row: any) => `${row.user.name}`,
+      name: "Username",
+      selector: (row: any) => `${row.username}`,
       sortable: true,
       center: false,
     },
@@ -91,14 +83,8 @@ const ProfessorsTable = () => {
       center: false,
     },
     {
-      name: "Teléfono",
-      selector: (row: any) => `${row.phone}`,
-      sortable: true,
-      center: false,
-    },
-    {
-      name: "Tarifa por hora",
-      selector: (row: any) => `${row.hourly_rate}`,
+      name: "Rol",
+      selector: (row: any) => `${row.role}`,
       sortable: true,
       center: false,
     },
@@ -115,8 +101,21 @@ const ProfessorsTable = () => {
       center: false,
     },
     {
+      name: "Intentos Fallidos",
+      selector: (row: any) =>
+        row.failed_attempts != null ? row.failed_attempts : 0,
+      sortable: true,
+      center: false,
+    },
+    {
+      name: "Creado en",
+      selector: (row: any) => new Date(row.created_at).toLocaleString(),
+      sortable: true,
+      center: false,
+    },
+    {
       name: "Último inicio de sesión",
-      selector: (row: any) => new Date(row.user.last_login).toLocaleString(),
+      selector: (row: any) => new Date(row.last_login).toLocaleString(),
       sortable: true,
       center: false,
     },
@@ -126,10 +125,10 @@ const ProfessorsTable = () => {
     <div className="table-responsive signal-table">
       <DataTable
         columns={columns}
-        data={professors.data.result}
+        data={users.data.result}
         pagination
         paginationServer
-        paginationTotalRows={professors.data.totalCount}
+        paginationTotalRows={users.data.totalCount}
         onChangePage={(page) => {
           router.push({
             pathname: router.pathname,
@@ -145,8 +144,8 @@ const ProfessorsTable = () => {
         highlightOnHover
         selectableRows={false}
       />
-      <TeacherForm isOpen={isOpen} toggle={toggle} data={selectedData} />
-      {/* <TeacherDetail
+      <UserForm isOpen={isOpen} toggle={toggle} data={selectedData} />
+      {/* <StudentDetail
         isOpen={isOpenDetail}
         toggle={toggleDetail}
         data={selectedData}
@@ -155,4 +154,4 @@ const ProfessorsTable = () => {
   );
 };
 
-export default ProfessorsTable;
+export default UsersTable;

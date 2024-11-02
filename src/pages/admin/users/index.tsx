@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import { useState } from "react";
+import TableHeaderActions from "@/components/own/table-header-actions/table-header-actions";
 import {
   Card,
   CardBody,
@@ -10,13 +11,10 @@ import {
   Label,
   Row,
 } from "reactstrap";
-import StudentsTable from "@/components/own/tables/students-table";
-import TableHeaderActions from "@/components/own/table-header-actions/table-header-actions";
-import { FaChevronDown, FaFilter } from "react-icons/fa6";
-import { studentsData } from "../../../../Data/table/ReactStrapTableData";
-import StudentForm from "@/components/own/form/student-form";
-
-const Students = () => {
+import { FaChevronDown, FaFilter } from "react-icons/fa";
+import UsersTable from "@/components/own/tables/users-table";
+import UserForm from "@/components/own/form/user-form";
+const Users = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenModal, setIsOpenModal] = useState(false);
 
@@ -55,11 +53,6 @@ const Students = () => {
                         <option value="" disabled>
                           Seleccione al estudiante
                         </option>
-                        {studentsData.map((student) => (
-                          <option value={student.id}>
-                            {student.name + " " + student.lastName}
-                          </option>
-                        ))}
                       </Input>
                     </Col>
                     <Col xs={12} sm={4} md={3} className="mb-3">
@@ -156,20 +149,20 @@ const Students = () => {
               <TableHeaderActions
                 onReload={() => {}}
                 addButton={{
-                  title: "Create Student",
+                  title: "Create User",
                   onClick: () => toggle(),
                 }}
               />
             </CardHeader>
             <div className="pb-4">
-              <StudentsTable />
+              <UsersTable />
             </div>
           </Card>
         </Row>
       </Container>
-      <StudentForm isOpen={isOpenModal} toggle={toggle} data={null} />
+      <UserForm isOpen={isOpenModal} toggle={toggle} data={null} />
     </div>
   );
 };
 
-export default Students;
+export default Users;

@@ -6,7 +6,7 @@ import {
 } from "../../../../Data/table/ReactStrapTableData";
 import TableActionButtons from "@/components/own/table-action-buttons/table-action-buttons";
 import TableFooter from "@/components/own/table-footer/table-footer";
-import StudentForm from "@/components/own/student-form/student-form";
+import StudentForm from "@/components/own/form/student-form";
 import Swal from "sweetalert2";
 import StudentDetail from "@/components/own/student-detail/student-datail";
 

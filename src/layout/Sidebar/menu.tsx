@@ -31,6 +31,14 @@ export const AdminMenuList: sidebarMenuType[] = [
     menucontent: "Módulo de inicio",
     Items: [
       {
+        title: "📚 Courses",
+        id: 1,
+        pathSlice: "dashboard",
+        type: "link",
+        badge: "badge badge-light-primary",
+        path: "admin/courses",
+      },
+      {
         title: "👩🏻‍🎓 Student",
         id: 1,
         pathSlice: "dashboard",
@@ -44,7 +52,7 @@ export const AdminMenuList: sidebarMenuType[] = [
         pathSlice: "dashboard",
         type: "link",
         badge: "badge badge-light-primary",
-        path: "teachers",
+        path: "admin/teachers",
       },
       {
         title: "🙎‍♂️ Users",

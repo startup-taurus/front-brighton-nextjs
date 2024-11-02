@@ -4,7 +4,7 @@ import { useRouter } from "next/router";
 import { getAllStudent } from "helper/api-data/student";
 import TableActionButtons from "@/components/own/table-action-buttons/table-action-buttons";
 import Swal from "sweetalert2";
-import StudentForm from "../student-form/student-form";
+import StudentForm from "../form/student-form";
 import StudentDetail from "../student-detail/student-datail";
 import DataTable from "react-data-table-component";
 
@@ -47,7 +47,7 @@ const StudentsTable = () => {
   const page = router.query.page ? Number(router.query.page) : 1;
   const rowPerPage = router.query.rowPerPage
     ? Number(router.query.rowPerPage)
-    : 5;
+    : 10;
 
   const {
     data: users,
