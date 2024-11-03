@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { ErrorMessage, Field, Formik } from "formik";
+
 import {
   Button,
   Col,
@@ -11,9 +12,22 @@ import {
   ModalHeader,
 } from "reactstrap";
 import { createProfessor, updateProfessor } from "helper/api-data/professor";
-import { Role } from "utils/Constant";
+import { ImgPath, Role } from "utils/Constant";
 
 const TeacherForm = ({ data, isOpen, toggle }: any) => {
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const save = async (data: any) => {
     try {
       const response = await createProfessor(data);
@@ -35,7 +49,6 @@ const TeacherForm = ({ data, isOpen, toggle }: any) => {
       console.error("Error al actualizar usuario:", error);
     }
   };
-  
 
   return (
     <Modal isOpen={isOpen} toggle={toggle} size="lg">
@@ -81,6 +94,39 @@ const TeacherForm = ({ data, isOpen, toggle }: any) => {
                 onSubmit={handleSubmit}
                 className={`row g-3`}
               >
+                <Col
+                  xs={12}
+                  className="user-profile d-flex justify-content-center"
+                >
+                  <div className="hovercard text-center card mt-2">
+                    <div className="card-header mt-4"></div>
+                    <div className="user-image">
+                      <div className="avatar">
+                        <img
+                          alt="User Avatar"
+                          src={imagePreview || `${ImgPath}/user/7.jpg`}
+                          className="step1 media"
+                        />
+                      </div>
+                      <div className="icon-wrapper step2">
+                        <i className="icofont icofont-pencil-alt-5">
+                          <input
+                            className="upload"
+                            type="file"
+                            onChange={handleImageChange}
+                            accept="image/*"
+                            style={{
+                              left: 0,
+                              opacity: 0,
+                              position: "absolute",
+                              right: 0,
+                            }}
+                          />
+                        </i>
+                      </div>
+                    </div>
+                  </div>
+                </Col>
                 <Col xs={6}>
                   <Label for="name">Name</Label>
                   <Field name="name" as={Input} />
@@ -127,6 +173,7 @@ const TeacherForm = ({ data, isOpen, toggle }: any) => {
                   <Field name="phone" as={Input} />
                   <ErrorMessage name="phone" component={FormFeedback} />
                 </Col>
+
                 <Col xs={12} className="d-flex justify-content-end mt-5">
                   <Button color="cancel" onClick={toggle}>
                     Close
