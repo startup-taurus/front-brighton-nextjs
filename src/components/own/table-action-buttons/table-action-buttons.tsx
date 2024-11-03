@@ -1,7 +1,12 @@
 import React from "react";
-import { FaMagnifyingGlass, FaBan, FaPenToSquare } from "react-icons/fa6";
+import {
+  FaMagnifyingGlass,
+  FaBan,
+  FaPenToSquare,
+  FaCheck,
+} from "react-icons/fa6";
 
-const TableActionButtons = ({ onView, onBlock, onEdit }: any) => {
+const TableActionButtons = ({ onView, onBlock, onEdit, stauts }: any) => {
   return (
     <div className="btn-group" role="group" aria-label="Basic example">
       {onView && (
@@ -10,12 +15,12 @@ const TableActionButtons = ({ onView, onBlock, onEdit }: any) => {
         </button>
       )}
       {onBlock && (
-        <button type="button" className="btn btn-danger" onClick={onBlock}>
-          <FaBan />
+        <button type="button" className="btn btn-cancel" onClick={onBlock}>
+          {!stauts ? <FaBan /> : <FaCheck />}
         </button>
       )}
       {onEdit && (
-        <button type="button" className="btn btn-success" onClick={onEdit}>
+        <button type="button" className="btn btn-save" onClick={onEdit}>
           <FaPenToSquare />
         </button>
       )}

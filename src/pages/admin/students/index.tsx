@@ -19,6 +19,7 @@ import StudentForm from "@/components/own/form/student-form";
 const Students = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenModal, setIsOpenModal] = useState(false);
+  const [reload, setReload] = useState(false);
 
   const toggle = () => {
     setIsOpenModal(!isOpenModal);
@@ -26,6 +27,10 @@ const Students = () => {
 
   const handleCollapse = () => {
     setIsOpen(!isOpen);
+  };
+
+  const handleReload = () => {
+    setReload(!reload);
   };
 
   return (
@@ -138,10 +143,10 @@ const Students = () => {
                     </Col>
                   </Row>
                   <div className="d-flex justify-content-end gap-2">
-                    <button type="button" className="btn btn-secondary">
+                    <button type="button" className="btn btn-cancel">
                       Reestablecer
                     </button>
-                    <button type="button" className="btn btn-success">
+                    <button type="button" className="btn btn-save">
                       <FaFilter /> <span>Filtrar</span>
                     </button>
                   </div>
@@ -154,7 +159,7 @@ const Students = () => {
           <Card>
             <CardHeader className="d-flex justify-content-end">
               <TableHeaderActions
-                onReload={() => {}}
+                onReload={handleReload}
                 addButton={{
                   title: "Create Student",
                   onClick: () => toggle(),
@@ -162,7 +167,7 @@ const Students = () => {
               />
             </CardHeader>
             <div className="pb-4">
-              <StudentsTable />
+              <StudentsTable reload={reload}/>
             </div>
           </Card>
         </Row>

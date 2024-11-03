@@ -18,6 +18,7 @@ import {
 const Teachers = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenNew, setIsOpenNew] = useState(false);
+  const [reload, setReload] = useState(false);
 
   const toggle = () => {
     setIsOpenNew(!isOpenNew);
@@ -26,7 +27,11 @@ const Teachers = () => {
   const handleCollapse = () => {
     setIsOpen(!isOpen);
   };
-  
+
+  const handleReload = () => {
+    setReload(!reload);
+  };
+
   return (
     <div className="page-body">
       <Container className="basic_table" fluid>
@@ -49,35 +54,29 @@ const Teachers = () => {
                 <form>
                   <Row>
                     <Col xs={12} sm={4} md={3} className="mb-3">
-                      <Label for="studentFilter">Nivel</Label>
-                      <Input type="select" name="student" id="studentFilter">
-                        <option value="" disabled>
-                          Seleccione el nivel
-                        </option>
-                        <option value="active">A1 Elementary</option>
-                        <option value="active">A2 Elementary</option>
-                        <option value="active">B1</option>
-                        <option value="active">B1 +</option>
-                        <option value="active">B2</option>
-                      </Input>
+                      <Label for="professorFilter">Names</Label>
+                      <Input
+                        type="text"
+                        name="name"
+                        id="professorFilter"
+                        placeholder="Enter user name"
+                      />
                     </Col>
                     <Col xs={12} sm={4} md={3} className="mb-3">
-                      <Label for="studentFilter">Curso</Label>
-                      <Input type="select" name="student" id="studentFilter">
-                        <option value="" disabled>
-                          Seleccione el curso
-                        </option>
-                        <option value="active">B-16</option>
-                        <option value="active">B-20</option>
-                        <option value="active">B-30</option>
-                      </Input>
+                      <Label for="professorFilter">ID</Label>
+                      <Input
+                        type="text"
+                        name="cedula"
+                        id="professorFilter"
+                        placeholder="Enter id"
+                      />
                     </Col>
                   </Row>
                   <div className="d-flex justify-content-end gap-2">
-                    <button type="button" className="btn btn-secondary">
+                    <button type="button" className="btn btn-cancel">
                       Reestablecer
                     </button>
-                    <button type="button" className="btn btn-success">
+                    <button type="button" className="btn btn-save">
                       <FaFilter /> <span>Filtrar</span>
                     </button>
                   </div>
@@ -90,7 +89,7 @@ const Teachers = () => {
           <Card>
             <CardHeader className="d-flex justify-content-end">
               <TableHeaderActions
-                onReload={() => {}}
+                onReload={handleReload}
                 addButton={{
                   title: "Create Teacher",
                   onClick: () => toggle(),
@@ -98,7 +97,7 @@ const Teachers = () => {
               />
             </CardHeader>
             <div className="pb-4">
-              <TeachersTable />
+              <TeachersTable reload={reload} />
             </div>
           </Card>
         </Row>

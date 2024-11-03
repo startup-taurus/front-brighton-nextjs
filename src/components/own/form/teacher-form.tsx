@@ -10,17 +10,32 @@ import {
   ModalBody,
   ModalHeader,
 } from "reactstrap";
-import { createProfessor } from "helper/api-data/professor"; // Función para crear profesor
+import { createProfessor, updateProfessor } from "helper/api-data/professor";
+import { Role } from "utils/Constant";
 
 const TeacherForm = ({ data, isOpen, toggle }: any) => {
-  const saveProfessor = async (data: any) => {
+  const save = async (data: any) => {
     try {
-      const response = await createProfessor(data); // Enviar datos para crear profesor
-      console.log("Profesor creado:", response);
+      const response = await createProfessor(data);
+      if (response.statusCode === 200) {
+        toggle();
+      }
     } catch (error) {
       console.error("Error al crear profesor:", error);
     }
   };
+
+  const update = async (data: any) => {
+    try {
+      const response = await updateProfessor(data.id, data);
+      if (response.statusCode === 200) {
+        toggle();
+      }
+    } catch (error) {
+      console.error("Error al actualizar usuario:", error);
+    }
+  };
+  
 
   return (
     <Modal isOpen={isOpen} toggle={toggle} size="lg">
@@ -41,6 +56,7 @@ const TeacherForm = ({ data, isOpen, toggle }: any) => {
                   cedula: data.cedula,
                   hourly_rate: data.hourly_rate,
                   phone: data.phone,
+                  role: data.user?.role,
                 }
               : {
                   name: "",
@@ -51,9 +67,10 @@ const TeacherForm = ({ data, isOpen, toggle }: any) => {
                   cedula: "",
                   hourly_rate: "",
                   phone: "",
+                  role: "",
                 }
           }
-          onSubmit={(info) => saveProfessor(info)} // Llamada al método para guardar el profesor
+          onSubmit={(info) => (data ? update(info) : save(info))}
         >
           {(props) => {
             const { errors, handleSubmit, isSubmitting } = props;
@@ -111,7 +128,7 @@ const TeacherForm = ({ data, isOpen, toggle }: any) => {
                   <ErrorMessage name="phone" component={FormFeedback} />
                 </Col>
                 <Col xs={12} className="d-flex justify-content-end mt-5">
-                  <Button color="danger" onClick={toggle}>
+                  <Button color="cancel" onClick={toggle}>
                     Close
                   </Button>
                   &nbsp; &nbsp;

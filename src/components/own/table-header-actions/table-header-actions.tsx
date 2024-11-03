@@ -15,14 +15,14 @@ const TableHeaderActions = ({ onReload, addButton }: TableHeaderActions) => {
     <div className="d-flex gap-2">
       <button
         type="button"
-        className="btn btn-warning small-btn"
+        className="btn btn-update small-btn"
         onClick={onReload}
       >
         <FaSyncAlt />
       </button>
       <button
         type="button"
-        className="btn btn-success small-btn"
+        className="btn btn-save small-btn"
         onClick={addButton.onClick}
       >
         <FaCirclePlus /> <span>{addButton.title}</span>

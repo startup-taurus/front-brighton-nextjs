@@ -17,6 +17,7 @@ import UserForm from "@/components/own/form/user-form";
 const Users = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenModal, setIsOpenModal] = useState(false);
+  const [reload, setReload] = useState(false);
 
   const toggle = () => {
     setIsOpenModal(!isOpenModal);
@@ -24,6 +25,9 @@ const Users = () => {
 
   const handleCollapse = () => {
     setIsOpen(!isOpen);
+  };
+  const handleReload = () => {
+    setReload(!reload);
   };
 
   return (
@@ -48,93 +52,52 @@ const Users = () => {
                 <form>
                   <Row>
                     <Col xs={12} sm={4} md={3} className="mb-3">
-                      <Label for="studentFilter">Estudiante</Label>
-                      <Input type="select" name="student" id="studentFilter">
-                        <option value="" disabled>
-                          Seleccione al estudiante
+                      <Label for="roleFilter">User type</Label>
+                      <Input type="select" name="role" id="roleFilter">
+                        <option value="" selected disabled>
+                          Select user type
                         </option>
+                        <option value="admin_staff">Admin</option>
+                        <option value="teacher">Teacher</option>
+                        <option value="student">Student</option>
+                        <option value="finalcia">Finalcia</option>
                       </Input>
                     </Col>
                     <Col xs={12} sm={4} md={3} className="mb-3">
-                      <Label for="studentFilter">Estado</Label>
+                      <Label for="studentFilter">Status</Label>
                       <Input type="select" name="student" id="studentFilter">
                         <option value="" disabled>
-                          Seleccione el estado del estudiante
+                          Select status
                         </option>
-                        <option value="active">Activo</option>
-                        <option value="active">Retirado</option>
-                        <option value="active">Transferido</option>
+                        <option value="active">Active</option>
+                        <option value="inactive">In-active</option>
                       </Input>
                     </Col>
 
                     <Col xs={12} sm={4} md={3} className="mb-3">
-                      <Label for="studentFilter">Nivel</Label>
-                      <Input type="select" name="student" id="studentFilter">
-                        <option value="" disabled>
-                          Seleccione el nivel
-                        </option>
-                        <option value="active">A1 Elementary</option>
-                        <option value="active">A2 Elementary</option>
-                        <option value="active">B1</option>
-                        <option value="active">B1 +</option>
-                        <option value="active">B2</option>
-                      </Input>
-                    </Col>
-                    <Col xs={12} sm={4} md={3} className="mb-3">
-                      <Label for="studentFilter">Curso</Label>
-                      <Input type="select" name="student" id="studentFilter">
-                        <option value="" disabled>
-                          Seleccione el curso
-                        </option>
-                        <option value="active">B-16</option>
-                        <option value="active">B-20</option>
-                        <option value="active">B-30</option>
-                      </Input>
-                    </Col>
-                    <Col xs={12} sm={4} md={3} className="mb-3">
-                      <Label for="studentFilter">Metodo de pago</Label>
-                      <Input type="select" name="student" id="studentFilter">
-                        <option value="" disabled>
-                          Seleccione el metodo de pago
-                        </option>
-                        <option value="active">Mensual</option>
-                        <option value="active">Semestral</option>
-                        <option value="active">Modulo completo</option>
-                      </Input>
-                    </Col>
-                    <Col xs={12} sm={4} md={3} className="mb-3">
-                      <Label for="studentFilter">Estado del pago</Label>
-                      <Input type="select" name="student" id="studentFilter">
-                        <option value="" disabled>
-                          Seleccione el estado del pago
-                        </option>
-                        <option value="active">Pagado</option>
-                        <option value="active">No Pagado</option>
-                      </Input>
-                    </Col>
-                    <Col xs={12} sm={4} md={3} className="mb-3">
-                      <Label for="studentFilter">Promoción</Label>
+                      <Label for="studentFilter">User name</Label>
                       <Input
-                        type="select"
+                        type="text"
                         name="student"
                         id="studentFilter"
-                        placeholder="Seleccione una promoción"
-                      >
-                        <option value="" disabled>
-                          Seleccione una promoción
-                        </option>
-                        <option value="na">Sin Promoción</option>
-                        <option value="active">2x1</option>
-                        <option value="active">Navidad</option>
-                        <option value="active">Año nuevo</option>
-                      </Input>
+                        placeholder="Enter user name"
+                      />
+                    </Col>
+                    <Col xs={12} sm={4} md={3} className="mb-3">
+                      <Label for="namesFilter">Names</Label>
+                      <Input
+                        type="text"
+                        name="names"
+                        id="namesFilter"
+                        placeholder="Enter names"
+                      />
                     </Col>
                   </Row>
                   <div className="d-flex justify-content-end gap-2">
-                    <button type="button" className="btn btn-secondary">
+                    <button type="button" className="btn btn-cancel">
                       Reestablecer
                     </button>
-                    <button type="button" className="btn btn-success">
+                    <button type="button" className="btn btn-save">
                       <FaFilter /> <span>Filtrar</span>
                     </button>
                   </div>
@@ -147,7 +110,7 @@ const Users = () => {
           <Card>
             <CardHeader className="d-flex justify-content-end">
               <TableHeaderActions
-                onReload={() => {}}
+                onReload={handleReload}
                 addButton={{
                   title: "Create User",
                   onClick: () => toggle(),
@@ -155,7 +118,7 @@ const Users = () => {
               />
             </CardHeader>
             <div className="pb-4">
-              <UsersTable />
+              <UsersTable reload={reload} />
             </div>
           </Card>
         </Row>

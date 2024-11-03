@@ -1,5 +1,4 @@
-import exp from "constants";
-import { getFetcher } from "../api";
+import { getFetcher, postFetcher, putFetcher } from "../api";
 
 export const getProfessorCourses = (userId: number) => {
   return getFetcher(`/professor/${userId}/courses`, false);
@@ -21,5 +20,13 @@ export const getActiveProfessors = (
 };
 
 export const createProfessor = (data: any) => {
-  return getFetcher(`/professor/create`, true, data);
-}
+  return postFetcher(`/professor/create`, data);
+};
+
+export const updateProfessor = (professorId: number, data: any) => {
+  return putFetcher(`/professor/update/${professorId}`, data);
+};
+
+export const updateStatusProfessor = (professorId: number, status: string) => {
+  return putFetcher(`/professor/update-status/${professorId}`, { status });
+};

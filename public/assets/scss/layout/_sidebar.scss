@@ -876,7 +876,7 @@
                           transition: all 0.3s ease;
 
                           &.stroke-icon {
-                            stroke: var(--theme-deafult);
+                            stroke: var(--body-font-color);
                           }
 
                           &.fill-icon {
@@ -2240,7 +2240,7 @@
                             }
 
                             span {
-                              color: var(--theme-deafult);
+                              color: var(--body-font-color);
                               transition: all 0.3s ease;
                             }
                           }

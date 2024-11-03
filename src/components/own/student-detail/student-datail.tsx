@@ -8,137 +8,118 @@ import {
   Row,
   Table,
 } from "reactstrap";
+import Image from "next/image";
+import { ImgPath } from "utils/Constant";
 
 const StudentDetail = ({ data, isOpen, toggle }: any) => {
   if (!data) return null;
   return (
-    <div className="table-responsive signal-table">
-      <Modal isOpen={isOpen} toggle={toggle} size="lg">
-        <ModalHeader toggle={toggle}>Detalle del Estudiante</ModalHeader>
-        <ModalBody>
-          <Row>
-            <Col xs={6}>
-              <div className="table-bottom-divider">
-                <td>
-                  <strong>CI:</strong> &nbsp; {data.cedula}
-                </td>
-              </div>
-              <div className="table-bottom-divider">
-                <td>
-                  <strong>Name:</strong> &nbsp; {data?.user?.name}
-                </td>
-              </div>
-              <div className="table-bottom-divider">
-                <td>
-                  <strong>Profession:</strong> &nbsp; {data.profession}
-                </td>
-              </div>
-              <div className="table-bottom-divider">
-                <td>
-                  <strong>Estado:</strong> &nbsp;{" "}
-                  <span
-                    className={`badge ${data.status ? "badge-success" : "badge-danger"}`}
-                  >
-                    {data?.status?.charAt(0).toUpperCase() +
-                      data?.status?.slice(1)}
-                  </span>
-                </td>
-              </div>
-              <div className="table-bottom-divider">
-                <td>
-                  <strong>Book delivered:</strong>&nbsp;{" "}
-                  <span
-                    className={`badge ${data.book_given ? "badge-success" : "badge-danger"}`}
-                  >
-                    {data.book_given ? "Yes" : "No"}
-                  </span>
-                </td>
-              </div>
-            </Col>
-            <Col xs={6}>
-              <div className="table-bottom-divider">
-                <td>
-                  <strong>Estado del Pago:</strong> &nbsp;{" "}
-                  <span
-                    className={`badge ${data.paymentStatus ? "badge-success" : "badge-danger"}`}
-                  >
-                    {data.paymentStatus ? "Pagado" : "No Pagado"}
-                  </span>
-                </td>
-              </div>
-              <div className="table-bottom-divider">
-                <td>
-                  <strong>Monto de Pago:</strong> &nbsp; {data.paymentAmount}
-                </td>
-              </div>
-              <div className="table-bottom-divider">
-                <td>
-                  <strong>Curso:</strong> &nbsp;{" "}
-                  {data?.course?.length > 0
-                    ? data.course[0]?.course_name
-                    : "Curso no disponible"}
-                </td>
-              </div>
-              <div className="table-bottom-divider">
-                <td>
-                  <strong>Nivel:</strong> &nbsp; {data.level}
-                </td>
-              </div>
-            </Col>
-            <Col xs={12}>
-              <strong>Emergency contact</strong> &nbsp;{" "}
-              <div className="table-bottom-divider d-flex gap-3">
-                <div>
-                  {" "}
+    <Modal isOpen={isOpen} toggle={toggle} size="lg">
+      <ModalHeader toggle={toggle}>{data?.user?.name}</ModalHeader>
+      <ModalBody>
+        <div className="project-box">
+          <span
+            className={`badge ${data.status ? "badge-success" : "badge-danger"}`}
+          >
+            {data?.status?.charAt(0).toUpperCase() + data?.status?.slice(1)}
+          </span>
+          <h6> {data.cedula} </h6>
+          <div className="media">
+            <Image
+              className="me-1 rounded-circle media"
+              width={30}
+              height={30}
+              src={`${ImgPath}/user/7.jpg`}
+              alt="user image"
+            />
+            <div className="media-body mt-1">
+              <p>{data?.user?.name}</p>
+            </div>
+          </div>
+
+          <div className="details row">
+            <div className="col-3">
+              <span>Profession </span>
+            </div>
+            <div className="font-success col-3">{data.profession}</div>
+            <div className="col-3">
+              <span>Status Payment </span>
+            </div>
+            <div
+              className={`${data.book_given ? "font-success" : "font-danger"} col-3`}
+            >
+              {data.paymentStatus ? "Pagado" : "No Pagado"}
+            </div>
+            <div className="col-3">
+              <span>Course</span>
+            </div>
+            <div className="font-success col-3">
+              {data?.course?.length > 0
+                ? data.course[0]?.course_name
+                : "Curso no disponible"}
+            </div>
+            <div className="col-3">
+              <span>Payment Amount </span>
+            </div>
+            <div className="col-3">
+              <span>$ {data.paymentAmount ?? 0}</span>
+            </div>
+            <div className="col-3">
+              <span>Level</span>
+            </div>
+            <div className="font-success col-3">{data.level}</div>
+            <div className="col-3">
+              <span>Book delivered</span>
+            </div>
+            <div
+              className={`${data.book_given ? "font-success" : "font-danger"} col-3`}
+            >
+              <span>{data.book_given ? "Yes" : "No"}</span>
+            </div>
+            <div className="col-12">
+              <strong className="my-2">Emergency contac</strong>
+              <div className="d-flex justify-content-between">
+                <div className="me-3">
                   <strong>Name:</strong> &nbsp; {data.emergency_contact_name}
                 </div>
-                <div>
-                  {" "}
+                <div className="me-3">
                   <strong>Phone:</strong> &nbsp; {data.emergency_contact_phone}
                 </div>
-                <div>
-                  {" "}
-                  <strong>Relationship:</strong> &nbsp;{" "}
+                <div className="me-3">
+                  <strong>Relationship:</strong>&nbsp;
                   {data.emergency_contact_relationship}
                 </div>
               </div>
-              <div className="border-bottom p-2">
-                <td>
-                  <strong>Observación:</strong> &nbsp; {data.observations}
-                </td>
+              <div>
+                <strong>Observación:</strong> &nbsp; {data.observations}
               </div>
-            </Col>
-            <Col xs={12}>
-              <strong>Payments</strong> &nbsp;{" "}
-              <Table responsive>
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Method</th>
-                    <th>Total</th>
-                  </tr>
-                </thead>
-                {Array.isArray(data.payments) &&
-                  data.payments.map((payment: any) => (
-                    <tbody>
-                      <tr>
-                        <td>{payment.payment_date}</td>
-                        <td>{payment.payment_method}</td>
-                        <td>{payment.total_payment}</td>
-                      </tr>
-                    </tbody>
-                  ))}
-              </Table>
-            </Col>
-          </Row>
-          <div className="d-flex justify-content-end py-4">
-            <Button color="danger" onClick={toggle}>
-              Cerrar
-            </Button>
+            </div>
           </div>
-        </ModalBody>
-      </Modal>
-    </div>
+          <Col xs={12}>
+            <strong>Payments</strong>
+            <Table>
+              <thead>
+                <tr>
+                  <th className="p-1">Date</th>
+                  <th className="p-1">Method</th>
+                  <th className="p-1">Total</th>
+                </tr>
+              </thead>
+              {Array.isArray(data.payments) &&
+                data.payments.map((payment: any) => (
+                  <tbody>
+                    <tr>
+                      <td className="p-1">{payment.payment_date}</td>
+                      <td className="p-1">{payment.payment_method}</td>
+                      <td className="p-1">{payment.total_payment}</td>
+                    </tr>
+                  </tbody>
+                ))}
+            </Table>
+          </Col>
+        </div>
+      </ModalBody>
+    </Modal>
   );
 };
 

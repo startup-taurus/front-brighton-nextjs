@@ -615,6 +615,24 @@ $btn-color in (primary, $primary-color),
   border-color: var(--theme-deafult) !important;
 }
 
+.btn-save {
+  background-color: $btn-save-color !important;
+  background-color: $btn-save-color !important;
+  color: $white;
+}
+
+.btn-update {
+  background-color: $btn-update-color !important;
+  background-color: $btn-update-color !important;
+  color: $white;
+}
+
+.btn-cancel {
+  background-color: $btn-cancel-color !important;
+  border-color:  $btn-cancel-color  !important;
+  color: $white;
+}
+
 .btn-secondary {
   background-color: var(--theme-secondary) !important;
   border-color: var(--theme-secondary) !important;

@@ -1,11 +1,19 @@
-import { getFetcher, postFetcher } from "helper/api";
+import { getFetcher, postFetcher, putFetcher } from "helper/api";
 
 export const postLogin = (data: any) => {
   return postFetcher("/user/login", data, "", false, true);
 };
 
 export const createUser = (data: any) => {
-  return postFetcher("/user/create", data);
+  return postFetcher("/user/register", data);
+};
+
+export const updateUser = (userId: number, data: any) => {
+  return putFetcher(`/user/update/${userId}`, data);
+};
+
+export const updateStatusUser = (userId: number, status: string) => {
+  return putFetcher(`/user/update-status/${userId}`, { status });
 };
 
 export const getAllUsers = (page: number, limit: number) => {

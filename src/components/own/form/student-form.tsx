@@ -13,7 +13,7 @@ import {
 } from "reactstrap";
 import useSWR from "swr";
 import { getActiveCourses } from "helper/api-data/course";
-import { createStudent } from "helper/api-data/student";
+import { createStudent, updateStudent } from "helper/api-data/student";
 
 const StudentForm = ({ data, isOpen, toggle }: any) => {
   const limit = 10;
@@ -25,14 +25,25 @@ const StudentForm = ({ data, isOpen, toggle }: any) => {
     () => getActiveCourses(page, limit, searchTerm)
   );
 
-  const updateStudent = (data: any) => {};
-
-  const saveStudent = async (data: any) => {
+  const save = async (data: any) => {
     try {
       const response = await createStudent(data);
-      console.log("Estudiante creado:", response);
+      if (response.statusCode === 200) {
+        toggle();
+      }
     } catch (error) {
       console.error("Error al crear estudiante:", error);
+    }
+  };
+
+  const update = async (data: any) => {
+    try {
+      const response = await updateStudent(data.id, data);
+      if (response.statusCode === 200) {
+        toggle();
+      }
+    } catch (error) {
+      console.error("Error al actualizar usuario:", error);
     }
   };
 
@@ -83,7 +94,7 @@ const StudentForm = ({ data, isOpen, toggle }: any) => {
                   observations: "",
                 }
           }
-          onSubmit={(info) => (data ? updateStudent(info) : saveStudent(info))}
+          onSubmit={(info) => (data ? update(info) : save(info))}
         >
           {(props) => {
             const {
@@ -133,6 +144,11 @@ const StudentForm = ({ data, isOpen, toggle }: any) => {
                     options={courseOptions}
                     onChange={(selectedOption: any) =>
                       setFieldValue("courseId", selectedOption.value)
+                    }
+                    value={
+                      courseOptions.find(
+                        (option: any) => option.value === props.values.courseId
+                      ) || null
                     }
                     placeholder="Seleccione o busque un curso"
                     isSearchable
@@ -232,7 +248,7 @@ const StudentForm = ({ data, isOpen, toggle }: any) => {
                   />
                 </Col>
                 <Col xs={12} className="d-flex justify-content-end mt-5">
-                  <Button color="danger" onClick={toggle}>
+                  <Button color="cancel" onClick={toggle}>
                     Close
                   </Button>
                   &nbsp; &nbsp;

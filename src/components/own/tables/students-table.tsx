@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import useSWR from "swr";
+import React, { useState, useEffect } from "react";
+import useSWR, { mutate }  from "swr";
 import { useRouter } from "next/router";
 import { getAllStudent } from "helper/api-data/student";
 import TableActionButtons from "@/components/own/table-action-buttons/table-action-buttons";
@@ -8,11 +8,15 @@ import StudentForm from "../form/student-form";
 import StudentDetail from "../student-detail/student-datail";
 import DataTable from "react-data-table-component";
 
-const StudentsTable = () => {
+const StudentsTable = ({ reload }: any) => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenDetail, setIsOpenDetail] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
+
+  useEffect(() => {
+    mutate([`/student/get-all`, page, rowPerPage]);
+  }, [reload]);
 
   const toggle = (data: any) => {
     setSelectedData(data);
@@ -24,24 +28,32 @@ const StudentsTable = () => {
     setIsOpenDetail(!isOpenDetail);
   };
 
-  const buttonStyle = Swal.mixin({
-    customClass: {
-      cancelButton: "btn-danger",
-      confirmButton: "btn btn-success",
-    },
-    buttonsStyling: true,
-  });
-
-  const handleAlert = () => {
-    buttonStyle.fire({
-      title: "Está seguro?",
-      text: "Esta acción no se puede revertir!",
+  const handleAlert = (row: any) => {
+    let status = row?.status === "active" ? "deactivate" : "active";
+    Swal.fire({
+      title: "Are you sure to " + status + "?",
+      text: "You are about to " + status + " this user",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Si, desactivar!",
-      cancelButtonText: "No, cancelar!",
+      confirmButtonText: "Yes, " + status + "!",
+      cancelButtonText: "Cancel",
       reverseButtons: true,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        updateStatus(row).then(() => {
+          mutate([`/student/get-all`, page, rowPerPage]);
+        });
+      }
     });
+  };
+
+  const updateStatus = async (data: any) => {
+    try {
+      let status = data?.status === "active" ? "inactive" : "active";
+      //const response = await updateStatusProfessor(data.id, status);
+    } catch (error) {
+      console.error("Error al actualizar usuario:", error);
+    }
   };
 
   const page = router.query.page ? Number(router.query.page) : 1;
@@ -65,7 +77,7 @@ const StudentsTable = () => {
       cell: (row: any) => (
         <TableActionButtons
           onView={() => toggleDetail(row)}
-          onBlock={() => handleAlert()}
+          onBlock={() => handleAlert(row)}
           onEdit={() => toggle(row)}
         />
       ),

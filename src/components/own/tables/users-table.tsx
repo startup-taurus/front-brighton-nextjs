@@ -1,40 +1,52 @@
-import React, { useState } from "react";
-import useSWR from "swr";
+import React, { useState, useEffect } from "react";
+import useSWR, { mutate } from "swr";
 import { useRouter } from "next/router";
-import { getAllUsers } from "helper/api-data/user";
+import { getAllUsers, updateStatusUser } from "helper/api-data/user";
 import TableActionButtons from "@/components/own/table-action-buttons/table-action-buttons";
 import Swal from "sweetalert2";
 import DataTable from "react-data-table-component";
 import UserForm from "../form/user-form";
 
-const UsersTable = () => {
+const UsersTable = ({ reload }: any) => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
+
+  useEffect(() => {
+    mutate([`/user/get-all`, page, rowPerPage]);
+  }, [reload]);
 
   const toggle = (data: any) => {
     setSelectedData(data);
     setIsOpen(!isOpen);
   };
 
-  const buttonStyle = Swal.mixin({
-    customClass: {
-      cancelButton: "btn-danger",
-      confirmButton: "btn btn-success",
-    },
-    buttonsStyling: true,
-  });
-
-  const handleAlert = () => {
-    buttonStyle.fire({
-      title: "Está seguro?",
-      text: "Esta acción no se puede revertir!",
+  const handleAlert = (row: any) => {
+    let status = row?.status === "active" ? "deactivate" : "active";
+    Swal.fire({
+      title: "Are you sure to " + status + "?",
+      text: "You are about to " + status + " this user",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Si, desactivar!",
-      cancelButtonText: "No, cancelar!",
+      confirmButtonText: "Yes, " + status + "!",
+      cancelButtonText: "Cancel",
       reverseButtons: true,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        updateStatus(row).then(() => {
+          mutate([`/user/get-all`, page, rowPerPage]);
+        });
+      }
     });
+  };
+
+  const updateStatus = async (data: any) => {
+    try {
+      let status = data?.status === "active" ? "inactive" : "active";
+      const response = await updateStatusUser(data.id, status);
+    } catch (error) {
+      console.error("Error al actualizar usuario:", error);
+    }
   };
 
   const page = router.query.page ? Number(router.query.page) : 1;
@@ -54,18 +66,19 @@ const UsersTable = () => {
 
   const columns = [
     {
-      name: "Acción",
+      name: "Actions",
       cell: (row: any) => (
         <TableActionButtons
           onEdit={() => toggle(row)}
-          onBlock={() => handleAlert()}
+          onBlock={() => handleAlert(row)}
+          stauts={row.status === "active" ? false : true}
         />
       ),
       sortable: false,
       center: false,
     },
     {
-      name: "Nombre",
+      name: "Names",
       selector: (row: any) => `${row.name}`,
       sortable: true,
       center: false,
@@ -84,12 +97,27 @@ const UsersTable = () => {
     },
     {
       name: "Rol",
-      selector: (row: any) => `${row.role}`,
+      cell: (row: any) => (
+        <span
+          className={`badge ${
+            row.role === "professor"
+              ? "badge-primary"
+              : row.role === "student"
+                ? "badge-info"
+                : row.role === "admin_staff"
+                  ? "badge-warning"
+                  : "badge-secondary"
+          }`}
+        >
+          {row.role.charAt(0).toUpperCase() +
+            row.role.slice(1).replace("_", " ")}
+        </span>
+      ),
       sortable: true,
       center: false,
     },
     {
-      name: "Estado",
+      name: "Status",
       cell: (row: any) => (
         <span
           className={`badge ${row.status === "active" ? "badge-success" : "badge-danger"}`}
@@ -101,20 +129,20 @@ const UsersTable = () => {
       center: false,
     },
     {
-      name: "Intentos Fallidos",
+      name: "Failed Attempts",
       selector: (row: any) =>
         row.failed_attempts != null ? row.failed_attempts : 0,
       sortable: true,
       center: false,
     },
     {
-      name: "Creado en",
+      name: "Created At",
       selector: (row: any) => new Date(row.created_at).toLocaleString(),
       sortable: true,
       center: false,
     },
     {
-      name: "Último inicio de sesión",
+      name: "Last Login",
       selector: (row: any) => new Date(row.last_login).toLocaleString(),
       sortable: true,
       center: false,

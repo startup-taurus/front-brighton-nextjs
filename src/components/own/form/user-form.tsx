@@ -10,15 +10,28 @@ import {
   ModalBody,
   ModalHeader,
 } from "reactstrap";
-import { createUser } from "helper/api-data/user"; // Función para crear usuario
+import { createUser, updateUser } from "helper/api-data/user"; // Función para crear usuario
 
 const UserForm = ({ data, isOpen, toggle }: any) => {
-  const saveUser = async (data: any) => {
+  const save = async (data: any) => {
     try {
-      const response = await createUser(data); // Enviar datos para crear usuario
-      console.log("Usuario creado:", response);
+      const response = await createUser(data);
+      if (response.statusCode === 200) {
+        toggle();
+      }
     } catch (error) {
       console.error("Error al crear usuario:", error);
+    }
+  };
+
+  const update = async (data: any) => {
+    try {
+      const response = await updateUser(data.id, data);
+      if (response.statusCode === 200) {
+        toggle();
+      }
+    } catch (error) {
+      console.error("Error al actualizar usuario:", error);
     }
   };
 
@@ -49,7 +62,7 @@ const UserForm = ({ data, isOpen, toggle }: any) => {
                   status: "",
                 }
           }
-          onSubmit={(info) => saveUser(info)} // Llamada al método para guardar el usuario
+          onSubmit={(info) => (data ? update(info) : save(info))}
         >
           {(props) => {
             const { errors, handleSubmit, isSubmitting } = props;
@@ -105,7 +118,7 @@ const UserForm = ({ data, isOpen, toggle }: any) => {
                   <ErrorMessage name="status" component={FormFeedback} />
                 </Col>
                 <Col xs={12} className="d-flex justify-content-end mt-5">
-                  <Button color="danger" onClick={toggle}>
+                  <Button color="cancel" onClick={toggle}>
                     Close
                   </Button>
                   &nbsp; &nbsp;

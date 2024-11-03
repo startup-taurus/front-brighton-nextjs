@@ -1,5 +1,7 @@
 import axios from "axios";
 import { handleError } from "../utils/utils";
+import { toast } from "react-toastify";
+import { SUCCESS_MESSAGE } from "utils/constants";
 
 export const postFetcher = (
   url: string,
@@ -12,7 +14,10 @@ export const postFetcher = (
     .post(`${process.env.API_URL}${url}`, data, {
       headers: { authorization: `Bearer ${token}` },
     })
-    .then((res) => res?.data)
+    .then((res) => {
+      toast.info(res?.data?.message ?? SUCCESS_MESSAGE);
+      return res.data;
+    })
     .catch((e) => {
       return handleError(e, hideError, stopRedirect);
     });
@@ -24,6 +29,20 @@ export const patchFetcher = (url: string, data: any, token?: string) => {
       headers: { authorization: `Bearer ${token}` },
     })
     .then((res) => res.data)
+    .catch((e) => {
+      return handleError(e);
+    });
+};
+
+export const putFetcher = (url: string, data: any, token?: string) => {
+  return axios
+    .put(`${process.env.API_URL}${url}`, data, {
+      headers: { authorization: `Bearer ${token}` },
+    })
+    .then((res) => {
+      toast.info(res?.data?.message ?? SUCCESS_MESSAGE);
+      return res.data;
+    })
     .catch((e) => {
       return handleError(e);
     });

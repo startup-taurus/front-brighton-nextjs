@@ -1,52 +1,58 @@
-import React, { useState } from "react";
-import useSWR from "swr";
+import React, { useState, useEffect } from "react";
+import useSWR, { mutate }  from "swr";
 import { useRouter } from "next/router";
-import { getAllProfessors } from "helper/api-data/professor";
+import { getAllProfessors, updateStatusProfessor } from "helper/api-data/professor";
 import TableActionButtons from "@/components/own/table-action-buttons/table-action-buttons";
 import Swal from "sweetalert2";
 import DataTable from "react-data-table-component";
 import TeacherForm from "../form/teacher-form";
 
-const ProfessorsTable = () => {
+const ProfessorsTable = ({ reload }: any) => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  const [isOpenDetail, setIsOpenDetail] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
+
+  useEffect(() => {
+    mutate([`/professor/get-all`, page, rowPerPage]);
+  }, [reload]);
 
   const toggle = (data: any) => {
     setSelectedData(data);
     setIsOpen(!isOpen);
   };
 
-  const toggleDetail = (data: any) => {
-    setSelectedData(data);
-    setIsOpenDetail(!isOpenDetail);
-  };
-
-  const buttonStyle = Swal.mixin({
-    customClass: {
-      cancelButton: "btn-danger",
-      confirmButton: "btn btn-success",
-    },
-    buttonsStyling: true,
-  });
-
-  const handleAlert = () => {
-    buttonStyle.fire({
-      title: "Está seguro?",
-      text: "Esta acción no se puede revertir!",
+  const handleAlert = (row: any) => {
+    let status = row?.status === "active" ? "deactivate" : "active";
+    Swal.fire({
+      title: "Are you sure to " + status + "?",
+      text: "You are about to " + status + " this user",
       icon: "warning",
       showCancelButton: true,
-      confirmButtonText: "Si, desactivar!",
-      cancelButtonText: "No, cancelar!",
+      confirmButtonText: "Yes, " + status + "!",
+      cancelButtonText: "Cancel",
       reverseButtons: true,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        updateStatus(row).then(() => {
+          mutate([`/professor/get-all`, page, rowPerPage]);
+        });
+      }
     });
+  };
+
+  const updateStatus = async (data: any) => {
+    try {
+      let status = data?.status === "active" ? "inactive" : "active";
+      const response = await updateStatusProfessor(data.id, status);
+    } catch (error) {
+      console.error("Error al actualizar usuario:", error);
+    }
   };
 
   const page = router.query.page ? Number(router.query.page) : 1;
   const rowPerPage = router.query.rowPerPage
     ? Number(router.query.rowPerPage)
-    : 5;
+    : 10;
 
   const {
     data: professors,
@@ -55,31 +61,30 @@ const ProfessorsTable = () => {
   } = useSWR([`/professor/get-all`, page, rowPerPage], () =>
     getAllProfessors(page, rowPerPage)
   );
-  console.log(professors?.data?.result);
 
   if (!professors?.data?.result) return null;
 
   const columns = [
     {
-      name: "Acción",
+      name: "Actions",
       cell: (row: any) => (
         <TableActionButtons
-          onView={() => toggleDetail(row)}
-          onBlock={() => handleAlert()}
+          onBlock={() => handleAlert(row)}
           onEdit={() => toggle(row)}
+          stauts={row.status === "active" ? false : true}
         />
       ),
       sortable: false,
       center: false,
     },
     {
-      name: "Cédula",
+      name: "ID",
       selector: (row: any) => `${row.cedula}`,
       sortable: true,
       center: false,
     },
     {
-      name: "Nombre",
+      name: "Names",
       selector: (row: any) => `${row.user.name}`,
       sortable: true,
       center: false,
@@ -91,19 +96,19 @@ const ProfessorsTable = () => {
       center: false,
     },
     {
-      name: "Teléfono",
+      name: "Phone",
       selector: (row: any) => `${row.phone}`,
       sortable: true,
       center: false,
     },
     {
-      name: "Tarifa por hora",
+      name: "Hourly Rate",
       selector: (row: any) => `${row.hourly_rate}`,
       sortable: true,
       center: false,
     },
     {
-      name: "Estado",
+      name: "Status",
       cell: (row: any) => (
         <span
           className={`badge ${row.status === "active" ? "badge-success" : "badge-danger"}`}
@@ -115,7 +120,7 @@ const ProfessorsTable = () => {
       center: false,
     },
     {
-      name: "Último inicio de sesión",
+      name: "Last login",
       selector: (row: any) => new Date(row.user.last_login).toLocaleString(),
       sortable: true,
       center: false,
