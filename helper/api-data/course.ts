@@ -22,8 +22,16 @@ export const getAllCourses = (page: number, limit: number) => {
   return getFetcher(`/course/get-all?page=${page}&limit=${limit}`, false);
 };
 
+export const getCourseWithProfessors =  (page: number, limit: number) => {
+  return getFetcher(`/course/get-all-with-professors?page=${page}&limit=${limit}`, false);
+}
+
 export const createCourse = (data: any) => {
   return postFetcher(`/course/create`, data);
+};
+
+export const updateCourse = (curseId: number, data: any) => {
+  return putFetcher(`/course/update/${curseId}`, data);
 };
 
 export const updateStatusCourse = (courseId: number, status: string) => {

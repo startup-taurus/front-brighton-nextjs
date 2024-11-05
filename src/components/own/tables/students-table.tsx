@@ -89,19 +89,19 @@ const StudentsTable = ({ reload }: any) => {
       center: false,
     },
     {
-      name: "CI",
+      name: "ID",
       selector: (row: any) => `${row.cedula}`,
       sortable: true,
       center: false,
     },
     {
-      name: "Estudiante",
+      name: "Student name",
       selector: (row: any) => `${row.user.name}`,
       sortable: true,
       center: false,
     },
     {
-      name: "Estado",
+      name: "Status",
       cell: (row: any) => (
         <span
           className={`badge ${row.status === "active" ? "badge-success" : "badge-danger"}`}
@@ -113,7 +113,26 @@ const StudentsTable = ({ reload }: any) => {
       center: false,
     },
     {
-      name: "Estado de pago",
+      name: "Course",
+      selector: (row: any) =>
+        row.course[0]?.course_name ? row.course[0].course_name : "",
+      sortable: true,
+      center: false,
+    },
+    {
+      name: "Level",
+      selector: (row: any) => `${row.level}`,
+      sortable: true,
+      center: false,
+    },
+    {
+      name: "Promotion",
+      selector: (row: any) => `${row.promotion ?? ""}`,
+      sortable: true,
+      center: false,
+    },
+    {
+      name: "Status payment",
       cell: (row: any) => (
         <span
           className={`badge ${row.pending_payments ? "badge-success" : "badge-danger"}`}
@@ -121,19 +140,6 @@ const StudentsTable = ({ reload }: any) => {
           {row.pending_payments ? "Pagado" : "No Pagado"}
         </span>
       ),
-      sortable: true,
-      center: false,
-    },
-    {
-      name: "Curso",
-      selector: (row: any) =>
-        row.course[0]?.course_name ? row.course[0].course_name : "",
-      sortable: true,
-      center: false,
-    },
-    {
-      name: "Nivel",
-      selector: (row: any) => `${row.level}`,
       sortable: true,
       center: false,
     },

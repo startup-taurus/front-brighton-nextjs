@@ -91,6 +91,7 @@ const StudentForm = ({ data, isOpen, toggle }: any) => {
                   emergency_contact_name: "",
                   emergency_contact_phone: "",
                   emergency_contact_relationship: "",
+                  promotion: "",
                   observations: "",
                 }
           }
@@ -150,7 +151,7 @@ const StudentForm = ({ data, isOpen, toggle }: any) => {
                         (option: any) => option.value === props.values.courseId
                       ) || null
                     }
-                    placeholder="Seleccione o busque un curso"
+                    placeholder="Select course"
                     isSearchable
                     onInputChange={(inputValue) => {
                       setSearchTerm(inputValue);
@@ -239,6 +240,11 @@ const StudentForm = ({ data, isOpen, toggle }: any) => {
                   />
                 </Col>
                 <Col xs={6}>
+                  <Label for="promotion">Promotion</Label>
+                  <Field name="promotion" as={Input} />
+                  <ErrorMessage name="promotion" component={FormFeedback} />
+                </Col>
+                <Col xs={12}>
                   <Label for="observations">Observations</Label>
                   <Field name="observations" type="textarea" as={Input} />
                   <ErrorMessage
