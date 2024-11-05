@@ -1,4 +1,4 @@
-'use client'
+"use client";
 import React, { useContext } from "react";
 import SidebarLogo from "./SidebarLogo";
 import SidebarMenu from "./SidebarMenu";
@@ -8,10 +8,15 @@ import layoutContext from "helper/Layout";
 import Link from "next/link";
 import Image from "next/image";
 import { ImgPath } from "utils/Constant";
+import { UserContext } from "../../../helper/User";
+import { AdminMenuList, TeacherMenuList } from "@/layout/Sidebar/menu";
 
 const Sidebar = () => {
   const { sidebarIconType } = useContext(CustomizerContext);
   const { sideBarToggle } = useContext(layoutContext);
+  const { user } = useContext(UserContext);
+
+  const mainLink = user?.role === "admin_staff" ? "/dashboard" : "/teachers";
 
   const IconType = sidebarIconType || ConfigDB.data.settings.sidebar.iconType;
   return (
@@ -22,7 +27,7 @@ const Sidebar = () => {
       <div>
         <SidebarLogo />
         <div className="logo-icon-wrapper">
-          <Link href={"/dashboard/default"}>
+          <Link href={mainLink}>
             <Image
               width={35}
               height={35}

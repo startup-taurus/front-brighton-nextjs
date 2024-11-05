@@ -3,12 +3,17 @@ import Link from "next/link";
 import FeatherIconCom from "../../../../CommonElements/Icons/FeatherIconCom";
 import layoutContext from "helper/Layout";
 import { useContext } from "react";
+import { UserContext } from "../../../../helper/User";
 
 const SidebarLogo = () => {
   const { setSideBarToggle, sideBarToggle } = useContext(layoutContext);
+  const { user } = useContext(UserContext);
+
+  const mainLink = user?.role === "admin_staff" ? "/dashboard" : "/teachers";
+
   return (
     <div className="logo-wrapper">
-      <Link href={"/teachers"}>
+      <Link href={mainLink}>
         <Image
           className="for-light"
           src={"/assets/images/logo/large-logo.png"}

@@ -31,9 +31,18 @@ export const AdminMenuList: sidebarMenuType[] = [
     menucontent: "Módulo de inicio",
     Items: [
       {
-        title: "Holidays",
+        title: "Dashboard",
         id: 1,
         pathSlice: "dashboard",
+        type: "link",
+        icon: "home",
+        badge: "badge badge-light-primary",
+        path: "dashboard",
+      },
+      {
+        title: "Holidays",
+        id: 2,
+        pathSlice: "holidays",
         type: "link",
         icon: "calendar",
         badge: "badge badge-light-primary",
@@ -41,8 +50,8 @@ export const AdminMenuList: sidebarMenuType[] = [
       },
       {
         title: "Courses",
-        id: 1,
-        pathSlice: "dashboard",
+        id: 3,
+        pathSlice: "courses",
         type: "link",
         icon: "others",
         badge: "badge badge-light-primary",
@@ -50,8 +59,8 @@ export const AdminMenuList: sidebarMenuType[] = [
       },
       {
         title: "Student",
-        id: 1,
-        pathSlice: "dashboard",
+        id: 4,
+        pathSlice: "students",
         type: "link",
         icon: "blog",
         badge: "badge badge-light-primary",
@@ -59,8 +68,8 @@ export const AdminMenuList: sidebarMenuType[] = [
       },
       {
         title: "Teachers",
-        id: 1,
-        pathSlice: "dashboard",
+        id: 5,
+        pathSlice: "teachers",
         type: "link",
         icon: "learning",
         badge: "badge badge-light-primary",
@@ -68,8 +77,8 @@ export const AdminMenuList: sidebarMenuType[] = [
       },
       {
         title: "Users",
-        id: 1,
-        pathSlice: "dashboard",
+        id: 6,
+        pathSlice: "users",
         type: "link",
         icon: "user",
         badge: "badge badge-light-primary",

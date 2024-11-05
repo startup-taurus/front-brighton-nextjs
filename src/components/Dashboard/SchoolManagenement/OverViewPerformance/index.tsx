@@ -4,7 +4,7 @@ import OverViewPerformanceCardBody from "./OverViewPerformanceCardBody";
 
 const OverViewPerformance = () => {
   return (
-    <Col xl={8} xs={12} className="order-1 order-xl-0 box-col-7">
+    <Col xl={12} xs={12} className="order-1 order-xl-0 box-col-7">
       <Card className="height-equal" style={{ minHeight: "444.469px" }}>
         <OverViewPerformanceCardHeader />
         <OverViewPerformanceCardBody />

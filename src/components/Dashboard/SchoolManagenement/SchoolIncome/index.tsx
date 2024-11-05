@@ -6,10 +6,10 @@ import { CommonHeader } from "../AcademicPerformance/CommonHeader";
 
 const SchoolIncome = () => {
   return (
-    <Col xl={4} sm={6} className="box-col-5">
+    <Col xl={6} sm={6} className="box-col-5">
       <Card className="height-equal" style={{ minHeight: "444.469px" }}>
-        <CommonHeader title={`Income`}/>
-        <SchoolIncomeCardBody/>
+        <CommonHeader title={`Income`} />
+        <SchoolIncomeCardBody />
       </Card>
     </Col>
   );

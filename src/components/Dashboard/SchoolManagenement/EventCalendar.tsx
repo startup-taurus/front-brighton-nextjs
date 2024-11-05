@@ -9,9 +9,12 @@ const EventCalendar = () => {
   const [startDate, setStartDate] = useState(new Date());
 
   return (
-    <Col xl={4} sm={6} className="order-0">
-      <Card className="height-equal school-manage" style={{ minHeight: "445.484px" }}>
-      <CommonHeader title={EventCalendarHeading} />
+    <Col xl={6} sm={6} className="order-0">
+      <Card
+        className="height-equal school-manage"
+        style={{ minHeight: "445.484px" }}
+      >
+        <CommonHeader title={EventCalendarHeading} />
         <CardBody className="pt-0">
           <div className="default-datepicker">
             <div className="datepicker-here" data-language="en">
