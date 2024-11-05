@@ -6,9 +6,9 @@ import { CommonHeader } from "../AcademicPerformance/CommonHeader";
 
 const TodayTask = () => {
   return (
-    <Col xl={8} className="order-2">
+    <Col xl={12} className="order-2">
       <Card className="height-equal" style={{ minHeight: "444.469px" }}>
-      <CommonHeader title={TodaysTaskHeading} />
+        <CommonHeader title={TodaysTaskHeading} />
         <TodayTaskCardBody />
       </Card>
     </Col>
