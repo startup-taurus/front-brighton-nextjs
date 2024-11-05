@@ -1,21 +1,20 @@
 import React, { useState, useEffect } from "react";
 import useSWR, { mutate } from "swr";
 import { useRouter } from "next/router";
-import { getAllStudent, updateStatusStudent } from "helper/api-data/student";
+import { getAllHolidays, updateHolidayStatus } from "helper/api-data/holidays";
 import TableActionButtons from "@/components/own/table-action-buttons/table-action-buttons";
 import Swal from "sweetalert2";
-import StudentForm from "../form/student-form";
-import StudentDetail from "../student-detail/student-datail";
 import DataTable from "react-data-table-component";
+import HolidaysForm from "../form/holidays-form";
 
-const StudentsTable = ({ reload }: any) => {
+const HolidaysTable = ({ reload }: any) => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenDetail, setIsOpenDetail] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
 
   useEffect(() => {
-    mutate([`/student/get-all`, page, rowPerPage]);
+    mutate([`/holidays/get-all`, page, rowPerPage]);
   }, [reload]);
 
   const toggle = (data: any) => {
@@ -23,16 +22,11 @@ const StudentsTable = ({ reload }: any) => {
     setIsOpen(!isOpen);
   };
 
-  const toggleDetail = (data: any) => {
-    setSelectedData(data);
-    setIsOpenDetail(!isOpenDetail);
-  };
-
   const handleAlert = (row: any) => {
-    let status = row?.status === "active" ? "deactivate" : "active";
+    let status = row?.status === "active" ? "deactivate" : "activate";
     Swal.fire({
-      title: "Are you sure to " + status + "?",
-      text: "You are about to " + status + " this user",
+      title: "Are you sure to " + status + " this holiday?",
+      text: "You are about to " + status + " this holiday",
       icon: "warning",
       showCancelButton: true,
       confirmButtonText: "Yes, " + status + "!",
@@ -41,7 +35,7 @@ const StudentsTable = ({ reload }: any) => {
     }).then((result) => {
       if (result.isConfirmed) {
         updateStatus(row).then(() => {
-          mutate([`/student/get-all`, page, rowPerPage]);
+          mutate([`/holidays/get-all`, page, rowPerPage]);
         });
       }
     });
@@ -50,12 +44,12 @@ const StudentsTable = ({ reload }: any) => {
   const updateStatus = async (data: any) => {
     try {
       let status = data?.status === "active" ? "inactive" : "active";
-      const response = await updateStatusStudent(data.id, status);
+      const response = await updateHolidayStatus(data.id, status);
       if (response.statusCode === 200) {
-        mutate([`/student/get-all`, page, rowPerPage]);
+        mutate([`/holidays/get-all`, page, rowPerPage]);
       }
     } catch (error) {
-      console.error("Error al actualizar usuario:", error);
+      console.error("Error updating holiday status:", error);
     }
   };
 
@@ -65,21 +59,20 @@ const StudentsTable = ({ reload }: any) => {
     : 10;
 
   const {
-    data: users,
+    data: holidays,
     error,
     isLoading,
-  } = useSWR([`/student/get-all`, page, rowPerPage], () =>
-    getAllStudent(page, rowPerPage)
+  } = useSWR([`/holidays/get-all`, page, rowPerPage], () =>
+    getAllHolidays(page, rowPerPage)
   );
 
-  if (!users?.data?.result) return null;
+  if (!holidays?.data?.result) return null;
 
   const columns = [
     {
-      name: "Acción",
+      name: "Actions",
       cell: (row: any) => (
         <TableActionButtons
-          onView={() => toggleDetail(row)}
           onBlock={() => handleAlert(row)}
           onEdit={() => toggle(row)}
           stauts={row.status === "active" ? false : true}
@@ -89,14 +82,27 @@ const StudentsTable = ({ reload }: any) => {
       center: false,
     },
     {
-      name: "ID",
-      selector: (row: any) => `${row.cedula}`,
+      name: "Holiday Name",
+      selector: (row: any) => `${row.holiday_name}`,
       sortable: true,
       center: false,
     },
     {
-      name: "Student name",
-      selector: (row: any) => `${row.user.name}`,
+      name: "Holiday Date",
+      selector: (row: any) => `${row.holiday_date}`,
+      sortable: true,
+      center: false,
+    },
+    {
+      name: "Description",
+      selector: (row: any) => `${row.description || ""}`,
+      sortable: false,
+      center: false,
+    },
+    {
+      name: "Type",
+      selector: (row: any) =>
+        `${row.holiday_type.charAt(0).toUpperCase() + row.holiday_type.slice(1)}`,
       sortable: true,
       center: false,
     },
@@ -112,47 +118,16 @@ const StudentsTable = ({ reload }: any) => {
       sortable: true,
       center: false,
     },
-    {
-      name: "Course",
-      selector: (row: any) =>
-        row.course[0]?.course_name ? row.course[0].course_name : "",
-      sortable: true,
-      center: false,
-    },
-    {
-      name: "Level",
-      selector: (row: any) => `${row.level}`,
-      sortable: true,
-      center: false,
-    },
-    {
-      name: "Promotion",
-      selector: (row: any) => `${row.promotion ?? ""}`,
-      sortable: true,
-      center: false,
-    },
-    {
-      name: "Status payment",
-      cell: (row: any) => (
-        <span
-          className={`badge ${row.pending_payments ? "badge-success" : "badge-danger"}`}
-        >
-          {row.pending_payments ? "Pagado" : "No Pagado"}
-        </span>
-      ),
-      sortable: true,
-      center: false,
-    },
   ];
 
   return (
-    <div className="table-responsive signal-table">
+    <div className="table-responsive">
       <DataTable
         columns={columns}
-        data={users.data.result}
+        data={holidays.data.result}
         pagination
         paginationServer
-        paginationTotalRows={users.data.totalCount}
+        paginationTotalRows={holidays.data.totalCount}
         onChangePage={(page) => {
           router.push({
             pathname: router.pathname,
@@ -168,14 +143,9 @@ const StudentsTable = ({ reload }: any) => {
         highlightOnHover
         selectableRows={false}
       />
-      <StudentForm isOpen={isOpen} toggle={toggle} data={selectedData} />
-      <StudentDetail
-        isOpen={isOpenDetail}
-        toggle={toggleDetail}
-        data={selectedData}
-      />
+      <HolidaysForm isOpen={isOpen} toggle={toggle} data={selectedData} />
     </div>
   );
 };
 
-export default StudentsTable;
+export default HolidaysTable;

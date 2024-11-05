@@ -10,3 +10,7 @@ export const createStudent = (data: any) => {
 export const updateStudent = (studentId: number, data: any) => {
   return putFetcher(`/student/update/${studentId}`, data);
 }
+
+export const updateStatusStudent = (studentId: number, status: string) => {
+  return putFetcher(`/student/update-status/${studentId}`, { status });
+};

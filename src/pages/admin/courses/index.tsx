@@ -18,6 +18,7 @@ import CourseForm from "@/components/own/form/course-form";
 const Students = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenModal, setIsOpenModal] = useState(false);
+  const [reload, setReload] = useState(false);
 
   const toggle = () => {
     setIsOpenModal(!isOpenModal);
@@ -25,6 +26,10 @@ const Students = () => {
 
   const handleCollapse = () => {
     setIsOpen(!isOpen);
+  };
+
+  const handleReload = () => {
+    setReload(!reload);
   };
 
   return (
@@ -92,7 +97,7 @@ const Students = () => {
           <Card>
             <CardHeader className="d-flex justify-content-end">
               <TableHeaderActions
-                onReload={() => {}}
+                onReload={handleReload}
                 addButton={{
                   title: "Create Course",
                   onClick: () => toggle(),
@@ -100,7 +105,7 @@ const Students = () => {
               />
             </CardHeader>
             <div className="pb-4">
-              <CoursesTable />
+              <CoursesTable reload={reload} />
             </div>
           </Card>
         </Row>

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { ErrorMessage, Field, Formik } from "formik";
+import { ErrorMessage, Field, FieldArray, Formik } from "formik";
 import {
   Button,
   Col,
@@ -12,21 +12,49 @@ import {
 } from "reactstrap";
 import useSWR from "swr";
 import Select from "react-select";
-import { createCourse } from "helper/api-data/course"; // Función para crear curso
+import { createCourse, updateCourse } from "helper/api-data/course"; // Función para crear curso
 import { getActiveProfessors } from "helper/api-data/professor";
-
+import { FaCirclePlus, FaTrash } from "react-icons/fa6";
+const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const CourseForm = ({ data, isOpen, toggle }: any) => {
   const limit = 10;
   const page = 1;
   const [searchTerm, setSearchTerm] = useState("");
 
-  const saveCourse = async (data: any) => {
+  const save = async (data: any) => {
     try {
-      const response = await createCourse(data); // Enviar datos para crear curso
-      console.log("Curso creado:", response);
+      const formattedSchedule = formatSchedule(data.schedules);
+      const payload = { ...data, schedule: formattedSchedule };
+      const response = await createCourse(payload);
+      if (response.statusCode === 200) {
+        toggle();
+      }
     } catch (error) {
       console.error("Error al crear curso:", error);
     }
+  };
+
+  const update = async (data: any) => {
+    try {
+      const formattedSchedule = formatSchedule(data.schedules);
+      const payload = { ...data, schedule: formattedSchedule };
+      const response = await updateCourse(data.id, payload);
+      if (response.statusCode === 200) {
+        toggle();
+      }
+    } catch (error) {
+      console.error("Error al actualizar usuario:", error);
+    }
+  };
+
+  const formatSchedule = (schedules: any) => {
+    return schedules
+      .map((schedule: any) => {
+        const days = schedule.days.join("-");
+        const timeRange = `${schedule.startTime}-${schedule.endTime}`;
+        return `${days} ${timeRange}`;
+      })
+      .join(", ");
   };
 
   const { data: course } = useSWR(
@@ -61,6 +89,15 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                   course_type: data.course_type,
                   hourly_rate: data.hourly_rate,
                   professor_id: data.professor_id,
+                  schedules: data.schedule
+                    ? [
+                        {
+                          days: data.schedule.split(" ")[0].split("-"),
+                          startTime: data.schedule.split(" ")[1].split("-")[0],
+                          endTime: data.schedule.split(" ")[1].split("-")[1],
+                        },
+                      ]
+                    : [{ days: [], startTime: "", endTime: "" }],
                 }
               : {
                   course_name: "",
@@ -68,13 +105,14 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                   start_date: "",
                   end_date: "",
                   comment: "",
-                  status: "",
+                  status: "active",
                   course_type: "",
                   hourly_rate: "",
                   professor_id: "",
+                  schedules: [{ days: [], startTime: "", endTime: "" }],
                 }
           }
-          onSubmit={(info) => saveCourse(info)} // Llamada al método para guardar el curso
+          onSubmit={(info) => (data ? update(info) : save(info))}
         >
           {(props) => {
             const { errors, handleSubmit, isSubmitting, setFieldValue } = props;
@@ -128,7 +166,7 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                       Select course type
                     </option>
                     <option value="online">Online</option>
-                    <option value="offline">On-Site</option>
+                    <option value="on-site">On-Site</option>
                   </Field>
                   <ErrorMessage name="course_type" component={FormFeedback} />
                 </Col>
@@ -140,7 +178,13 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                     onChange={(selectedOption: any) =>
                       setFieldValue("professor_id", selectedOption.value)
                     }
-                    placeholder="Seleccione o busque un curso"
+                    placeholder="Select a professor"
+                    value={
+                      professorOptions.find(
+                        (option: any) =>
+                          option.value === props.values.professor_id
+                      ) || null
+                    }
                     isSearchable
                     onInputChange={(inputValue) => {
                       setSearchTerm(inputValue);
@@ -153,10 +197,91 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                   <Field name="hourly_rate" as={Input} type="number" />
                   <ErrorMessage name="hourly_rate" component={FormFeedback} />
                 </Col>
-                <Col xs={6}>
+                <Col xs={12}>
                   <Label for="schedule">Schedule</Label>
-                  <Field name="schedule" as={Input} type="datetime-local" />
-                  <ErrorMessage name="schedule" component={FormFeedback} />
+                  <FieldArray name="schedules">
+                    {({ push, remove, form }) => (
+                      <div>
+                        {form.values.schedules.map(
+                          (schedule: any, index: number) => (
+                            <div
+                              key={index}
+                              className="row align-items-center border-bottom pb-3"
+                            >
+                              <Col xs={10}>
+                                <div className="m-checkbox-inline custom-radio-ml ">
+                                  {daysOfWeek.map((day) => (
+                                    <div className="checkbox px-1">
+                                      <Field
+                                        type="checkbox"
+                                        id={index + day}
+                                        className="form-check-input"
+                                        name={`schedules[${index}].days`}
+                                        value={day}
+                                      />
+                                      <label
+                                        htmlFor={index + day}
+                                        className="form-label"
+                                        key={day}
+                                      >
+                                        {day}
+                                      </label>
+                                    </div>
+                                  ))}
+                                </div>
+                              </Col>
+                              <Col xs={2}>
+                                {/* <Button
+                                  color="danger"
+                                  onClick={() => remove(index)}
+                                >
+                                  <FaTrash />
+                                </Button> */}
+                              </Col>
+                              <Col xs={5}>
+                                <Label for={`schedules[${index}].startTime`}>
+                                  Start Time
+                                </Label>
+                                <Field
+                                  name={`schedules[${index}].startTime`}
+                                  as={Input}
+                                  type="time"
+                                />
+                                <ErrorMessage
+                                  name={`schedules[${index}].startTime`}
+                                  component={FormFeedback}
+                                />
+                              </Col>
+                              <Col xs={5}>
+                                <Label for={`schedules[${index}].endTime`}>
+                                  End Time
+                                </Label>
+                                <Field
+                                  name={`schedules[${index}].endTime`}
+                                  as={Input}
+                                  type="time"
+                                />
+                                <ErrorMessage
+                                  name={`schedules[${index}].endTime`}
+                                  component={FormFeedback}
+                                />
+                              </Col>
+                            </div>
+                          )
+                        )}
+                        {/* <div className="d-flex justify-content-end">
+                          <Button
+                            color="primary"
+                            onClick={() =>
+                              push({ days: [], startTime: "", endTime: "" })
+                            }
+                          >
+                            <FaCirclePlus />
+                          </Button>
+                        </div> */}
+                      </div>
+                    )}
+                  </FieldArray>
                 </Col>
 
                 <Col xs={12} className="d-flex justify-content-end mt-5">
