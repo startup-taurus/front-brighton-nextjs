@@ -68,7 +68,7 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                   start_date: "",
                   end_date: "",
                   comment: "",
-                  status: "",
+                  status: "active",
                   course_type: "",
                   hourly_rate: "",
                   professor_id: "",

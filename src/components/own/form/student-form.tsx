@@ -85,7 +85,7 @@ const StudentForm = ({ data, isOpen, toggle }: any) => {
                   lastName: "",
                   courseId: "",
                   level: "",
-                  status: "",
+                  status: "active",
                   bookGiven: false,
                   pendingPayments: false,
                   emergency_contact_name: "",

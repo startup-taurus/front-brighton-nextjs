@@ -1,18 +1,20 @@
 import React, { useState, useEffect } from "react";
 import useSWR, { mutate } from "swr";
 import { useRouter } from "next/router";
-import { getAllCourses, updateStatusCourse } from "helper/api-data/course";
+import { getAllHolidays, updateHolidayStatus } from "helper/api-data/holidays";
 import TableActionButtons from "@/components/own/table-action-buttons/table-action-buttons";
 import Swal from "sweetalert2";
 import DataTable from "react-data-table-component";
+import HolidaysForm from "../form/holidays-form";
 
-const CoursesTable = ({ reload }: any) => {
+const HolidaysTable = ({ reload }: any) => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
+  const [isOpenDetail, setIsOpenDetail] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
 
   useEffect(() => {
-    mutate([`/course/get-all`, page, rowPerPage]);
+    mutate([`/holidays/get-all`, page, rowPerPage]);
   }, [reload]);
 
   const toggle = (data: any) => {
@@ -21,10 +23,10 @@ const CoursesTable = ({ reload }: any) => {
   };
 
   const handleAlert = (row: any) => {
-    let status = row?.status === "active" ? "deactivate" : "active";
+    let status = row?.status === "active" ? "deactivate" : "activate";
     Swal.fire({
-      title: "Are you sure to " + status + "?",
-      text: "You are about to " + status + " this user",
+      title: "Are you sure to " + status + " this holiday?",
+      text: "You are about to " + status + " this holiday",
       icon: "warning",
       showCancelButton: true,
       confirmButtonText: "Yes, " + status + "!",
@@ -33,7 +35,7 @@ const CoursesTable = ({ reload }: any) => {
     }).then((result) => {
       if (result.isConfirmed) {
         updateStatus(row).then(() => {
-          mutate([`/course/get-all`, page, rowPerPage]);
+          mutate([`/holidays/get-all`, page, rowPerPage]);
         });
       }
     });
@@ -42,12 +44,12 @@ const CoursesTable = ({ reload }: any) => {
   const updateStatus = async (data: any) => {
     try {
       let status = data?.status === "active" ? "inactive" : "active";
-      const response = await updateStatusCourse(data.id, status);
+      const response = await updateHolidayStatus(data.id, status);
       if (response.statusCode === 200) {
-        mutate([`/course/get-all`, page, rowPerPage]);
+        mutate([`/holidays/get-all`, page, rowPerPage]);
       }
     } catch (error) {
-      console.error("Error al actualizar usuario:", error);
+      console.error("Error updating holiday status:", error);
     }
   };
 
@@ -57,22 +59,22 @@ const CoursesTable = ({ reload }: any) => {
     : 10;
 
   const {
-    data: courses,
+    data: holidays,
     error,
     isLoading,
-  } = useSWR([`/course/get-all`, page, rowPerPage], () =>
-    getAllCourses(page, rowPerPage)
+  } = useSWR([`/holidays/get-all`, page, rowPerPage], () =>
+    getAllHolidays(page, rowPerPage)
   );
 
-  if (!courses?.data?.result) return null;
+  if (!holidays?.data?.result) return null;
 
   const columns = [
     {
-      name: "Acción",
+      name: "Actions",
       cell: (row: any) => (
         <TableActionButtons
-          onEdit={() => toggle(row)}
           onBlock={() => handleAlert(row)}
+          onEdit={() => toggle(row)}
           stauts={row.status === "active" ? false : true}
         />
       ),
@@ -80,31 +82,32 @@ const CoursesTable = ({ reload }: any) => {
       center: false,
     },
     {
-      name: "Código",
-      selector: (row: any) => `${row.course_number}`,
+      name: "Holiday Name",
+      selector: (row: any) => `${row.holiday_name}`,
       sortable: true,
       center: false,
     },
     {
-      name: "Nombre del Curso",
-      selector: (row: any) => `${row.course_name}`,
+      name: "Holiday Date",
+      selector: (row: any) => `${row.holiday_date}`,
       sortable: true,
       center: false,
     },
     {
-      name: "Fecha de Inicio",
-      selector: (row: any) => `${row.start_date}`,
+      name: "Description",
+      selector: (row: any) => `${row.description || ""}`,
+      sortable: false,
+      center: false,
+    },
+    {
+      name: "Type",
+      selector: (row: any) =>
+        `${row.holiday_type.charAt(0).toUpperCase() + row.holiday_type.slice(1)}`,
       sortable: true,
       center: false,
     },
     {
-      name: "Fecha de Fin",
-      selector: (row: any) => `${row.end_date}`,
-      sortable: true,
-      center: false,
-    },
-    {
-      name: "Estado",
+      name: "Status",
       cell: (row: any) => (
         <span
           className={`badge ${row.status === "active" ? "badge-success" : "badge-danger"}`}
@@ -115,28 +118,16 @@ const CoursesTable = ({ reload }: any) => {
       sortable: true,
       center: false,
     },
-    {
-      name: "Nivel",
-      selector: (row: any) => `${row.course_type}`,
-      sortable: true,
-      center: false,
-    },
-    {
-      name: "Horario",
-      selector: (row: any) => `${row.schedule}`,
-      sortable: true,
-      center: false,
-    },
   ];
 
   return (
-    <div className="table-responsive signal-table">
+    <div className="table-responsive">
       <DataTable
         columns={columns}
-        data={courses.data.result}
+        data={holidays.data.result}
         pagination
         paginationServer
-        paginationTotalRows={courses.data.totalCount}
+        paginationTotalRows={holidays.data.totalCount}
         onChangePage={(page) => {
           router.push({
             pathname: router.pathname,
@@ -152,8 +143,9 @@ const CoursesTable = ({ reload }: any) => {
         highlightOnHover
         selectableRows={false}
       />
+      <HolidaysForm isOpen={isOpen} toggle={toggle} data={selectedData} />
     </div>
   );
 };
 
-export default CoursesTable;
+export default HolidaysTable;

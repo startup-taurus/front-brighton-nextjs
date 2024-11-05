@@ -59,7 +59,7 @@ const UserForm = ({ data, isOpen, toggle }: any) => {
                   email: "",
                   password: "",
                   role: "",
-                  status: "",
+                  status: "active",
                 }
           }
           onSubmit={(info) => (data ? update(info) : save(info))}

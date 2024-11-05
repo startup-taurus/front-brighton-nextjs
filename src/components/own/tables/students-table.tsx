@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import useSWR, { mutate }  from "swr";
+import useSWR, { mutate } from "swr";
 import { useRouter } from "next/router";
-import { getAllStudent } from "helper/api-data/student";
+import { getAllStudent, updateStatusStudent } from "helper/api-data/student";
 import TableActionButtons from "@/components/own/table-action-buttons/table-action-buttons";
 import Swal from "sweetalert2";
 import StudentForm from "../form/student-form";
@@ -50,7 +50,10 @@ const StudentsTable = ({ reload }: any) => {
   const updateStatus = async (data: any) => {
     try {
       let status = data?.status === "active" ? "inactive" : "active";
-      //const response = await updateStatusProfessor(data.id, status);
+      const response = await updateStatusStudent(data.id, status);
+      if (response.statusCode === 200) {
+        mutate([`/student/get-all`, page, rowPerPage]);
+      }
     } catch (error) {
       console.error("Error al actualizar usuario:", error);
     }
@@ -79,6 +82,7 @@ const StudentsTable = ({ reload }: any) => {
           onView={() => toggleDetail(row)}
           onBlock={() => handleAlert(row)}
           onEdit={() => toggle(row)}
+          stauts={row.status === "active" ? false : true}
         />
       ),
       sortable: false,

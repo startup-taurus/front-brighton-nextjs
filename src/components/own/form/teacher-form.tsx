@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { ErrorMessage, Field, Formik } from "formik";
 
 import {
@@ -17,20 +17,20 @@ import { ImgPath, Role } from "utils/Constant";
 const TeacherForm = ({ data, isOpen, toggle }: any) => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
-  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+  useEffect(() => {
+    if (!isOpen) {
+      setImagePreview(null);
     }
-  };
+  }, [isOpen]);
 
   const save = async (data: any) => {
     try {
-      const response = await createProfessor(data);
+      const formData = new FormData();
+      Object.keys(data).forEach((key) => {
+        formData.append(key, data[key]);
+      });
+
+      const response = await createProfessor(formData);
       if (response.statusCode === 200) {
         toggle();
       }
@@ -70,23 +70,35 @@ const TeacherForm = ({ data, isOpen, toggle }: any) => {
                   hourly_rate: data.hourly_rate,
                   phone: data.phone,
                   role: data.user?.role,
+                  image: data?.user?.image,
                 }
               : {
                   name: "",
                   username: "",
                   email: "",
                   password: "",
-                  status: "",
+                  status: "active",
                   cedula: "",
                   hourly_rate: "",
                   phone: "",
                   role: "",
+                  image: "",
                 }
           }
           onSubmit={(info) => (data ? update(info) : save(info))}
         >
           {(props) => {
-            const { errors, handleSubmit, isSubmitting } = props;
+            const { errors, handleSubmit, isSubmitting, setFieldValue } = props;
+            const handleImageChange = (
+              event: React.ChangeEvent<HTMLInputElement>
+            ) => {
+              const file = event.target.files?.[0];
+              if (file) {
+                setImagePreview(URL.createObjectURL(file));
+                setFieldValue("image", file);
+              }
+            };
+
             return (
               <form
                 noValidate
@@ -113,6 +125,8 @@ const TeacherForm = ({ data, isOpen, toggle }: any) => {
                           <input
                             className="upload"
                             type="file"
+                            name="image"
+                            id="image"
                             onChange={handleImageChange}
                             accept="image/*"
                             style={{
