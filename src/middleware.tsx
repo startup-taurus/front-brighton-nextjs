@@ -1,6 +1,21 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { USER_TYPES } from "../utils/constants";
+
+const teacherPaths = [
+  "/authentication/login",
+  "/teachers",
+  "/teachers/faq",
+  "/course/:id/home",
+  "/course/:id/attendance",
+  "/course/:id/holidays",
+  "/course/:id/gradebook",
+  "/course/:id/student-report",
+  "/course/:id/faq",
+];
+
+const adminPaths = ["/dashboard", "/admin", "/admin/:path*"];
+
 export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const userCookie = request.cookies.get("token")?.value;
@@ -29,33 +44,6 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(`/teachers`, request.url));
   }
 
-  const teacherPaths = [
-    "/authentication/login",
-    "/teachers",
-    "/teachers/faq",
-    "/course/:id/home",
-    "/course/:id/attendance",
-    "/course/:id/holidays",
-    "/course/:id/gradebook",
-    "/course/:id/student-report",
-    "/course/:id/faq",
-  ];
-
-  const pathTeacherRegex = new RegExp(
-    `^(${teacherPaths
-      .map((path) => path.replace(/:\w+/g, "\\w+"))
-      .join("|")})$`,
-  );
-
-  if (
-    !pathTeacherRegex.test(path) &&
-    user &&
-    user?.role !== USER_TYPES.PROFESSOR
-  ) {
-    return NextResponse.redirect(new URL("/teachers", request.url));
-  }
-  const adminPaths = ["/admin", "/admin/:path*"];
-
   if (
     path.split("/")[1] === "authentication" &&
     user &&
@@ -64,15 +52,31 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL(`/dashboard`, request.url));
   }
 
-  // if (
-  //   adminPaths.some((p) => new RegExp(p.replace(/:\w+/g, "\\w+")).test(path)) &&
-  //   user &&
-  //   user?.idRole?.name !== "admin" &&
-  //   user?.idRole?.name !== "creador"
-  // ) {
-  //   return NextResponse.redirect(new URL("/dashboard/home", request.url));
-  // }
-  //
+  const pathTeacherRegex = new RegExp(
+    `^(${teacherPaths
+      .map((path) => path.replace(/:\w+/g, "\\w+"))
+      .join("|")})$`,
+  );
+
+  if (
+    pathTeacherRegex.test(path) &&
+    user &&
+    user?.role !== USER_TYPES.PROFESSOR
+  ) {
+    console.log("Entra aqui no es teacher");
+    return NextResponse.redirect(new URL("/dashboard", request.url));
+  }
+
+  console.log(new RegExp(`^(/dashboard|/admin(\\/.*)?)$`).test(path));
+  if (
+    new RegExp(`^(/dashboard|/admin(\\/.*)?)$`).test(path) &&
+    user &&
+    user?.role !== USER_TYPES.ADMIN
+  ) {
+    console.log("Entra aqui  es teacher");
+    return NextResponse.redirect(new URL("/teachers", request.url));
+  }
+
   return NextResponse.next();
 }
 
@@ -88,5 +92,8 @@ export const config = {
     "/course/:id/gradebook",
     "/course/:id/student-report",
     "/course/:id/faq",
+    "/dashboard",
+    "/admin",
+    "/admin/:path*",
   ],
 };
