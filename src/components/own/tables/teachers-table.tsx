@@ -1,13 +1,16 @@
 import React, { useState, useEffect } from "react";
-import useSWR, { mutate }  from "swr";
+import useSWR, { mutate } from "swr";
 import { useRouter } from "next/router";
-import { getAllProfessors, updateStatusProfessor } from "helper/api-data/professor";
+import {
+  getAllProfessors,
+  updateStatusProfessor,
+} from "helper/api-data/professor";
 import TableActionButtons from "@/components/own/table-action-buttons/table-action-buttons";
 import Swal from "sweetalert2";
 import DataTable from "react-data-table-component";
 import TeacherForm from "../form/teacher-form";
 
-const ProfessorsTable = ({ reload }: any) => {
+const TeachersTable = ({ reload }: any) => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
@@ -19,6 +22,10 @@ const ProfessorsTable = ({ reload }: any) => {
   const toggle = (data: any) => {
     setSelectedData(data);
     setIsOpen(!isOpen);
+
+    if (isOpen) {
+      mutate([`/professor/get-all`, page, rowPerPage]);
+    }
   };
 
   const handleAlert = (row: any) => {
@@ -160,4 +167,4 @@ const ProfessorsTable = ({ reload }: any) => {
   );
 };
 
-export default ProfessorsTable;
+export default TeachersTable;

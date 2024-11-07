@@ -20,6 +20,9 @@ const HolidaysTable = ({ reload }: any) => {
   const toggle = (data: any) => {
     setSelectedData(data);
     setIsOpen(!isOpen);
+    if (isOpen) {
+      mutate([`/holidays/get-all`, page, rowPerPage]);
+    }
   };
 
   const handleAlert = (row: any) => {

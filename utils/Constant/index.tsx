@@ -2,6 +2,7 @@ import ConfigDB from "config/ThemeConfig";
 
 export const Footertext: string = "Copyright 2023 © Brighton";
 export const ImgPath: string = "/assets/images";
+export const UrlImage: string = `${process.env.API_URL}/images`;
 export const Href: string = "#javascript";
 export const StarColor = "var(--theme-deafult)";
 export const SvgPath: string = "/assets/svg";

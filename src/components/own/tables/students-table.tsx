@@ -21,6 +21,9 @@ const StudentsTable = ({ reload }: any) => {
   const toggle = (data: any) => {
     setSelectedData(data);
     setIsOpen(!isOpen);
+    if (isOpen) {
+      mutate([`/student/get-all`, page, rowPerPage]);
+    }
   };
 
   const toggleDetail = (data: any) => {
