@@ -12,13 +12,15 @@ import {
   ModalHeader,
 } from "reactstrap";
 import { createProfessor, updateProfessor } from "helper/api-data/professor";
-import { ImgPath, Role } from "utils/Constant";
+import { ImgPath, UrlImage } from "utils/Constant";
 
 const TeacherForm = ({ data, isOpen, toggle }: any) => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isOpen) {
+    if (data && data.user?.image) {
+      setImagePreview(`${UrlImage}/${data.user.image}`);
+    } else if (!isOpen) {
       setImagePreview(null);
     }
   }, [isOpen]);

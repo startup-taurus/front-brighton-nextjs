@@ -19,6 +19,10 @@ const UsersTable = ({ reload }: any) => {
   const toggle = (data: any) => {
     setSelectedData(data);
     setIsOpen(!isOpen);
+
+    if (isOpen) {
+      mutate([`/user/get-all`, page, rowPerPage]);
+    }
   };
 
   const handleAlert = (row: any) => {

@@ -22,6 +22,10 @@ const CoursesTable = ({ reload }: any) => {
   const toggle = (data: any) => {
     setSelectedData(data);
     setIsOpen(!isOpen);
+
+    if (isOpen) {
+      mutate([`/course/get-all-with-professors`, page, rowPerPage]);
+    }
   };
 
   const handleAlert = (row: any) => {
