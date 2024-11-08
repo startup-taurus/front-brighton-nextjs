@@ -42,7 +42,7 @@ const CommonForm = ({ alignLogo }: commonFormPropsType) => {
       login(response.data);
 
       if (response.data.role === "admin_staff") {
-        router.push("/inscription/students");
+        router.push("/dashboard");
       } else {
         router.push("/teachers");
       }

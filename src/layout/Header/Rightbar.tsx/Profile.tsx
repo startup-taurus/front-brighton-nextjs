@@ -8,8 +8,10 @@ import { Logout } from "../../../../utils/Constant/index";
 import { useRouter } from "next/router";
 import Cookies from "js-cookie";
 import { UserContext } from "../../../../helper/User";
+import * as process from "process";
 
 const Profile = () => {
+  const FILE_URL = process.env.FILE_URL;
   const { user } = useContext(UserContext);
   const router = useRouter();
 
@@ -22,7 +24,11 @@ const Profile = () => {
       <div className="media profile-media">
         <Image
           className="b-r-10"
-          src="/assets/images/own/profile-image.png"
+          src={
+            user.image
+              ? `${FILE_URL}/${user.image}`
+              : "/assets/images/user/user.png"
+          }
           alt=""
           width={35}
           height={35}

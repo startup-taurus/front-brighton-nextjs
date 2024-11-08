@@ -96,7 +96,7 @@ const Dashboard = () => {
           <SectionTitle title="Dashboard" />
           <TeacherProfile
             profileData={{
-              profileImage: `${ImgPath}/own/profile-image.png`,
+              profileImage: `${ImgPath}/user/user.png`,
               firstName: user?.name?.split(" ")[0],
               lastName: user?.name?.split(" ")[1],
               position: user?.role,
