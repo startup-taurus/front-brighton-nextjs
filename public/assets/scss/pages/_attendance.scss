@@ -1,6 +1,7 @@
 .attendance {
-    background: url("../../../assets/images/own/gradebook-report.png") no-repeat bottom right;
-    //padding-bottom: 4rem;
+    background-image: url("../../../assets/images/own/gradebook-report.png");
+    background-position: bottom right;
+    background-repeat: no-repeat;
 }
 
 .attendance-help {

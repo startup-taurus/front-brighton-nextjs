@@ -75,6 +75,8 @@
 
 
 .gradebook{
-  background: url("../../../assets/images/own/gradebook-report.png") no-repeat bottom left;
+  background-image: url("../../../assets/images/own/gradebook-report.png");
+  background-position: bottom left;
+  background-repeat: no-repeat;
 
 }
