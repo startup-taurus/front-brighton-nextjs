@@ -19,7 +19,6 @@ interface layoutProps {
 const Layout = ({ children }: layoutProps) => {
   const { layout, setLayout } = useContext(CustomizerContext);
   const { user } = useContext(UserContext);
-  console.log(user);
   const {
     sideBarToggle,
     setSideBarToggle,
