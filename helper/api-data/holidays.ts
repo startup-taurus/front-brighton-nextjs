@@ -4,11 +4,15 @@ export const getAllHolidays = (page: number, limit: number) => {
   return getFetcher(`/holidays/get-all?page=${page}&limit=${limit}`, false);
 };
 
+export const getAllActiveHolidays = () => {
+  return getFetcher(`/holidays/get-all-active`, false);
+};
+
 export const createHoliday = (data: any) => {
   return postFetcher(`/holidays/create`, data);
 };
 
-export const updateHoliday = (holidaysId: number ,data: any) => {
+export const updateHoliday = (holidaysId: number, data: any) => {
   return putFetcher(`/holidays/update/${holidaysId}`, data);
 };
 

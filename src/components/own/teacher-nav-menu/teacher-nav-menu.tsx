@@ -47,7 +47,6 @@ const TeacherNavMenu = () => {
     setActive(pathNameId);
   }, [pathname]);
 
-  console.log(active);
   return (
     <Card className="px-4 py-2 ">
       <Nav fill pills>

@@ -9,85 +9,34 @@ import Image from "next/image";
 import CourseLayout from "@/components/own/course-layout/course-layout";
 import { NextPageWithLayout } from "@/pages/_app";
 import { getCourseById } from "../../../../helper/api-data/course";
+import { getAllActiveHolidays } from "../../../../helper/api-data/holidays";
+import { format } from "date-fns";
 
 const tabsName = "HOLIDAYS";
 const holidayCols = [
   {
     name: "DATE",
-    selector: (row: { date: string }) => row.date,
+    selector: (row: { holiday_date: string }) =>
+      format(new Date(row.holiday_date), "ccc, LLL dd"),
     sortable: true,
   },
   {
     name: "FESTIVITY",
-    selector: (row: { festivity: string }) => row.festivity,
+    selector: (row: { holiday_name: string }) => row.holiday_name,
     sortable: true,
-  },
-];
-
-const holidayData = [
-  {
-    date: "Mon, Jan 01",
-    festivity: "NEW YEAR'S DAY",
-  },
-  {
-    date: "Fri, Feb 09",
-    festivity: "CARNIVAL",
-  },
-  {
-    date: "Tue, Feb 13",
-    festivity: "CARNIVAL",
-  },
-  {
-    date: "Fri, Mar 29",
-    festivity: "GOOD FRIDAY",
-  },
-  {
-    date: "Wed, May 01",
-    festivity: "LABOR DAY",
-  },
-  {
-    date: "Sun, May 26",
-    festivity: "BATTLE OF PICHINCHA",
-  },
-  {
-    date: "Sat, Aug 10",
-    festivity: "FIRST CRY OF INDEPENDENCE",
-  },
-  {
-    date: "Wed, Oct 09",
-    festivity: "GUAYAQUIL'S INDEPENDENCE",
-  },
-  {
-    date: "Sat, Nov 02",
-    festivity: "ALL SOULS' DAY",
-  },
-  {
-    date: "Sun, Nov 03",
-    festivity: "CUENCA'S INDEPENDENCE",
-  },
-  {
-    date: "Tue, Dec 24",
-    festivity: "CHRISTMAS EVE",
-  },
-  {
-    date: "Wed, Dec 25",
-    festivity: "CHRISTMAS",
-  },
-  {
-    date: "Tue, Dec 31",
-    festivity: "NEW YEAR'S EVE",
   },
 ];
 
 const cancelClassesCols = [
   {
     name: "DATE",
-    selector: (row: { date: string }) => row.date,
+    selector: (row: { date: string }) =>
+      format(new Date(row.date), "ccc, LLL dd"),
     sortable: true,
   },
   {
     name: "REASON",
-    selector: (row: { festivity: string }) => row.festivity,
+    selector: (row: { reason: string }) => row.reason,
     sortable: true,
   },
 ];
@@ -98,6 +47,10 @@ const TeachersHolidays: NextPageWithLayout = () => {
   const courseDetail = useSWR(
     courseId ? `/course/get-one/${courseId}` : null,
     () => getCourseById(courseId),
+  );
+
+  const holidays = useSWR(`/holidays/get-all-active`, () =>
+    getAllActiveHolidays(),
   );
 
   if (!courseDetail?.data?.data) return null;
@@ -112,13 +65,13 @@ const TeachersHolidays: NextPageWithLayout = () => {
             <div className="holiday-table-header">
               <h3>UNIVERSAL LIST</h3>
             </div>
-            <CustomTable columns={holidayCols} data={holidayData} />
+            <CustomTable columns={holidayCols} data={holidays?.data?.data} />
           </Col>
           <Col xs={12} sm={12} md={6} lg={4}>
             <div className="holiday-table-header">
               <h3>CANCELED LESSONS</h3>
             </div>
-            <CustomTable columns={holidayCols} data={[]} />
+            <CustomTable columns={cancelClassesCols} data={[]} />
           </Col>
           <Col xs={12} sm={12} md={6} lg={4}>
             <div className="warning-messages">
