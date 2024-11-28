@@ -14,12 +14,13 @@ import useSWR from "swr";
 import Select from "react-select";
 import { createCourse, updateCourse } from "helper/api-data/course"; // Función para crear curso
 import { getActiveProfessors } from "helper/api-data/professor";
-import { FaCirclePlus, FaTrash } from "react-icons/fa6";
+import { getAllSyllabus } from "helper/api-data/syllabus";
 const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const CourseForm = ({ data, isOpen, toggle }: any) => {
   const limit = 10;
   const page = 1;
   const [searchTerm, setSearchTerm] = useState("");
+  const [searchTermSyllabus, setSearchTermSyllabus] = useState("");
 
   const save = async (data: any) => {
     try {
@@ -62,6 +63,17 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
     () => getActiveProfessors(page, limit, searchTerm)
   );
 
+  const { data: syllabus } = useSWR(["/syllabus/get-all", page, limit], () =>
+    getAllSyllabus(page, limit)
+  );
+
+  const syllabusOptions = syllabus?.data
+    ? syllabus?.data.map((syllabusItem: any) => ({
+        value: syllabusItem.id,
+        label: syllabusItem.syllabus_name,
+      }))
+    : [];
+
   const professorOptions = course?.data
     ? course?.data.map((professorItem: any) => ({
         value: professorItem.id,
@@ -89,6 +101,7 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                   course_type: data.course_type,
                   hourly_rate: data.hourly_rate,
                   professor_id: data.professor_id,
+                  syllabus_id: data.syllabus_id,
                   schedules: data.schedule
                     ? [
                         {
@@ -110,6 +123,7 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                   hourly_rate: "",
                   professor_id: "",
                   schedules: [{ days: [], startTime: "", endTime: "" }],
+                  syllabus_id: "",
                 }
           }
           onSubmit={(info) => (data ? update(info) : save(info))}
@@ -191,6 +205,27 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                     }}
                   />
                   <ErrorMessage name="professor_id" component={FormFeedback} />
+                </Col>
+                <Col xs={6}>
+                  <Label for="hourly_rate">Syllabus</Label>
+                  <Select
+                    id="syllabus_id"
+                    options={syllabusOptions}
+                    onChange={(selectedOption: any) =>
+                      setFieldValue("syllabus_id", selectedOption.value)
+                    }
+                    placeholder="Select a syllabus"
+                    value={
+                      syllabusOptions.find(
+                        (option: any) => option.value === props.values.syllabus_id
+                      ) || null
+                    }
+                    isSearchable
+                    // onInputChange={(inputValue) => {
+                    //   searchTermSyllabus(inputValue);
+                    // }}
+                  />
+                  <ErrorMessage name="syllabus_id" component={FormFeedback} />
                 </Col>
                 <Col xs={6}>
                   <Label for="hourly_rate">Hourly Rate</Label>
