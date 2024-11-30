@@ -106,17 +106,18 @@ const CoursesTable = ({ reload }: any) => {
       center: false,
     },
     {
+      name: "Classroom",
+      selector: (row: any) => `${row.classroom}`.toLocaleUpperCase(),
+      sortable: true,
+      center: false,
+    },
+    {
       name: "Start date",
       selector: (row: any) => `${row.start_date}`,
       sortable: true,
       center: false,
     },
-    {
-      name: "End date",
-      selector: (row: any) => `${row.end_date}`,
-      sortable: true,
-      center: false,
-    },
+
     {
       name: "Status",
       cell: (row: any) => (
@@ -131,7 +132,7 @@ const CoursesTable = ({ reload }: any) => {
     },
     {
       name: "Type",
-      selector: (row: any) => `${row.course_type}`,
+      selector: (row: any) => `${row.course_type.toLocaleUpperCase()}`,
       sortable: true,
       center: false,
     },

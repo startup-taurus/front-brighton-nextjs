@@ -117,21 +117,21 @@ const StudentForm = ({ data, isOpen, toggle }: any) => {
                   <Field name="name" as={Input} />
                   <ErrorMessage name="name" component={FormFeedback} />
                 </Col>
-                <Col xs={6}>
+                {/* <Col xs={6}>
                   <Label for="username">Username</Label>
                   <Field name="username" as={Input} />
                   <ErrorMessage name="username" component={FormFeedback} />
-                </Col>
+                </Col> */}
                 <Col xs={6}>
                   <Label for="email">Email</Label>
                   <Field name="email" as={Input} />
                   <ErrorMessage name="email" component={FormFeedback} />
                 </Col>
-                <Col xs={6}>
+                {/* <Col xs={6}>
                   <Label for="password">Password</Label>
                   <Field name="password" as={Input} type="" />
                   <ErrorMessage name="password" component={FormFeedback} />
-                </Col>
+                </Col> */}
                 <Col xs={6}>
                   <Label for="cedula">Cédula</Label>
                   <Field name="cedula" as={Input} />
