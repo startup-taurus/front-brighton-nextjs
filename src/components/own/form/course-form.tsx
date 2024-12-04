@@ -14,12 +14,13 @@ import useSWR from "swr";
 import Select from "react-select";
 import { createCourse, updateCourse } from "helper/api-data/course"; // Función para crear curso
 import { getActiveProfessors } from "helper/api-data/professor";
-import { FaCirclePlus, FaTrash } from "react-icons/fa6";
+import { getAllSyllabus } from "helper/api-data/syllabus";
 const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 const CourseForm = ({ data, isOpen, toggle }: any) => {
   const limit = 10;
   const page = 1;
   const [searchTerm, setSearchTerm] = useState("");
+  const [searchTermSyllabus, setSearchTermSyllabus] = useState("");
 
   const save = async (data: any) => {
     try {
@@ -62,6 +63,17 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
     () => getActiveProfessors(page, limit, searchTerm)
   );
 
+  const { data: syllabus } = useSWR(["/syllabus/get-all", page, limit], () =>
+    getAllSyllabus(page, limit)
+  );
+
+  const syllabusOptions = syllabus?.data
+    ? syllabus?.data.map((syllabusItem: any) => ({
+        value: syllabusItem.id,
+        label: syllabusItem.syllabus_name,
+      }))
+    : [];
+
   const professorOptions = course?.data
     ? course?.data.map((professorItem: any) => ({
         value: professorItem.id,
@@ -72,7 +84,7 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
   return (
     <Modal isOpen={isOpen} toggle={toggle} size="lg">
       <ModalHeader toggle={toggle}>
-        {data ? "Editar Curso" : "Add New Course"}
+        {data ? "Edit Course" : "Add New Course"}
       </ModalHeader>
       <ModalBody>
         <Formik
@@ -87,8 +99,10 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                   comment: data.comment,
                   status: data.status,
                   course_type: data.course_type,
+                  classroom: data.classroom,
                   hourly_rate: data.hourly_rate,
                   professor_id: data.professor_id,
+                  syllabus_id: data.syllabus_id,
                   schedules: data.schedule
                     ? [
                         {
@@ -107,9 +121,11 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                   comment: "",
                   status: "active",
                   course_type: "",
+                  classroom: "",
                   hourly_rate: "",
                   professor_id: "",
                   schedules: [{ days: [], startTime: "", endTime: "" }],
+                  syllabus_id: "",
                 }
           }
           onSubmit={(info) => (data ? update(info) : save(info))}
@@ -138,11 +154,6 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                   <Field name="start_date" as={Input} type="date" />
                   <ErrorMessage name="start_date" component={FormFeedback} />
                 </Col>
-                <Col xs={6}>
-                  <Label for="end_date">End Date</Label>
-                  <Field name="end_date" as={Input} type="date" />
-                  <ErrorMessage name="end_date" component={FormFeedback} />
-                </Col>
                 <Col xs={12}>
                   <Label for="comment">Comment</Label>
                   <Field name="comment" as={Input} type="textarea" />
@@ -160,15 +171,17 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                   <ErrorMessage name="status" component={FormFeedback} />
                 </Col>
                 <Col xs={6}>
-                  <Label for="course_type">Course Type</Label>
-                  <Field name="course_type" as={Input} type="select">
-                    <option value="" disabled>
-                      Select course type
+                  <Label for="classroom">Classroom</Label>
+                  <Field name="classroom" as={Input} type="select">
+                    <option value="" selected disabled>
+                      Select clasrroom
                     </option>
-                    <option value="online">Online</option>
-                    <option value="on-site">On-Site</option>
+                    <option value="cambrige">Cambrige</option>
+                    <option value="oxford">Oxord</option>
+                    <option value="brighton">Brighton</option>
+                    <option value="hardvard">Hardvard</option>
                   </Field>
-                  <ErrorMessage name="course_type" component={FormFeedback} />
+                  <ErrorMessage name="classroom" component={FormFeedback} />
                 </Col>
                 <Col xs={6}>
                   <Label for="professor_id">Professor</Label>
@@ -193,8 +206,60 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                   <ErrorMessage name="professor_id" component={FormFeedback} />
                 </Col>
                 <Col xs={6}>
+                  <Label for="hourly_rate">Syllabus</Label>
+                  <Select
+                    id="syllabus_id"
+                    options={syllabusOptions}
+                    onChange={(selectedOption: any) =>
+                      setFieldValue("syllabus_id", selectedOption.value)
+                    }
+                    placeholder="Select a syllabus"
+                    value={
+                      syllabusOptions.find(
+                        (option: any) =>
+                          option.value === props.values.syllabus_id
+                      ) || null
+                    }
+                    isSearchable
+                    // onInputChange={(inputValue) => {
+                    //   searchTermSyllabus(inputValue);
+                    // }}
+                  />
+                  <ErrorMessage name="syllabus_id" component={FormFeedback} />
+                </Col>
+                <Col xs={6}>
+                  <Label for="course_type">Course Type</Label>
+                  <Field
+                    name="course_type"
+                    as={Input}
+                    type="select"
+                    onChange={(e: any) => {
+                      props.setFieldValue("course_type", e.target.value); // Actualiza el valor en Formik
+                    }}
+                  >
+                    <option value="" disabled>
+                      Select course type
+                    </option>
+                    <option value="online">Online</option>
+                    <option value="on-site">On-Site</option>
+                    <option value="private">Private</option>
+                    <option value="private - online">Private - Online</option>
+                  </Field>
+                  <ErrorMessage name="course_type" component={FormFeedback} />
+                </Col>
+                <Col xs={6}>
                   <Label for="hourly_rate">Hourly Rate</Label>
-                  <Field name="hourly_rate" as={Input} type="number" />
+                  <Field
+                    name="hourly_rate"
+                    as={Input}
+                    type="number"
+                    disabled={
+                      !(
+                        props.values.course_type === "private" ||
+                        props.values.course_type === "private - online"
+                      )
+                    }
+                  />
                   <ErrorMessage name="hourly_rate" component={FormFeedback} />
                 </Col>
                 <Col xs={12}>

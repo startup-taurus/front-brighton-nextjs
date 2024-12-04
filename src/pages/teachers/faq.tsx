@@ -9,7 +9,7 @@ const Faq = () => {
         <CardBody>
           <div className="mb-4">
             <LogoHeader />
-          </div>{" "}
+          </div>
           <div className="faq-content">
             <h2>TEACHER DASHBOARD TEMPLATE (V 1.01)</h2>
             <p>This is a dashboard where you can find your general overview.</p>

@@ -83,12 +83,12 @@ const StudentReport: NextPageWithLayout = () => {
 
   const courseDetail = useSWR(
     courseId ? `/course/get-one/${courseId}` : null,
-    () => getCourseById(courseId),
+    () => getCourseById(courseId)
   );
 
   const courseStudents = useSWR(
     courseId ? `/course/get-students/${courseId}` : null,
-    () => getCourseWithStudents(courseId!.toString()),
+    () => getCourseWithStudents(courseId!.toString())
   );
 
   if (!courseDetail?.data?.data) return null;
@@ -115,7 +115,7 @@ const StudentReport: NextPageWithLayout = () => {
                   <option value="" disabled>
                     Select the student
                   </option>
-                  {students.map((student: any) => (
+                  {students?.map((student: any) => (
                     <option
                       value={student?.id}
                       key={`student-report-${student?.id}`}

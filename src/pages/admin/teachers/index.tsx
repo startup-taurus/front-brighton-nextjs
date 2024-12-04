@@ -17,11 +17,11 @@ import {
 
 const Teachers = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isOpenNew, setIsOpenNew] = useState(false);
+  const [isOpenModal, setIsOpenModal] = useState(false);
   const [reload, setReload] = useState(false);
 
   const toggle = () => {
-    setIsOpenNew(!isOpenNew);
+    setIsOpenModal(!isOpenModal);
   };
 
   const handleCollapse = () => {
@@ -102,7 +102,7 @@ const Teachers = () => {
           </Card>
         </Row>
       </Container>
-      <TeacherForm isOpen={isOpenNew} toggle={toggle} data={null} />
+      <TeacherForm isOpen={isOpenModal} toggle={toggle} data={null} />
     </div>
   );
 };
