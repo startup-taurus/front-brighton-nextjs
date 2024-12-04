@@ -1,7 +1,8 @@
 import React from "react";
 import DataTable from "react-data-table-component";
+import { TableProps } from "react-data-table-component/dist/DataTable/types";
 
-const CustomTable = ({ columns, data }: any) => {
+const CustomTable = ({ columns, data, ...otherProps }: TableProps<any>) => {
   return (
     <DataTable
       columns={columns}
@@ -11,6 +12,7 @@ const CustomTable = ({ columns, data }: any) => {
       highlightOnHover
       pointerOnHover
       dense={false}
+      {...otherProps}
     />
   );
 };

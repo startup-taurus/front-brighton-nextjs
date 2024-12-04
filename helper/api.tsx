@@ -8,14 +8,13 @@ export const postFetcher = (
   data: any,
   token?: string,
   hideError?: boolean,
-  stopRedirect?: boolean
+  stopRedirect?: boolean,
 ) => {
   return axios
     .post(`${process.env.API_URL}${url}`, data, {
       headers: { authorization: `Bearer ${token}` },
     })
     .then((res) => {
-      toast.info(res?.data?.message ?? SUCCESS_MESSAGE);
       return res.data;
     })
     .catch((e) => {
@@ -40,7 +39,6 @@ export const putFetcher = (url: string, data: any, token?: string) => {
       headers: { authorization: `Bearer ${token}` },
     })
     .then((res) => {
-      toast.info(res?.data?.message ?? SUCCESS_MESSAGE);
       return res.data;
     })
     .catch((e) => {
@@ -52,7 +50,7 @@ export const getFetcher = (
   url: string,
   addLevel?: boolean,
   token?: string,
-  stopRedirect?: boolean
+  stopRedirect?: boolean,
 ) => {
   return axios
     .get(`${process.env.API_URL}${url}`, {
