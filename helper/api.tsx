@@ -61,3 +61,14 @@ export const getFetcher = (
       return handleError(e, true, stopRedirect);
     });
 };
+
+export const deleteFetcher = (url: string, token?: string) => {
+  return axios
+    .delete(`${process.env.NEXT_PUBLIC_NUTRE_API}/v1${url}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    })
+    .then((res) => res.data)
+    .catch((e) => {
+      return handleError(e);
+    });
+};

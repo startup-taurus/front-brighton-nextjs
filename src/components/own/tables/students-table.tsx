@@ -1,14 +1,21 @@
-import React, { useState, useEffect } from "react";
-import useSWR, { mutate } from "swr";
+import React, { useEffect, useState } from "react";
+import { mutate } from "swr";
 import { useRouter } from "next/router";
-import { getAllStudent, updateStatusStudent } from "helper/api-data/student";
+import { updateStatusStudent } from "helper/api-data/student";
 import TableActionButtons from "@/components/own/table-action-buttons/table-action-buttons";
 import Swal from "sweetalert2";
 import StudentForm from "../form/student-form";
 import StudentDetail from "../student-detail/student-datail";
 import DataTable from "react-data-table-component";
+import { setQueryStringValue } from "../../../../utils/utils";
 
-const StudentsTable = ({ reload }: any) => {
+const StudentsTable = ({
+  students,
+  reload,
+  page,
+  rowPerPage,
+  filters,
+}: any) => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenDetail, setIsOpenDetail] = useState(false);
@@ -22,7 +29,7 @@ const StudentsTable = ({ reload }: any) => {
     setSelectedData(data);
     setIsOpen(!isOpen);
     if (isOpen) {
-      mutate([`/student/get-all`, page, rowPerPage]);
+      mutate([`/student/get-all${filters ? filters : ""}`]);
     }
   };
 
@@ -44,7 +51,7 @@ const StudentsTable = ({ reload }: any) => {
     }).then((result) => {
       if (result.isConfirmed) {
         updateStatus(row).then(() => {
-          mutate([`/student/get-all`, page, rowPerPage]);
+          mutate([`/student/get-all${filters ? filters : ""}`]);
         });
       }
     });
@@ -55,27 +62,14 @@ const StudentsTable = ({ reload }: any) => {
       let status = data?.status === "active" ? "inactive" : "active";
       const response = await updateStatusStudent(data.id, status);
       if (response.statusCode === 200) {
-        mutate([`/student/get-all`, page, rowPerPage]);
+        mutate([`/student/get-all${filters ? filters : ""}`]);
       }
     } catch (error) {
       console.error("Error al actualizar usuario:", error);
     }
   };
 
-  const page = router.query.page ? Number(router.query.page) : 1;
-  const rowPerPage = router.query.rowPerPage
-    ? Number(router.query.rowPerPage)
-    : 10;
-
-  const {
-    data: users,
-    error,
-    isLoading,
-  } = useSWR([`/student/get-all`, page, rowPerPage], () =>
-    getAllStudent(page, rowPerPage)
-  );
-
-  if (!users?.data?.result) return null;
+  if (!students?.data?.result) return null;
 
   const columns = [
     {
@@ -85,7 +79,7 @@ const StudentsTable = ({ reload }: any) => {
           onView={() => toggleDetail(row)}
           onBlock={() => handleAlert(row)}
           onEdit={() => toggle(row)}
-          stauts={row.status === "active" ? false : true}
+          status={row.status === "active" ? false : true}
         />
       ),
       sortable: false,
@@ -152,22 +146,14 @@ const StudentsTable = ({ reload }: any) => {
     <div className="table-responsive signal-table">
       <DataTable
         columns={columns}
-        data={users.data.result}
+        data={students?.data.result}
         pagination
         paginationServer
-        paginationTotalRows={users.data.totalCount}
-        onChangePage={(page) => {
-          router.push({
-            pathname: router.pathname,
-            query: { ...router.query, page },
-          });
-        }}
-        onChangeRowsPerPage={(newPerPage) => {
-          router.push({
-            pathname: router.pathname,
-            query: { ...router.query, rowPerPage: newPerPage },
-          });
-        }}
+        paginationTotalRows={students.data.totalCount}
+        onChangePage={(page) => setQueryStringValue("page", page, router)}
+        onChangeRowsPerPage={(newPerPage) =>
+          setQueryStringValue("newPerPage", newPerPage, router)
+        }
         highlightOnHover
         selectableRows={false}
       />

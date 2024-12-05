@@ -45,14 +45,30 @@ export const setQueryStringValue = (
   value: string | number,
   router: NextRouter,
 ) => {
+  const query = { ...router.query, [key]: value };
+
   router.push(
     {
       pathname: router.pathname,
-      query: { ...router.query, [key]: value },
+      query,
     },
     undefined,
     { shallow: true },
   );
+};
+
+export const getFiltersString = (
+  filters: Array<{ key: string; value: string }>,
+) => {
+  return filters
+    .reduce(
+      (prev, current) =>
+        current.value !== "all"
+          ? prev.concat(`${current.key}=${current.value}&`)
+          : prev,
+      "",
+    )
+    .slice(0, -1);
 };
 
 export const textEllipsis = (
