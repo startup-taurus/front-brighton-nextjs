@@ -7,14 +7,13 @@ import { useRouter } from "next/router";
 import { FiltersProps } from "../../../../Types/types";
 import TableFilters from "@/components/own/table-filters/table-filters";
 import { getFiltersString, setQueryStringValue } from "../../../../utils/utils";
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 import { getAllStudent } from "../../../../helper/api-data/student";
 
 const Students = () => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenModal, setIsOpenModal] = useState(false);
-  const [reload, setReload] = useState(false);
 
   const filterStatus = router?.query.status ? String(router?.query.status) : "";
   const filterCourse = router?.query.course ? String(router?.query.course) : "";
@@ -79,15 +78,19 @@ const Students = () => {
     setIsOpen(!isOpen);
   };
   const handleReload = () => {
-    setReload(!reload);
+    mutate([
+      `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ""}`,
+    ]);
   };
   const handleChangeFilter = (key: string, value: string | number) => {
     setQueryStringValue(key, value, router);
   };
 
   const students = useSWR(
-    [`/student/get-all${filters ? `?${filters}` : ""}`],
-    () => getAllStudent(page, rowPerPage),
+    [
+      `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ""}`,
+    ],
+    () => getAllStudent(page, rowPerPage, filters),
   );
 
   return (
@@ -113,7 +116,6 @@ const Students = () => {
             </CardHeader>
             <div className="pb-4">
               <StudentsTable
-                reload={reload}
                 page={page}
                 rowPerPage={rowPerPage}
                 students={students?.data}

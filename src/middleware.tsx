@@ -66,13 +66,11 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
-  console.log(new RegExp(`^(/dashboard|/admin(\\/.*)?)$`).test(path));
   if (
     new RegExp(`^(/dashboard|/admin(\\/.*)?)$`).test(path) &&
     user &&
     user?.role !== USER_TYPES.ADMIN
   ) {
-    console.log("Entra aqui  es teacher");
     return NextResponse.redirect(new URL("/teachers", request.url));
   }
 

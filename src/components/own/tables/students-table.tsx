@@ -9,27 +9,19 @@ import StudentDetail from "../student-detail/student-datail";
 import DataTable from "react-data-table-component";
 import { setQueryStringValue } from "../../../../utils/utils";
 
-const StudentsTable = ({
-  students,
-  reload,
-  page,
-  rowPerPage,
-  filters,
-}: any) => {
+const StudentsTable = ({ students, page, rowPerPage, filters }: any) => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenDetail, setIsOpenDetail] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
 
-  useEffect(() => {
-    mutate([`/student/get-all`, page, rowPerPage]);
-  }, [reload]);
-
   const toggle = (data: any) => {
     setSelectedData(data);
     setIsOpen(!isOpen);
     if (isOpen) {
-      mutate([`/student/get-all${filters ? filters : ""}`]);
+      mutate([
+        `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ""}`,
+      ]);
     }
   };
 
@@ -51,7 +43,9 @@ const StudentsTable = ({
     }).then((result) => {
       if (result.isConfirmed) {
         updateStatus(row).then(() => {
-          mutate([`/student/get-all${filters ? filters : ""}`]);
+          mutate([
+            `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ""}`,
+          ]);
         });
       }
     });
@@ -62,7 +56,9 @@ const StudentsTable = ({
       let status = data?.status === "active" ? "inactive" : "active";
       const response = await updateStatusStudent(data.id, status);
       if (response.statusCode === 200) {
-        mutate([`/student/get-all${filters ? filters : ""}`]);
+        mutate([
+          `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ""}`,
+        ]);
       }
     } catch (error) {
       console.error("Error al actualizar usuario:", error);
