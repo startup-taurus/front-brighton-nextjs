@@ -10,21 +10,24 @@ export const getCourseWithStudents = (courseId: string) => {
 export const getActiveCourses = (
   page: number,
   limit: number,
-  searchTerm = ""
+  searchTerm = "",
 ) => {
   return getFetcher(
     `/course/get-active?page=${page}&limit=${limit}&search=${searchTerm}`,
-    false
+    false,
   );
 };
 
-export const getAllCourses = (page: number, limit: number) => {
-  return getFetcher(`/course/get-all?page=${page}&limit=${limit}`, false);
+export const getAllCourses = () => {
+  return getFetcher(`/course/get-all`, false);
 };
 
-export const getCourseWithProfessors =  (page: number, limit: number) => {
-  return getFetcher(`/course/get-all-with-professors?page=${page}&limit=${limit}`, false);
-}
+export const getCourseWithProfessors = (page: number, limit: number) => {
+  return getFetcher(
+    `/course/get-all-with-professors?page=${page}&limit=${limit}`,
+    false,
+  );
+};
 
 export const createCourse = (data: any) => {
   return postFetcher(`/course/create`, data);

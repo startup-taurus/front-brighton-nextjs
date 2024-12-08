@@ -11,6 +11,8 @@ import {
 } from "reactstrap";
 import { FaChevronDown, FaFilter } from "react-icons/fa6";
 import { FiltersProps } from "../../../../Types/types";
+import { clearQueryString } from "../../../../utils/utils";
+import { useRouter } from "next/router";
 
 interface TableFiltersProps {
   handleCollapse: () => void;
@@ -23,6 +25,7 @@ const TableFilters = ({
   isOpen,
   selectFilters,
 }: TableFiltersProps) => {
+  const router = useRouter();
   return (
     <Card>
       <CardHeader
@@ -52,7 +55,7 @@ const TableFilters = ({
                   <Label for="studentFilter">{item.labelName}</Label>
                   <Input {...item} type="select">
                     <option value="all">All</option>
-                    {item.items.map((item, j) => (
+                    {item?.items?.map((item, j) => (
                       <option
                         value={item.value}
                         key={`item-${item.value}-${i}`}
@@ -65,7 +68,11 @@ const TableFilters = ({
               ))}
             </Row>
             <div className="d-flex justify-content-end gap-2">
-              <button type="button" className="btn btn-cancel">
+              <button
+                type="button"
+                className="btn btn-cancel"
+                onClick={() => clearQueryString(router)}
+              >
                 Reset
               </button>
             </div>

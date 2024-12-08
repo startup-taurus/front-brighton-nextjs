@@ -71,6 +71,24 @@ export const getFiltersString = (
     .slice(0, -1);
 };
 
+export const clearQueryString = (router: NextRouter) => {
+  router.push(
+    {
+      pathname: router.pathname,
+    },
+    undefined,
+    { shallow: true },
+  );
+};
+
+export const handleChangeFilter = (
+  key: string,
+  value: string | number,
+  router: NextRouter,
+) => {
+  setQueryStringValue(key, value, router);
+};
+
 export const textEllipsis = (
   str: string,
   maxLength: number,

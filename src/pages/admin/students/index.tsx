@@ -6,9 +6,22 @@ import StudentForm from "@/components/own/form/student-form";
 import { useRouter } from "next/router";
 import { FiltersProps } from "../../../../Types/types";
 import TableFilters from "@/components/own/table-filters/table-filters";
-import { getFiltersString, setQueryStringValue } from "../../../../utils/utils";
+import {
+  getFiltersString,
+  handleChangeFilter,
+  setQueryStringValue,
+} from "../../../../utils/utils";
 import useSWR, { mutate } from "swr";
 import { getAllStudent } from "../../../../helper/api-data/student";
+import {
+  getActiveCourses,
+  getAllCourses,
+} from "../../../../helper/api-data/course";
+import {
+  LEVEL_FILTER,
+  PROMOTION_FILTER,
+  STATUS_FILTER,
+} from "../../../../utils/constants";
 
 const Students = () => {
   const router = useRouter();
@@ -33,40 +46,51 @@ const Students = () => {
     { key: "promotion", value: filterPromotion },
   ]);
 
+  const students = useSWR(
+    [
+      `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ""}`,
+    ],
+    () => getAllStudent(page, rowPerPage, filters),
+  );
+
+  const course = useSWR(`/course/get-all`, () => getAllCourses());
+
   const selectFilters: FiltersProps[] = [
     {
       labelName: "Status",
       name: "status",
-      items: [
-        { label: "Active", value: "active" },
-        { label: "Inactive", value: "inactive" },
-      ],
+      items: STATUS_FILTER,
       onChange: ({ target: { value } }: any) =>
-        handleChangeFilter("status", value),
+        handleChangeFilter("status", value, router),
       value: filterStatus,
     },
     {
       labelName: "Course",
       name: "course",
-      items: [{ label: "H-16", value: 1 }],
+      items: course?.data
+        ? course?.data?.data?.result?.map((item: any) => ({
+            label: item.course_name,
+            value: item.id,
+          }))
+        : [],
       onChange: ({ target: { value } }: any) =>
-        handleChangeFilter("course", value),
+        handleChangeFilter("course", value, router),
       value: filterCourse,
     },
     {
       labelName: "Level",
       name: "level",
-      items: [{ label: "A1", value: "a1" }],
+      items: LEVEL_FILTER,
       onChange: ({ target: { value } }: any) =>
-        handleChangeFilter("level", value),
+        handleChangeFilter("level", value, router),
       value: filterLevel,
     },
     {
       labelName: "Promotion",
       name: "promotion",
-      items: [{ label: "Navidad", value: "Navidad" }],
+      items: PROMOTION_FILTER,
       onChange: ({ target: { value } }: any) =>
-        handleChangeFilter("promotion", value),
+        handleChangeFilter("promotion", value, router),
       value: filterPromotion,
     },
   ];
@@ -82,16 +106,6 @@ const Students = () => {
       `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ""}`,
     ]);
   };
-  const handleChangeFilter = (key: string, value: string | number) => {
-    setQueryStringValue(key, value, router);
-  };
-
-  const students = useSWR(
-    [
-      `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ""}`,
-    ],
-    () => getAllStudent(page, rowPerPage, filters),
-  );
 
   return (
     <div className="page-body">
