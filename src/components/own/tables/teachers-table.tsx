@@ -9,23 +9,31 @@ import TableActionButtons from "@/components/own/table-action-buttons/table-acti
 import Swal from "sweetalert2";
 import DataTable from "react-data-table-component";
 import TeacherForm from "../form/teacher-form";
+import { getFiltersString } from "../../../../utils/utils";
 
 const TeachersTable = ({ reload }: any) => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
-
-  useEffect(() => {
-    mutate([`/professor/get-all`, page, rowPerPage]);
-  }, [reload]);
+  const page = router.query.page ? Number(router.query.page) : 1;
+  const rowPerPage = router.query.rowPerPage
+    ? Number(router.query.rowPerPage)
+    : 10;
+  const filters = getFiltersString(router);
 
   const toggle = (data: any) => {
     setSelectedData(data);
     setIsOpen(!isOpen);
 
     if (isOpen) {
-      mutate([`/professor/get-all`, page, rowPerPage]);
+      mutateData();
     }
+  };
+
+  const mutateData = () => {
+    mutate([
+      `/professor/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ""}`,
+    ]);
   };
 
   const handleAlert = (row: any) => {
@@ -41,7 +49,7 @@ const TeachersTable = ({ reload }: any) => {
     }).then((result) => {
       if (result.isConfirmed) {
         updateStatus(row).then(() => {
-          mutate([`/professor/get-all`, page, rowPerPage]);
+          mutateData();
         });
       }
     });
@@ -56,17 +64,13 @@ const TeachersTable = ({ reload }: any) => {
     }
   };
 
-  const page = router.query.page ? Number(router.query.page) : 1;
-  const rowPerPage = router.query.rowPerPage
-    ? Number(router.query.rowPerPage)
-    : 10;
-
   const {
     data: professors,
     error,
     isLoading,
-  } = useSWR([`/professor/get-all`, page, rowPerPage], () =>
-    getAllProfessors(page, rowPerPage)
+  } = useSWR(
+    `/professor/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ""}`,
+    () => getAllProfessors(page, rowPerPage, filters),
   );
 
   if (!professors?.data?.result) return null;

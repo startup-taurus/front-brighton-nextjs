@@ -9,14 +9,22 @@ import TableActionButtons from "@/components/own/table-action-buttons/table-acti
 import Swal from "sweetalert2";
 import DataTable from "react-data-table-component";
 import CourseForm from "../form/course-form";
+import { getFiltersString } from "../../../../utils/utils";
 
 const CoursesTable = ({ reload }: any) => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
+  const page = router.query.page ? Number(router.query.page) : 1;
+  const rowPerPage = router.query.rowPerPage
+    ? Number(router.query.rowPerPage)
+    : 10;
+  const filters = getFiltersString(router);
 
   useEffect(() => {
-    mutate([`/course/get-all-with-professors`, page, rowPerPage]);
+    mutate([
+      `/course/get-all-with-professors?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ""}`,
+    ]);
   }, [reload]);
 
   const toggle = (data: any) => {
@@ -24,7 +32,9 @@ const CoursesTable = ({ reload }: any) => {
     setIsOpen(!isOpen);
 
     if (isOpen) {
-      mutate([`/course/get-all-with-professors`, page, rowPerPage]);
+      mutate([
+        `/course/get-all-with-professors?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ""}`,
+      ]);
     }
   };
 
@@ -41,7 +51,9 @@ const CoursesTable = ({ reload }: any) => {
     }).then((result) => {
       if (result.isConfirmed) {
         updateStatus(row).then(() => {
-          mutate([`/course/get-all-with-professors`, page, rowPerPage]);
+          mutate([
+            `/course/get-all-with-professors?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ""}`,
+          ]);
         });
       }
     });
@@ -52,24 +64,24 @@ const CoursesTable = ({ reload }: any) => {
       let status = data?.status === "active" ? "inactive" : "active";
       const response = await updateStatusCourse(data.id, status);
       if (response.statusCode === 200) {
-        mutate([`/course/get-all-with-professors`, page, rowPerPage]);
+        mutate([
+          `/course/get-all-with-professors?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ""}`,
+        ]);
       }
     } catch (error) {
       console.error("Error al actualizar usuario:", error);
     }
   };
 
-  const page = router.query.page ? Number(router.query.page) : 1;
-  const rowPerPage = router.query.rowPerPage
-    ? Number(router.query.rowPerPage)
-    : 10;
-
   const {
     data: courses,
     error,
     isLoading,
-  } = useSWR([`/course/get-all-with-professors`, page, rowPerPage], () =>
-    getCourseWithProfessors(page, rowPerPage)
+  } = useSWR(
+    [
+      `/course/get-all-with-professors?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ""}`,
+    ],
+    () => getCourseWithProfessors(page, rowPerPage, filters),
   );
 
   if (!courses?.data?.result) return null;

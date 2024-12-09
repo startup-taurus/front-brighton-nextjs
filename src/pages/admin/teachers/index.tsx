@@ -1,22 +1,15 @@
 import TeacherForm from "@/components/own/form/teacher-form";
 import TableHeaderActions from "@/components/own/table-header-actions/table-header-actions";
 import TeachersTable from "@/components/own/tables/teachers-table";
-import { useState } from "react";
-import { FaChevronDown, FaFilter } from "react-icons/fa6";
-import {
-  Card,
-  CardBody,
-  CardHeader,
-  Col,
-  Collapse,
-  Container,
-  Input,
-  Label,
-  Row,
-} from "reactstrap";
+import React, { useState } from "react";
+import { Card, CardHeader, Container, Row } from "reactstrap";
+import TableFilters from "@/components/own/table-filters/table-filters";
+import { FiltersProps } from "../../../../Types/types";
+import { STATUS_FILTER } from "../../../../utils/constants";
+import { useRouter } from "next/router";
 
 const Teachers = () => {
-  const [isOpen, setIsOpen] = useState(false);
+  const router = useRouter();
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [reload, setReload] = useState(false);
 
@@ -24,66 +17,30 @@ const Teachers = () => {
     setIsOpenModal(!isOpenModal);
   };
 
-  const handleCollapse = () => {
-    setIsOpen(!isOpen);
-  };
-
   const handleReload = () => {
     setReload(!reload);
   };
+
+  const selectFilters: FiltersProps[] = [
+    {
+      labelName: "Name",
+      name: "name",
+      type: "text",
+      placeholder: "Type the teacher name",
+    },
+    {
+      labelName: "Status",
+      name: "status",
+      type: "select",
+      items: STATUS_FILTER,
+    },
+  ];
 
   return (
     <div className="page-body">
       <Container className="basic_table" fluid>
         <Row>
-          <Card>
-            <CardHeader
-              className="d-flex justify-content-between"
-              onClick={handleCollapse}
-            >
-              <h5>Filtros de Búsqueda</h5>
-              <button
-                onClick={handleCollapse}
-                className={`btn btn-link text-black p-0 ${isOpen && "btn-collapse"}`}
-              >
-                <FaChevronDown />
-              </button>
-            </CardHeader>
-            <Collapse isOpen={isOpen}>
-              <CardBody>
-                <form>
-                  <Row>
-                    <Col xs={12} sm={4} md={3} className="mb-3">
-                      <Label for="professorFilter">Names</Label>
-                      <Input
-                        type="text"
-                        name="name"
-                        id="professorFilter"
-                        placeholder="Enter user name"
-                      />
-                    </Col>
-                    <Col xs={12} sm={4} md={3} className="mb-3">
-                      <Label for="professorFilter">ID</Label>
-                      <Input
-                        type="text"
-                        name="cedula"
-                        id="professorFilter"
-                        placeholder="Enter id"
-                      />
-                    </Col>
-                  </Row>
-                  <div className="d-flex justify-content-end gap-2">
-                    <button type="button" className="btn btn-cancel">
-                      Reestablecer
-                    </button>
-                    <button type="button" className="btn btn-save">
-                      <FaFilter /> <span>Filtrar</span>
-                    </button>
-                  </div>
-                </form>
-              </CardBody>
-            </Collapse>
-          </Card>
+          <TableFilters selectFilters={selectFilters} />
         </Row>
         <Row>
           <Card>

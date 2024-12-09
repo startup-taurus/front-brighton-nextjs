@@ -20,3 +20,16 @@ export const PROMOTION_FILTER = [
   { label: "Navidad", value: "Navidad" },
   { label: "2x1", value: "2x1" },
 ];
+
+export const COURSE_TYPE_FILTER = [
+  { label: "ON-SITE", value: "on-site" },
+  { label: "PRIVATE - ONLINE", value: "private - online" },
+  { label: "ONLINE", value: "online" },
+];
+
+export const USER_ROLES = [
+  { value: "admin_staff", label: "Admin" },
+  { value: "teacher", label: "Teacher" },
+  { value: "student", label: "Student" },
+  { value: "financial", label: "Financial" },
+];

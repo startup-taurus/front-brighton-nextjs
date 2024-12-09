@@ -22,9 +22,13 @@ export const getAllCourses = () => {
   return getFetcher(`/course/get-all`, false);
 };
 
-export const getCourseWithProfessors = (page: number, limit: number) => {
+export const getCourseWithProfessors = (
+  page: number,
+  limit: number,
+  filters: any,
+) => {
   return getFetcher(
-    `/course/get-all-with-professors?page=${page}&limit=${limit}`,
+    `/course/get-all-with-professors?page=${page}&limit=${limit}${filters ? `&${filters}` : ""}`,
     false,
   );
 };

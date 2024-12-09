@@ -6,17 +6,10 @@ import StudentForm from "@/components/own/form/student-form";
 import { useRouter } from "next/router";
 import { FiltersProps } from "../../../../Types/types";
 import TableFilters from "@/components/own/table-filters/table-filters";
-import {
-  getFiltersString,
-  handleChangeFilter,
-  setQueryStringValue,
-} from "../../../../utils/utils";
+import { getFiltersString } from "../../../../utils/utils";
 import useSWR, { mutate } from "swr";
 import { getAllStudent } from "../../../../helper/api-data/student";
-import {
-  getActiveCourses,
-  getAllCourses,
-} from "../../../../helper/api-data/course";
+import { getAllCourses } from "../../../../helper/api-data/course";
 import {
   LEVEL_FILTER,
   PROMOTION_FILTER,
@@ -25,26 +18,13 @@ import {
 
 const Students = () => {
   const router = useRouter();
-  const [isOpen, setIsOpen] = useState(false);
   const [isOpenModal, setIsOpenModal] = useState(false);
-
-  const filterStatus = router?.query.status ? String(router?.query.status) : "";
-  const filterCourse = router?.query.course ? String(router?.query.course) : "";
-  const filterLevel = router?.query.level ? String(router?.query.level) : "";
-  const filterPromotion = router?.query.promotion
-    ? String(router?.query.promotion)
-    : "";
   const page = router.query.page ? Number(router.query.page) : 1;
   const rowPerPage = router.query.rowPerPage
     ? Number(router.query.rowPerPage)
     : 10;
 
-  const filters = getFiltersString([
-    { key: "status", value: filterStatus },
-    { key: "course", value: filterCourse },
-    { key: "level", value: filterLevel },
-    { key: "promotion", value: filterPromotion },
-  ]);
+  const filters = getFiltersString(router);
 
   const students = useSWR(
     [
@@ -59,48 +39,38 @@ const Students = () => {
     {
       labelName: "Status",
       name: "status",
+      type: "select",
       items: STATUS_FILTER,
-      onChange: ({ target: { value } }: any) =>
-        handleChangeFilter("status", value, router),
-      value: filterStatus,
     },
     {
       labelName: "Course",
       name: "course",
+      type: "select",
       items: course?.data
         ? course?.data?.data?.result?.map((item: any) => ({
             label: item.course_name,
             value: item.id,
           }))
         : [],
-      onChange: ({ target: { value } }: any) =>
-        handleChangeFilter("course", value, router),
-      value: filterCourse,
     },
     {
       labelName: "Level",
       name: "level",
+      type: "select",
       items: LEVEL_FILTER,
-      onChange: ({ target: { value } }: any) =>
-        handleChangeFilter("level", value, router),
-      value: filterLevel,
     },
     {
       labelName: "Promotion",
       name: "promotion",
+      type: "select",
       items: PROMOTION_FILTER,
-      onChange: ({ target: { value } }: any) =>
-        handleChangeFilter("promotion", value, router),
-      value: filterPromotion,
     },
   ];
 
   const toggle = () => {
     setIsOpenModal(!isOpenModal);
   };
-  const handleCollapse = () => {
-    setIsOpen(!isOpen);
-  };
+
   const handleReload = () => {
     mutate([
       `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ""}`,
@@ -111,11 +81,7 @@ const Students = () => {
     <div className="page-body">
       <Container className="basic_table" fluid>
         <Row>
-          <TableFilters
-            selectFilters={selectFilters}
-            isOpen={isOpen}
-            handleCollapse={handleCollapse}
-          />
+          <TableFilters selectFilters={selectFilters} />
         </Row>
         <Row>
           <Card>

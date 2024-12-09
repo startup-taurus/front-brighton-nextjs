@@ -57,18 +57,36 @@ export const setQueryStringValue = (
   );
 };
 
-export const getFiltersString = (
-  filters: Array<{ key: string; value: string }>,
-) => {
-  return filters
-    .reduce(
-      (prev, current) =>
-        current.value !== "all"
-          ? prev.concat(`${current.key}=${current.value}&`)
-          : prev,
-      "",
+// export const getFiltersString = (
+//   filters: Array<{ key: string; value: string }>,
+// ) => {
+//   return filters
+//     .reduce(
+//       (prev, current) =>
+//         current.value !== "all"
+//           ? prev.concat(`${current.key}=${current.value}&`)
+//           : prev,
+//       "",
+//     )
+//     .slice(0, -1);
+// };
+
+export const getFiltersString = (router: NextRouter) => {
+  return Object.entries(router.query)
+    .filter(([, value]) => value && value !== "all")
+    .map(
+      ([key, value]) =>
+        `${encodeURIComponent(key)}=${encodeURIComponent(value as string)}`,
     )
-    .slice(0, -1);
+    .join("&");
+};
+
+export const cleanAndFormatQuery = (values: any) => {
+  return Object.fromEntries(
+    Object.entries(values)
+      .filter(([, value]) => value && value !== "all")
+      .map((item) => item),
+  );
 };
 
 export const clearQueryString = (router: NextRouter) => {

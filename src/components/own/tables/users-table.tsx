@@ -6,6 +6,7 @@ import TableActionButtons from "@/components/own/table-action-buttons/table-acti
 import Swal from "sweetalert2";
 import DataTable from "react-data-table-component";
 import UserForm from "../form/user-form";
+import { getFiltersString } from "../../../../utils/utils";
 
 const UsersTable = ({ reload }: any) => {
   const router = useRouter();
@@ -13,7 +14,9 @@ const UsersTable = ({ reload }: any) => {
   const [selectedData, setSelectedData] = useState(null);
 
   useEffect(() => {
-    mutate([`/user/get-all`, page, rowPerPage]);
+    mutate([
+      `/user/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ""}`,
+    ]);
   }, [reload]);
 
   const toggle = (data: any) => {
@@ -21,7 +24,9 @@ const UsersTable = ({ reload }: any) => {
     setIsOpen(!isOpen);
 
     if (isOpen) {
-      mutate([`/user/get-all`, page, rowPerPage]);
+      mutate([
+        `/user/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ""}`,
+      ]);
     }
   };
 
@@ -38,7 +43,9 @@ const UsersTable = ({ reload }: any) => {
     }).then((result) => {
       if (result.isConfirmed) {
         updateStatus(row).then(() => {
-          mutate([`/user/get-all`, page, rowPerPage]);
+          mutate([
+            `/user/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ""}`,
+          ]);
         });
       }
     });
@@ -57,13 +64,17 @@ const UsersTable = ({ reload }: any) => {
   const rowPerPage = router.query.rowPerPage
     ? Number(router.query.rowPerPage)
     : 10;
+  const filters = getFiltersString(router);
 
   const {
     data: users,
     error,
     isLoading,
-  } = useSWR([`/user/get-all`, page, rowPerPage], () =>
-    getAllUsers(page, rowPerPage)
+  } = useSWR(
+    [
+      `/user/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ""}`,
+    ],
+    () => getAllUsers(page, rowPerPage, filters),
   );
 
   if (!users?.data?.result) return null;
