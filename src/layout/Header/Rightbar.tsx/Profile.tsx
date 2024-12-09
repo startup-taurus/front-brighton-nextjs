@@ -51,7 +51,7 @@ const Profile = () => {
         {/*    </li>*/}
         {/*  ))}*/}
         <li onClick={handleLogOut}>
-          <a href="#123">
+          <a>
             <FeatherIconCom iconName={"LogIn"} />
             <span>{Logout}</span>
           </a>
