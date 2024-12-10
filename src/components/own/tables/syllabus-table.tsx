@@ -73,19 +73,19 @@ const SyllabusTable = ({ reload }: any) => {
     },
     {
       name: "Assig Percentage",
-      selector: (row: any) => `${row.percentages.assig_percentage}%`,
+      selector: (row: any) => `${row.percentages?.assig_percentage}%`,
       sortable: true,
       center: false,
     },
     {
       name: "Test Percentage",
-      selector: (row: any) => `${row.percentages.test_percentage}%`,
+      selector: (row: any) => `${row.percentages?.test_percentage}%`,
       sortable: true,
       center: false,
     },
     {
       name: "Exam Percentage",
-      selector: (row: any) => `${row.percentages.exam_percentage}%`,
+      selector: (row: any) => `${row.percentages?.exam_percentage}%`,
       sortable: true,
       center: false,
     },

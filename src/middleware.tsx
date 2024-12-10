@@ -29,7 +29,6 @@ export function middleware(request: NextRequest) {
 
   if (
     !path.startsWith("/authentication") &&
-    !path.startsWith("/_next") &&
     !path.startsWith("/api") &&
     !user
   ) {

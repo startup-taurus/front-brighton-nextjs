@@ -230,6 +230,7 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                 <Col xs={6}>
                   <Label for="course_type">Course Type</Label>
                   <Field
+                    id="course_type"
                     name="course_type"
                     as={Input}
                     type="select"
