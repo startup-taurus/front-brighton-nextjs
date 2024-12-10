@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import FeatherIconCom from "CommonElements/Icons/FeatherIconCom";
 import React, { useContext } from "react";
-import { Admin, EmayWalter, ImgPath } from "utils/Constant";
+import { Admin, EmayWalter, ImgPath, UrlImage } from "utils/Constant";
 import { profileListData } from "Data/HeaderData";
 import { Logout } from "../../../../utils/Constant/index";
 import { useRouter } from "next/router";
@@ -26,7 +26,7 @@ const Profile = () => {
           className="b-r-10"
           src={
             user.image
-              ? `${FILE_URL}/${user.image}`
+              ? `${UrlImage}/${user.image}`
               : "/assets/images/user/user.png"
           }
           alt=""

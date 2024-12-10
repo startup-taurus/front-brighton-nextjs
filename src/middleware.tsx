@@ -76,20 +76,20 @@ export function middleware(request: NextRequest) {
   return NextResponse.next();
 }
 
-// export const config = {
-//   matcher: [
-//     "/",
-//     "/authentication/login",
-//     "/teachers",
-//     "/teachers/faq",
-//     "/course/:id/home",
-//     "/course/:id/attendance",
-//     "/course/:id/holidays",
-//     "/course/:id/gradebook",
-//     "/course/:id/student-report",
-//     "/course/:id/faq",
-//     "/dashboard",
-//     "/admin",
-//     "/admin/:path*",
-//   ],
-// };
+export const config = {
+  matcher: [
+    "/",
+    "/authentication/login",
+    "/teachers",
+    "/teachers/faq",
+    "/course/:id/home",
+    "/course/:id/attendance",
+    "/course/:id/holidays",
+    "/course/:id/gradebook",
+    "/course/:id/student-report",
+    "/course/:id/faq",
+    "/dashboard",
+    "/admin",
+    "/admin/:path*",
+  ],
+};
