@@ -12,14 +12,14 @@ const CommonLogo = ({ alignLogo }: propsType) => {
         width={121}
         height={35}
         className="img-fluid for-light"
-        src={`${ImgPath}/logo/logo.png`}
+        src={`${ImgPath}/logo.png`}
         alt="looginpage"
       />
       <Image
         width={121}
         height={35}
         className="img-fluid for-dark"
-        src={`${ImgPath}/logo/logo_dark.png`}
+        src={`${ImgPath}/logo.png`}
         alt="looginpage"
       />
     </Link>

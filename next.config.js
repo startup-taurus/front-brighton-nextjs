@@ -4,6 +4,16 @@ const nextConfig = {
     API_URL: "https://devbrighton.zgamestechnology.com/v1/api",
     FILE_URL: "https://devbrighton.zgamestechnology.com",
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "devbrighton.zgamestechnology.com",
+        port: "",
+        pathname: "",
+      },
+    ],
+  },
   redirects: async () => {
     return [
       {
