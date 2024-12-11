@@ -27,11 +27,7 @@ export function middleware(request: NextRequest) {
     user = null;
   }
 
-  if (
-    !path.startsWith("/authentication") &&
-    !path.startsWith("/api") &&
-    !user
-  ) {
+  if (!user && path.split("/")[1] !== "authentication") {
     return NextResponse.redirect(new URL("/authentication/login", request.url));
   }
 
@@ -90,6 +86,11 @@ export const config = {
     "/course/:id/faq",
     "/dashboard",
     "/admin",
-    "/admin/:path*",
+    "/admin/dashboard",
+    "/admin/holidays",
+    "/admin/students",
+    "/admin/syllabus",
+    "/admin/teachers",
+    "/admin/users",
   ],
 };
