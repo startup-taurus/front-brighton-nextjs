@@ -1,17 +1,11 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { Input, Table } from "reactstrap";
-import { format } from "date-fns";
-import {
-  buildAttendanceStructure,
-  getAllCourseDays,
-} from "../../../../utils/utils";
+import { formatDate, getAllCourseDays } from "../../../../utils/utils";
 import { createAttendance } from "../../../../helper/api-data/attendance";
 import { useRouter } from "next/router";
 
 type TableAttendance = {
-  startDate: Date;
-  endDate: Date;
-  schedule: Array<any>;
+  courseSchedule: any;
   studentsAttendance: Array<any>;
   students: Array<any>;
 };
@@ -22,46 +16,50 @@ type AttendanceStatistics = {
 };
 
 const TableAttendance = ({
-  startDate,
-  endDate,
-  schedule,
+  courseSchedule = [],
   studentsAttendance,
-  students,
+  students = [],
 }: TableAttendance) => {
-  const router = useRouter();
-  const courseId = router.query.id;
   const [dates, setDates] = useState<any>([]);
-  const daysOfClasses = useMemo(
-    () => getAllCourseDays(startDate, endDate, schedule),
-    [startDate, endDate],
-  );
 
   useEffect(() => {
-    const attendance = buildAttendanceStructure(
-      daysOfClasses,
-      studentsAttendance,
-    );
-    setDates(attendance);
-  }, [startDate, endDate, daysOfClasses, studentsAttendance]);
+    let attendanceDate: any = {};
+    courseSchedule?.forEach((courseScheduleItem: any) => {
+      attendanceDate[courseScheduleItem.id] = {};
+      students?.forEach((student) => {
+        attendanceDate[courseScheduleItem.id][student.id] = "";
+      });
+    });
+
+    studentsAttendance?.forEach((studentAttendance) => {
+      if (attendanceDate[studentAttendance?.id]) {
+        attendanceDate[studentAttendance?.id]![studentAttendance?.student_id] =
+          studentAttendance?.status;
+      }
+    });
+
+    setDates(attendanceDate);
+  }, [courseSchedule, students, studentsAttendance]);
 
   const changeAttendance = async (
     event: any,
-    currentDate: any,
-    student: any,
+    syllabusItemId: any,
+    studentId: any,
   ) => {
-    if (event.target.value === "") return;
+    const status = event.target.value;
+    if (status === "") return;
     setDates((date: any) => ({
       ...date,
-      [currentDate]: {
-        ...date[currentDate],
-        [student?.id]: event.target.value,
+      [syllabusItemId]: {
+        ...date[syllabusItemId],
+        [studentId]: status,
       },
     }));
+
     await createAttendance({
-      course_id: Number(courseId),
-      student_id: student.id,
-      attendance_date: format(new Date(currentDate), "yyyy-MM-dd"),
-      status: event.target.value,
+      course_schedule_id: syllabusItemId,
+      student_id: studentId,
+      status,
     });
   };
 
@@ -87,8 +85,8 @@ const TableAttendance = ({
   };
 
   const renderStatisticsCol = (studentId: number) => {
-    const assistanceStatistics = calculateAttendance(studentId, "Present");
-    const absentStatistics = calculateAttendance(studentId, "Absent");
+    const assistanceStatistics = calculateAttendance(studentId, "present");
+    const absentStatistics = calculateAttendance(studentId, "absent");
 
     return (
       <>
@@ -106,9 +104,9 @@ const TableAttendance = ({
         <thead>
           <tr>
             <th className="main-col-title student-col">STUDENT</th>
-            {daysOfClasses.map((date: string, index: number) => (
+            {courseSchedule?.map((date: any, index: number) => (
               <th className="col-vertical" key={`date-attendance-${index}`}>
-                {date}
+                {formatDate(date?.scheduled_date)}
               </th>
             ))}
             <th className="main-col-title" colSpan={2}>
@@ -124,20 +122,21 @@ const TableAttendance = ({
             students?.map((student: any, index) => (
               <tr key={`date-student-${index}`}>
                 <td>{student?.name}</td>
-                {Object.keys(dates).map((currentDate: any, index2) => (
+                {Object.keys(dates).map((courseScheduleId: any, index2) => (
                   <td key={`attendance-${index2}`} className={`td-attendance`}>
                     <Input
                       type="select"
                       className="attendance-input"
-                      value={dates[currentDate][student?.id]}
+                      value={dates[courseScheduleId][student?.id]}
                       onChange={(event) =>
-                        changeAttendance(event, currentDate, student)
+                        changeAttendance(event, courseScheduleId, student?.id)
                       }
                     >
                       <option value="">&nbsp;</option>
-                      <option value="Present">P</option>
-                      <option value="Excused">R</option>
-                      <option value="Absent">A</option>
+                      <option value="present">P</option>
+                      <option value="absent">F</option>
+                      <option value="late">A</option>
+                      <option value="recovered">R</option>
                     </Input>
                   </td>
                 ))}
@@ -154,6 +153,32 @@ const TableAttendance = ({
               </td>
             </tr>
           )}
+
+          <tr className="py-2">
+            <td className="border-none"></td>
+          </tr>
+          <tr>
+            <td className="main-col-description student-col">LESSON:</td>
+            {courseSchedule.map((_: any, index: number) => (
+              <td
+                className="col-vertical"
+                key={`current-lesson-col-${index}`}
+              ></td>
+            ))}
+            <td className="main-col-description" colSpan={4}></td>
+          </tr>
+          <tr>
+            <td className="main-col-description student-col">CURRICULUM:</td>
+            {courseSchedule?.map((item: any, index: number) => (
+              <td
+                className="col-vertical highlighted-col text-center"
+                key={`curriculum-lesson-col-${index}`}
+              >
+                {item.syllabusItem.item_name}
+              </td>
+            ))}
+            <td className="main-col-description" colSpan={4}></td>
+          </tr>
         </tbody>
       </Table>
     </div>

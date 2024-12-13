@@ -11,7 +11,6 @@ import { UserContext } from "../../../../helper/User";
 import * as process from "process";
 
 const Profile = () => {
-  const FILE_URL = process.env.FILE_URL;
   const { user } = useContext(UserContext);
   const router = useRouter();
 
@@ -33,6 +32,7 @@ const Profile = () => {
           width={35}
           height={35}
         />
+
         <div className="media-body">
           <span>{user.name}</span>
           <p className="mb-0 font-roboto">

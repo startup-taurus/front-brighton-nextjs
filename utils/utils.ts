@@ -191,46 +191,8 @@ const getDateByDateAndDayName = (date: any, day: string) => {
   return addDays(weekStart, dayNumber);
 };
 
-const formatDate = (date: string): string =>
-  format(parseISO(date), "EEE, MMM d, yy");
+export const formatDate = (date: string): string =>
+  format(parseISO(date), "EEE, MMM d");
 
 export const getUniqueStudents = (attendanceList: any[]): string[] =>
   Array.from(new Set(attendanceList?.map((record) => record.student_id)));
-
-const initializeAttendanceStructure = (
-  dates: string[],
-  students: string[],
-): any => {
-  const attendanceByDate: any = {};
-  dates?.forEach((date) => {
-    attendanceByDate[date] = {};
-    students.forEach((student) => {
-      attendanceByDate[date][student] = "";
-    });
-  });
-  return attendanceByDate;
-};
-
-const mapAttendanceToDates = (
-  attendanceList: any[],
-  attendanceByDate: any,
-): any => {
-  attendanceList?.forEach((record) => {
-    const formattedDate = formatDate(record.attendance_date);
-    const status = record.status;
-
-    if (attendanceByDate[formattedDate]) {
-      attendanceByDate[formattedDate][record.student_id] = status;
-    }
-  });
-  return attendanceByDate;
-};
-
-export const buildAttendanceStructure = (
-  dates: string[],
-  attendanceList: any[],
-): any => {
-  const students = getUniqueStudents(attendanceList);
-  let attendanceByDate = initializeAttendanceStructure(dates, students);
-  return mapAttendanceToDates(attendanceList, attendanceByDate);
-};

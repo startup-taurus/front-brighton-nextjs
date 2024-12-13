@@ -438,8 +438,20 @@ th {
 .table-responsive {
 	padding-top: 0.85rem;
 }
+
+table {
+	.highlighted-col {
+		background: $brighton-secondary-color;
+	}
+
+	.border-none{
+		border: none;
+	}
+}
+
  .main-table {
-	 .main-col-title {
+	 .main-col-title,
+	 .main-col-description {
 		 background: $brighton-font-primary-color;
 		 padding: 1.5rem;
 		 color: $white;
@@ -448,12 +460,19 @@ th {
 		 font-size: 1.25rem;
 	 }
 
+	 .main-col-title {
+		 padding: 1.5rem;
+	 }
+
+	 .main-col-description {
+		 padding: 0.5rem;
+	 }
+
 	 .student-col{
 		 min-width: 320px;
 	 }
 
 	 .col-vertical {
-		 text-align: center;
 		 vertical-align: middle;
 		 writing-mode: vertical-rl;
 		 transform: rotate(180deg);
@@ -497,9 +516,6 @@ th {
 		font-size: 1.25rem;
 	}
 
-	 .highlighted-col {
-		 background: $brighton-secondary-color;
-	 }
 
 	 .gay-col {
 		 background: $brighton-gray;

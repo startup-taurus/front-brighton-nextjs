@@ -22,7 +22,7 @@ const StudentForm = ({ data, isOpen, toggle }: any) => {
 
   const { data: course } = useSWR(
     ["/course/get-active", page, limit, searchTerm],
-    () => getActiveCourses(page, limit, searchTerm)
+    () => getActiveCourses(page, limit, searchTerm),
   );
 
   const save = async (data: any) => {
@@ -46,6 +46,8 @@ const StudentForm = ({ data, isOpen, toggle }: any) => {
       console.error("Error al actualizar usuario:", error);
     }
   };
+
+  console.log(course);
 
   const courseOptions = course?.data
     ? course?.data.map((courseItem: any) => ({
@@ -148,7 +150,7 @@ const StudentForm = ({ data, isOpen, toggle }: any) => {
                     }
                     value={
                       courseOptions.find(
-                        (option: any) => option.value === props.values.courseId
+                        (option: any) => option.value === props.values.courseId,
                       ) || null
                     }
                     placeholder="Select course"
