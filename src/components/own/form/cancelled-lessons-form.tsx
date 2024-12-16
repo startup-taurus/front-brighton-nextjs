@@ -52,7 +52,9 @@ const CancelledLessonsForm = ({
       .required("The cancel date is required"),
   });
 
-  const onSubmit = (body: any) => {
+  const onSubmit = (body: any, { setSubmitting }: any) => {
+    console.log(body);
+    setSubmitting(true);
     if (data) {
       updateCancelLesson(data?.id, body).then(() => {
         toast.success("Record updated correctly");
@@ -60,11 +62,14 @@ const CancelledLessonsForm = ({
       });
     } else {
       body.course_id = router?.query?.id;
-      createCancelLesson(body).then(() => {
-        toast.success("Record saved correctly");
-        onClose();
+      createCancelLesson(body).then((res) => {
+        if (res.statusCode === 200) {
+          toast.success("Record saved correctly");
+          onClose();
+        }
       });
     }
+    setSubmitting(false);
   };
 
   const onClose = () => {

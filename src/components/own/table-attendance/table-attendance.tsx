@@ -1,6 +1,10 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { Input, Table } from "reactstrap";
-import { formatDate, getAllCourseDays } from "../../../../utils/utils";
+import {
+  buildAttendanceStructure,
+  formatDate,
+  getAllCourseDays,
+} from "../../../../utils/utils";
 import { createAttendance } from "../../../../helper/api-data/attendance";
 import { useRouter } from "next/router";
 
@@ -20,26 +24,16 @@ const TableAttendance = ({
   studentsAttendance,
   students = [],
 }: TableAttendance) => {
+  const attendanceDate = useMemo(
+    () =>
+      buildAttendanceStructure(courseSchedule, students, studentsAttendance),
+    [courseSchedule, students, studentsAttendance],
+  );
   const [dates, setDates] = useState<any>([]);
 
   useEffect(() => {
-    let attendanceDate: any = {};
-    courseSchedule?.forEach((courseScheduleItem: any) => {
-      attendanceDate[courseScheduleItem.id] = {};
-      students?.forEach((student) => {
-        attendanceDate[courseScheduleItem.id][student.id] = "";
-      });
-    });
-
-    studentsAttendance?.forEach((studentAttendance) => {
-      if (attendanceDate[studentAttendance?.id]) {
-        attendanceDate[studentAttendance?.id]![studentAttendance?.student_id] =
-          studentAttendance?.status;
-      }
-    });
-
     setDates(attendanceDate);
-  }, [courseSchedule, students, studentsAttendance]);
+  }, [attendanceDate]);
 
   const changeAttendance = async (
     event: any,
@@ -159,11 +153,10 @@ const TableAttendance = ({
           </tr>
           <tr>
             <td className="main-col-description student-col">LESSON:</td>
-            {courseSchedule.map((_: any, index: number) => (
-              <td
-                className="col-vertical"
-                key={`current-lesson-col-${index}`}
-              ></td>
+            {courseSchedule.map((item: any, index: number) => (
+              <td className="col-vertical" key={`current-lesson-col-${index}`}>
+                <Input type="text" className="attendance-input" />
+              </td>
             ))}
             <td className="main-col-description" colSpan={4}></td>
           </tr>

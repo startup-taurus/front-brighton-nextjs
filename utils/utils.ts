@@ -181,7 +181,6 @@ export const getAllCourseDays = (
     currentDate = addWeeks(currentDate, 1);
   }
   daysOfClasses.push(format(new Date(endDate), "EEE, MMM d, yy"));
-  console.log(daysOfClasses);
   return daysOfClasses;
 };
 
@@ -194,5 +193,33 @@ const getDateByDateAndDayName = (date: any, day: string) => {
 export const formatDate = (date: string): string =>
   format(parseISO(date), "EEE, MMM d");
 
-export const getUniqueStudents = (attendanceList: any[]): string[] =>
-  Array.from(new Set(attendanceList?.map((record) => record.student_id)));
+export const initializeAttendanceStructure = (
+  courseSchedule: any,
+  students: any,
+  attendanceDate: any,
+) => {
+  courseSchedule?.forEach((courseScheduleItem: any) => {
+    attendanceDate[courseScheduleItem.id] = {};
+    students?.forEach((student: any) => {
+      attendanceDate[courseScheduleItem.id][student.id] = "";
+    });
+  });
+};
+
+export const buildAttendanceStructure = (
+  courseSchedule: any,
+  students: any,
+  studentsAttendance: any,
+) => {
+  let attendanceDate: any = {};
+  initializeAttendanceStructure(courseSchedule, students, attendanceDate);
+
+  studentsAttendance?.forEach((studentAttendance: any) => {
+    if (attendanceDate[studentAttendance?.id]) {
+      attendanceDate[studentAttendance?.id]![studentAttendance?.student_id] =
+        studentAttendance?.status;
+    }
+  });
+
+  return attendanceDate;
+};

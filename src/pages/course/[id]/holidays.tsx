@@ -5,7 +5,7 @@ import Image from "next/image";
 import useSWR, { mutate } from "swr";
 import { Button, ButtonGroup, Card, CardBody, Col, Row } from "reactstrap";
 import { NextPageWithLayout } from "@/pages/_app";
-import { format } from "date-fns";
+import { format, parseISO } from "date-fns";
 
 import TabsTeachers from "@/components/own/tabs-teachers/tabs-teachers";
 import CustomTable from "@/components/own/custom-table/custom-table";
@@ -46,7 +46,7 @@ const TeachersHolidays: NextPageWithLayout = () => {
     {
       name: "DATE",
       selector: (row: { holiday_date: string }) =>
-        format(new Date(row.holiday_date), "ccc, LLL dd"),
+        format(parseISO(row.holiday_date), "ccc, LLL dd"),
     },
     {
       name: "FESTIVITY",
@@ -58,7 +58,7 @@ const TeachersHolidays: NextPageWithLayout = () => {
     {
       name: "DATE",
       selector: (row: { cancel_date: string }) =>
-        format(new Date(row.cancel_date), "ccc, LLL dd"),
+        format(parseISO(row.cancel_date), "ccc, LLL dd"),
     },
     {
       name: "REASON",

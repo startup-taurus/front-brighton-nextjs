@@ -53,7 +53,7 @@ const TeacherNavMenu = () => {
         {NAV_ITEMS.map(({ name, link, id }, index) => (
           <NavItem key={`teacher-nav-${index}`}>
             <Link href={link.replace("${id}", courseId.toString())}>
-              <NavLink className={active === id ? "active" : ""}>
+              <NavLink tag="span" className={active === id ? "active" : ""}>
                 {name}
               </NavLink>
             </Link>
