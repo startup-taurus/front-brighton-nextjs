@@ -1,12 +1,9 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useState, useMemo, ChangeEvent } from "react";
 import { Input, Table } from "reactstrap";
-import {
-  buildAttendanceStructure,
-  formatDate,
-  getAllCourseDays,
-} from "../../../../utils/utils";
+import { buildAttendanceStructure, formatDate } from "../../../../utils/utils";
 import { createAttendance } from "../../../../helper/api-data/attendance";
-import { useRouter } from "next/router";
+import { updateLessonTaught } from "../../../../helper/api-data/course-schedule";
+import { toast } from "react-toastify";
 
 type TableAttendance = {
   courseSchedule: any;
@@ -30,10 +27,15 @@ const TableAttendance = ({
     [courseSchedule, students, studentsAttendance],
   );
   const [dates, setDates] = useState<any>([]);
+  const [scheduleItems, setScheduleItems] = useState(courseSchedule);
 
   useEffect(() => {
     setDates(attendanceDate);
   }, [attendanceDate]);
+
+  useEffect(() => {
+    setScheduleItems(courseSchedule);
+  }, [courseSchedule]);
 
   const changeAttendance = async (
     event: any,
@@ -78,6 +80,27 @@ const TableAttendance = ({
     };
   };
 
+  const updateScheduleItem = (e: ChangeEvent, index: number) => {
+    const value = (e.target as HTMLInputElement).value;
+
+    const updatedScheduleItems = scheduleItems.map((item: any, i: number) => {
+      if (index === i) return { ...item, lesson_taught: value };
+      return item;
+    });
+    setScheduleItems(updatedScheduleItems);
+  };
+
+  const onSaveLesson = (e: KeyboardEvent, lessonId: number, index: number) => {
+    const value = (e.target as HTMLInputElement).value;
+
+    if (e.code === "Enter") {
+      updateLessonTaught(lessonId, { lesson_taught: value }).then((res) => {
+        if (res.status === "status")
+          toast.success("Lesson update successfully!");
+      });
+    }
+  };
+
   const renderStatisticsCol = (studentId: number) => {
     const assistanceStatistics = calculateAttendance(studentId, "present");
     const absentStatistics = calculateAttendance(studentId, "absent");
@@ -98,7 +121,7 @@ const TableAttendance = ({
         <thead>
           <tr>
             <th className="main-col-title student-col">STUDENT</th>
-            {courseSchedule?.map((date: any, index: number) => (
+            {scheduleItems?.map((date: any, index: number) => (
               <th className="col-vertical" key={`date-attendance-${index}`}>
                 {formatDate(date?.scheduled_date)}
               </th>
@@ -153,16 +176,24 @@ const TableAttendance = ({
           </tr>
           <tr>
             <td className="main-col-description student-col">LESSON:</td>
-            {courseSchedule.map((item: any, index: number) => (
+            {scheduleItems.map((item: any, index: number) => (
               <td className="col-vertical" key={`current-lesson-col-${index}`}>
-                <Input type="text" className="attendance-input" />
+                <Input
+                  type="text"
+                  className="attendance-input"
+                  // @ts-ignore
+                  onChange={(e) => updateScheduleItem(e, index)}
+                  // @ts-ignore
+                  onKeyUp={(e) => onSaveLesson(e, item.id, index)}
+                  value={scheduleItems[index].lesson_taught ?? ""}
+                />
               </td>
             ))}
             <td className="main-col-description" colSpan={4}></td>
           </tr>
           <tr>
             <td className="main-col-description student-col">CURRICULUM:</td>
-            {courseSchedule?.map((item: any, index: number) => (
+            {scheduleItems?.map((item: any, index: number) => (
               <td
                 className="col-vertical highlighted-col text-center"
                 key={`curriculum-lesson-col-${index}`}

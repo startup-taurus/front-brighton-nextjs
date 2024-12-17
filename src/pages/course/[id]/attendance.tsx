@@ -1,18 +1,19 @@
-import CourseLayout from "@/components/own/course-layout/course-layout";
-import AttendanceTable from "@/components/own/table-attendance/table-attendance";
-import TabsTeachers from "@/components/own/tabs-teachers/tabs-teachers";
 import React, { ReactElement } from "react";
 import { Card, CardBody } from "reactstrap";
 import { NextPageWithLayout } from "@/pages/_app";
 import { useRouter } from "next/router";
 import useSWR from "swr";
+
+import CourseLayout from "@/components/own/course-layout/course-layout";
+import AttendanceTable from "@/components/own/table-attendance/table-attendance";
+import TabsTeachers from "@/components/own/tabs-teachers/tabs-teachers";
 import {
   getCourseById,
-  getCourseScheduleDates,
   getCourseWithStudents,
 } from "../../../../helper/api-data/course";
 import { getAttendance } from "../../../../helper/api-data/attendance";
 import AttendanceHelpBox from "@/components/own/attendance-help-box/attendance-help-box";
+import { getCourseScheduleDates } from "../../../../helper/api-data/course-schedule";
 
 const tabsName = "ATTENDANCE";
 
@@ -35,7 +36,7 @@ const TeachersAttendance: NextPageWithLayout = () => {
   );
 
   const schedule = useSWR(
-    courseId ? `/course/get-syllabus-by-course/${courseId}` : null,
+    courseId ? `/course-schedule/get-syllabus-by-course/${courseId}` : null,
     () => getCourseScheduleDates(courseId!.toString()),
   );
 

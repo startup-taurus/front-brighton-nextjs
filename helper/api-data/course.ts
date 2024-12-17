@@ -7,10 +7,6 @@ export const getCourseWithStudents = (courseId: string) => {
   return getFetcher(`/course/get-students/${courseId}`, false);
 };
 
-export const getCourseScheduleDates = (courseId: string) => {
-  return getFetcher(`/course/get-syllabus-by-course/${courseId}`, false);
-};
-
 export const getActiveCourses = (
   page: number,
   limit: number,
