@@ -68,9 +68,9 @@ const TeachersHolidays: NextPageWithLayout = () => {
       name: "ACTIONS",
       cell: (row: any) => (
         <ButtonGroup>
-          <Button color="primary" onClick={() => onRowSelected(row)}>
-            <FaPencil />
-          </Button>
+          {/*<Button color="primary" onClick={() => onRowSelected(row)}>*/}
+          {/*  <FaPencil />*/}
+          {/*</Button>*/}
           <Button color="danger" onClick={() => deleteRow(row)}>
             <FaTrash />
           </Button>
@@ -83,10 +83,10 @@ const TeachersHolidays: NextPageWithLayout = () => {
     setIsOpenModal(() => !isOpenModal);
   };
 
-  const onRowSelected = (row: any) => {
-    setSelectedData(() => row);
-    toggleModal();
-  };
+  // const onRowSelected = (row: any) => {
+  //   setSelectedData(() => row);
+  //   toggleModal();
+  // };
 
   const deleteRow = (row: any) => {
     Swal.fire({

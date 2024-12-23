@@ -53,23 +53,23 @@ const CancelledLessonsForm = ({
   });
 
   const onSubmit = (body: any, { setSubmitting }: any) => {
-    console.log(body);
     setSubmitting(true);
     if (data) {
       updateCancelLesson(data?.id, body).then(() => {
+        setSubmitting(false);
         toast.success("Record updated correctly");
         onClose();
       });
     } else {
       body.course_id = router?.query?.id;
       createCancelLesson(body).then((res) => {
+        setSubmitting(false);
         if (res.statusCode === 200) {
           toast.success("Record saved correctly");
           onClose();
         }
       });
     }
-    setSubmitting(false);
   };
 
   const onClose = () => {

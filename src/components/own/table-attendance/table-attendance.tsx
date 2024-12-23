@@ -1,9 +1,16 @@
-import React, { useEffect, useState, useMemo, ChangeEvent } from "react";
+import React, {
+  useEffect,
+  useState,
+  useMemo,
+  ChangeEvent,
+  useCallback,
+} from "react";
 import { Input, Table } from "reactstrap";
 import { buildAttendanceStructure, formatDate } from "../../../../utils/utils";
 import { createAttendance } from "../../../../helper/api-data/attendance";
 import { updateLessonTaught } from "../../../../helper/api-data/course-schedule";
 import { toast } from "react-toastify";
+import { debounce } from "lodash";
 
 type TableAttendance = {
   courseSchedule: any;
@@ -21,13 +28,14 @@ const TableAttendance = ({
   studentsAttendance,
   students = [],
 }: TableAttendance) => {
+  const [dates, setDates] = useState<any>([]);
+  const [scheduleItems, setScheduleItems] = useState(courseSchedule);
+
   const attendanceDate = useMemo(
     () =>
       buildAttendanceStructure(courseSchedule, students, studentsAttendance),
     [courseSchedule, students, studentsAttendance],
   );
-  const [dates, setDates] = useState<any>([]);
-  const [scheduleItems, setScheduleItems] = useState(courseSchedule);
 
   useEffect(() => {
     setDates(attendanceDate);
@@ -80,7 +88,11 @@ const TableAttendance = ({
     };
   };
 
-  const updateScheduleItem = (e: ChangeEvent, index: number) => {
+  const updateScheduleItem = (
+    e: ChangeEvent,
+    lessonId: number,
+    index: number,
+  ) => {
     const value = (e.target as HTMLInputElement).value;
 
     const updatedScheduleItems = scheduleItems.map((item: any, i: number) => {
@@ -88,18 +100,16 @@ const TableAttendance = ({
       return item;
     });
     setScheduleItems(updatedScheduleItems);
+
+    onSaveLesson(value, lessonId);
   };
 
-  const onSaveLesson = (e: KeyboardEvent, lessonId: number, index: number) => {
-    const value = (e.target as HTMLInputElement).value;
-
-    if (e.code === "Enter") {
-      updateLessonTaught(lessonId, { lesson_taught: value }).then((res) => {
-        if (res.status === "status")
-          toast.success("Lesson update successfully!");
-      });
-    }
-  };
+  const onSaveLesson = useCallback(
+    debounce(async (lesson: string, lessonId: number) => {
+      await updateLessonTaught(lessonId, { lesson_taught: lesson });
+    }, 600),
+    [],
+  );
 
   const renderStatisticsCol = (studentId: number) => {
     const assistanceStatistics = calculateAttendance(studentId, "present");
@@ -182,9 +192,7 @@ const TableAttendance = ({
                   type="text"
                   className="attendance-input"
                   // @ts-ignore
-                  onChange={(e) => updateScheduleItem(e, index)}
-                  // @ts-ignore
-                  onKeyUp={(e) => onSaveLesson(e, item.id, index)}
+                  onChange={(e) => updateScheduleItem(e, item.id, index)}
                   value={scheduleItems[index].lesson_taught ?? ""}
                 />
               </td>
