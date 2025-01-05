@@ -14,8 +14,6 @@ const teacherPaths = [
   "/course/:id/faq",
 ];
 
-const adminPaths = ["/dashboard", "/admin", "/admin/:path*"];
-
 export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const userCookie = request.cookies.get("token")?.value;

@@ -1,22 +1,8 @@
 import React, { useEffect, useState } from "react";
 import FullCalendar from "@fullcalendar/react";
 import timeGridPlugin from "@fullcalendar/timegrid";
-import { EventSourceInput } from "@fullcalendar/core";
 import { Col, Row } from "reactstrap";
 import { getDayOfClassesOfWeek } from "../../../../utils/utils";
-
-const INITIAL_EVENTS: EventSourceInput = [
-  {
-    id: "1",
-    title: "F-16",
-    start: new Date().toISOString().replace(/T.*$/, "") + "T11:00:00",
-  },
-  {
-    id: "2",
-    title: "F-16",
-    start: new Date().toISOString().replace(/T.*$/, "") + "T12:00:00",
-  },
-];
 
 const ScheduleCalendar = ({ courses }: any) => {
   const [daysOfClasses, setDayOfClasses] = useState<any[]>([]);

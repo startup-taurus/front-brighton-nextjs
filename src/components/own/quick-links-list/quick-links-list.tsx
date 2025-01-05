@@ -21,16 +21,20 @@ const QuickLinksList = ({
 }: CoursesListProps) => {
   return (
     <div>
-      <h2 className="main-title text-lg-end">{title}</h2>
+      <h2 className="main-title text-lg-end pt-lg-0 pt-3">{title}</h2>
       <Table className="link-list-small">
         <tbody>
           {quickLinks?.map((link, index) => (
             <tr key={`dashboard-course-${index}`}>
-              <td>{link.title}</td>
+              <td className="link-list-title">{link.title}</td>
               <td className="col-bg-primary ">
-                <Link href={link.link} className="w-100 h-100 col-icon">
+                <a
+                  href={link.link}
+                  target="_blank"
+                  className="w-100 h-100 col-icon"
+                >
                   {link.icon}
-                </Link>
+                </a>
               </td>
             </tr>
           ))}
@@ -40,7 +44,7 @@ const QuickLinksList = ({
         <tbody>
           {otherLinks?.map((link, index) => (
             <tr key={`dashboard-course-${index}`}>
-              <td>{link.title}</td>
+              <td className="link-list-title">{link.title}</td>
               <td className="col-bg-primary ">
                 <a
                   href={link.link}

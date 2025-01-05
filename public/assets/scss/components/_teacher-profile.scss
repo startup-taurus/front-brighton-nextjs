@@ -10,11 +10,6 @@
     height: 150px;
   }
 
-  //   @media screen and (max-width: 600px) {
-  //     width: 100px;
-  //     height: 100px;
-  //   }
-
   .profile-description {
     display: flex;
     align-items: center;
@@ -57,6 +52,41 @@
       }
       .statistics-description {
         text-transform: uppercase;
+      }
+    }
+  }
+
+  @media (max-width: 992px) {
+    gap: 1rem;
+
+    .profile-description {
+      h3 {
+        font-size: 2rem;
+      }
+      p {
+        font-size: 1rem;
+      }
+    }
+
+    .yourule-decorator,
+    .hearth-decorator {
+      display: none;
+    }
+
+    .profile-statistics {
+      padding: 1.5rem 0.5rem;
+    }
+  }
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+
+    .profile-description {
+      h3 {
+        font-size: 1.5rem;
+      }
+      p {
+        font-size: 0.8rem;
       }
     }
   }

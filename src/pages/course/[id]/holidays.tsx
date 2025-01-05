@@ -96,7 +96,7 @@ const TeachersHolidays: NextPageWithLayout = () => {
       showCancelButton: true,
     }).then((result) => {
       if (result.value) {
-        deleteCancelledLesson(row?.id).then(() => {
+        deleteCancelledLesson(row).then(() => {
           mutate(`/cancelled-lesson/get-all-by-course/${courseId}`);
           toast.success("Cancelled class deleted!");
         });
@@ -119,7 +119,7 @@ const TeachersHolidays: NextPageWithLayout = () => {
               </div>
               <CustomTable columns={holidayCols} data={holidays?.data?.data} />
             </Col>
-            <Col xs={12} sm={12} md={6} lg={4}>
+            <Col xs={12} sm={12} md={6} lg={4} className="mt-4 mt-md-0">
               <div className="holiday-table-header">
                 <h3>CANCELED LESSONS</h3>
                 <Button onClick={toggleModal}>
@@ -131,7 +131,7 @@ const TeachersHolidays: NextPageWithLayout = () => {
                 data={cancelledLessons?.data?.data}
               />
             </Col>
-            <Col xs={12} sm={12} md={6} lg={4}>
+            <Col xs={12} sm={12} md={6} lg={4} className="mt-4 mt-lg-0">
               <div className="warning-messages">
                 <Image
                   src={`${ImgPath}/course/warning-icon.png`}
@@ -145,7 +145,7 @@ const TeachersHolidays: NextPageWithLayout = () => {
                 </p>
               </div>
               <Image
-                className="w-100"
+                className="w-100 holiday-decorator"
                 src={`${ImgPath}/course/holiday-bg.png`}
                 alt="logo"
                 layout="responsive"

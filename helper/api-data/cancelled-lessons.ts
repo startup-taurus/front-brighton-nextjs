@@ -12,6 +12,6 @@ export const updateCancelLesson = (id: number, data: any) => {
   return patchFetcher(`/cancelled-lesson/update/${id}`, data);
 };
 
-export const deleteCancelledLesson = (id: number) => {
-  return postFetcher(`/cancelled-lesson/delete/${id}`, {});
+export const deleteCancelledLesson = (row: any) => {
+  return postFetcher(`/cancelled-lesson/delete`, row);
 };

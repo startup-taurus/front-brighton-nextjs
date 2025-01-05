@@ -181,36 +181,45 @@ const TableAttendance = ({
             </tr>
           )}
 
-          <tr className="py-2">
-            <td className="border-none"></td>
-          </tr>
-          <tr>
-            <td className="main-col-description student-col">LESSON:</td>
-            {scheduleItems.map((item: any, index: number) => (
-              <td className="col-vertical" key={`current-lesson-col-${index}`}>
-                <Input
-                  type="text"
-                  className="attendance-input"
-                  // @ts-ignore
-                  onChange={(e) => updateScheduleItem(e, item.id, index)}
-                  value={scheduleItems[index].lesson_taught ?? ""}
-                />
-              </td>
-            ))}
-            <td className="main-col-description" colSpan={4}></td>
-          </tr>
-          <tr>
-            <td className="main-col-description student-col">CURRICULUM:</td>
-            {scheduleItems?.map((item: any, index: number) => (
-              <td
-                className="col-vertical highlighted-col text-center"
-                key={`curriculum-lesson-col-${index}`}
-              >
-                {item.syllabusItem.item_name}
-              </td>
-            ))}
-            <td className="main-col-description" colSpan={4}></td>
-          </tr>
+          {students && students.length > 0 && (
+            <>
+              <tr className="py-2">
+                <td className="border-none"></td>
+              </tr>
+              <tr>
+                <td className="main-col-description student-col">LESSON:</td>
+                {scheduleItems.map((item: any, index: number) => (
+                  <td
+                    className="col-vertical"
+                    key={`current-lesson-col-${index}`}
+                  >
+                    <Input
+                      type="text"
+                      className="attendance-input"
+                      // @ts-ignore
+                      onChange={(e) => updateScheduleItem(e, item.id, index)}
+                      value={scheduleItems[index].lesson_taught ?? ""}
+                    />
+                  </td>
+                ))}
+                <td className="main-col-description" colSpan={4}></td>
+              </tr>
+              <tr>
+                <td className="main-col-description student-col">
+                  CURRICULUM:
+                </td>
+                {scheduleItems?.map((item: any, index: number) => (
+                  <td
+                    className="col-vertical highlighted-col text-center"
+                    key={`curriculum-lesson-col-${index}`}
+                  >
+                    {item.syllabusItem.item_name}
+                  </td>
+                ))}
+                <td className="main-col-description" colSpan={4}></td>
+              </tr>
+            </>
+          )}
         </tbody>
       </Table>
     </div>

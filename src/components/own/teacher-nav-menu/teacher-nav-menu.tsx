@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Card, CardBody, Nav, NavItem, NavLink } from "reactstrap";
+import { Card, Nav, NavItem, NavLink } from "reactstrap";
 import { useRouter } from "next/router";
 import Link from "next/link";
 
@@ -15,14 +15,14 @@ const NAV_ITEMS = [
     link: "/course/${id}/attendance",
   },
   {
-    id: "holidays",
-    name: "‍🌴 HOLIDAYS",
-    link: "/course/${id}/holidays",
-  },
-  {
     id: "gradebook",
     name: "📚 GRADEBOOK",
     link: "/course/${id}/gradebook",
+  },
+  {
+    id: "holidays",
+    name: "‍🌴 HOLIDAYS",
+    link: "/course/${id}/holidays",
   },
   {
     id: "student-report",

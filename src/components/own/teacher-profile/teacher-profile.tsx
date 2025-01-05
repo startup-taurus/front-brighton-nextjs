@@ -39,14 +39,15 @@ const TeacherProfile = ({ profileData }: TeacherProfileProps) => {
           />
         )}
         <div>
-          <h3>
+          <h3 className="teacher-name">
             {firstName} {lastName}
           </h3>
-          <p>{position}</p>
+          <p className="teacher-position">{position}</p>
         </div>
       </div>
       <Image
         src={`${ImgPath}/own/hearth-bg.png`}
+        className="hearth-decorator"
         alt="image profile"
         width={160}
         height={120}
@@ -83,6 +84,7 @@ const TeacherProfile = ({ profileData }: TeacherProfileProps) => {
       </div>
       <Image
         src={`${ImgPath}/own/yourule-bg.png`}
+        className="yourule-decorator"
         alt="image profile"
         width={120}
         height={120}

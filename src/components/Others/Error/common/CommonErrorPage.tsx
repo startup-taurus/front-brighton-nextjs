@@ -4,13 +4,22 @@ import Link from "next/link";
 import { Col, Container } from "reactstrap";
 import { BackToHomePage, CommonErrorPageText, ImgPath } from "utils/Constant";
 
-
-const CommonErrorPage = ({tittle,tittleClassName,BtnClassName,}: errorPageCommonProps) => {
+const CommonErrorPage = ({
+  tittle,
+  tittleClassName,
+  BtnClassName,
+}: errorPageCommonProps) => {
   return (
     <div className="page-wrapper compact-wrapper" id="pageWrapper">
       <div className="error-wrapper">
         <Container>
-          <Image width={100} height={100} className="img-100" src={`${ImgPath}/other-images/sad.png`} alt="Error"/>
+          <Image
+            width={100}
+            height={100}
+            className="img-100"
+            src={`${ImgPath}/other-images/sad.png`}
+            alt="Error"
+          />
           <div className="error-heading">
             <h2 className={`headline ${tittleClassName}`}>{tittle}</h2>
           </div>
@@ -18,7 +27,10 @@ const CommonErrorPage = ({tittle,tittleClassName,BtnClassName,}: errorPageCommon
             <p className="sub-content">{CommonErrorPageText}</p>
           </Col>
           <div>
-            <Link className={`btn  ${BtnClassName} btn-lg `} href={"/dashboard/default"}>
+            <Link
+              className={`btn  ${BtnClassName} btn-lg `}
+              href={"/dashboard"}
+            >
               {BackToHomePage}
             </Link>
           </div>

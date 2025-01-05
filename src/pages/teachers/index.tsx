@@ -3,7 +3,7 @@ import React, { useContext } from "react";
 import SectionTitle from "@/components/own/section-title/section-title";
 import { Card, CardBody, Col, Row } from "reactstrap";
 import TeacherProfile from "@/components/own/teacher-profile/teacher-profile";
-import { ImgPath } from "utils/Constant";
+import { ImgPath, UrlImage } from "utils/Constant";
 import CoursesList from "@/components/own/courses-list/courses-list";
 import QuickLinksList from "@/components/own/quick-links-list/quick-links-list";
 import ScheduleCalendar from "@/components/own/schedule-calendar/schedule-calendar";
@@ -47,22 +47,22 @@ const QUICK_LINKS = [
   },
   {
     title: "Study Guides",
-    link: "https://drive.google.com/drive/folders/1570aSXIRsYP2h8BFHzsXyzJrZ5nCGd1F",
+    link: "https://drive.google.com/drive/folders/1uA2VgHN_SZUz8dqwtohTiAJ-qx18phuc",
     icon: "🎒",
   },
   {
     title: "Final Projects",
-    link: "https://drive.google.com/drive/folders/1570aSXIRsYP2h8BFHzsXyzJrZ5nCGd1F",
+    link: "https://drive.google.com/drive/folders/1uLk_oPsPtNhJ0UJAbC51_48r5Y19E6Qx",
     icon: "🎓",
   },
   {
     title: "Final Exams",
-    link: "https://drive.google.com/drive/folders/1570aSXIRsYP2h8BFHzsXyzJrZ5nCGd1F",
+    link: "https://drive.google.com/drive/folders/1NYeWSHLyHa-K1qvOST0dIq-ihoEKLLIO",
     icon: "📝",
   },
   {
     title: "Rulebooks",
-    link: "https://drive.google.com/drive/folders/1570aSXIRsYP2h8BFHzsXyzJrZ5nCGd1F",
+    link: "https://drive.google.com/drive/folders/1D7UJ5u8r9KHkSZq1KG9nhp5uOfP5SyB1",
     icon: "📔",
   },
 ];
@@ -70,12 +70,7 @@ const QUICK_LINKS = [
 const OTHER_LINKS = [
   {
     title: "Monthly reports",
-    link: "https://drive.google.com/drive/folders/1570aSXIRsYP2h8BFHzsXyzJrZ5nCGd1F",
-    icon: "📁",
-  },
-  {
-    title: "Courses",
-    link: "https://drive.google.com/drive/folders/1570aSXIRsYP2h8BFHzsXyzJrZ5nCGd1F",
+    link: "https://drive.google.com/drive/folders/13yP6HYfuUjwnhVwV0K3hYUE_FC_juCAQ",
     icon: "📁",
   },
 ];
@@ -96,7 +91,9 @@ const Dashboard = () => {
           <SectionTitle title="Dashboard" />
           <TeacherProfile
             profileData={{
-              profileImage: `${ImgPath}/user/user.png`,
+              profileImage: user.image
+                ? `${UrlImage}/${user.image}`
+                : "/assets/images/user/user.png",
               firstName: user?.name?.split(" ")[0],
               lastName: user?.name?.split(" ")[1],
               position: user?.role,

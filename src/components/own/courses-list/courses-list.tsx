@@ -8,7 +8,6 @@ interface CoursesListProps {
 }
 
 const CoursesList = ({ title, coursesList }: CoursesListProps) => {
-  console.log(coursesList);
   return (
     <div>
       <h2 className="main-title">{title}</h2>

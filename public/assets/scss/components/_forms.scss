@@ -12,7 +12,7 @@
 .form-space {
   margin-bottom: -10px;
 
-  >div {
+  > div {
     margin-bottom: 10px;
   }
 }
@@ -47,20 +47,20 @@
     }
   }
 
-  input[type=text],
-  input[type=email],
-  input[type=search],
-  input[type=password],
-  input[type=number],
-  input[type=tel],
-  input[type=date],
-  input[type=datetime-local],
-  input[type=time],
-  input[type=datetime-local],
-  input[type=month],
-  input[type=week],
-  input[type=url],
-  input[type=file],
+  input[type="text"],
+  input[type="email"],
+  input[type="search"],
+  input[type="password"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="date"],
+  input[type="datetime-local"],
+  input[type="time"],
+  input[type="datetime-local"],
+  input[type="month"],
+  input[type="week"],
+  input[type="url"],
+  input[type="file"],
   textarea,
   select {
     border-color: $gray-60;
@@ -79,7 +79,7 @@
     }
   }
 
-  input[type=file] {
+  input[type="file"] {
     height: auto;
   }
 
@@ -237,7 +237,6 @@
     border-radius: 10px;
     background-color: rgba($light-color, 0.3);
 
-
     [dir="rtl"] & {
       padding: 10px 70px 10px 10px;
     }
@@ -258,10 +257,7 @@
 
 // Custom style
 .custom-input {
-
-
   &.was-validated {
-
     .form-control,
     .form-select {
       &:valid {
@@ -273,7 +269,6 @@
       }
     }
   }
-
 
   .valid-tooltip {
     background-color: $success-color;
@@ -289,7 +284,6 @@
 
   .form-check {
     .form-check-input {
-
       &:valid {
         border-color: $success-color;
       }
@@ -298,11 +292,11 @@
         border-color: $danger-color;
       }
 
-      &:invalid~.form-check-label {
+      &:invalid ~ .form-check-label {
         color: $danger-color;
       }
 
-      &:valid~.form-check-label {
+      &:valid ~ .form-check-label {
         color: $success-color;
       }
 
@@ -319,14 +313,12 @@
   #validationCustom03,
   #validationCustom05,
   #validationCustomUsername {
-
     &.form-control,
     .form-select {
       border-color: $gray-60;
     }
 
     &.was-validated {
-
       .form-control,
       .form-select {
         &:valid {
@@ -336,7 +328,6 @@
         &:invalid {
           border-color: $danger-color;
         }
-
       }
     }
   }
@@ -372,7 +363,6 @@
       &.sub-title {
         font-weight: 500;
       }
-
     }
   }
 
@@ -414,9 +404,7 @@
 
     [dir="rtl"] & {
       margin: 0;
-
     }
-
 
     .form-check-input {
       width: 18px;
@@ -455,7 +443,6 @@
         left: unset;
         right: 15px;
       }
-
     }
 
     .form-check-label {
@@ -477,7 +464,7 @@
       margin-top: 0;
 
       &::before {
-        content: '';
+        content: "";
         width: 100%;
         height: 100%;
         margin-left: 1px;
@@ -491,18 +478,17 @@
         }
       }
     }
-
   }
 
   &.checkbox-primary {
-    input[type=checkbox]:checked {
-      +label::before {
+    input[type="checkbox"]:checked {
+      + label::before {
         color: transparent;
         border: 2px solid $primary-color;
       }
     }
 
-    input[type=checkbox] {
+    input[type="checkbox"] {
       opacity: 1;
     }
 
@@ -515,7 +501,7 @@
         }
       }
 
-      &:checked[type=checkbox] {
+      &:checked[type="checkbox"] {
         background-image: none;
       }
     }
@@ -527,7 +513,6 @@
   .btn {
     margin-bottom: 0;
   }
-
 }
 
 .radio-wrapper,
@@ -537,7 +522,7 @@
   flex-wrap: wrap;
   justify-content: center;
 
-  @media (max-width:1200px) {
+  @media (max-width: 1200px) {
     justify-content: unset;
   }
 
@@ -552,11 +537,11 @@
     justify-content: center;
     max-width: 130px;
 
-    @media (max-width:1335px) {
+    @media (max-width: 1335px) {
       max-width: 113px;
     }
 
-    @media (max-width:1232px) {
+    @media (max-width: 1232px) {
       padding: 8px;
       max-width: 105px;
     }
@@ -578,7 +563,7 @@
         box-shadow: none;
       }
 
-      &[type=radio] {
+      &[type="radio"] {
         opacity: 1;
       }
 
@@ -586,7 +571,7 @@
         border: 2px solid $primary-color;
         background-color: transparent;
 
-        &[type=radio] {
+        &[type="radio"] {
           background-image: none;
           box-shadow: unset;
         }
@@ -679,7 +664,6 @@
     }
 
     &.stroke-icon {
-
       width: 25px;
       height: 25px;
       stroke: $dark-color;
@@ -722,7 +706,7 @@
   }
 
   .form-floating {
-    >label {
+    > label {
       [dir="rtl"] & {
         left: unset;
         right: 0;
@@ -737,10 +721,16 @@
   }
 }
 
-
 .form-floating {
   &.mb-3 {
     margin-bottom: 0 !important;
+  }
+}
+
+.required-input {
+  &::after {
+    content: "*";
+    color: red;
   }
 }
 

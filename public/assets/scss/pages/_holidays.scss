@@ -6,8 +6,6 @@
   justify-content: space-between;
   gap: 0.5rem;
 
-
-
   h3 {
     font-size: 1.5rem;
     color: $white;
@@ -15,8 +13,7 @@
   }
 }
 
-
-.warning-messages{
+.warning-messages {
   border: 2px solid $brighton-border-color;
   border-radius: 20px;
   padding: 1rem;
@@ -27,24 +24,28 @@
   align-items: center;
   gap: 0.5rem;
 
-  p{
+  p {
     font-size: 1.1rem;
     font-weight: 700;
     line-height: 1;
     letter-spacing: 0.01rem;
     text-align: center;
 
-    span{
+    span {
       color: $brighton-primary-color;
       text-transform: uppercase;
     }
   }
 }
 
+@media (max-width: 992px) {
+  .holiday-decorator {
+    display: none;
+  }
+}
 
 @media screen and (max-width: 600px) {
   .warning-messages {
     max-width: 100%;
   }
-
-  }
+}

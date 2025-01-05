@@ -45,7 +45,6 @@
 
 /*======= Page Header css ends  ======= */
 
-
 /**======Main Header css Start ======**/
 .offcanvas,
 .offcanvas-bookmark {
@@ -99,7 +98,7 @@
       transition: all 0.3s ease;
     }
 
-    >svg {
+    > svg {
       color: var(--theme-deafult) !important;
       stroke: var(--theme-deafult) !important;
     }
@@ -139,7 +138,6 @@
   }
 }
 
-
 /**======Main Header css Ends ======**/
 
 /*=======Mega menu css start=======*/
@@ -166,7 +164,7 @@
   }
 
   div {
-    >div {
+    > div {
       a {
         margin-bottom: 0px;
         display: inline-block;
@@ -233,8 +231,9 @@
   width: 100%;
   height: auto;
 }
+
 .teacher-title {
-  color: #FFA700;
+  color: #ffa700;
   font-size: 2rem;
   font-weight: bold;
   text-transform: uppercase;
@@ -280,6 +279,11 @@
 
 /* Responsividad */
 @media (max-width: 768px) {
+  .background-header-image {
+    margin-top: 1rem;
+    height: 120px !important;
+  }
+
   .teacher-details-box {
     top: 52%;
     left: 1%;
@@ -304,6 +308,13 @@
 
   .info-description {
     font-size: 12px;
+    text-wrap: initial;
+  }
+}
+
+@media (max-width: 576px) {
+  .background-header-image {
+    margin-top: 0.5rem;
   }
 }
 
@@ -313,7 +324,7 @@
     left: 1%;
     width: 31%;
   }
-  .teacher-students-info{
+  .teacher-students-info {
     margin-bottom: 0px;
   }
   .info-title {
@@ -323,17 +334,16 @@
   .info-description {
     font-size: 11px;
     max-width: 50%;
-    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
   }
 
-  .img-sm{
+  .img-sm {
     height: 20px !important;
   }
 
   .small {
-    max-width:100%;
+    max-width: 100%;
   }
 
   .pad {
@@ -341,7 +351,5 @@
     padding-left: 15px !important;
   }
 }
-
-
 
 /*=======Header Teacher css end=======*/

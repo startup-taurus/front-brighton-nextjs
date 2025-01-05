@@ -8,11 +8,6 @@ import { getCourseWithStudents } from "../../../../helper/api-data/course";
 import { useRouter } from "next/router";
 import useSWR from "swr";
 
-const numberOfClass = "F-16°";
-const nameTeacher = "KAORI FUKASAWA";
-const numberOfStudents = "7";
-const nameCourse = "A1.2 MOVERS - MON & WEB 4-6 PM";
-
 const CourseHome: NextPageWithLayout = () => {
   const router = useRouter();
   const courseId = router.query.id;
