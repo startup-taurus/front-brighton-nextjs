@@ -1,0 +1,296 @@
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { Input, Table } from "reactstrap";
+import { COMPONENTS_GRADEBOOK } from "../../../../utils/constants";
+import {
+  buildGradebookStructure,
+  calculateAverage,
+  calculateClassTotalAverage,
+  calculateTotalAverage,
+  determineResult,
+  formatGradebookComponents,
+} from "../../../../utils/utils";
+import { debounce } from "lodash";
+import { useRouter } from "next/router";
+import { updateStudentGrade } from "../../../../helper/api-data/student-grades";
+import { ComponentsGradebook } from "../../../../Types/GradingItem";
+
+const GradebookTable = ({
+  students,
+  gradingItems,
+  studentsGrades,
+  gradingPercentages,
+}: any) => {
+  const router = useRouter();
+  const courseId = router.query.id as string;
+
+  const [grades, setGrades] = useState<any>({});
+  const [componentsGradebook, setComponentsGradebook] =
+    useState<ComponentsGradebook>({
+      assignments: [],
+      progressTest: [],
+      moversExam: [],
+    });
+
+  const gradingGrade = useMemo(
+    () => buildGradebookStructure(gradingItems, students, studentsGrades),
+    [gradingItems, students, studentsGrades],
+  );
+
+  useEffect(() => {
+    const components = formatGradebookComponents(gradingItems);
+    setComponentsGradebook(components);
+  }, [gradingItems]);
+
+  useEffect(() => {
+    setGrades(gradingGrade);
+  }, [gradingGrade]);
+
+  const changeGrades = async (
+    event: any,
+    gradingItemId: any,
+    studentId: any,
+  ) => {
+    const grade = event.target.value;
+    if (grade === "") return;
+    setGrades((grades: any) => ({
+      ...grades,
+      [gradingItemId]: {
+        ...grade[gradingItemId],
+        [studentId]: grade,
+      },
+    }));
+
+    onSaveGrade({
+      course_id: courseId,
+      student_id: studentId,
+      grading_item_id: gradingItemId,
+      grade,
+    });
+  };
+
+  const onSaveGrade = useCallback(
+    debounce(async (data: any) => {
+      await updateStudentGrade(data);
+    }, 600),
+    [],
+  );
+
+  const renderAverageCols = ({
+    grades,
+    componentsGradebook,
+    student,
+    gradingPercentages,
+  }: any) => {
+    const totalAverage = calculateTotalAverage(
+      grades,
+      componentsGradebook,
+      student.id,
+      gradingPercentages,
+    );
+
+    const result = determineResult(Number(totalAverage));
+    return (
+      <>
+        <td className="highlighted-col">{totalAverage}%</td>
+        <td
+          className={` ${result?.resultClass ? `bg-${result?.resultClass}` : "gray-col"}`}
+        >
+          {result?.result}
+        </td>
+      </>
+    );
+  };
+
+  return (
+    <>
+      <Table responsive bordered className="report-table">
+        <tbody>
+          <tr className="py-2 border-none">
+            <td className="border-none"></td>
+            <td
+              className="col-title"
+              colSpan={componentsGradebook?.assignments.length}
+            >
+              {COMPONENTS_GRADEBOOK.ASSIGNMENTS}
+            </td>
+            <td className="border-none"></td>
+            <td
+              className="col-title"
+              colSpan={componentsGradebook?.progressTest.length}
+            >
+              {COMPONENTS_GRADEBOOK.PROGRESS_TESTS}
+            </td>
+            <td className="border-none"></td>
+            <td
+              className="col-title"
+              colSpan={componentsGradebook?.moversExam.length}
+            >
+              {COMPONENTS_GRADEBOOK.MOVERS_EXAM}
+            </td>
+          </tr>
+          <tr className="py-2 border-none">
+            <td className="border-none"></td>
+            {componentsGradebook?.assignments?.map(
+              (item: any, index: number) => (
+                <td
+                  className="col-vertical border-bottom text-center"
+                  key={`assignments-title-${item.item_id}`}
+                >
+                  {item.item_name}
+                </td>
+              ),
+            )}
+            <td className="border-none"></td>
+            {componentsGradebook?.progressTest?.map(
+              (item: any, index: number) => (
+                <td
+                  className="col-vertical border-bottom text-center highlighted-col"
+                  key={`progressTest-title-${item.item_id}`}
+                >
+                  {item.item_name}
+                </td>
+              ),
+            )}
+            <td className="border-none"></td>
+            {componentsGradebook?.moversExam?.map(
+              (item: any, index: number) => (
+                <td
+                  className="col-vertical border-bottom text-center highlighted-col"
+                  key={`moversExam-title-${item.item_id}`}
+                >
+                  {item.item_name}
+                </td>
+              ),
+            )}
+          </tr>
+          <tr className="py-2 border-none">
+            <td className="border-none"></td>
+          </tr>
+          <tr>
+            <td className="col-title">STUDENT</td>
+            <td
+              className="col-title"
+              colSpan={componentsGradebook?.assignments?.length}
+            ></td>
+            <td className="col-title">
+              ASSIG. ({gradingPercentages?.assig_percentage}%)
+            </td>
+            <td
+              className="col-title"
+              colSpan={componentsGradebook?.progressTest?.length}
+            ></td>
+            <td className="col-title">
+              TEST. ({gradingPercentages?.test_percentage}%)
+            </td>
+            <td
+              className="col-title"
+              colSpan={componentsGradebook?.moversExam?.length}
+            ></td>
+            <td className="col-title">
+              EXAM ({gradingPercentages?.exam_percentage}%)
+            </td>
+            <td className="col-title">TOTAL</td>
+            <td className="col-title">GRADE</td>
+          </tr>
+
+          {students &&
+            students.length > 0 &&
+            grades &&
+            students.map((student: any, i: number) => (
+              <tr key={`grade-student-${i}`}>
+                <td>{student.name}</td>
+                {componentsGradebook?.assignments?.map((item: any, j) => (
+                  <td className="td-container" key={`grade-note-${j}`}>
+                    <Input
+                      className="td-input input-percentage"
+                      type="number"
+                      onChange={(event) =>
+                        changeGrades(event, item.item_id, student?.id)
+                      }
+                      value={grades[item.item_id][student.id] ?? ""}
+                    />
+                  </td>
+                ))}
+                <td>
+                  {calculateAverage(
+                    grades,
+                    componentsGradebook?.assignments,
+                    student.id,
+                  )}
+                  %
+                </td>
+                {componentsGradebook?.progressTest?.map((item: any, j) => (
+                  <td
+                    className="td-container"
+                    key={`grade-note-progressTest-${j}`}
+                  >
+                    <Input
+                      className="td-input input-percentage"
+                      type="number"
+                      onChange={(event) =>
+                        changeGrades(event, item.item_id, student?.id)
+                      }
+                      value={grades[item.item_id][student.id] ?? ""}
+                    />
+                  </td>
+                ))}
+                <td>
+                  {calculateAverage(
+                    grades,
+                    componentsGradebook?.progressTest,
+                    student.id,
+                  )}
+                  %
+                </td>
+                {componentsGradebook?.moversExam?.map((item: any, j) => (
+                  <td
+                    className="td-container"
+                    key={`grade-note-progressTest-${j}`}
+                  >
+                    <Input
+                      className="td-input input-percentage"
+                      type="number"
+                      onChange={(event) =>
+                        changeGrades(event, item.item_id, student?.id)
+                      }
+                      value={grades[item.item_id][student.id] ?? ""}
+                    />
+                  </td>
+                ))}
+                <td>
+                  {calculateAverage(
+                    grades,
+                    componentsGradebook?.moversExam,
+                    student.id,
+                  )}
+                  %
+                </td>
+                {renderAverageCols({
+                  grades,
+                  componentsGradebook,
+                  student,
+                  gradingPercentages,
+                })}
+              </tr>
+            ))}
+        </tbody>
+      </Table>
+      <div className="d-flex justify-content-end">
+        <div className="attendance-resume">
+          <p className="field-description">CLASS AVG.</p>
+          <p className="field-value">
+            {calculateClassTotalAverage(
+              grades,
+              componentsGradebook,
+              gradingPercentages,
+              students,
+            )}
+            %
+          </p>
+        </div>
+      </div>
+    </>
+  );
+};
+
+export default GradebookTable;

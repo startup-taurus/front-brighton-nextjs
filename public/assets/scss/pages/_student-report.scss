@@ -79,6 +79,11 @@
   background-image: url("../../../assets/images/own/gradebook-report.png");
   background-position: bottom left;
   background-repeat: no-repeat;
+
+  .col-vertical {
+    max-height: 130px;
+    line-height: 1;
+  }
 }
 
 @media (max-width: 1200px) {

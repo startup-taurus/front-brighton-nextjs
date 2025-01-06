@@ -2,7 +2,12 @@ import React from "react";
 import { Table } from "reactstrap";
 import { tr } from "date-fns/locale";
 
-const ReportTable = ({ columns = [], data = [], resumeRowTitle }: any) => {
+const ReportTable = ({
+  columns = [],
+  data = [],
+  resumeRowTitle,
+  finalPercentage = 0,
+}: any) => {
   if (columns && columns.length === 0) return null;
   return (
     <Table responsive bordered className="report-table">
@@ -24,7 +29,7 @@ const ReportTable = ({ columns = [], data = [], resumeRowTitle }: any) => {
           </tr>
         ) : (
           <>
-            {data.map((row: any, index: number) => (
+            {data?.map((row: any, index: number) => (
               <tr key={`report-table-row-${index}`}>
                 {columns?.map((col: any, index: number) => (
                   <td
@@ -40,7 +45,9 @@ const ReportTable = ({ columns = [], data = [], resumeRowTitle }: any) => {
               <td colSpan={4} className="highlighted-col resume-title-col">
                 {resumeRowTitle}
               </td>
-              <td className="resume-title-col text-center">24.4%</td>
+              <td className="resume-title-col text-center">
+                {finalPercentage}%
+              </td>
             </tr>
           </>
         )}

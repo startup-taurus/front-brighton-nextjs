@@ -7,6 +7,17 @@ export const getCourseWithStudents = (courseId: string) => {
   return getFetcher(`/course/get-students/${courseId}`, false);
 };
 
+export const getGradingItems = (courseId: string) => {
+  return getFetcher(`/course/get-grading-items/${courseId}`, false);
+};
+
+export const getGradingPercentageBySyllabus = (syllabusId: string) => {
+  return getFetcher(
+    `/course/get-grading-percentage-by-syllabus/${syllabusId}`,
+    false,
+  );
+};
+
 export const getActiveCourses = (
   page: number,
   limit: number,

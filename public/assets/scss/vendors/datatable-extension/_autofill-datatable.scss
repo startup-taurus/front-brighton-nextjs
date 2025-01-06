@@ -3,8 +3,11 @@
 $autofill-define-button: true !default;
 $autofill-outline: #4989de !default;
 $autofill-handle-border: 1px solid #316ad1 !default;
-$autofill-handle-background: linear-gradient(to bottom, #abcffb 0%, #4989de 100%) !default;
-
+$autofill-handle-background: linear-gradient(
+  to bottom,
+  #abcffb 0%,
+  #4989de 100%
+) !default;
 
 div.dt-autofill-handle {
   position: absolute;
@@ -22,11 +25,12 @@ div.dt-autofill-select {
   z-index: 1001;
 
   background-color: $autofill-outline;
-  background-image: repeating-linear-gradient(45deg,
-          transparent,
-          transparent 5px,
-          rgba(255,255,255,.5) 5px,
-          rgba(255,255,255,.5) 10px
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 5px,
+    rgba(255, 255, 255, 0.5) 5px,
+    rgba(255, 255, 255, 0.5) 10px
   );
 
   &.top,
@@ -83,11 +87,11 @@ div.dt-autofill-list {
     padding: 0.5em 0;
     border-bottom: 1px solid #ccc;
 
-    input[type=number] {
-      padding: 6px;
-      width: 30px;
-      margin: -2px 0;
-    }
+    //input[type=number] {
+    //  padding: 6px;
+    //  width: 30px;
+    //  margin: -2px 0;
+    //}
   }
 
   div.dt-autofill-button {
@@ -119,7 +123,11 @@ div.dt-autofill-background {
   height: 100%;
 
   background: rgba(0, 0, 0, 0.7); // fallback
-  background: radial-gradient(ellipse farthest-corner at center, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.7) 100%);
+  background: radial-gradient(
+    ellipse farthest-corner at center,
+    rgba(0, 0, 0, 0.3) 0%,
+    rgba(0, 0, 0, 0.7) 100%
+  );
 
   z-index: 10;
 }

@@ -8,376 +8,366 @@ tfoot,
 tr,
 td,
 th {
-	border-color: #dee2e6;
+  border-color: #dee2e6;
 }
 
 .pills-component {
-	width: 20%;
+  width: 20%;
 }
 
 #row_create {
-	td.highlight {
-		font-weight: 400;
-		color: $primary-color;
-	}
+  td.highlight {
+    font-weight: 400;
+    color: $primary-color;
+  }
 
-	td.danger {
-		font-weight: 400;
-		color: $danger-color;
-	}
+  td.danger {
+    font-weight: 400;
+    color: $danger-color;
+  }
 }
 
 .table {
-	margin-bottom: $table-b-margin;
+  margin-bottom: $table-b-margin;
 
-	> :not(:last-child) {
-		> :last-child {
-			>* {
-				border-bottom-color: $light-gray;
-			}
-		}
-	}
+  > :not(:last-child) {
+    > :last-child {
+      > * {
+        border-bottom-color: $light-gray;
+      }
+    }
+  }
 
-	th,
-	td {
-		padding: $table-padding;
-	}
+  th,
+  td {
+    padding: $table-padding;
+  }
 
-	&.table-primary {
-		th {
-			color: $white;
-		}
-	}
+  &.table-primary {
+    th {
+      color: $white;
+    }
+  }
 
-	thead.bg-primary {
-		tr {
-			th {
-				color: $white;
-			}
-		}
-	}
+  thead.bg-primary {
+    tr {
+      th {
+        color: $white;
+      }
+    }
+  }
 
-	th {
-		color: $table-heading-color;
-		font-weight: 500;
+  th {
+    color: $table-heading-color;
+    font-weight: 500;
 
-		&.f-light {
-			color: var(--chart-text-color);
-			opacity: 0.8;
-		}
-	}
+    &.f-light {
+      color: var(--chart-text-color);
+      opacity: 0.8;
+    }
+  }
 
-	td {
-		color: $table-row-color;
-	}
+  td {
+    color: $table-row-color;
+  }
 
-	[class*='bg-'] {
-		color: $white;
-	}
+  [class*="bg-"] {
+    color: $white;
+  }
 
-	.bg-light {
-		color: $theme-body-font-color;
-	}
+  .bg-light {
+    color: $theme-body-font-color;
+  }
 
-	tfoot {
-		font-weight: $table-footer-font-weight;
-	}
+  tfoot {
+    font-weight: $table-footer-font-weight;
+  }
 }
 
 .table-dark {
-	th {
-		color: $white;
-	}
+  th {
+    color: $white;
+  }
 }
 
 .table-inverse {
-	color: $white;
-	background-color: $table-inverse-bg-color;
+  color: $white;
+  background-color: $table-inverse-bg-color;
 
-	th,
-	td {
-		border-color: $white;
-		color: $white;
-	}
+  th,
+  td {
+    border-color: $white;
+    color: $white;
+  }
 
-	&.table-bordered {
-		border: 0;
-	}
+  &.table-bordered {
+    border: 0;
+  }
 }
 
-.table[class*='bg-'] {
-
-	th,
-	td {
-		color: $white;
-	}
+.table[class*="bg-"] {
+  th,
+  td {
+    color: $white;
+  }
 }
 
 .table-hover {
-	>tbody {
-		>tr:hover {
-			--bs-table-accent-bg: #f6f6f6;
-		}
-	}
+  > tbody {
+    > tr:hover {
+      --bs-table-accent-bg: #f6f6f6;
+    }
+  }
 
-	tbody {
-		tr {
-			&:hover {
-				// background-color: rgba($primary-color, 0.1);
-			}
+  tbody {
+    tr {
+      &:hover {
+        // background-color: rgba($primary-color, 0.1);
+      }
 
-			vertical-align: middle;
+      vertical-align: middle;
 
-			td {
-				//svg {
-				//	width: 30px;
-				//	height: 30px;
-				//	padding: 5px;
-				//	border-radius: 4px;
-				//	margin-right: 10px;
-				//
-				//	[dir="rtl"] & {
-				//		margin-right: unset;
-				//		margin-left: 10px;
-				//	}
-				//}
-			}
-		}
-	}
+      td {
+        //svg {
+        //	width: 30px;
+        //	height: 30px;
+        //	padding: 5px;
+        //	border-radius: 4px;
+        //	margin-right: 10px;
+        //
+        //	[dir="rtl"] & {
+        //		margin-right: unset;
+        //		margin-left: 10px;
+        //	}
+        //}
+      }
+    }
+  }
 }
 
 // Table border-bottom removes in particular typography page
 .typography-table {
-	tr {
-		&:last-child {
-			border-bottom: none;
+  tr {
+    &:last-child {
+      border-bottom: none;
 
-			td {
-				border-bottom: none;
-			}
-		}
-	}
+      td {
+        border-bottom: none;
+      }
+    }
+  }
 }
 
 .table-double {
-	border-left: 4px double #dee2e6;
-	border-right: 4px double #dee2e6;
+  border-left: 4px double #dee2e6;
+  border-right: 4px double #dee2e6;
 
-	thead,
-	tbody,
-	tfoot,
-	tr,
-	td,
-	th {
-		border-style: double;
-		border-width: 4px;
-		border-right: 0;
-		border-left: 0;
-	}
+  thead,
+  tbody,
+  tfoot,
+  tr,
+  td,
+  th {
+    border-style: double;
+    border-width: 4px;
+    border-right: 0;
+    border-left: 0;
+  }
 }
 
 .table-dotted {
-	border-left: 2px dotted #dee2e6;
-	border-right: 2px dotted #dee2e6;
+  border-left: 2px dotted #dee2e6;
+  border-right: 2px dotted #dee2e6;
 
-	thead,
-	tbody,
-	tfoot,
-	tr,
-	td,
-	th {
-		border-style: dotted !important;
-		border-width: 2px;
-		border-right: 0;
-		border-left: 0;
-	}
+  thead,
+  tbody,
+  tfoot,
+  tr,
+  td,
+  th {
+    border-style: dotted !important;
+    border-width: 2px;
+    border-right: 0;
+    border-left: 0;
+  }
 }
 
 .table-dashed {
-	border-left: 2px dashed #dee2e6;
-	border-right: 2px dashed #dee2e6;
+  border-left: 2px dashed #dee2e6;
+  border-right: 2px dashed #dee2e6;
 
-	thead,
-	tbody,
-	tfoot,
-	tr,
-	td,
-	th {
-		border-style: dashed !important;
-		border-width: 2px;
-		border-right: 0;
-		border-left: 0;
-	}
+  thead,
+  tbody,
+  tfoot,
+  tr,
+  td,
+  th {
+    border-style: dashed !important;
+    border-width: 2px;
+    border-right: 0;
+    border-left: 0;
+  }
 }
 
 //Sizing class
 .table-xl {
-
-	td,
-	th {
-		padding: $table-xl-padding;
-		font-size: $table-xl-font;
-	}
+  td,
+  th {
+    padding: $table-xl-padding;
+    font-size: $table-xl-font;
+  }
 }
 
 .table-lg {
-
-	td,
-	th {
-		padding: $table-lg-padding;
-		font-size: $table-lg-font;
-	}
+  td,
+  th {
+    padding: $table-lg-padding;
+    font-size: $table-lg-font;
+  }
 }
 
 .table-de {
-
-	td,
-	th {
-		padding: $table-de-padding;
-	}
+  td,
+  th {
+    padding: $table-de-padding;
+  }
 }
 
 .table-sm {
-
-	th,
-	td {
-		padding: $table-sm-padding;
-		font-size: $table-sm-font;
-	}
+  th,
+  td {
+    padding: $table-sm-padding;
+    font-size: $table-sm-font;
+  }
 }
 
 .table-xs {
-
-	th,
-	td {
-		padding: $table-xs-padding;
-		font-size: $table-xs-font;
-	}
+  th,
+  td {
+    padding: $table-xs-padding;
+    font-size: $table-xs-font;
+  }
 }
 
 //Table Border
 .table-border-horizontal {
-
-	tr,
-	th,
-	td {
-		border-top: 1px solid $horizontal-border-color;
-		padding: $horizontal-padding;
-	}
+  tr,
+  th,
+  td {
+    border-top: 1px solid $horizontal-border-color;
+    padding: $horizontal-padding;
+  }
 }
 
 .table-border-vertical {
+  tr,
+  th,
+  td {
+    border-top: 0;
+    border-right: 1px solid $horizontal-border-color;
+  }
 
-	tr,
-	th,
-	td {
-		border-top: 0;
-		border-right: 1px solid $horizontal-border-color;
-	}
+  tr {
+    td {
+      border-bottom: 0;
 
-	tr {
-		td {
-			border-bottom: 0;
+      &:last-child {
+        border-right: none;
+      }
+    }
+  }
 
-			&:last-child {
-				border-right: none;
-			}
-		}
-	}
-
-	tbody {
-		tr {
-			th {
-				border-bottom: 0;
-			}
-		}
-	}
+  tbody {
+    tr {
+      th {
+        border-bottom: 0;
+      }
+    }
+  }
 }
 
 .table-bordernone {
-	td {
-		border: none !important;
-	}
+  td {
+    border: none !important;
+  }
 
-	thead {
-		th {
-			border: none !important;
-		}
-	}
+  thead {
+    th {
+      border: none !important;
+    }
+  }
 
-	.u-s-tb {
-		padding: 11px;
-	}
+  .u-s-tb {
+    padding: 11px;
+  }
 }
 
 .table-striped {
-	tbody {
-		tr {
-			&:nth-of-type(odd) {
-				background-color: var(--light-background);
-				--bs-table-accent-bg: unset;
+  tbody {
+    tr {
+      &:nth-of-type(odd) {
+        background-color: var(--light-background);
+        --bs-table-accent-bg: unset;
 
-				td {
-					--bs-table-bg-type: unset;
-				}
-			}
-		}
-	}
+        td {
+          --bs-table-bg-type: unset;
+        }
+      }
+    }
+  }
 }
 
 .table-bordered {
-
-	thead,
-	tbody,
-	tfoot,
-	tr,
-	td,
-	th {
-		border-color: rgba($light-text, 0.3);
-	}
+  thead,
+  tbody,
+  tfoot,
+  tr,
+  td,
+  th {
+    border-color: rgba($light-text, 0.3);
+  }
 }
 
 .main-inverse-table {
-	.table-responsive {
-		tbody {
-			tr {
-				th {
-					&:first-child {
-						--bs-table-bg-type: unset;
-					}
-				}
-			}
-		}
-	}
+  .table-responsive {
+    tbody {
+      tr {
+        th {
+          &:first-child {
+            --bs-table-bg-type: unset;
+          }
+        }
+      }
+    }
+  }
 }
 
 .main-state-table {
-	.rdt_Table {
-		.rdt_TableBody {
-			.rdt_TableRow {
-				.rdt_TableCell {
-					&.dJRLAq {
-						min-width: 182px;
-
-					}
-				}
-			}
-		}
-	}
+  .rdt_Table {
+    .rdt_TableBody {
+      .rdt_TableRow {
+        .rdt_TableCell {
+          &.dJRLAq {
+            min-width: 182px;
+          }
+        }
+      }
+    }
+  }
 }
 
 .main-stock-wrapper {
-	.table-responsive {
-		.rdt_Table {
-			.rdt_TableBody {
-				.rdt_TableRow:nth-child(even) {
-					.rdt_TableCell {
-						font-size: 14px;
-					}
-				}
-			}
-		}
-	}
+  .table-responsive {
+    .rdt_Table {
+      .rdt_TableBody {
+        .rdt_TableRow:nth-child(even) {
+          .rdt_TableCell {
+            font-size: 14px;
+          }
+        }
+      }
+    }
+  }
 }
 
 /**=====================
@@ -385,161 +375,184 @@ th {
 ==========================**/
 
 .cbWkqp svg {
-    margin: auto;
-    color: rgba(0, 0, 0, 0.54);
+  margin: auto;
+  color: rgba(0, 0, 0, 0.54);
 }
 
-
 .table-bottom-divider {
-	border-bottom: 1px solid #dee2e6;
-	padding: 14px 10px;
+  border-bottom: 1px solid #dee2e6;
+  padding: 14px 10px;
 }
 
 //table of students
 .table-container-student {
-	display: flex;
-	justify-content: space-between;
-	align-items: center;
-	padding: 20px;
-  }
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+}
 
+.decorative-image-container {
+  position: relative;
+  margin-left: 20px;
+}
+
+.decorative-image {
+  width: 300px !important;
+  height: auto !important;
+}
+
+.border-table {
+  border: 2px solid #ff9700;
+  border-radius: 8px;
+}
+
+.status-cell {
+  background-color: #e0e8d0;
+  padding: 5px;
+  border-radius: 4px;
+  text-align: center;
+}
+@media (max-width: 768px) {
   .decorative-image-container {
-	position: relative;
-	margin-left: 20px;
+    display: none;
   }
+}
 
-  .decorative-image {
-	width: 300px !important;
-	height: auto !important;
-  }
-
-  .border-table {
-	border: 2px solid #ff9700;
-	border-radius: 8px;
-  }
-
-  .status-cell {
-	background-color: #E0E8D0;
-	padding: 5px;
-	border-radius: 4px;
-	text-align: center;
-  }
-  @media (max-width: 768px) {
-	.decorative-image-container {
-	  display: none;
-	}
-  }
-
- .table-container-student .rdt_TableHeadRow{
-	min-height: 25px !important;
-	line-height: 1.2;
-  }
+.table-container-student .rdt_TableHeadRow {
+  min-height: 25px !important;
+  line-height: 1.2;
+}
 
 .table-responsive {
-	padding-top: 0.85rem;
+  padding-top: 0.85rem;
+}
+
+.main-table {
+  .main-col-title,
+  .main-col-description {
+    background: $brighton-font-primary-color;
+    padding: 1.5rem;
+    color: $white;
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.25rem;
+  }
+
+  .main-col-title {
+    padding: 1.5rem;
+  }
+
+  .main-col-description {
+    padding: 0.5rem;
+  }
+
+  .student-col {
+    min-width: 320px;
+  }
+
+  .td-attendance {
+    padding: 0;
+  }
+
+  .attendance-input {
+    border-color: transparent;
+    padding: 0;
+    height: 40px;
+    width: 100%;
+    margin: 1px;
+    text-align: center;
+    --bs-form-select-bg-img: none !important;
+  }
+
+  .attendance-input:focus {
+    outline: none;
+    box-shadow: none !important;
+  }
+}
+
+.report-table {
+  //border: 2px solid $brighton-font-primary-color;
+  margin-bottom: 1rem;
+
+  th,
+  td {
+    padding: 0.5rem;
+  }
+
+  .col-title {
+    background: $brighton-font-primary-color;
+    color: $white;
+    text-align: center;
+    font-weight: 700;
+    font-size: 1.25rem;
+  }
+
+  .gray-col {
+    background: $brighton-gray;
+  }
+
+  .resume-title-col {
+    font-weight: 700;
+    text-align: right;
+
+    &.text-center {
+      text-align: center;
+    }
+  }
+}
+
+.add-col-btn {
+  position: absolute;
+  bottom: -14px;
+  left: -10px;
+  cursor: pointer;
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
 }
 
 table {
-	.highlighted-col {
-		background: $brighton-secondary-color;
-	}
+  .highlighted-col {
+    background: $brighton-secondary-color;
+  }
 
-	.border-none{
-		border: none;
-	}
+  .border-none {
+    border: none;
+  }
+
+  .border-bottom {
+    border-color: rgba(153, 153, 153, 0.3);
+  }
+
+  .td-container {
+    padding: 0 !important;
+  }
+
+  .td-input {
+    border-color: transparent;
+    padding: 0;
+    height: 40px;
+    width: 60px;
+    text-align: center;
+    margin: 0 auto;
+    --bs-form-select-bg-img: none !important;
+    font-size: 14px;
+  }
+
+  .td-input:focus {
+    border-color: transparent !important;
+    outline: none !important;
+    box-shadow: none !important;
+  }
+
+  .col-vertical {
+    vertical-align: middle;
+    writing-mode: vertical-rl;
+    transform: rotate(180deg);
+    line-height: 0.001;
+    position: relative;
+  }
 }
-
- .main-table {
-	 .main-col-title,
-	 .main-col-description {
-		 background: $brighton-font-primary-color;
-		 padding: 1.5rem;
-		 color: $white;
-		 text-align: center;
-		 font-weight: 700;
-		 font-size: 1.25rem;
-	 }
-
-	 .main-col-title {
-		 padding: 1.5rem;
-	 }
-
-	 .main-col-description {
-		 padding: 0.5rem;
-	 }
-
-	 .student-col{
-		 min-width: 320px;
-	 }
-
-	 .col-vertical {
-		 vertical-align: middle;
-		 writing-mode: vertical-rl;
-		 transform: rotate(180deg);
-		 line-height: 0.001;
-		 position: relative;
-	 }
-
-	 .td-attendance {
-		 padding: 0;
-	 }
-
-	 .attendance-input {
-		 border-color: transparent;
-		 padding: 0;
-		 height: 40px;
-		 width: 100%;
-		 margin: 1px;
-		 text-align: center;
-		 --bs-form-select-bg-img: none !important;
-	 }
-
-	 .attendance-input:focus {
-		 outline: none;
-		 box-shadow: none !important;
-	 }
- }
-
- .report-table {
-	 border: 2px solid $brighton-font-primary-color;
-	 margin-bottom: 1rem;
-
-	 th,td {
-		 padding: 0.5rem;
-	 }
-
-	.col-title {
-		background: $brighton-font-primary-color;
-		color: $white;
-		text-align: center;
-		font-weight: 700;
-		font-size: 1.25rem;
-	}
-
-
-	 .gay-col {
-		 background: $brighton-gray;
-	 }
-
-	 .resume-title-col {
-		 font-weight: 700;
-		 text-align: right;
-
-		 &.text-center {
-			 text-align: center;
-		 }
-	 }
- }
-
-
- .add-col-btn {
-	 position: absolute;
-	 bottom: -14px;
-	 left: -10px;
-	cursor: pointer;
-
-	 svg {
-		 width: 20px;
-		 height: 20px;
-	 }
- }

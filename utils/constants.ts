@@ -33,3 +33,9 @@ export const USER_ROLES = [
   { value: "student", label: "Student" },
   { value: "financial", label: "Financial" },
 ];
+
+export const COMPONENTS_GRADEBOOK = {
+  ASSIGNMENTS: "ASSIGNMENTS",
+  PROGRESS_TESTS: "PROGRESS TESTS",
+  MOVERS_EXAM: "MOVERS EXAM",
+};

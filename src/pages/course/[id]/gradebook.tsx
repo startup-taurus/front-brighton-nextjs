@@ -1,50 +1,21 @@
+import useSWR from "swr";
+
 import CourseLayout from "@/components/own/course-layout/course-layout";
 import TabsTeachers from "@/components/own/tabs-teachers/tabs-teachers";
 import React, { ReactElement } from "react";
-import { Card, CardBody, Table } from "reactstrap";
+import { Card, CardBody } from "reactstrap";
 import { NextPageWithLayout } from "@/pages/_app";
-import { tr } from "date-fns/locale";
 import { useRouter } from "next/router";
-import useSWR from "swr";
-import { getCourseById } from "../../../../helper/api-data/course";
+import {
+  getCourseById,
+  getCourseWithStudents,
+  getGradingItems,
+  getGradingPercentageBySyllabus,
+} from "../../../../helper/api-data/course";
+import GradebookTable from "@/components/own/tables/gradebook-table";
+import { getGradesByCourse } from "../../../../helper/api-data/student-grades";
 
 const tabsName = "GRADEBOOK";
-const numberOfClass = "F-16°";
-
-const studentsData = [
-  {
-    name: "PIERINA VALENTINA CEVALLOS MALDONA",
-  },
-  {
-    name: "ENRIQUE LEONARDO GARCIA CARRILLO",
-  },
-  {
-    name: "MATEO NICOLAS MALDONADO PALMA",
-  },
-];
-
-const studentsCols = [
-  {
-    name: "STUDENT",
-    selector: (row: { name: string }) => row.name,
-  },
-  {
-    name: "Page 112",
-    selector: (row: any) => row.page112,
-  },
-  {
-    name: "Homework #2",
-    selector: (row: any) => row.homeWork,
-  },
-  {
-    name: "ASSIG. (5%)",
-    selector: (row: any) => row.assig,
-  },
-  {
-    name: "Test Units 1-2",
-    selector: (row: any) => row.note,
-  },
-];
 
 const Gradebook: NextPageWithLayout = () => {
   const router = useRouter();
@@ -55,76 +26,48 @@ const Gradebook: NextPageWithLayout = () => {
     () => getCourseById(courseId),
   );
 
-  if (!courseDetail?.data?.data) return null;
-  const { course_number } = courseDetail?.data?.data;
+  const gradingItems = useSWR(
+    courseId ? `/course/get-grading-items/${courseId}` : null,
+    () => getGradingItems(courseId),
+  );
+
+  const courseStudents = useSWR(
+    courseId ? `/course/get-students/${courseId}` : null,
+    () => getCourseWithStudents(courseId!.toString()),
+  );
+
+  const gradesByCourse = useSWR(
+    courseId ? `/student-grades/get-grades-by-course/${courseId}` : null,
+    () => getGradesByCourse(courseId!.toString()),
+  );
+
+  const gradingPercentage = useSWR(
+    courseDetail?.data?.data?.syllabus_id
+      ? `/student-grades/get-grades-by-course/${courseDetail?.data?.data?.syllabus_id}`
+      : null,
+    () =>
+      getGradingPercentageBySyllabus(
+        courseDetail?.data?.data?.syllabus_id!.toString(),
+      ),
+  );
 
   return (
     <Card tag="section" className="gradebook">
       <CardBody>
-        <TabsTeachers numberOfClass={course_number} tabsName={tabsName} />
-        <Table responsive bordered className="report-table">
-          <thead>
-            <tr>
-              <th className="col-title">STUDENT</th>
-              <th className="col-title"></th>
-              <th className="col-title"></th>
-              <th className="col-title"></th>
-              <th className="col-title">ASSIG. (5%)</th>
-              <th className="col-title"></th>
-              <th className="col-title"></th>
-              <th className="col-title"></th>
-              <th className="col-title">TEST. (15%)</th>
-              <th className="col-title"></th>
-              <th className="col-title"></th>
-              <th className="col-title"></th>
-              <th className="col-title">EXAM (80%)</th>
-              <th className="col-title">TOTAL</th>
-              <th className="col-title">GRADE</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td>PIERINA VALENTINA CEVALLOS MALDONA</td>
-              <td>100%</td>
-              <td>100%</td>
-              <td></td>
-              <td>90%</td>
-              <td>80%</td>
-              <td></td>
-              <td></td>
-              <td>80%</td>
-              <td>80%</td>
-              <td></td>
-              <td></td>
-              <td>80%</td>
-              <td className="highlighted-col">80%</td>
-              <td className="gay-col">NOT REPORTED</td>
-            </tr>
-            <tr>
-              <td>ENRIQUE LEONARDO GARCIA CARRILLO</td>
-              <td>100%</td>
-              <td>100%</td>
-              <td></td>
-              <td>90%</td>
-              <td>80%</td>
-              <td></td>
-              <td></td>
-              <td>80%</td>
-              <td>80%</td>
-              <td></td>
-              <td></td>
-              <td>80%</td>
-              <td className="highlighted-col">80%</td>
-              <td className="gay-col">NOT REPORTED</td>
-            </tr>
-          </tbody>
-        </Table>
-        <div className="d-flex justify-content-end">
-          <div className="attendance-resume">
-            <p className="field-description">CLASS AVG.</p>
-            <p className="field-value">5.33%</p>
-          </div>
-        </div>
+        <TabsTeachers
+          numberOfClass={courseDetail?.data?.data?.course_number ?? ""}
+          tabsName={tabsName}
+        />
+        {gradingItems?.data?.data &&
+          courseStudents?.data?.data?.students &&
+          gradingPercentage?.data?.data && (
+            <GradebookTable
+              students={courseStudents?.data?.data?.students}
+              gradingItems={gradingItems?.data?.data}
+              studentsGrades={gradesByCourse?.data?.data}
+              gradingPercentages={gradingPercentage?.data?.data}
+            />
+          )}
       </CardBody>
     </Card>
   );
