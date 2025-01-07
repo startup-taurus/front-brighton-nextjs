@@ -399,14 +399,35 @@ export const formatStudentScoreExamGrades = (
     const gradeResult = determineResult(
       Number(grades[moverExamScore.item_id][studentId]),
     );
+
     return {
       id: index,
       criterion: moverExamScore.item_name,
-      level: courseLevel,
+      level: moverExamScore?.category,
       score: grades[moverExamScore.item_id][studentId],
       grade: gradeResult?.result,
     };
   });
+};
+
+export const calculateAssignmentAverage = (
+  scoreGrades: any,
+  gradingPercentage: GradingPercentage,
+) => {
+  let totalPercentage = 0;
+  let average = 0;
+
+  totalPercentage =
+    Number(gradingPercentage.assig_percentage) +
+    Number(gradingPercentage.test_percentage);
+
+  average =
+    scoreGrades.assignments *
+      ((Number(gradingPercentage.assig_percentage) / totalPercentage) * 10) +
+    scoreGrades.progressTest *
+      ((Number(gradingPercentage.test_percentage) / totalPercentage) * 10);
+
+  return Number(average).toFixed(2);
 };
 
 export const calculateReportExamAverage = (
@@ -421,7 +442,34 @@ export const calculateReportExamAverage = (
     return acc + Number(grades[moverExamScore.item_id][studentId]);
   }, 0);
 
-  moversExamProm = moverExamSum / moversExamScore.length;
+  moversExamProm = (moverExamSum / moversExamScore.length) * 10;
 
   return Number(moversExamProm).toFixed(2);
+};
+
+export const formatReportBarChartData = (
+  moversExamScore: any[] = [],
+  grades: any,
+  studentId: string,
+) => {
+  let labels: string[] = [];
+  let data: number[] = [];
+
+  moversExamScore.forEach((item) => {
+    labels.push(item.item_name);
+    data.push(Number(grades[item.item_id][studentId]) * 0.01);
+  }, 0);
+
+  return {
+    labels,
+    datasets: [
+      {
+        label: "SKILLS",
+        backgroundColor: "rgba(255, 167 ,0, 1)",
+        highlightFill: "rgba(255, 151 , 0, 1)",
+        borderWidth: 2,
+        data,
+      },
+    ],
+  };
 };

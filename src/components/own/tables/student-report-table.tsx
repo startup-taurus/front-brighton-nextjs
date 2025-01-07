@@ -8,30 +8,16 @@ import { Bar } from "react-chartjs-2";
 import { barChartOptions } from "../../../../Data/Charts/ChartJsData";
 import {
   buildGradebookStructure,
+  calculateAssignmentAverage,
   calculateAverage,
   calculateReportExamAverage,
   formatGradebookComponents,
+  formatReportBarChartData,
   formatStudentScoreAssignmentsGrades,
   formatStudentScoreExamGrades,
 } from "../../../../utils/utils";
 import { ComponentsGradebook } from "../../../../Types/GradingItem";
-
-const assignmentsTestData = [
-  {
-    id: 1,
-    criterion: "ASSIGNMENTS",
-    level: "B1",
-    score: "97.7%",
-    grade: "PASS",
-  },
-  {
-    id: 2,
-    criterion: "TEST",
-    level: "B1",
-    score: "0.0%",
-    grade: "FAIL",
-  },
-];
+import { DEFAULT_BAR_CHART_DATA } from "../../../../utils/constants";
 
 const assignmentsTestCols = [
   {
@@ -81,19 +67,6 @@ const examPageCols = [
   },
 ];
 
-const barChartData = {
-  labels: ["READING", "WRITING", "LISTENING", "SPEAKING"],
-  datasets: [
-    {
-      label: "SKILLS",
-      backgroundColor: "rgba(255, 167 ,0, 1)",
-      highlightFill: "rgba(255, 151 , 0, 1)",
-      borderWidth: 2,
-      data: [0.25, 0.5, 1, 0.75],
-    },
-  ],
-};
-
 const StudentReportTable = ({
   students,
   courseDetail,
@@ -116,6 +89,9 @@ const StudentReportTable = ({
 
   const [assignmentsAverage, setAssignmentsAverage] = useState("0");
   const [examAverage, setExamAverage] = useState("0");
+  const [reportChartData, setReportChartData] = useState<any>(
+    DEFAULT_BAR_CHART_DATA,
+  );
 
   const gradingGrade = useMemo(
     () =>
@@ -160,17 +136,32 @@ const StudentReportTable = ({
       selectedStudentId,
       gradingGrade,
     );
+
+    const assignmentAverage = calculateAssignmentAverage(
+      {
+        assignments,
+        progressTest,
+      },
+      gradingPercentage,
+    );
+
     const reportExamAverage = calculateReportExamAverage(
       componentsGradebook.moversExam,
       gradingGrade,
       selectedStudentId,
     );
 
-    console.log(reportExamAverage);
+    const chartFormattedData = formatReportBarChartData(
+      componentsGradebook.moversExam,
+      gradingGrade,
+      selectedStudentId,
+    );
 
+    setAssignmentsAverage(assignmentAverage);
     setExamData(result);
-    setAssignmentsData(assignmentsScore);
     setExamAverage(reportExamAverage);
+    setAssignmentsData(assignmentsScore);
+    setReportChartData(chartFormattedData);
   }, [gradingGrade, componentsGradebook, selectedStudentId]);
 
   return (
@@ -189,6 +180,7 @@ const StudentReportTable = ({
             data={assignmentsData}
             columns={assignmentsTestCols}
             resumeRowTitle={`ASSIGNMENTS (${gradingPercentage?.assig_percentage}%) + TESTS (${gradingPercentage?.test_percentage}%)`}
+            finalPercentage={assignmentsAverage}
           />
         )}
         {examData && examData?.length > 0 && (
@@ -218,15 +210,17 @@ const StudentReportTable = ({
         </div>
       </Col>
       <Col xs={12} sm={12} md={12} lg={4}>
-        <div className="chart-container">
-          <Bar
-            data={barChartData}
-            options={barChartOptions}
-            width={778}
-            height={400}
-            style={{ width: "100%" }}
-          />
-        </div>
+        {reportChartData && (
+          <div className="chart-container">
+            <Bar
+              data={reportChartData}
+              options={barChartOptions}
+              width={778}
+              height={400}
+              style={{ width: "100%" }}
+            />
+          </div>
+        )}
       </Col>
     </>
   );

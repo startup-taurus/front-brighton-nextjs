@@ -39,3 +39,38 @@ export const COMPONENTS_GRADEBOOK = {
   PROGRESS_TESTS: "PROGRESS TESTS",
   MOVERS_EXAM: "MOVERS EXAM",
 };
+
+export const DEFAULT_BAR_CHART_DATA = {
+  labels: [],
+  datasets: [
+    {
+      label: "SKILLS",
+      backgroundColor: "rgba(255, 167 ,0, 1)",
+      highlightFill: "rgba(255, 151 , 0, 1)",
+      borderWidth: 2,
+      data: [],
+    },
+  ],
+};
+
+export const LEVELS_FOR_KIDS = [
+  { label: "Pre-A1 Starter", value: "Pre-A1 Starter" },
+  { label: "A1.1 Movers", value: "A1.1 Movers" },
+  { label: "A1.2 Movers", value: "A1.2 Movers" },
+  { label: "A2.1 Flyers", value: "A2.1 Flyers" },
+  { label: "A2.2 Flyers", value: "A2.2 Flyers" },
+  { label: "B1.1 Pre-Intermediate", value: "B1.1 Pre-Intermediate" },
+  { label: "B1.2 Pre-Intermediate", value: "B1.2 Pre-Intermediate" },
+  { label: "Private Classes", value: "Private Classes" },
+];
+
+export const LEVELS_FOR_ADULTS = [
+  { label: "Pre-A1 Starter", value: "Pre-A1 Starter" },
+  { label: "A1 Beginner", value: "A1 Beginner" },
+  { label: "A2 Elementary", value: "A2 Elementary" },
+  { label: "B1 Pre-Intermediate", value: "B1 Pre-Intermediate" },
+  { label: "B1+ Intermediate", value: "B1+ Intermediate" },
+  { label: "B2 Upper Intermediate", value: "B2 Upper Intermediate" },
+  { label: "B2 First Preparation", value: "B2 First Preparation" },
+  { label: "Private Classes", value: "Private Classes" },
+];

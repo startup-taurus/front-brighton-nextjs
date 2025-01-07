@@ -13,6 +13,10 @@ import {
 
 import * as Yup from "yup";
 import sectionTitle from "@/components/own/section-title/section-title";
+import {
+  LEVELS_FOR_ADULTS,
+  LEVELS_FOR_KIDS,
+} from "../../../../utils/constants";
 
 const StudentsRegistrationForm = () => {
   const validations = Yup.object().shape({
@@ -28,6 +32,9 @@ const StudentsRegistrationForm = () => {
     level: Yup.string().required("The level is required"),
     schedule: Yup.string().required("The schedule is required"),
     sameBilling: Yup.string().required("The billing is required"),
+    isAcceptedTermsAndCondition: Yup.string().required(
+      "You must accept the terms and conditions",
+    ),
   });
 
   const initialValues = {
@@ -44,9 +51,12 @@ const StudentsRegistrationForm = () => {
     schedule: "",
     sameBilling: "",
     whereHearAboutUs: "",
+    isAcceptedTermsAndCondition: "",
   };
 
-  const onSubmit = (body: any, { setSubmitting }: any) => {};
+  const onSubmit = (body: any, { setSubmitting }: any) => {
+    console.log(body);
+  };
 
   return (
     <section className="students-registration-form">
@@ -56,7 +66,7 @@ const StudentsRegistrationForm = () => {
           onSubmit={onSubmit}
           validationSchema={validations}
         >
-          {({ errors, handleSubmit, isSubmitting, touched }) => (
+          {({ errors, handleSubmit, isSubmitting, touched, values }) => (
             <form
               noValidate
               autoComplete="off"
@@ -186,7 +196,171 @@ const StudentsRegistrationForm = () => {
                     Adults
                   </Label>
                 </FormGroup>
-                <ErrorMessage name="ageCategory" component={FormFeedback} />
+                <ErrorMessage
+                  name="ageCategory"
+                  component={({ children }: any) => (
+                    <FormFeedback className="d-block">{children}</FormFeedback>
+                  )}
+                />
+              </Col>
+              {!!values.ageCategory && (
+                <Col xs={12}>
+                  <Label>
+                    Level <span className="required-input" />
+                  </Label>
+                  {values.ageCategory === "kids"
+                    ? LEVELS_FOR_KIDS.map((level, index) => (
+                        <FormGroup
+                          check
+                          className="radio radio-primary"
+                          key={`level-kids-${index}`}
+                        >
+                          <Field
+                            className="form-check-input"
+                            id={`level-kids-${index}`}
+                            type="radio"
+                            name="level"
+                            value={level.value}
+                            invalid={touched.level && !!errors.level}
+                          />
+                          <Label
+                            className="form-check-label"
+                            htmlFor={`level-kids-${index}`}
+                          >
+                            {level.label}
+                          </Label>
+                        </FormGroup>
+                      ))
+                    : LEVELS_FOR_ADULTS.map((level, index) => (
+                        <FormGroup
+                          check
+                          className="radio radio-primary"
+                          key={`level-adults-${index}`}
+                        >
+                          <Field
+                            className="form-check-input"
+                            id={`level-adults-${index}`}
+                            type="radio"
+                            name="level"
+                            value={level.value}
+                            invalid={touched.level && !!errors.level}
+                          />
+                          <Label
+                            className="form-check-label"
+                            htmlFor={`level-adults-${index}`}
+                          >
+                            {level.label}
+                          </Label>
+                        </FormGroup>
+                      ))}
+                  <ErrorMessage
+                    name="level"
+                    component={({ children }: any) => (
+                      <FormFeedback className="d-block">
+                        {children}
+                      </FormFeedback>
+                    )}
+                  />
+                </Col>
+              )}
+
+              <Col xs={12}>
+                <Label className="form-check-label">Same Billing Data?</Label>
+                <FormGroup check className="radio radio-primary">
+                  <Field
+                    className="form-check-input"
+                    type="radio"
+                    id="same-billing-yes"
+                    name="sameBilling"
+                    value="yes"
+                    invalid={touched.sameBilling && !!errors.sameBilling}
+                  />
+                  <Label
+                    className="form-check-label"
+                    htmlFor={`same-billing-yes`}
+                  >
+                    Yes
+                  </Label>
+                </FormGroup>
+                <FormGroup check className="radio radio-primary">
+                  <Field
+                    className="form-check-input"
+                    id="same-billing-no"
+                    type="radio"
+                    name="sameBilling"
+                    value="no"
+                    invalid={touched.sameBilling && !!errors.sameBilling}
+                  />
+                  <Label
+                    className="form-check-label"
+                    htmlFor={`same-billing-no`}
+                  >
+                    No
+                  </Label>
+                </FormGroup>
+                <ErrorMessage
+                  name="sameBilling"
+                  component={({ children }: any) => (
+                    <FormFeedback className="d-block">{children}</FormFeedback>
+                  )}
+                />
+              </Col>
+
+              {values.sameBilling === "yes" && (
+                <Col xs={12}>
+                  <Label for="whereHearAboutUs">
+                    Where did you hear about us?
+                  </Label>
+                  <Field
+                    id="whereHearAboutUs"
+                    name="whereHearAboutUs"
+                    type="textarea"
+                    as={Input}
+                  />
+                  <ErrorMessage
+                    name="whereHearAboutUs"
+                    component={FormFeedback}
+                  />
+                </Col>
+              )}
+              <Col xs={12}>
+                <Label for="whereHearAboutUs">
+                  Where did you hear about us?
+                </Label>
+                <Field
+                  id="whereHearAboutUs"
+                  name="whereHearAboutUs"
+                  as={Input}
+                />
+              </Col>
+              <Col xs={12}>
+                <Label className="form-check-label">
+                  Terms of Registration <span className="required-input" />
+                </Label>
+                <FormGroup check className="radio radio-primary">
+                  <Field
+                    className="form-check-input"
+                    type="radio"
+                    id="isAcceptedTermsAndCondition"
+                    name="isAcceptedTermsAndCondition"
+                    value="yes"
+                    invalid={!!errors.isAcceptedTermsAndCondition}
+                  />
+                  <Label
+                    className="form-check-label"
+                    htmlFor={`isAcceptedTermsAndCondition`}
+                  >
+                    I accept that once the payment is made, there will be no
+                    refund of the money.
+                  </Label>
+                </FormGroup>
+
+                <ErrorMessage
+                  name="isAcceptedTermsAndCondition"
+                  component={({ children }: any) => (
+                    <FormFeedback className="d-block">{children}</FormFeedback>
+                  )}
+                />
               </Col>
               <Col xs={12} className="d-flex justify-content-center gap-2 mt-4">
                 <Button color="primary" type="submit" disabled={isSubmitting}>
