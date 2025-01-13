@@ -22,3 +22,7 @@ export const getAllUsers = (page: number, limit: number, filters?: any) => {
     false,
   );
 };
+
+export const getDashboardData = () => {
+  return getFetcher(`/user/get-dashboard-data`, false);
+};

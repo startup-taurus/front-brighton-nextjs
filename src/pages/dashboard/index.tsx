@@ -12,15 +12,15 @@ const SchoolManagement = () => {
   const AcademicPerformance = dynamic(
     () =>
       import("@/components/Dashboard/SchoolManagenement/AcademicPerformance"),
-    { ssr: false },
+    { ssr: false }
   );
   const SchoolPerformance = dynamic(
     () => import("@/components/Dashboard/SchoolManagenement/SchoolPerformance"),
-    { ssr: false },
+    { ssr: false }
   );
   const SchoolIncome = dynamic(
     () => import("@/components/Dashboard/SchoolManagenement/SchoolIncome"),
-    { ssr: false },
+    { ssr: false }
   );
 
   return (
@@ -37,9 +37,6 @@ const SchoolManagement = () => {
               <AcademicPerformance />
               <SchoolPerformance />
               <SchoolData />
-              <SchoolIncome />
-              <EventCalendar />
-              <TodayTask />
             </Row>
           </Col>
           <Col xxl={12} className="d-xxl-block d-none box-col-none">
