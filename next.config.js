@@ -1,14 +1,28 @@
 const nextConfig = {
+  distDir: "build",
   env: {
-    // API_URL: "http://localhost:3000/v1/api",
-    API_URL: "https://devbrighton.zgamestechnology.com/v1/api",
-    FILE_URL: "https://devbrighton.zgamestechnology.com",
+    //API_URL: "http://localhost:3000/v1/api",
+    API_URL: "http://154.12.252.34:5000/v1/api",
+    FILE_URL: "http://154.12.252.34:5000",
   },
   images: {
+    unoptimized: true,
     remotePatterns: [
       {
         protocol: "https",
         hostname: "devbrighton.zgamestechnology.com",
+        port: "",
+        pathname: "**",
+      },
+      {
+        protocol: "http",
+        hostname: "154.12.252.34",
+        port: "",
+        pathname: "**",
+      },
+       {
+        protocol: "http",
+        hostname: "154.12.252.34:5000",
         port: "",
         pathname: "**",
       },
