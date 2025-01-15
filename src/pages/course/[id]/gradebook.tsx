@@ -60,12 +60,14 @@ const Gradebook: NextPageWithLayout = () => {
         />
         {gradingItems?.data?.data &&
           courseStudents?.data?.data?.students &&
-          gradingPercentage?.data?.data && (
+          gradingPercentage?.data?.data &&
+          courseDetail?.data?.data && (
             <GradebookTable
               students={courseStudents?.data?.data?.students}
               gradingItems={gradingItems?.data?.data}
               studentsGrades={gradesByCourse?.data?.data}
               gradingPercentages={gradingPercentage?.data?.data}
+              syllabusId={courseDetail?.data?.data?.syllabus_id}
             />
           )}
       </CardBody>

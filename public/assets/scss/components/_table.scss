@@ -456,7 +456,7 @@ th {
   }
 
   .attendance-input {
-    border-color: transparent;
+    border-color: transparent !important;
     padding: 0;
     height: 40px;
     width: 100%;
@@ -465,9 +465,29 @@ th {
     --bs-form-select-bg-img: none !important;
   }
 
+  .assignments-input {
+    border-color: transparent !important;
+    padding: 0;
+    height: 100% !important;
+    width: 100%;
+    margin: 1px;
+    text-align: center;
+    --bs-form-select-bg-img: none !important;
+    font-size: 14px;
+    font-family: Rubik, sans-serif;
+  }
+
   .attendance-input:focus {
     outline: none;
     box-shadow: none !important;
+  }
+
+  .warning-field {
+    background-color: #ffe599;
+  }
+
+  .danger-field {
+    background-color: #e99999;
   }
 }
 
@@ -503,10 +523,8 @@ th {
 }
 
 .add-col-btn {
-  position: absolute;
-  bottom: -14px;
-  left: -10px;
   cursor: pointer;
+  padding: 4px;
 
   svg {
     width: 20px;
@@ -545,6 +563,21 @@ table {
   .td-input:focus {
     border-color: transparent !important;
     outline: none !important;
+    box-shadow: none !important;
+  }
+
+  .assignments-input {
+    border-color: transparent !important;
+    padding: 0;
+    height: 100% !important;
+    width: 100%;
+    margin: 1px;
+    text-align: center;
+    --bs-form-select-bg-img: none !important;
+  }
+
+  .assignments-input:focus {
+    outline: none;
     box-shadow: none !important;
   }
 

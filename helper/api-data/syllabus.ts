@@ -18,3 +18,10 @@ export const createSyllabus = (data: any) => {
 export const updateSyllabus = (syllabusId: number, data: any) => {
   return putFetcher(`/syllabus/update/${syllabusId}`, data);
 };
+
+export const createAssignmentGradingItem = (data: any) => {
+  return postFetcher("/syllabus/create-assignment-item", data);
+};
+export const updateAssignmentGradingItem = (data: any) => {
+  return putFetcher(`/syllabus/update-assignment-item`, data);
+};

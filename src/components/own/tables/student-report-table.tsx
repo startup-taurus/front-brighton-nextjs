@@ -11,6 +11,8 @@ import {
   calculateAssignmentAverage,
   calculateAverage,
   calculateReportExamAverage,
+  calculateStudentAverage,
+  calculateTotalAverage,
   formatGradebookComponents,
   formatReportBarChartData,
   formatStudentScoreAssignmentsGrades,
@@ -89,6 +91,7 @@ const StudentReportTable = ({
 
   const [assignmentsAverage, setAssignmentsAverage] = useState("0");
   const [examAverage, setExamAverage] = useState("0");
+  const [studentTotalAverage, setStudentTotalAverage] = useState("0");
   const [reportChartData, setReportChartData] = useState<any>(
     DEFAULT_BAR_CHART_DATA,
   );
@@ -157,6 +160,15 @@ const StudentReportTable = ({
       selectedStudentId,
     );
 
+    const studentAverage = calculateStudentAverage(
+      {
+        assignments,
+        progressTest,
+        moversExam,
+      },
+      gradingPercentage,
+    );
+    setStudentTotalAverage(studentAverage);
     setAssignmentsAverage(assignmentAverage);
     setExamData(result);
     setExamAverage(reportExamAverage);
@@ -195,7 +207,7 @@ const StudentReportTable = ({
           <ReportStatus
             field="GPA"
             status="NOT REPORTED"
-            statusPercentage="4.5%"
+            statusPercentage={`${studentTotalAverage}%`}
           />
           <div className="d-flex download-container gap-2">
             <Link

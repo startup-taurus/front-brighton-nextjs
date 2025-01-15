@@ -6,7 +6,13 @@ import React, {
   useCallback,
 } from "react";
 import { Input, Table } from "reactstrap";
-import { buildAttendanceStructure, formatDate } from "../../../../utils/utils";
+import {
+  buildAttendanceStructure,
+  countAbsences,
+  countAttendance,
+  formatDate,
+  getColorOfAssistance,
+} from "../../../../utils/utils";
 import { createAttendance } from "../../../../helper/api-data/attendance";
 import { updateLessonTaught } from "../../../../helper/api-data/course-schedule";
 import { toast } from "react-toastify";
@@ -67,25 +73,12 @@ const TableAttendance = ({
     });
   };
 
-  const calculateAttendance = (
-    studentId: number,
-    status: string,
-  ): AttendanceStatistics => {
-    const datesValues = Object.values(dates);
+  const calculateAttendance = (studentId: number): AttendanceStatistics => {
+    return countAttendance(dates, studentId);
+  };
 
-    const attendanceCount = datesValues.filter(
-      (record: any) => record[studentId] === status,
-    ).length;
-
-    const attendancePercentage = (
-      (attendanceCount / datesValues.length) *
-      100
-    ).toFixed(2);
-
-    return {
-      attendanceCount,
-      attendancePercentage: Number(attendancePercentage),
-    };
+  const calculateAbsence = (studentId: number): AttendanceStatistics => {
+    return countAbsences(dates, studentId);
   };
 
   const updateScheduleItem = (
@@ -112,15 +105,21 @@ const TableAttendance = ({
   );
 
   const renderStatisticsCol = (studentId: number) => {
-    const assistanceStatistics = calculateAttendance(studentId, "present");
-    const absentStatistics = calculateAttendance(studentId, "absent");
+    const assistanceStatistics = calculateAttendance(studentId);
+    const absentStatistics = calculateAbsence(studentId);
 
     return (
       <>
         <td>{assistanceStatistics.attendanceCount}</td>
         <td>{assistanceStatistics.attendancePercentage}%</td>
         <td>{absentStatistics.attendanceCount}</td>
-        <td>{absentStatistics.attendancePercentage}%</td>
+        <td
+          className={getColorOfAssistance(
+            absentStatistics.attendancePercentage,
+          )}
+        >
+          {absentStatistics.attendancePercentage}%
+        </td>
       </>
     );
   };

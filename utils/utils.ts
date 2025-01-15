@@ -216,8 +216,9 @@ export const buildAttendanceStructure = (
 
   studentsAttendance?.forEach((studentAttendance: any) => {
     if (attendanceDate[studentAttendance?.id]) {
-      attendanceDate[studentAttendance?.id]![studentAttendance?.student_id] =
-        studentAttendance?.status;
+      attendanceDate[studentAttendance?.course_schedule_id]![
+        studentAttendance?.student_id
+      ] = studentAttendance?.status;
     }
   });
 
@@ -285,6 +286,7 @@ export const calculateAverage = (
   studentId: string,
 ) => {
   let sumResult = 0;
+  let totalExpected = notes.length * 10;
   let averageResult = "0";
 
   notes.map((note) => {
@@ -293,7 +295,7 @@ export const calculateAverage = (
       : 0;
   });
 
-  averageResult = (sumResult / notes.length).toFixed(2) ?? 0;
+  averageResult = ((sumResult * 100) / totalExpected).toFixed(2) ?? 0;
 
   return averageResult;
 };
@@ -423,9 +425,32 @@ export const calculateAssignmentAverage = (
 
   average =
     scoreGrades.assignments *
-      ((Number(gradingPercentage.assig_percentage) / totalPercentage) * 10) +
+      (Number(gradingPercentage.assig_percentage) / totalPercentage) +
     scoreGrades.progressTest *
-      ((Number(gradingPercentage.test_percentage) / totalPercentage) * 10);
+      (Number(gradingPercentage.test_percentage) / totalPercentage);
+
+  return Number(average).toFixed(2);
+};
+
+export const calculateStudentAverage = (
+  scoreGrades: any,
+  gradingPercentage: GradingPercentage,
+) => {
+  let totalPercentage = 0;
+  let average = 0;
+
+  totalPercentage =
+    Number(gradingPercentage.assig_percentage) +
+    Number(gradingPercentage.test_percentage) +
+    Number(gradingPercentage.exam_percentage);
+
+  average =
+    scoreGrades.assignments *
+      (Number(gradingPercentage.assig_percentage) / totalPercentage) +
+    scoreGrades.progressTest *
+      (Number(gradingPercentage.test_percentage) / totalPercentage) +
+    scoreGrades.moversExam *
+      (Number(gradingPercentage.exam_percentage) / totalPercentage);
 
   return Number(average).toFixed(2);
 };
@@ -457,7 +482,7 @@ export const formatReportBarChartData = (
 
   moversExamScore.forEach((item) => {
     labels.push(item.item_name);
-    data.push(Number(grades[item.item_id][studentId]) * 0.01);
+    data.push(Number(grades[item.item_id][studentId]) * 0.1);
   }, 0);
 
   return {
@@ -472,4 +497,55 @@ export const formatReportBarChartData = (
       },
     ],
   };
+};
+
+export const countAttendance = (dates: any = {}, studentId: any) => {
+  const datesValues = Object.values(dates);
+  let attendanceAverage = 0;
+  const attendanceTotal = datesValues.reduce((acc: number, attendance: any) => {
+    if (
+      attendance[studentId] === "present" ||
+      attendance[studentId] === "recovered"
+    )
+      return acc + 1;
+    if (attendance[studentId] === "late") return acc + 0.5;
+    return acc;
+  }, 0);
+  console.log(attendanceTotal);
+
+  attendanceAverage = (attendanceTotal / datesValues.length) * 100;
+
+  return {
+    attendanceCount: Math.floor(attendanceTotal),
+    attendancePercentage: attendanceAverage,
+  };
+};
+
+export const countAbsences = (dates: any = {}, studentId: any) => {
+  const datesValues = Object.values(dates);
+  let attendanceAverage = 0;
+  const attendanceTotal = datesValues.reduce((acc: number, attendance: any) => {
+    if (attendance[studentId] === "absent") return acc + 1;
+    if (attendance[studentId] === "late") return acc + 0.5;
+    return acc;
+  }, 0);
+
+  attendanceAverage = (attendanceTotal / datesValues.length) * 100;
+
+  return {
+    attendanceCount: Math.floor(attendanceTotal),
+    attendancePercentage: attendanceAverage,
+  };
+};
+
+export const getColorOfAssistance = (value: any) => {
+  const percentage = Number(value);
+  if (percentage >= 12 && percentage < 20) {
+    return "warning-field";
+  }
+  if (percentage >= 20) {
+    return "danger-field";
+  }
+
+  return "";
 };
