@@ -2,15 +2,15 @@ const nextConfig = {
   distDir: "build",
   env: {
     //API_URL: "http://localhost:3000/v1/api",
-    API_URL: "http://154.12.252.34:5000/v1/api",
-    FILE_URL: "http://154.12.252.34:5000",
+    API_URL: "https://api-sistema.bebrighton.net/v1/api",
+    FILE_URL: "https://api-sistema.bebrighton.net",
   },
   images: {
     unoptimized: true,
     remotePatterns: [
       {
         protocol: "https",
-        hostname: "devbrighton.zgamestechnology.com",
+        hostname: "api-sistema.bebrighton.net",
         port: "",
         pathname: "**",
       },
