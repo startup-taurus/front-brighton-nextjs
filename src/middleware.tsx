@@ -1,9 +1,12 @@
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
-import { USER_TYPES } from "../utils/constants";
+
+const USER_TYPES = {
+  ADMIN: "admin_staff",
+  PROFESSOR: "professor",
+};
 
 const teacherPaths = [
-  "/authentication/login",
   "/teachers",
   "/teachers/faq",
   "/course/:id/home",
@@ -24,49 +27,58 @@ export function middleware(request: NextRequest) {
   } catch (error) {
     user = null;
   }
+  // console.log(user, path.split("/"));
 
-  if (!user && path.split("/")[1] !== "authentication") {
-    return NextResponse.redirect(new URL("/authentication/login", request.url));
-  }
-
-  if (
-    path.split("/")[1] === "authentication" &&
-    user &&
-    user?.role === USER_TYPES.PROFESSOR
-  ) {
-    return NextResponse.redirect(new URL(`/teachers`, request.url));
-  }
-
-  if (
-    path.split("/")[1] === "authentication" &&
-    user &&
-    user?.role === USER_TYPES.ADMIN
-  ) {
-    return NextResponse.redirect(new URL(`/dashboard`, request.url));
-  }
-
-  const pathTeacherRegex = new RegExp(
-    `^(${teacherPaths
-      .map((path) => path.replace(/:\w+/g, "\\w+"))
-      .join("|")})$`,
-  );
-
-  if (
-    pathTeacherRegex.test(path) &&
-    user &&
-    user?.role !== USER_TYPES.PROFESSOR
-  ) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
-  }
-
-  if (
-    new RegExp(`^(/dashboard|/admin(\\/.*)?)$`).test(path) &&
-    user &&
-    user?.role !== USER_TYPES.ADMIN
-  ) {
-    return NextResponse.redirect(new URL("/teachers", request.url));
-  }
-
+  // if (!user && path.split("/")[1] === "authentication") {
+  //   console.log("Entra 0");
+  //   return NextResponse.next();
+  // }
+  //
+  // if (!user && path.split("/")[1] !== "authentication") {
+  //   return NextResponse.redirect(new URL("/authentication/login", request.url));
+  // }
+  //
+  // if (
+  //   path.split("/")[1] === "authentication" &&
+  //   user &&
+  //   user?.role === USER_TYPES.PROFESSOR
+  // ) {
+  //   console.log("Entra");
+  //   return NextResponse.redirect(new URL(`/teachers`, request.url));
+  // }
+  //
+  // if (
+  //   path.split("/")[1] === "authentication" &&
+  //   user &&
+  //   user?.role === USER_TYPES.ADMIN
+  // ) {
+  //   return NextResponse.redirect(new URL(`/dashboard`, request.url));
+  // }
+  //
+  // const pathTeacherRegex = new RegExp(
+  //   `^(${teacherPaths
+  //     .map((path) => path.replace(/:\w+/g, "\\w+"))
+  //     .join("|")})$`,
+  // );
+  //
+  // if (
+  //   pathTeacherRegex.test(path) &&
+  //   user &&
+  //   user?.role !== USER_TYPES.PROFESSOR
+  // ) {
+  //   console.log("Entra 2");
+  //   return NextResponse.redirect(new URL("/dashboard", request.url));
+  // }
+  //
+  // if (
+  //   new RegExp(`^(/dashboard|/admin(\\/.*)?)$`).test(path) &&
+  //   user &&
+  //   user?.role !== USER_TYPES.ADMIN
+  // ) {
+  //   console.log("Entra 3");
+  //   return NextResponse.redirect(new URL("/teachers", request.url));
+  // }
+  // console.log("Sale");
   return NextResponse.next();
 }
 

@@ -74,3 +74,14 @@ export const LEVELS_FOR_ADULTS = [
   { label: "B2 First Preparation", value: "B2 First Preparation" },
   { label: "Private Classes", value: "Private Classes" },
 ];
+
+export const TEACHER_PATHS = [
+  "/teachers",
+  "/teachers/faq",
+  "/course/:id/home",
+  "/course/:id/attendance",
+  "/course/:id/holidays",
+  "/course/:id/gradebook",
+  "/course/:id/student-report",
+  "/course/:id/faq",
+];

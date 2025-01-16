@@ -1,3 +1,5 @@
+"use client";
+
 import CommonForm from "@/components/Others/authentication/common/CommonForm";
 import { Col, Container, Row } from "reactstrap";
 

@@ -7,12 +7,12 @@ import { ImgPath } from "utils/Constant";
 
 const SchoolData = () => {
   const { data: schoolCardData } = useSWR([`/get-dashboard-data/get-all`], () =>
-    getDashboardData()
+    getDashboardData(),
   );
 
   return (
     <>
-      {schoolCardData.data.map((data: any, index: number) => (
+      {schoolCardData?.data?.map((data: any, index: number) => (
         <Col
           md={4}
           className={data.smallScreenClass ? "col-sm-6" : ""}

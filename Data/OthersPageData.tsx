@@ -1,6 +1,7 @@
 export const withoutLayoutThemePath = [
   "/students-registration",
   "/authentication/login",
+  "/404",
 ];
 
 export const stepperHorizontalData = [

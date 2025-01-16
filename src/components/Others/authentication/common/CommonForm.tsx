@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { ChangeEvent, FormEvent, useContext, useState } from "react";
 import { Button, FormGroup, Input, Label } from "reactstrap";
@@ -17,6 +19,7 @@ import CommonLogo from "./CommonLogo";
 import { useRouter } from "next/router";
 import { postLogin } from "helper/api-data/user";
 import { UserContext } from "helper/User";
+import { USER_ROLES, USER_TYPES } from "../../../../../utils/constants";
 export interface commonFormPropsType {
   alignLogo?: string;
 }
@@ -25,8 +28,8 @@ const CommonForm = ({ alignLogo }: commonFormPropsType) => {
 
   const [showPassWord, setShowPassWord] = useState(false);
   const [formValues, setFormValues] = useState({
-    username: "jean",
-    password: "123",
+    username: "",
+    password: "",
   });
   const { username, password } = formValues;
   const router = useRouter();
@@ -41,9 +44,11 @@ const CommonForm = ({ alignLogo }: commonFormPropsType) => {
       Cookies.set("token", JSON.stringify(response?.data));
       login(response.data);
 
-      if (response.data.role === "admin_staff") {
+      if (response.data.role === USER_TYPES.ADMIN) {
         router.push("/dashboard");
-      } else {
+      }
+
+      if (response.data.role === USER_TYPES.PROFESSOR) {
         router.push("/teachers");
       }
 
@@ -90,15 +95,6 @@ const CommonForm = ({ alignLogo }: commonFormPropsType) => {
               </div>
             </FormGroup>
             <FormGroup className="mb-0 position-relative">
-              <div className="checkbox p-0">
-                <Input id="checkbox1" type="checkbox" />
-                <Label className="text-muted" htmlFor="checkbox1">
-                  {RememberPassword}
-                </Label>
-              </div>
-              <Link className="link" href="/pages/authentication/forget-pwd">
-                {ForgotPassword}
-              </Link>
               <div className="text-end mt-3">
                 <Button
                   color="primary"

@@ -1,43 +1,16 @@
+"use client";
 import React, { useContext } from "react";
 
 import SectionTitle from "@/components/own/section-title/section-title";
-import { Card, CardBody, Col, Row } from "reactstrap";
+import { Card, CardBody } from "reactstrap";
 import TeacherProfile from "@/components/own/teacher-profile/teacher-profile";
-import { ImgPath, UrlImage } from "utils/Constant";
+import { UrlImage } from "utils/Constant";
 import CoursesList from "@/components/own/courses-list/courses-list";
 import QuickLinksList from "@/components/own/quick-links-list/quick-links-list";
 import ScheduleCalendar from "@/components/own/schedule-calendar/schedule-calendar";
 import useSWR from "swr";
 import { UserContext } from "../../../helper/User";
 import { getProfessorCourses } from "../../../helper/api-data/professor";
-
-const COURSES = [
-  {
-    classRoom: "F-16°",
-    level: "A1.2 MOVERS - MON & WED 4-6 PM",
-    link: "/course/home",
-  },
-  {
-    classRoom: "F-42°",
-    level: "A1.2 MOVERS - MON & WED 4-6 PM",
-    link: "/course/home",
-  },
-  {
-    classRoom: "H-17°",
-    level: "A1.2 MOVERS - MON & WED 4-6 PM",
-    link: "/course/home",
-  },
-  {
-    classRoom: "C-17°",
-    level: "A1.2 MOVERS - MON & WED 4-6 PM",
-    link: "/course/home",
-  },
-  {
-    classRoom: "V-51°",
-    level: "A1.2 MOVERS - MON & WED 4-6 PM",
-    link: "/course/home",
-  },
-];
 
 const QUICK_LINKS = [
   {

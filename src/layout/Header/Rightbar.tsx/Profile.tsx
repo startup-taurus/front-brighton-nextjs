@@ -11,12 +11,11 @@ import { UserContext } from "../../../../helper/User";
 import * as process from "process";
 
 const Profile = () => {
-  const { user } = useContext(UserContext);
+  const { user, logout } = useContext(UserContext);
   const router = useRouter();
 
   const handleLogOut = () => {
-    Cookies.remove("token");
-    router.push("/authentication/login");
+    logout();
   };
   return (
     <li className="profile-nav onhover-dropdown pe-0 py-0">

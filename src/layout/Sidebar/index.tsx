@@ -9,7 +9,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { ImgPath } from "utils/Constant";
 import { UserContext } from "../../../helper/User";
-import { AdminMenuList, TeacherMenuList } from "@/layout/Sidebar/menu";
 
 const Sidebar = () => {
   const { sidebarIconType } = useContext(CustomizerContext);
