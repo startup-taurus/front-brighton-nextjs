@@ -56,6 +56,13 @@ const SyllabusForm = ({ data, isOpen, toggle }: any) => {
                   assignments: data?.assignments || [""],
                   progress_tests: data?.progress_tests || [""],
                   movers_exam: data?.movers_exam || [""],
+                  percentages: data?.percentages_syllabus || [
+                    {
+                      name: "",
+                      min: 0,
+                      max: 0,
+                    },
+                  ],
                 }
               : {
                   id: "",
@@ -67,6 +74,13 @@ const SyllabusForm = ({ data, isOpen, toggle }: any) => {
                   assignments: [""],
                   progress_tests: [""],
                   movers_exam: [""],
+                  percentages: [
+                    {
+                      name: "",
+                      min: 0,
+                      max: 0,
+                    },
+                  ],
                 }
           }
           onSubmit={(values) => (data ? update(values) : save(values))}
@@ -130,6 +144,89 @@ const SyllabusForm = ({ data, isOpen, toggle }: any) => {
               </Col>
             );
 
+            const renderPercentagesField = (
+              name: string,
+              label: string,
+              values: any,
+              setFieldValue: (field: string, value: any) => void
+            ) => (
+              <Col xs={12} className="mt-3">
+                <Label>{label}</Label>
+                <FieldArray
+                  name={name}
+                  render={(arrayHelpers) => (
+                    <div style={{ maxHeight: "300px", overflowY: "auto" }}>
+                      {values[name].map((percentage: any, index: number) => (
+                        <Row key={index} className="mb-2">
+                          <Col md={4}>
+                            <Label>Name</Label>
+                            <Input
+                              type="text"
+                              value={percentage.name}
+                              onChange={(e) =>
+                                setFieldValue(
+                                  `${name}[${index}].name`,
+                                  e.target.value
+                                )
+                              }
+                            />
+                          </Col>
+                          <Col md={3}>
+                            <Label>Min %</Label>
+                            <Input
+                              type="number"
+                              value={percentage.min}
+                              onChange={(e) =>
+                                setFieldValue(
+                                  `${name}[${index}].min`,
+                                  e.target.value
+                                )
+                              }
+                            />
+                          </Col>
+                          <Col md={3}>
+                            <Label>Max %</Label>
+                            <Input
+                              type="number"
+                              value={percentage.max}
+                              onChange={(e) =>
+                                setFieldValue(
+                                  `${name}[${index}].max`,
+                                  e.target.value
+                                )
+                              }
+                            />
+                          </Col>
+                          <Col md={2} className="d-flex align-items-end">
+                            <Button
+                              type="button"
+                              color="danger"
+                              onClick={() => arrayHelpers.remove(index)}
+                            >
+                              <FaTrash />
+                            </Button>
+                          </Col>
+                        </Row>
+                      ))}
+                      <Button
+                        type="button"
+                        color="primary"
+                        onClick={() =>
+                          arrayHelpers.push({
+                            name: "",
+                            min: 0,
+                            max: 0,
+                          })
+                        }
+                      >
+                        Add Percentage
+                      </Button>
+                    </div>
+                  )}
+                />
+              </Col>
+            );
+
             return (
               <form
                 noValidate
@@ -175,6 +272,14 @@ const SyllabusForm = ({ data, isOpen, toggle }: any) => {
                 {renderArrayField("progress_tests", "Progress Tests")}
                 <hr />
                 {renderArrayField("movers_exam", "Movers Exam")}
+                <hr />
+                {renderPercentagesField(
+                  "percentages",
+                  "Custom Percentages",
+                  values,
+                  setFieldValue
+                )}
+
                 <Col xs={12} className="d-flex justify-content-end mt-5">
                   <Button color="cancel" onClick={toggle}>
                     Close

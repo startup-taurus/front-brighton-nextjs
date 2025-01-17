@@ -102,6 +102,7 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                   classroom: data.classroom,
                   hourly_rate: data.hourly_rate,
                   professor_id: data.professor_id,
+                  age_group: data.age_group,
                   syllabus_id: data.syllabus_id,
                   schedules: data.schedule
                     ? [
@@ -124,6 +125,7 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                   classroom: "",
                   hourly_rate: "",
                   professor_id: "",
+                  age_group: "",
                   schedules: [{ days: [], startTime: "", endTime: "" }],
                   syllabus_id: "",
                 }
@@ -159,7 +161,7 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                   <Field name="comment" as={Input} type="textarea" />
                   <ErrorMessage name="comment" component={FormFeedback} />
                 </Col>
-                <Col xs={6}>
+                <Col xs={4}>
                   <Label for="status">Status</Label>
                   <Field name="status" as={Input} type="select">
                     <option value="" disabled>
@@ -170,7 +172,7 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                   </Field>
                   <ErrorMessage name="status" component={FormFeedback} />
                 </Col>
-                <Col xs={6}>
+                <Col xs={4}>
                   <Label for="classroom">Classroom</Label>
                   <Field name="classroom" as={Input} type="select">
                     <option value="" selected disabled>
@@ -182,6 +184,17 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                     <option value="hardvard">Hardvard</option>
                   </Field>
                   <ErrorMessage name="classroom" component={FormFeedback} />
+                </Col>
+                <Col xs={4}>
+                  <Label for="age_group">Age Group</Label>
+                  <Field name="age_group" as={Input} type="select">
+                    <option value="" selected disabled>
+                      Select age group
+                    </option>
+                    <option value="adult">Adult</option>
+                    <option value="children">Children</option>
+                  </Field>
+                  <ErrorMessage name="age_group" component={FormFeedback} />
                 </Col>
                 <Col xs={6}>
                   <Label for="professor_id">Professor</Label>
