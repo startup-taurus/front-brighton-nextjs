@@ -34,14 +34,15 @@ const UserProvider = ({ children }: contextType) => {
   }, []);
 
   useEffect(() => {
+    const user = JSON.parse(Cookies.get("token") ?? "{}");
+
     const path = router.pathname.split("/")[1];
     const isUserLogged = Object.keys(user).length > 1;
-    console.log(user, isUserLogged);
 
     const pathTeacherRegex = new RegExp(
-      `^(${TEACHER_PATHS.map((path) =>
-        router.pathname.replace(/:\w+/g, "\\w+"),
-      ).join("|")})$`,
+      `^(${TEACHER_PATHS.map((path) => path.replace(/:\w+/g, "\\w+")).join(
+        "|",
+      )})$`,
     );
     if (path === "students-registration") {
     } else if (!isUserLogged && path !== "authentication") {
