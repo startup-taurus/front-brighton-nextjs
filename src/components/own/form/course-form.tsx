@@ -123,7 +123,7 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                   status: "active",
                   course_type: "",
                   classroom: "",
-                  hourly_rate: "",
+                  hourly_rate: null,
                   professor_id: "",
                   age_group: "",
                   schedules: [{ days: [], startTime: "", endTime: "" }],
