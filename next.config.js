@@ -1,8 +1,8 @@
 const nextConfig = {
   distDir: "build",
   env: {
-    API_URL: "http://localhost:3001/v1/api",
-    // API_URL: "https://api-sistema.bebrighton.net/v1/api",
+    // API_URL: "http://localhost:3001/v1/api",
+    API_URL: "https://api-sistema.bebrighton.net/v1/api",
     FILE_URL: "https://api-sistema.bebrighton.net",
   },
   images: {
@@ -11,18 +11,6 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "api-sistema.bebrighton.net",
-        port: "",
-        pathname: "**",
-      },
-      {
-        protocol: "http",
-        hostname: "154.12.252.34",
-        port: "",
-        pathname: "**",
-      },
-      {
-        protocol: "http",
-        hostname: "154.12.252.34:5000",
         port: "",
         pathname: "**",
       },
