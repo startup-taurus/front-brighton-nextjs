@@ -134,7 +134,7 @@ const GradebookTable = ({
     );
 
     const result = calculateFinalGradingStatus(notesPercentages, totalAverage);
-    const resultClass = result.split(" ")[0].toLowerCase();
+    const resultClass = result?.split(" ")[0].toLowerCase();
     return (
       <>
         <td className="highlighted-col">{totalAverage}%</td>

@@ -17,6 +17,7 @@ import { getGradesByCourseAndStudent } from "../../../../helper/api-data/student
 import StudentReportTable from "@/components/own/tables/student-report-table";
 import Image from "next/image";
 import { ImgPath } from "../../../../utils/Constant";
+import { getFinalPercentageBySyllabusId } from "../../../../helper/api-data/syllabus";
 
 const tabsName = "STUDENT REPORT";
 
@@ -65,6 +66,16 @@ const StudentReport: NextPageWithLayout = () => {
       ),
   );
 
+  const notesPercentages = useSWR(
+    courseDetail?.data?.data?.syllabus_id
+      ? `/syllabus/get-percentages-by-syllabus/${courseDetail?.data?.data?.syllabus_id}`
+      : null,
+    () =>
+      getFinalPercentageBySyllabusId(
+        courseDetail?.data?.data?.syllabus_id!.toString(),
+      ),
+  );
+
   const changeSelectedStudent = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSelectedStudentId(value);
@@ -76,6 +87,7 @@ const StudentReport: NextPageWithLayout = () => {
     gradingItems?.data?.data &&
     gradesByStudent?.data?.data &&
     courseDetail?.data?.data &&
+    notesPercentages?.data?.data &&
     selectedStudentId;
 
   return (
@@ -129,6 +141,7 @@ const StudentReport: NextPageWithLayout = () => {
                 gradingPercentage={gradingPercentage?.data?.data}
                 gradingItems={gradingItems?.data?.data}
                 gradesByStudent={gradesByStudent?.data?.data}
+                notesPercentages={notesPercentages?.data?.data}
                 selectedStudentId={selectedStudentId}
                 setSelectedStudentId={selectedStudentId}
               />

@@ -353,29 +353,18 @@ export const calculateFinalGradingStatus = (
       Number(notePercentage.max) >= percentage,
   );
 
-  console.log(notesPercentages, gradingStatus);
   return !!gradingStatus ? gradingStatus?.name : "NOT REPORTED";
 };
 export const determineResult = (totalAverage: number) => {
-  if (totalAverage < 40) {
+  if (totalAverage > 70) {
     return {
-      resultClass: "",
-      result: "NOT REPORTED",
-    };
-  } else if (totalAverage >= 40 && totalAverage < 60) {
-    return {
-      resultClass: "danger",
-      result: "FAILED",
-    };
-  } else if (totalAverage >= 60 && totalAverage < 85) {
-    return {
-      resultClass: "success",
+      resultClass: "result-pass",
       result: "PASS",
     };
-  } else if (totalAverage >= 85) {
+  } else {
     return {
-      resultClass: "info",
-      result: "MERIT",
+      resultClass: "result-failed",
+      result: "FAIL",
     };
   }
 };
@@ -410,18 +399,26 @@ export const formatStudentScoreExamGrades = (
   courseLevel: string,
   studentId: string,
   grades: any,
+  notesPercentages: any,
 ) => {
   return moversExamScore?.map((moverExamScore, index) => {
-    const gradeResult = determineResult(
-      Number(grades[moverExamScore.item_id][studentId]),
+    const scorePercentage = (
+      (grades[moverExamScore.item_id][studentId] * 100) /
+      10
+    ).toFixed(2);
+
+    const gradeResult = calculateFinalGradingStatus(
+      notesPercentages,
+      scorePercentage,
     );
 
     return {
       id: index,
       criterion: moverExamScore.item_name,
       level: moverExamScore?.category,
-      score: grades[moverExamScore.item_id][studentId],
-      grade: gradeResult?.result,
+      score: scorePercentage,
+      grade: gradeResult,
+      class: `result-${gradeResult?.split(" ")[0].toLowerCase()}`,
     };
   });
 };
@@ -525,7 +522,6 @@ export const countAttendance = (dates: any = {}, studentId: any) => {
     if (attendance[studentId] === "late") return acc + 0.5;
     return acc;
   }, 0);
-  console.log(attendanceTotal);
 
   attendanceAverage = (attendanceTotal / datesValues.length) * 100;
 

@@ -76,7 +76,7 @@ const StudentReportTable = ({
   gradingPercentage,
   gradingItems,
   gradesByStudent,
-
+  notesPercentages,
   selectedStudentId,
 }: any) => {
   const [componentsGradebook, setComponentsGradebook] =
@@ -138,6 +138,7 @@ const StudentReportTable = ({
       courseDetail?.course_name,
       selectedStudentId,
       gradingGrade,
+      notesPercentages,
     );
 
     const assignmentAverage = calculateAssignmentAverage(
