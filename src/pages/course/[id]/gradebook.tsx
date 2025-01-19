@@ -14,6 +14,7 @@ import {
 } from "../../../../helper/api-data/course";
 import GradebookTable from "@/components/own/tables/gradebook-table";
 import { getGradesByCourse } from "../../../../helper/api-data/student-grades";
+import { getFinalPercentageBySyllabusId } from "../../../../helper/api-data/syllabus";
 
 const tabsName = "GRADEBOOK";
 
@@ -51,6 +52,16 @@ const Gradebook: NextPageWithLayout = () => {
       ),
   );
 
+  const notesPercentages = useSWR(
+    courseDetail?.data?.data?.syllabus_id
+      ? `/syllabus/get-percentages-by-syllabus/${courseDetail?.data?.data?.syllabus_id}`
+      : null,
+    () =>
+      getFinalPercentageBySyllabusId(
+        courseDetail?.data?.data?.syllabus_id!.toString(),
+      ),
+  );
+
   return (
     <Card tag="section" className="gradebook">
       <CardBody>
@@ -61,12 +72,14 @@ const Gradebook: NextPageWithLayout = () => {
         {gradingItems?.data?.data &&
           courseStudents?.data?.data?.students &&
           gradingPercentage?.data?.data &&
-          courseDetail?.data?.data && (
+          courseDetail?.data?.data &&
+          notesPercentages?.data?.data && (
             <GradebookTable
               students={courseStudents?.data?.data?.students}
               gradingItems={gradingItems?.data?.data}
               studentsGrades={gradesByCourse?.data?.data}
               gradingPercentages={gradingPercentage?.data?.data}
+              notesPercentages={notesPercentages?.data?.data}
               syllabusId={courseDetail?.data?.data?.syllabus_id}
             />
           )}

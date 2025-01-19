@@ -342,6 +342,20 @@ export const calculateClassTotalAverage = (
   return !!totalClassAverage ? Number(totalClassAverage).toFixed(2) : "0";
 };
 
+export const calculateFinalGradingStatus = (
+  notesPercentages: any[] = [],
+  note: any,
+) => {
+  const percentage = Number(note);
+  const gradingStatus = notesPercentages?.find(
+    (notePercentage: any) =>
+      Number(notePercentage.min) <= percentage &&
+      Number(notePercentage.max) >= percentage,
+  );
+
+  console.log(notesPercentages, gradingStatus);
+  return !!gradingStatus ? gradingStatus?.name : "NOT REPORTED";
+};
 export const determineResult = (totalAverage: number) => {
   if (totalAverage < 40) {
     return {

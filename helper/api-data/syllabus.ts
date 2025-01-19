@@ -10,6 +10,9 @@ export const getActiveSyllabus = (page: number, limit: number) => {
 export const getSyllabusById = (id: string) => {
   return getFetcher(`/syllabus/get-syllabus/${id}`, false);
 };
+export const getFinalPercentageBySyllabusId = (id: string) => {
+  return getFetcher(`/syllabus/get-percentages-by-syllabus/${id}`, false);
+};
 
 export const createSyllabus = (data: any) => {
   return postFetcher("/syllabus/create", data);

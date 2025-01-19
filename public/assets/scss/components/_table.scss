@@ -481,14 +481,6 @@ th {
     outline: none;
     box-shadow: none !important;
   }
-
-  .warning-field {
-    background-color: #ffe599;
-  }
-
-  .danger-field {
-    background-color: #e99999;
-  }
 }
 
 .report-table {
@@ -587,5 +579,26 @@ table {
     transform: rotate(180deg);
     line-height: 0.001;
     position: relative;
+  }
+
+  .result-not {
+  }
+
+  .result-pass {
+    background-color: #d7ebcf;
+  }
+
+  .result-merit {
+    background-color: #c7daf6;
+  }
+
+  .result-failed,
+  .warning-field {
+    background-color: #ffe599;
+  }
+
+  .result-distinction,
+  .danger-field {
+    background-color: #e99999;
   }
 }

@@ -12,8 +12,8 @@ import {
   calculateAverage,
   calculateClassTotalAverage,
   calculateTotalAverage,
-  determineResult,
   formatGradebookComponents,
+  calculateFinalGradingStatus,
 } from "../../../../utils/utils";
 import { debounce } from "lodash";
 import { useRouter } from "next/router";
@@ -32,6 +32,7 @@ const GradebookTable = ({
   studentsGrades,
   gradingPercentages,
   syllabusId,
+  notesPercentages,
 }: any) => {
   const router = useRouter();
   const courseId = router.query.id as string;
@@ -63,22 +64,25 @@ const GradebookTable = ({
     gradingItemId: any,
     studentId: any,
   ) => {
-    const grade = event.target.value;
+    let grade = event.target.value;
     if (grade === "") return;
-    setGrades((grades: any) => ({
-      ...grades,
-      [gradingItemId]: {
-        ...grade[gradingItemId],
-        [studentId]: grade,
-      },
-    }));
+    if (Number(grade) >= 0 && Number(grade) <= 10) {
+      grade = Number(grade).toFixed(2);
+      setGrades((grades: any) => ({
+        ...grades,
+        [gradingItemId]: {
+          ...grade[gradingItemId],
+          [studentId]: grade,
+        },
+      }));
 
-    onSaveGrade({
-      course_id: courseId,
-      student_id: studentId,
-      grading_item_id: gradingItemId,
-      grade,
-    });
+      onSaveGrade({
+        course_id: courseId,
+        student_id: studentId,
+        grading_item_id: gradingItemId,
+        grade,
+      });
+    }
   };
 
   const onSaveGrade = useCallback(
@@ -129,14 +133,15 @@ const GradebookTable = ({
       gradingPercentages,
     );
 
-    const result = determineResult(Number(totalAverage));
+    const result = calculateFinalGradingStatus(notesPercentages, totalAverage);
+    const resultClass = result.split(" ")[0].toLowerCase();
     return (
       <>
         <td className="highlighted-col">{totalAverage}%</td>
         <td
-          className={` ${result?.resultClass ? `bg-${result?.resultClass}` : "gray-col"}`}
+          className={`text-nowrap ${resultClass ? `result-${resultClass}` : "gray-col"}`}
         >
-          {result?.result}
+          {result}
         </td>
       </>
     );
