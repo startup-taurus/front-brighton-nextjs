@@ -85,3 +85,8 @@ export const TEACHER_PATHS = [
   "/course/:id/student-report",
   "/course/:id/faq",
 ];
+
+export const EXAMS_TYPE = {
+  MOVERS: "MOVERS",
+  PRELIM: "PRELIM.",
+};

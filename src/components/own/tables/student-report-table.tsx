@@ -13,13 +13,18 @@ import {
   calculateReportExamAverage,
   calculateStudentAverage,
   calculateTotalAverage,
+  formatExamParams,
   formatGradebookComponents,
   formatReportBarChartData,
+  formatReportUrl,
   formatStudentScoreAssignmentsGrades,
   formatStudentScoreExamGrades,
 } from "../../../../utils/utils";
 import { ComponentsGradebook } from "../../../../Types/GradingItem";
-import { DEFAULT_BAR_CHART_DATA } from "../../../../utils/constants";
+import {
+  DEFAULT_BAR_CHART_DATA,
+  EXAMS_TYPE,
+} from "../../../../utils/constants";
 
 const assignmentsTestCols = [
   {
@@ -70,7 +75,7 @@ const examPageCols = [
 ];
 
 const StudentReportTable = ({
-  students,
+  selectedStudent,
   courseDetail,
   studentAttendance,
   gradingPercentage,
@@ -169,6 +174,29 @@ const StudentReportTable = ({
       },
       gradingPercentage,
     );
+
+    const examProps = formatExamParams(result);
+
+    const url = {
+      student: selectedStudent?.name,
+      ageGroup: courseDetail?.age_group,
+      level: courseDetail?.course_name,
+      assignments: `${assignmentsScore[0]?.score}%`,
+      assignmentsStatus: assignmentsScore[0]?.grade,
+      assignmentsTotal: assignmentAverage,
+      tests: `${assignmentsScore[1]?.score}%`,
+      testsStatus: assignmentsScore[1]?.grade,
+      exam:
+        courseDetail?.age_group === "adult"
+          ? EXAMS_TYPE.PRELIM
+          : EXAMS_TYPE.MOVERS,
+      gap: `${studentAverage}% (NOT RESULTED)`,
+      final: "NOT RESULTED",
+      ...examProps,
+    };
+
+    console.log(url);
+
     setStudentTotalAverage(studentAverage);
     setAssignmentsAverage(assignmentAverage);
     setExamData(result);
@@ -176,6 +204,15 @@ const StudentReportTable = ({
     setAssignmentsData(assignmentsScore);
     setReportChartData(chartFormattedData);
   }, [gradingGrade, componentsGradebook, selectedStudentId]);
+
+  const generateReportUrl = () => {
+    const url = formatReportUrl({
+      student: selectedStudent?.student,
+      ageGroup: courseDetail?.age_group,
+      level: courseDetail?.course_name,
+    });
+    // console.log(url);
+  };
 
   return (
     <>

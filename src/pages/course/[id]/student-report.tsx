@@ -25,6 +25,7 @@ const StudentReport: NextPageWithLayout = () => {
   const router = useRouter();
   const courseId = router.query.id as string;
   const [selectedStudentId, setSelectedStudentId] = useState("");
+  const [selectedStudent, setSelectedStudent] = useState("");
 
   const courseDetail = useSWR(
     courseId ? `/course/get-one/${courseId}` : null,
@@ -79,6 +80,11 @@ const StudentReport: NextPageWithLayout = () => {
   const changeSelectedStudent = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSelectedStudentId(value);
+    const student = courseStudents?.data?.data?.students?.find(
+      (s: any) => s.id == value,
+    );
+
+    setSelectedStudent(student);
   };
 
   const shouldRenderStudentReport =
@@ -144,6 +150,7 @@ const StudentReport: NextPageWithLayout = () => {
                 notesPercentages={notesPercentages?.data?.data}
                 selectedStudentId={selectedStudentId}
                 setSelectedStudentId={selectedStudentId}
+                selectedStudent={selectedStudent}
               />
             )}
           </Row>

@@ -1,6 +1,6 @@
 import Cookies from "js-cookie";
 import { toast } from "react-toastify";
-import { COMPONENTS_GRADEBOOK, ERROR_MESSAGE } from "./constants";
+import { COMPONENTS_GRADEBOOK, ERROR_MESSAGE, EXAMS_TYPE } from "./constants";
 import { NextRouter } from "next/router";
 import {
   addDays,
@@ -558,4 +558,99 @@ export const getColorOfAssistance = (value: any) => {
   }
 
   return "";
+};
+
+export const formatExamParams = (result: any[]) => {
+  const values = result?.map((exam) => {
+    const name = exam.criterion?.toLowerCase().replace(" and ", "-");
+    return {
+      [name]: `${exam.score}%`,
+      [`${name}Status`]: `${exam.grade}%`,
+    };
+  });
+
+  return Object.assign({}, ...values);
+};
+
+export const formatReportUrl = ({
+  student,
+  ageGroup,
+  level,
+  assignments,
+  assignmentsTotal,
+  assignmentsStatus,
+  tests,
+  testsStatus,
+  exam,
+  reading,
+  readingStatus,
+  writing,
+  writingStatus,
+  speaking,
+  speakingStatus,
+  generalExamsStatus,
+  //Young learners
+  readingWriting,
+  readingWritingStatus,
+  listeningYLE,
+  listeningYLEStatus,
+  speakingYLE,
+  speakingYLEStatus,
+  yleTotal,
+  gpa,
+  final,
+}: any) => {
+  const baseUrl = new URL(
+    "https://chiispiitas.github.io/Brighton/Certificate%20Generator/index.html",
+  );
+  baseUrl.searchParams.append("student", student.toUpperCase());
+  baseUrl.searchParams.append(
+    "program",
+    ageGroup === "adult" ? "General English" : "Young Learners",
+  );
+  baseUrl.searchParams.append("level", level);
+  baseUrl.searchParams.append("short-level", level?.split(" ")[0]);
+  baseUrl.searchParams.append("assignments", assignments);
+  baseUrl.searchParams.append("assignments-total", assignmentsTotal);
+  baseUrl.searchParams.append("assignments-status", assignmentsStatus);
+  baseUrl.searchParams.append("tests", tests);
+  baseUrl.searchParams.append("tests-status", testsStatus);
+  baseUrl.searchParams.append("exam", exam);
+
+  baseUrl.searchParams.append("gpa", gpa);
+  baseUrl.searchParams.append("final", final);
+  baseUrl.searchParams.append("password", "Brighton1234@");
+
+  if (exam === EXAMS_TYPE.PRELIM) {
+    baseUrl.searchParams.append("reading", reading);
+    baseUrl.searchParams.append("reading-status", readingStatus);
+    baseUrl.searchParams.append("listening", reading);
+    baseUrl.searchParams.append("listening-status", readingStatus);
+    baseUrl.searchParams.append("writing", writing);
+    baseUrl.searchParams.append("writing-status", writingStatus);
+    baseUrl.searchParams.append("speaking", speaking);
+    baseUrl.searchParams.append("speaking-status", speakingStatus);
+    baseUrl.searchParams.append("general-exams-total", generalExamsStatus);
+  } else {
+    baseUrl.searchParams.append("reading-and-writing", readingWriting);
+    baseUrl.searchParams.append(
+      "reading-and-writing-status",
+      readingWritingStatus,
+    );
+    baseUrl.searchParams.append("listening-yle", listeningYLE);
+    baseUrl.searchParams.append("listening-yle-status", listeningYLEStatus);
+    baseUrl.searchParams.append("speaking-yle", speakingYLE);
+    baseUrl.searchParams.append("speaking-yle-status", speakingYLEStatus);
+    baseUrl.searchParams.append("yle-total", yleTotal);
+  }
+
+  return baseUrl;
+  // return `https://chiispiitas.github.io/Brighton/Certificate%20Generator/index.html?student=JEAN%20PA
+  //         UL%20SANTOS%20CUADROS&program=General%20English&level=B1%20PRE-
+  //         INTERMEDIATE&short-level=B1&assignments=90%&assignments-total=97.5%&assignments-
+  //         status=PASS&tests=100&tests-status=PASS&exam=PRELIM.&reading=20%&reading-
+  //         status=NOT%20REPORTED&listening=30%&listening-
+  //         status=NOT%20REPORTED&writing=40%&writing-
+  //         status=FAILED%20(A2)&speaking=50%&speaking-status=FAILED%20(A2)&general-exams-
+  //         total=35%&gpa=47.5%%20(FAILED%20(A2))&final=FAILED%20&password=Brighton1234@`;
 };
