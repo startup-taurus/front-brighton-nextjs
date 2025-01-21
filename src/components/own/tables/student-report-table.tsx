@@ -10,6 +10,7 @@ import {
   buildGradebookStructure,
   calculateAssignmentAverage,
   calculateAverage,
+  calculateFinalGradingStatus,
   calculateReportExamAverage,
   calculateStudentAverage,
   calculateTotalAverage,
@@ -101,6 +102,8 @@ const StudentReportTable = ({
     DEFAULT_BAR_CHART_DATA,
   );
 
+  const [reportURL, setReportURL] = useState<string>("");
+
   const gradingGrade = useMemo(
     () =>
       buildGradebookStructure(
@@ -133,12 +136,12 @@ const StudentReportTable = ({
       selectedStudentId,
     );
 
-    const assignmentsScore = formatStudentScoreAssignmentsGrades(
+    const assignmentsFormatedData = formatStudentScoreAssignmentsGrades(
       { assignments, progressTest, moversExam },
       courseDetail?.course_name,
     );
 
-    const result = formatStudentScoreExamGrades(
+    const examFormatedData = formatStudentScoreExamGrades(
       componentsGradebook.moversExam,
       courseDetail?.course_name,
       selectedStudentId,
@@ -175,33 +178,41 @@ const StudentReportTable = ({
       gradingPercentage,
     );
 
-    const examProps = formatExamParams(result);
+    const examProps = formatExamParams(examFormatedData);
+    const gpaResult = calculateFinalGradingStatus(
+      notesPercentages,
+      studentAverage,
+    );
 
-    const url = {
+    const url = formatReportUrl({
       student: selectedStudent?.name,
       ageGroup: courseDetail?.age_group,
       level: courseDetail?.course_name,
-      assignments: `${assignmentsScore[0]?.score}%`,
-      assignmentsStatus: assignmentsScore[0]?.grade,
+      assignments: `${assignmentsFormatedData[0]?.score}%`,
+      assignmentsStatus: assignmentsFormatedData[0]?.grade,
       assignmentsTotal: assignmentAverage,
-      tests: `${assignmentsScore[1]?.score}%`,
-      testsStatus: assignmentsScore[1]?.grade,
+      tests: `${assignmentsFormatedData[1]?.score}%`,
+      testsStatus: assignmentsFormatedData[1]?.grade,
       exam:
         courseDetail?.age_group === "adult"
           ? EXAMS_TYPE.PRELIM
           : EXAMS_TYPE.MOVERS,
-      gap: `${studentAverage}% (NOT RESULTED)`,
-      final: "NOT RESULTED",
+      generalExamsTotal: reportExamAverage,
+      gpa: `${studentAverage}% (${gpaResult})`,
+      final: `${gpaResult}`,
       ...examProps,
-    };
+    });
 
-    console.log(url);
+    setReportURL(!!url ? url.href : "");
 
     setStudentTotalAverage(studentAverage);
+
     setAssignmentsAverage(assignmentAverage);
-    setExamData(result);
     setExamAverage(reportExamAverage);
-    setAssignmentsData(assignmentsScore);
+
+    setAssignmentsData(assignmentsFormatedData);
+    setExamData(examFormatedData);
+
     setReportChartData(chartFormattedData);
   }, [gradingGrade, componentsGradebook, selectedStudentId]);
 
@@ -211,7 +222,6 @@ const StudentReportTable = ({
       ageGroup: courseDetail?.age_group,
       level: courseDetail?.course_name,
     });
-    // console.log(url);
   };
 
   return (
@@ -251,7 +261,7 @@ const StudentReportTable = ({
             <Link
               className="brighton-download-btn"
               target="_blank"
-              href="https://chiispiitas.github.io/Brighton/Certificate%20Generator/index.html?student=JEAN%20PAUL%20SANTOS%20CUADROS&program=General%20English&level=B1%20PRE-INTERMEDIATE&short-level=B1&assignments=90%&assignments-total=22.5%&assignments-status=PASS&tests=0&tests-status=FAIL&exam=PRELIM.&reading=0%&reading-status=&listening=0%&listening-status=&writing=0%&writing-status=&speaking=0%&speaking-status=&general-exams-total=0%&gpa=4.5%%20(NOT%20REPORTED)&final=NOT%20REPORTED&password=Brighton1234@"
+              href={reportURL}
             >
               Download
             </Link>

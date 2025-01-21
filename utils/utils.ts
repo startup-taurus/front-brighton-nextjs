@@ -347,11 +347,13 @@ export const calculateFinalGradingStatus = (
   note: any,
 ) => {
   const percentage = Number(note);
-  const gradingStatus = notesPercentages?.find(
-    (notePercentage: any) =>
-      Number(notePercentage.min) <= percentage &&
-      Number(notePercentage.max) >= percentage,
-  );
+
+  const gradingStatus = notesPercentages?.find((notePercentage: any) => {
+    return (
+      percentage >= Number(notePercentage.min) &&
+      percentage <= Number(notePercentage.max)
+    );
+  });
 
   return !!gradingStatus ? gradingStatus?.name : "NOT REPORTED";
 };
@@ -565,7 +567,7 @@ export const formatExamParams = (result: any[]) => {
     const name = exam.criterion?.toLowerCase().replace(" and ", "-");
     return {
       [name]: `${exam.score}%`,
-      [`${name}Status`]: `${exam.grade}%`,
+      [`${name}Status`]: `${exam.grade}`,
     };
   });
 
@@ -588,7 +590,7 @@ export const formatReportUrl = ({
   writingStatus,
   speaking,
   speakingStatus,
-  generalExamsStatus,
+  generalExamsTotal,
   //Young learners
   readingWriting,
   readingWritingStatus,
@@ -630,7 +632,7 @@ export const formatReportUrl = ({
     baseUrl.searchParams.append("writing-status", writingStatus);
     baseUrl.searchParams.append("speaking", speaking);
     baseUrl.searchParams.append("speaking-status", speakingStatus);
-    baseUrl.searchParams.append("general-exams-total", generalExamsStatus);
+    baseUrl.searchParams.append("general-exams-total", generalExamsTotal);
   } else {
     baseUrl.searchParams.append("reading-and-writing", readingWriting);
     baseUrl.searchParams.append(
