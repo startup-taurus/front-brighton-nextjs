@@ -580,25 +580,26 @@ table {
     line-height: 0.001;
     position: relative;
   }
+}
 
-  .result-not {
-  }
+.result-not {
+  background-color: #e8eaed !important;
+}
 
-  .result-pass {
-    background-color: #d7ebcf;
-  }
+.result-pass {
+  background-color: #d7ebcf !important;
+}
 
-  .result-merit {
-    background-color: #c7daf6;
-  }
+.result-merit {
+  background-color: #c7daf6 !important;
+}
 
-  .result-failed,
-  .warning-field {
-    background-color: #ffe599;
-  }
+.result-failed,
+.warning-field {
+  background-color: #ffe599 !important;
+}
 
-  .result-distinction,
-  .danger-field {
-    background-color: #e99999;
-  }
+.result-distinction,
+.danger-field {
+  background-color: #e99999 !important;
 }

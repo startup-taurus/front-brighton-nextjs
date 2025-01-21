@@ -101,6 +101,7 @@ const StudentReportTable = ({
   const [reportChartData, setReportChartData] = useState<any>(
     DEFAULT_BAR_CHART_DATA,
   );
+  const [resultGPA, setResultGPA] = useState<string>("NOT RESULTED");
 
   const [reportURL, setReportURL] = useState<string>("");
 
@@ -214,6 +215,7 @@ const StudentReportTable = ({
     setExamData(examFormatedData);
 
     setReportChartData(chartFormattedData);
+    setResultGPA(gpaResult);
   }, [gradingGrade, componentsGradebook, selectedStudentId]);
 
   const generateReportUrl = () => {
@@ -254,7 +256,7 @@ const StudentReportTable = ({
         <div className="d-flex flex-column flex-md-row justify-content-between">
           <ReportStatus
             field="GPA"
-            status="NOT REPORTED"
+            status={resultGPA}
             statusPercentage={`${studentTotalAverage}%`}
           />
           <div className="d-flex download-container gap-2">
