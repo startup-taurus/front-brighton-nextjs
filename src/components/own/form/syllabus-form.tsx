@@ -14,7 +14,7 @@ import {
 import { createSyllabus, updateSyllabus } from "helper/api-data/syllabus";
 import { FaTrash } from "react-icons/fa";
 
-const SyllabusForm = ({ data, isOpen, toggle }: any) => {
+const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
   const save = async (syllabus: any) => {
     try {
       const response = await createSyllabus(syllabus);
@@ -40,14 +40,18 @@ const SyllabusForm = ({ data, isOpen, toggle }: any) => {
   return (
     <Modal isOpen={isOpen} toggle={toggle} size="lg">
       <ModalHeader toggle={toggle}>
-        {data ? "Editar Syllabus" : "Add New Syllabus"}
+        {isCopy
+          ? "Duplicate Syllabus"
+          : data
+            ? "Edit Syllabus"
+            : "Add new Syllabus"}
       </ModalHeader>
       <ModalBody>
         <Formik
           initialValues={
             data
               ? {
-                  id: data.id,
+                  id: isCopy ? "" : data.id,
                   syllabus_name: data.syllabus_name,
                   items: data?.items?.map((item: any) => item.item_name) || [],
                   test_percentage: data?.percentages?.test_percentage || 0,
@@ -83,7 +87,9 @@ const SyllabusForm = ({ data, isOpen, toggle }: any) => {
                   ],
                 }
           }
-          onSubmit={(values) => (data ? update(values) : save(values))}
+          onSubmit={(values) =>
+            data && !isCopy ? update(values) : save(values)
+          }
         >
           {(props) => {
             const {
@@ -286,7 +292,7 @@ const SyllabusForm = ({ data, isOpen, toggle }: any) => {
                   </Button>
                   &nbsp;&nbsp;
                   <Button color="primary" type="submit">
-                    {data ? "Update" : "Save"}
+                    {isCopy ? "Duplicate" : data ? "Update" : "Save"}
                   </Button>
                 </Col>
               </form>

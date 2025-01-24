@@ -15,6 +15,7 @@ const SyllabusTable = ({ reload }: any) => {
   const [selectedItems, setSelectedItems] = useState([]);
   const [selectedSyllabus, setSelectedSyllabus] = useState(null);
   const [selectedData, setSelectedData] = useState(null);
+  const [isCopyMode, setIsCopyMode] = useState(false);
 
   const toggle = (syllabus: any) => {
     setIsOpen(!isOpen);
@@ -28,10 +29,18 @@ const SyllabusTable = ({ reload }: any) => {
 
   const toggleDetail = (data: any) => {
     setSelectedData(data);
+    setIsCopyMode(false);
     setIsOpenDetail(!isOpenDetail);
     if (isOpenDetail) {
       mutate([`/syllabus/get-all`, page, rowPerPage]);
     }
+  };
+
+  const handleCopy = (syllabus: any) => {
+    const copiedData = { ...syllabus, id: "" };
+    setSelectedData(copiedData);
+    setIsCopyMode(true);
+    setIsOpenDetail(true);
   };
 
   useEffect(() => {
@@ -60,6 +69,7 @@ const SyllabusTable = ({ reload }: any) => {
         <TableActionButtons
           onView={() => toggle(row)}
           onEdit={() => toggleDetail(row)}
+          onCopy={() => handleCopy(row)}
         />
       ),
       sortable: false,
@@ -124,6 +134,7 @@ const SyllabusTable = ({ reload }: any) => {
         isOpen={isOpenDetail}
         toggle={toggleDetail}
         data={selectedData}
+        isCopy={isCopyMode}
       />
     </div>
   );
