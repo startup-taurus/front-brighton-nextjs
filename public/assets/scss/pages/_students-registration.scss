@@ -7,6 +7,7 @@
   }
 
   &__inner-wrapper {
+    height: 100%;
     padding-top: 2rem;
     padding-bottom: 2rem;
     background: rgba(0, 0, 0, 0.3);
@@ -37,8 +38,19 @@
     }
   }
   @media (max-width: 576px) {
+    height: 300px;
+
+    &__hero {
+      background-size: cover;
+    }
+
+    &__inner-wrapper {
+      display: flex;
+      align-items: center;
+    }
+
     &__title {
-      font-size: 4rem;
+      font-size: 3rem;
     }
   }
 }
@@ -57,5 +69,25 @@
     max-width: 570px;
     margin: 0 auto;
     padding: 0 1rem;
+  }
+}
+
+.student-registered-success {
+  font-size: 3rem;
+  text-align: center;
+
+  @media (max-width: 1200px) {
+    font-size: 2.5rem;
+  }
+
+  @media (max-width: 992px) {
+    font-size: 2rem;
+  }
+
+  @media (max-width: 768px) {
+    font-size: 2rem;
+  }
+  @media (max-width: 576px) {
+    font-size: 1.5rem;
   }
 }

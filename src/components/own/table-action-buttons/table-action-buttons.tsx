@@ -4,9 +4,16 @@ import {
   FaBan,
   FaPenToSquare,
   FaCheck,
+  FaTrash,
 } from "react-icons/fa6";
 
-const TableActionButtons = ({ onView, onBlock, onEdit, status }: any) => {
+const TableActionButtons = ({
+  onView,
+  onBlock,
+  onEdit,
+  onDelete,
+  status,
+}: any) => {
   return (
     <div className="btn-group" role="group" aria-label="Basic example">
       {onView && (
@@ -22,6 +29,11 @@ const TableActionButtons = ({ onView, onBlock, onEdit, status }: any) => {
       {onEdit && (
         <button type="button" className="btn btn-save" onClick={onEdit}>
           <FaPenToSquare />
+        </button>
+      )}
+      {onDelete && (
+        <button type="button" className="btn btn-danger" onClick={onDelete}>
+          <FaTrash />
         </button>
       )}
     </div>

@@ -49,6 +49,15 @@ export const AdminMenuList: sidebarMenuType[] = [
         path: "admin/students",
       },
       {
+        title: "Registered Students",
+        id: 4,
+        pathSlice: "registered-students",
+        type: "link",
+        icon: "blog",
+        badge: "badge badge-light-primary",
+        path: "admin/registered-students",
+      },
+      {
         title: "Syllabus",
         id: 3,
         pathSlice: "Syllabus",

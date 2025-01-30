@@ -27,10 +27,8 @@ export function middleware(request: NextRequest) {
   } catch (error) {
     user = null;
   }
-  // console.log(user, path.split("/"));
 
   // if (!user && path.split("/")[1] === "authentication") {
-  //   console.log("Entra 0");
   //   return NextResponse.next();
   // }
   //
@@ -43,7 +41,6 @@ export function middleware(request: NextRequest) {
   //   user &&
   //   user?.role === USER_TYPES.PROFESSOR
   // ) {
-  //   console.log("Entra");
   //   return NextResponse.redirect(new URL(`/teachers`, request.url));
   // }
   //
@@ -66,7 +63,6 @@ export function middleware(request: NextRequest) {
   //   user &&
   //   user?.role !== USER_TYPES.PROFESSOR
   // ) {
-  //   console.log("Entra 2");
   //   return NextResponse.redirect(new URL("/dashboard", request.url));
   // }
   //
@@ -75,10 +71,8 @@ export function middleware(request: NextRequest) {
   //   user &&
   //   user?.role !== USER_TYPES.ADMIN
   // ) {
-  //   console.log("Entra 3");
   //   return NextResponse.redirect(new URL("/teachers", request.url));
   // }
-  // console.log("Sale");
   return NextResponse.next();
 }
 

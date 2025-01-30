@@ -47,8 +47,6 @@ const StudentForm = ({ data, isOpen, toggle }: any) => {
     }
   };
 
-  console.log(course);
-
   const courseOptions = course?.data
     ? course?.data.map((courseItem: any) => ({
         value: courseItem.id,
