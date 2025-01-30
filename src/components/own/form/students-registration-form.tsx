@@ -8,7 +8,7 @@ import {
   LEVELS_FOR_ADULTS,
   LEVELS_FOR_KIDS,
 } from "../../../../utils/constants";
-import { createStudent } from "../../../../helper/api-data/registered-student";
+import { createRegisteredStudent } from "../../../../helper/api-data/registered-student";
 
 const StudentsRegistrationForm = () => {
   const validations = Yup.object().shape({
@@ -50,7 +50,7 @@ const StudentsRegistrationForm = () => {
 
   const onSubmit = (body: any, { setSubmitting }: any) => {
     setSubmitting(true);
-    createStudent(body)
+    createRegisteredStudent(body)
       .then((response) => {
         if (response.statusCode === 200) {
           setIsSuccess(true);

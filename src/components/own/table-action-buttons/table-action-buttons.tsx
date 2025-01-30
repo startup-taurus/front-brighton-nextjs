@@ -1,4 +1,5 @@
 import React from "react";
+import { FaCopy } from "react-icons/fa";
 import {
   FaMagnifyingGlass,
   FaBan,
@@ -13,6 +14,7 @@ const TableActionButtons = ({
   onEdit,
   onDelete,
   status,
+  onCopy,
 }: any) => {
   return (
     <div className="btn-group" role="group" aria-label="Basic example">
@@ -29,6 +31,11 @@ const TableActionButtons = ({
       {onEdit && (
         <button type="button" className="btn btn-save" onClick={onEdit}>
           <FaPenToSquare />
+        </button>
+      )}
+      {onCopy && (
+        <button type="button" className="btn btn-cancel" onClick={onCopy}>
+          <FaCopy />
         </button>
       )}
       {onDelete && (
