@@ -50,7 +50,7 @@ export const AdminMenuList: sidebarMenuType[] = [
       },
       {
         title: "Registered Students",
-        id: 4,
+        id: 10,
         pathSlice: "registered-students",
         type: "link",
         icon: "blog",

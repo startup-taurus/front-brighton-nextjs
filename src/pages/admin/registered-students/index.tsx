@@ -66,9 +66,9 @@ const Students = () => {
   return (
     <div className="page-body">
       <Container className="basic_table" fluid>
-        <Row>
-          <TableFilters selectFilters={selectFilters} />
-        </Row>
+        {/*<Row>*/}
+        {/*  <TableFilters selectFilters={selectFilters} />*/}
+        {/*</Row>*/}
         <Row>
           <Card>
             <CardHeader className="d-flex justify-content-end">
