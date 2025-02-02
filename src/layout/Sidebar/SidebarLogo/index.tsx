@@ -28,15 +28,15 @@ const SidebarLogo = () => {
       >
         <i className="fa fa-angle-left" />
       </div>
-      <div
-        className="toggle-sidebar"
-        onClick={() => setSideBarToggle(!sideBarToggle)}
-      >
-        <FeatherIconCom
-          iconName={"Grid"}
-          className="status_toggle middle sidebar-toggle"
-        />
-      </div>
+      {/*<div*/}
+      {/*  className="toggle-sidebar"*/}
+      {/*  onClick={() => setSideBarToggle(!sideBarToggle)}*/}
+      {/*>*/}
+      {/*  <FeatherIconCom*/}
+      {/*    iconName={"Grid"}*/}
+      {/*    className="status_toggle middle sidebar-toggle"*/}
+      {/*  />*/}
+      {/*</div>*/}
     </div>
   );
 };
