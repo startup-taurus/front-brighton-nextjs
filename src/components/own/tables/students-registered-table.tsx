@@ -8,6 +8,7 @@ import DataTable from "react-data-table-component";
 import { setQueryStringValue } from "../../../../utils/utils";
 import { deleteRegisteredStudent } from "../../../../helper/api-data/registered-student";
 import RegisteredStudentDetail from "@/components/own/registered-student-detail/registered-student-detail";
+import { toast } from "react-toastify";
 
 const StudentsRegisteredTable = ({
   students,
@@ -46,7 +47,8 @@ const StudentsRegisteredTable = ({
       reverseButtons: true,
     }).then((result) => {
       if (result.isConfirmed) {
-        deleteRegisteredStudent(row).then(() => {
+        deleteRegisteredStudent(row.id).then(() => {
+          toast.success("Student deleted correctly!");
           mutate([
             `/registered-student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ""}`,
           ]);

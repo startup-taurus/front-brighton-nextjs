@@ -64,7 +64,7 @@ export const getFetcher = (
 
 export const deleteFetcher = (url: string, token?: string) => {
   return axios
-    .delete(`${process.env.NEXT_PUBLIC_NUTRE_API}/v1${url}`, {
+    .delete(`${process.env.API_URL}${url}`, {
       headers: { Authorization: `Bearer ${token}` },
     })
     .then((res) => res.data)

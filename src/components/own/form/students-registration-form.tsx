@@ -324,9 +324,7 @@ const StudentsRegistrationForm = () => {
 
                 {values.same_billing === "no" && (
                   <Col xs={12}>
-                    <Label for="billing_address">
-                      Where did you hear about us?
-                    </Label>
+                    <Label for="billing_address">Billing Address</Label>
                     <Field
                       id="billing_address"
                       name="billing_address"
