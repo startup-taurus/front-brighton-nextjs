@@ -10,6 +10,8 @@ import { getFiltersString } from "../../../../utils/utils";
 import { getAllRegisteredStudents } from "../../../../helper/api-data/registered-student";
 import {
   LEVEL_FILTER,
+  LEVELS_FOR_ADULTS,
+  LEVELS_FOR_KIDS,
   PROMOTION_FILTER,
   STATUS_FILTER,
 } from "../../../../utils/constants";
@@ -34,22 +36,10 @@ const Students = () => {
 
   const selectFilters: FiltersProps[] = [
     {
-      labelName: "Status",
-      name: "status",
-      type: "select",
-      items: STATUS_FILTER,
-    },
-    {
       labelName: "Level",
       name: "level",
       type: "select",
-      items: LEVEL_FILTER,
-    },
-    {
-      labelName: "Promotion",
-      name: "promotion",
-      type: "select",
-      items: PROMOTION_FILTER,
+      items: [...LEVELS_FOR_KIDS, ...LEVELS_FOR_ADULTS],
     },
   ];
 
@@ -66,9 +56,9 @@ const Students = () => {
   return (
     <div className="page-body">
       <Container className="basic_table" fluid>
-        {/*<Row>*/}
-        {/*  <TableFilters selectFilters={selectFilters} />*/}
-        {/*</Row>*/}
+        <Row>
+         <TableFilters selectFilters={selectFilters} />
+        </Row>
         <Row>
           <Card>
             <CardHeader className="d-flex justify-content-end">
@@ -85,7 +75,6 @@ const Students = () => {
           </Card>
         </Row>
       </Container>
-      <StudentForm isOpen={isOpenModal} toggle={toggle} data={null} />
     </div>
   );
 };
