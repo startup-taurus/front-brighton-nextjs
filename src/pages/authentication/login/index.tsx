@@ -7,7 +7,12 @@ const LoginWithBackGroundImage = () => {
   return (
     <Container fluid>
       <Row>
-        <Col xl={7} className="b-center bg-size order-1 loginImageBg1" />
+        <Col xl={7} className="b-center bg-size order-1 loginImageBg1">
+          <h2 className="slogan">
+            Be Brighter
+            <br /> Be Brighton
+          </h2>
+        </Col>
         <Col xl={5} className="p-0">
           <CommonForm alignLogo="text-center" />
         </Col>

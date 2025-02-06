@@ -2,13 +2,24 @@
     3.29 Login CSS Start
 ==========================**/
 
+.slogan {
+  font-family: $font-montserrat, serif;
+  font-weight: 900;
+  font-size: 4rem;
+  margin-top: 4rem;
+
+  @media (max-width: 980px) {
+    display: none;
+  }
+}
+
 .login-card {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
   margin: 0 auto;
-  background: url('/assets/images/login/login_bg.jpg');
+  background: url("/assets/images/login/login_bg.jpg");
   background-position: center;
   padding: 30px 12px;
 
@@ -24,7 +35,7 @@
       padding: 10px 15px;
       margin: 0;
 
-      &+.btn {
+      & + .btn {
         margin-left: 5px;
       }
 
