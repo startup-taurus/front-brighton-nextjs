@@ -9,7 +9,7 @@ const LoginWithBackGroundImage = () => {
       <Row>
         <Col xl={7} className="b-center bg-size order-1 loginImageBg1" />
         <Col xl={5} className="p-0">
-          <CommonForm alignLogo="text-start" />
+          <CommonForm alignLogo="text-center" />
         </Col>
       </Row>
     </Container>
