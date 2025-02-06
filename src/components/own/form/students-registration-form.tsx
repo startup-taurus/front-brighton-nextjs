@@ -155,20 +155,8 @@ const StudentsRegistrationForm = () => {
                   <ErrorMessage name="phone_number" component={FormFeedback} />
                 </Col>
                 <Col xs={12}>
-                  <Label for="address">
-                    Email <span className="required-input" />
-                  </Label>
-                  <Field
-                    id="address"
-                    name="address"
-                    invalid={touched.address && !!errors.address}
-                    as={Input}
-                  />
-                  <ErrorMessage name="address" component={FormFeedback} />
-                </Col>
-                <Col xs={12}>
                   <Label for="email">
-                    Address <span className="required-input" />
+                    Email <span className="required-input" />
                   </Label>
                   <Field
                     id="email"
@@ -177,6 +165,18 @@ const StudentsRegistrationForm = () => {
                     as={Input}
                   />
                   <ErrorMessage name="email" component={FormFeedback} />
+                </Col>
+                <Col xs={12}>
+                  <Label for="address">
+                    Address <span className="required-input" />
+                  </Label>
+                  <Field
+                    id="address"
+                    name="address"
+                    invalid={touched.address && !!errors.address}
+                    as={Input}
+                  />
+                  <ErrorMessage name="address" component={FormFeedback} />
                 </Col>
                 <Col xs={12}>
                   <FormGroup check className="radio radio-primary">
