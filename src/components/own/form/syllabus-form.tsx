@@ -15,24 +15,30 @@ import { createSyllabus, updateSyllabus } from "helper/api-data/syllabus";
 import { FaTrash } from "react-icons/fa";
 
 const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
-  const save = async (syllabus: any) => {
+  const save = async (syllabus: any, { setSubmitting }: any) => {
+    setSubmitting(true);
     try {
       const response = await createSyllabus(syllabus);
       if (response.statusCode === 200) {
+        setSubmitting(false);
         toggle();
       }
     } catch (error) {
+      setSubmitting(false);
       console.error("Error al crear syllabus:", error);
     }
   };
 
-  const update = async (syllabus: any) => {
+  const update = async (syllabus: any, { setSubmitting }: any) => {
+    setSubmitting(true);
     try {
       const response = await updateSyllabus(syllabus.id, syllabus);
       if (response.statusCode === 200) {
+        setSubmitting(false);
         toggle();
       }
     } catch (error) {
+      setSubmitting(false);
       console.error("Error al actualizar syllabus:", error);
     }
   };
@@ -87,8 +93,8 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
                   ],
                 }
           }
-          onSubmit={(values) =>
-            data && !isCopy ? update(values) : save(values)
+          onSubmit={(values, othersProps) =>
+            data && !isCopy ? update(values, othersProps ) : save(values, othersProps)
           }
         >
           {(props) => {
@@ -291,7 +297,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
                     Close
                   </Button>
                   &nbsp;&nbsp;
-                  <Button color="primary" type="submit">
+                  <Button color="primary" type="submit" disabled={isSubmitting}>
                     {isCopy ? "Duplicate" : data ? "Update" : "Save"}
                   </Button>
                 </Col>
