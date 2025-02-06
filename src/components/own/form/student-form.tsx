@@ -1,6 +1,6 @@
-import React, { use, useState } from "react";
-import Select from "react-select";
-import { ErrorMessage, Field, Formik } from "formik";
+import React, { use, useState } from 'react';
+import Select from 'react-select';
+import { ErrorMessage, Field, Formik } from 'formik';
 import {
   Button,
   Col,
@@ -10,40 +10,50 @@ import {
   Modal,
   ModalBody,
   ModalHeader,
-} from "reactstrap";
-import useSWR from "swr";
-import { getActiveCourses } from "helper/api-data/course";
-import { createStudent, updateStudent } from "helper/api-data/student";
+} from 'reactstrap';
+import useSWR from 'swr';
+import { getActiveCourses } from 'helper/api-data/course';
+import { createStudent, updateStudent } from 'helper/api-data/student';
+import { toast } from 'react-toastify';
 
-const StudentForm = ({ data, isOpen, toggle }: any) => {
+const StudentForm = ({
+  data,
+  isOpen,
+  toggle,
+  isTransfer = false,
+  onSuccessCreate,
+}: any) => {
   const limit = 10;
   const page = 1;
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchTerm, setSearchTerm] = useState('');
 
   const { data: course } = useSWR(
-    ["/course/get-active", page, limit, searchTerm],
-    () => getActiveCourses(page, limit, searchTerm),
+    ['/course/get-active', page, limit, searchTerm],
+    () => getActiveCourses(page, limit, searchTerm)
   );
 
-  const save = async (data: any) => {
+  const save = async (row: any) => {
     try {
-      const response = await createStudent(data);
+      const response = await createStudent(row);
       if (response.statusCode === 200) {
+        toast.success('Student created successfull!');
         toggle();
+        onSuccessCreate && onSuccessCreate(data?.user?.id);
       }
     } catch (error) {
-      console.error("Error al crear estudiante:", error);
+      console.error('Error al crear estudiante:', error);
     }
   };
 
   const update = async (data: any) => {
     try {
+      toast.success('Student updated successfull!');
       const response = await updateStudent(data.id, data);
       if (response.statusCode === 200) {
         toggle();
       }
     } catch (error) {
-      console.error("Error al actualizar usuario:", error);
+      console.error('Error al actualizar usuario:', error);
     }
   };
 
@@ -52,9 +62,9 @@ const StudentForm = ({ data, isOpen, toggle }: any) => {
         value: courseItem.id,
         label:
           courseItem.course_number +
-          " - " +
+          ' - ' +
           courseItem.course_name +
-          " - " +
+          ' - ' +
           courseItem?.professor?.user?.name,
       }))
     : [];
@@ -62,7 +72,11 @@ const StudentForm = ({ data, isOpen, toggle }: any) => {
   return (
     <Modal isOpen={isOpen} toggle={toggle} size="lg">
       <ModalHeader toggle={toggle}>
-        {data ? "Editar Estudiante" : "Add New Student"}
+        {isTransfer
+          ? 'Transfer Student'
+          : data
+            ? 'Edit Student'
+            : 'Add New Student'}
       </ModalHeader>
       <ModalBody>
         <Formik
@@ -74,28 +88,28 @@ const StudentForm = ({ data, isOpen, toggle }: any) => {
                   lastName: data?.user?.lastName,
                   username: data?.user?.username,
                   email: data?.user?.email,
-                  courseId: data?.course?.length > 0 ? data?.course[0]?.id : "",
+                  courseId: data?.course?.length > 0 ? data?.course[0]?.id : '',
                 }
               : {
-                  name: "",
-                  username: "",
-                  email: "",
-                  password: "",
-                  cedula: "",
-                  lastName: "",
-                  courseId: "",
-                  level: "",
-                  status: "active",
+                  name: '',
+                  username: '',
+                  email: '',
+                  password: '',
+                  cedula: '',
+                  lastName: '',
+                  courseId: '',
+                  level: '',
+                  status: 'active',
                   bookGiven: false,
                   pendingPayments: false,
-                  emergency_contact_name: "",
-                  emergency_contact_phone: "",
-                  emergency_contact_relationship: "",
-                  promotion: "",
-                  observations: "",
+                  emergency_contact_name: '',
+                  emergency_contact_phone: '',
+                  emergency_contact_relationship: '',
+                  promotion: '',
+                  observations: '',
                 }
           }
-          onSubmit={(info) => (data ? update(info) : save(info))}
+          onSubmit={(info) => (data && !isTransfer ? update(info) : save(info))}
         >
           {(props) => {
             const {
@@ -144,11 +158,11 @@ const StudentForm = ({ data, isOpen, toggle }: any) => {
                     id="courseId"
                     options={courseOptions}
                     onChange={(selectedOption: any) =>
-                      setFieldValue("courseId", selectedOption.value)
+                      setFieldValue('courseId', selectedOption.value)
                     }
                     value={
                       courseOptions.find(
-                        (option: any) => option.value === props.values.courseId,
+                        (option: any) => option.value === props.values.courseId
                       ) || null
                     }
                     placeholder="Select course"
@@ -258,8 +272,8 @@ const StudentForm = ({ data, isOpen, toggle }: any) => {
                     Close
                   </Button>
                   &nbsp; &nbsp;
-                  <Button color="primary" type="submit">
-                    {data ? "Update" : "Save"}
+                  <Button color="primary" type="submit" disabled={isSubmitting}>
+                    {isTransfer ? 'Transfer' : data ? 'Update' : 'Save'}
                   </Button>
                 </Col>
               </form>

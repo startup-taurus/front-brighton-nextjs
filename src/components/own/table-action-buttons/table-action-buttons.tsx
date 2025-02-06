@@ -6,6 +6,7 @@ import {
   FaPenToSquare,
   FaCheck,
   FaTrash,
+  FaArrowRightArrowLeft,
 } from "react-icons/fa6";
 
 const TableActionButtons = ({
@@ -15,6 +16,7 @@ const TableActionButtons = ({
   onDelete,
   status,
   onCopy,
+  onTransfer
 }: any) => {
   return (
     <div className="btn-group" role="group" aria-label="Basic example">
@@ -36,6 +38,11 @@ const TableActionButtons = ({
       {onCopy && (
         <button type="button" className="btn btn-cancel" onClick={onCopy}>
           <FaCopy />
+        </button>
+      )}
+      {onTransfer && (
+        <button type="button" className="btn btn-cancel" onClick={onTransfer}>
+          <FaArrowRightArrowLeft />
         </button>
       )}
       {onDelete && (
