@@ -70,7 +70,7 @@ const CommonForm = ({ alignLogo }: commonFormPropsType) => {
               <Input
                 type="text"
                 required
-                placeholder="Test"
+                placeholder="Username"
                 value={username}
                 name="username"
                 onChange={handleUserValue}
