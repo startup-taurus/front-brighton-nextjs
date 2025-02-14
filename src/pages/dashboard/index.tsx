@@ -1,7 +1,7 @@
 import EventCalendar from "@/components/Dashboard/SchoolManagenement/EventCalendar";
 import NoticeBoard from "@/components/Dashboard/SchoolManagenement/NoticeBoard";
 import SchoolData from "@/components/Dashboard/SchoolManagenement/SchoolData";
-import StudentLeader from "@/components/Dashboard/SchoolManagenement/StudentLeader";
+import ProfessorsTable from "@/components/Dashboard/SchoolManagenement/ProfessorsTable";
 import TodayTask from "@/components/Dashboard/SchoolManagenement/TodayTask";
 import Breadcrumbs from "CommonElements/Breadcrumbs";
 import dynamic from "next/dynamic";
@@ -41,8 +41,8 @@ const SchoolManagement = () => {
           </Col>
           <Col xxl={12} className="d-xxl-block d-none box-col-none">
             <Row>
-              <NoticeBoard />
-              <StudentLeader />
+              {/* <NoticeBoard /> */}
+              <ProfessorsTable />
             </Row>
           </Col>
         </Row>

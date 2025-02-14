@@ -7,23 +7,27 @@ export const getProfessorCourses = (userId: number) => {
 export const getAllProfessors = (
   page: number,
   limit: number,
-  filters?: any,
+  filters?: any
 ) => {
   return getFetcher(
     `/professor/get-all?page=${page}&limit=${limit}${filters ? `&${filters}` : ""}`,
-    false,
+    false
   );
 };
 
 export const getActiveProfessors = (
   page: number,
   limit: number,
-  searchTerm = "",
+  searchTerm = ""
 ) => {
   return getFetcher(
     `/professor/get-active?page=${page}&limit=${limit}&search=${searchTerm}`,
-    false,
+    false
   );
+};
+
+export const getProfessorsCoursesAndStudents = () => {
+  return getFetcher(`/professor/get-courses-and-students`, false);
 };
 
 export const createProfessor = (data: any) => {
