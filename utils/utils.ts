@@ -529,7 +529,7 @@ export const countAttendance = (dates: any = {}, studentId: any) => {
 
   return {
     attendanceCount: Math.floor(attendanceTotal),
-    attendancePercentage: attendanceAverage,
+    attendancePercentage: Number(Number(attendanceAverage).toFixed(2)),
   };
 };
 
@@ -546,7 +546,7 @@ export const countAbsences = (dates: any = {}, studentId: any) => {
 
   return {
     attendanceCount: Math.floor(attendanceTotal),
-    attendancePercentage: attendanceAverage,
+    attendancePercentage: Number(Number(attendanceAverage).toFixed(2)),
   };
 };
 
