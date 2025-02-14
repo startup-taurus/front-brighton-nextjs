@@ -37,15 +37,9 @@ const TableAttendance = ({
   const [dates, setDates] = useState<any>([]);
   const [scheduleItems, setScheduleItems] = useState(courseSchedule);
 
-  const attendanceDate = useMemo(
-    () =>
-      buildAttendanceStructure(courseSchedule, students, studentsAttendance),
-    [courseSchedule, students, studentsAttendance],
-  );
-
   useEffect(() => {
-    setDates(attendanceDate);
-  }, [attendanceDate]);
+    setDates(studentsAttendance);
+  }, [studentsAttendance]);
 
   useEffect(() => {
     setScheduleItems(courseSchedule);

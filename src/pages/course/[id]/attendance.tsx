@@ -47,15 +47,20 @@ const TeachersAttendance: NextPageWithLayout = () => {
   const students = courseStudents?.data?.data?.students;
   const courseSchedule = schedule?.data?.data;
 
+  const shouldRenderStudentAttendance =
+    studentsAttendance && students && courseSchedule;
+
   return (
     <Card tag="section" className="attendance">
       <CardBody>
         <TabsTeachers numberOfClass={course_number} tabsName={tabsName} />
-        <AttendanceTable
-          courseSchedule={courseSchedule}
-          studentsAttendance={studentsAttendance}
-          students={students}
-        />
+        {shouldRenderStudentAttendance && (
+          <AttendanceTable
+            courseSchedule={courseSchedule}
+            studentsAttendance={studentsAttendance}
+            students={students}
+          />
+        )}
         <AttendanceHelpBox />
       </CardBody>
     </Card>
