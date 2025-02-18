@@ -35,6 +35,12 @@ const RegisteredStudentDetail = ({ data, isOpen, toggle }: any) => {
               </Col>
             </Row>
             <Row>
+              {!!data?.birthday && (
+                <Col xs={12} sm={6} md={4} className="mb-3">
+                  <strong>Birthday:</strong>&nbsp;
+                  {data.birthday}
+                </Col>
+              )}
               <Col xs={12} sm={6} md={4} className="mb-3">
                 <strong>Phone:</strong> &nbsp; {data.phone_number}
               </Col>
@@ -46,6 +52,12 @@ const RegisteredStudentDetail = ({ data, isOpen, toggle }: any) => {
                 <strong>Level:</strong>&nbsp;
                 {data.level}
               </Col>
+              {!!data?.schedule && (
+                <Col xs={12} sm={6} md={4} className="mb-3">
+                  <strong>Schedule:</strong>&nbsp;
+                  {data.schedule}
+                </Col>
+              )}
               <Col xs={12} sm={6} md={6} className="mb-3">
                 <strong>Address:</strong> &nbsp; {data.address}
               </Col>
