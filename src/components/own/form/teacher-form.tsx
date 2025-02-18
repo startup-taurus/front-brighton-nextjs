@@ -73,6 +73,7 @@ const TeacherForm = ({ data, isOpen, toggle }: any) => {
                   phone: data.phone,
                   role: data.user?.role,
                   image: data?.user?.image,
+                  report_link: data.report_link,
                 }
               : {
                   name: "",
@@ -85,6 +86,7 @@ const TeacherForm = ({ data, isOpen, toggle }: any) => {
                   phone: "",
                   role: "",
                   image: "",
+                  report_link: "",
                 }
           }
           onSubmit={(info) => (data ? update(info) : save(info))}
@@ -188,6 +190,11 @@ const TeacherForm = ({ data, isOpen, toggle }: any) => {
                   <Label for="phone">Phone</Label>
                   <Field name="phone" as={Input} />
                   <ErrorMessage name="phone" component={FormFeedback} />
+                </Col>
+                <Col xs={12}>
+                  <Label for="report_link">Report link </Label>
+                  <Field name="report_link" as={Input} />
+                  <ErrorMessage name="report_link" component={FormFeedback} />
                 </Col>
 
                 <Col xs={12} className="d-flex justify-content-end mt-5">
