@@ -113,6 +113,13 @@ const StudentsTable = ({ students, page, rowPerPage, filters }: any) => {
       center: false,
     },
     {
+      name: "Course No",
+      selector: (row: any) =>
+        row.course[0]?.course_number ? row.course[0].course_number : "",
+      sortable: true,
+      center: false,
+    },
+    {
       name: "Level",
       selector: (row: any) => `${row.level}`,
       sortable: true,

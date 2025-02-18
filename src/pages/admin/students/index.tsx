@@ -30,7 +30,7 @@ const Students = () => {
     [
       `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ""}`,
     ],
-    () => getAllStudent(page, rowPerPage, filters),
+    () => getAllStudent(page, rowPerPage, filters)
   );
 
   const course = useSWR(`/course/get-all`, () => getAllCourses());
@@ -43,12 +43,12 @@ const Students = () => {
       items: STATUS_FILTER,
     },
     {
-      labelName: "Course",
+      labelName: "Course No",
       name: "course",
       type: "select",
       items: course?.data
         ? course?.data?.data?.result?.map((item: any) => ({
-            label: item.course_name,
+            label: item.course_number,
             value: item.id,
           }))
         : [],
