@@ -1,6 +1,6 @@
-import React, { use, useState } from 'react';
-import Select from 'react-select';
-import { ErrorMessage, Field, Formik } from 'formik';
+import React, { use, useState } from "react";
+import Select from "react-select";
+import { ErrorMessage, Field, Formik } from "formik";
 import {
   Button,
   Col,
@@ -10,11 +10,11 @@ import {
   Modal,
   ModalBody,
   ModalHeader,
-} from 'reactstrap';
-import useSWR from 'swr';
-import { getActiveCourses } from 'helper/api-data/course';
-import { createStudent, updateStudent } from 'helper/api-data/student';
-import { toast } from 'react-toastify';
+} from "reactstrap";
+import useSWR from "swr";
+import { getActiveCourses } from "helper/api-data/course";
+import { createStudent, updateStudent } from "helper/api-data/student";
+import { toast } from "react-toastify";
 
 const StudentForm = ({
   data,
@@ -25,10 +25,10 @@ const StudentForm = ({
 }: any) => {
   const limit = 10;
   const page = 1;
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
 
   const { data: course } = useSWR(
-    ['/course/get-active', page, limit, searchTerm],
+    ["/course/get-active", page, limit, searchTerm],
     () => getActiveCourses(page, limit, searchTerm)
   );
 
@@ -36,24 +36,24 @@ const StudentForm = ({
     try {
       const response = await createStudent(row);
       if (response.statusCode === 200) {
-        toast.success('Student created successfull!');
+        toast.success("Student created successfull!");
         toggle();
         onSuccessCreate && onSuccessCreate(data?.user?.id);
       }
     } catch (error) {
-      console.error('Error al crear estudiante:', error);
+      console.error("Error al crear estudiante:", error);
     }
   };
 
   const update = async (data: any) => {
     try {
-      toast.success('Student updated successfull!');
+      toast.success("Student updated successfull!");
       const response = await updateStudent(data.id, data);
       if (response.statusCode === 200) {
         toggle();
       }
     } catch (error) {
-      console.error('Error al actualizar usuario:', error);
+      console.error("Error al actualizar usuario:", error);
     }
   };
 
@@ -62,9 +62,9 @@ const StudentForm = ({
         value: courseItem.id,
         label:
           courseItem.course_number +
-          ' - ' +
+          " - " +
           courseItem.course_name +
-          ' - ' +
+          " - " +
           courseItem?.professor?.user?.name,
       }))
     : [];
@@ -73,10 +73,10 @@ const StudentForm = ({
     <Modal isOpen={isOpen} toggle={toggle} size="lg">
       <ModalHeader toggle={toggle}>
         {isTransfer
-          ? 'Transfer Student'
+          ? "Transfer Student"
           : data
-            ? 'Edit Student'
-            : 'Add New Student'}
+            ? "Edit Student"
+            : "Add New Student"}
       </ModalHeader>
       <ModalBody>
         <Formik
@@ -88,25 +88,27 @@ const StudentForm = ({
                   lastName: data?.user?.lastName,
                   username: data?.user?.username,
                   email: data?.user?.email,
-                  courseId: data?.course?.length > 0 ? data?.course[0]?.id : '',
+                  courseId: data?.course?.length > 0 ? data?.course[0]?.id : "",
                 }
               : {
-                  name: '',
-                  username: '',
-                  email: '',
-                  password: '',
-                  cedula: '',
-                  lastName: '',
-                  courseId: '',
-                  level: '',
-                  status: 'active',
-                  bookGiven: false,
+                  name: "",
+                  username: "",
+                  email: "",
+                  password: "",
+                  cedula: "",
+                  lastName: "",
+                  courseId: "",
+                  level: "",
+                  status: "active",
+                  book_given: false,
                   pendingPayments: false,
-                  emergency_contact_name: '',
-                  emergency_contact_phone: '',
-                  emergency_contact_relationship: '',
-                  promotion: '',
-                  observations: '',
+                  emergency_contact_name: "",
+                  emergency_contact_phone: "",
+                  emergency_contact_relationship: "",
+                  promotion: "",
+                  observations: "",
+                  age_category: "adults",
+                  birth_date: "",
                 }
           }
           onSubmit={(info) => (data && !isTransfer ? update(info) : save(info))}
@@ -158,7 +160,7 @@ const StudentForm = ({
                     id="courseId"
                     options={courseOptions}
                     onChange={(selectedOption: any) =>
-                      setFieldValue('courseId', selectedOption.value)
+                      setFieldValue("courseId", selectedOption.value)
                     }
                     value={
                       courseOptions.find(
@@ -191,21 +193,40 @@ const StudentForm = ({
                     </option>
                     <option value="active">Active</option>
                     <option value="inactive">Inactive</option>
+                    <option value="finalized">Finalized</option>
                   </Field>
                   <ErrorMessage name="status" component={FormFeedback} />
                 </Col>
                 <Col xs={6}>
-                  <Label for="bookGiven">Book Given</Label>
+                  <Label for="age_category">Age Category</Label>
                   <Field
-                    name="bookGiven"
+                    name="age_category"
                     as={Input}
                     type="select"
-                    id="bookGiven"
+                    id="age_category"
+                  >
+                    <option value="kids">Kids</option>
+                    <option value="adults">Adults</option>
+                  </Field>
+                  <ErrorMessage name="age_category" component={FormFeedback} />
+                </Col>
+                <Col xs={6}>
+                  <Label for="birth_date">Birth Date</Label>
+                  <Field type="date" name="birth_date" as={Input} />
+                  <ErrorMessage name="birth_date" component={FormFeedback} />
+                </Col>
+                <Col xs={6}>
+                  <Label for="book_given">Book Given</Label>
+                  <Field
+                    name="book_given"
+                    as={Input}
+                    type="select"
+                    id="book_given"
                   >
                     <option value="true">Yes</option>
                     <option value="false">No</option>
                   </Field>
-                  <ErrorMessage name="bookGiven" component={FormFeedback} />
+                  <ErrorMessage name="book_given" component={FormFeedback} />
                 </Col>
                 <Col xs={6}>
                   <Label for="pendingPayments">Pending Payments</Label>
@@ -273,7 +294,7 @@ const StudentForm = ({
                   </Button>
                   &nbsp; &nbsp;
                   <Button color="primary" type="submit" disabled={isSubmitting}>
-                    {isTransfer ? 'Transfer' : data ? 'Update' : 'Save'}
+                    {isTransfer ? "Transfer" : data ? "Update" : "Save"}
                   </Button>
                 </Col>
               </form>

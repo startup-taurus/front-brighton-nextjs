@@ -125,6 +125,13 @@ const StudentsTable = ({ students, page, rowPerPage, filters }: any) => {
       center: false,
     },
     {
+      name: "Age Category",
+      selector: (row: any) => `${row.age_category ?? ""}`,
+      sortable: true,
+      center: false,
+    },
+    
+    {
       name: "Status payment",
       cell: (row: any) => (
         <span
