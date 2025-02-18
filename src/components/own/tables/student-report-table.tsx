@@ -185,6 +185,7 @@ const StudentReportTable = ({
       studentAverage,
     );
 
+    console.log("ex", examProps);
     const url = formatReportUrl({
       student: selectedStudent?.name,
       ageGroup: courseDetail?.age_group,
@@ -217,14 +218,6 @@ const StudentReportTable = ({
     setReportChartData(chartFormattedData);
     setResultGPA(gpaResult);
   }, [gradingGrade, componentsGradebook, selectedStudentId]);
-
-  const generateReportUrl = () => {
-    const url = formatReportUrl({
-      student: selectedStudent?.student,
-      ageGroup: courseDetail?.age_group,
-      level: courseDetail?.course_name,
-    });
-  };
 
   return (
     <>

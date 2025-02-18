@@ -75,6 +75,20 @@ export const LEVELS_FOR_ADULTS = [
   { label: "Private Classes", value: "Private Classes" },
 ];
 
+export const SCHEDULE_DATES = [
+  { label: "Monday & Wednesday 9:00-11:00", value: "Mon-Wed 9:00-11:00" },
+  { label: "Monday & Wednesday 15:00-17:00", value: "Mon-Wed 15:00-17:00" },
+  { label: "Monday & Wednesday 17:00-19:00", value: "Mon-Wed 17:00-19:00" },
+  { label: "Monday & Wednesday 19:00-21:00", value: "Mon-Wed 19:00-21:00" },
+
+  { label: "Tuesday & Thursday 9:00-11:00", value: "Tue-Thu 9:00-11:00" },
+  { label: "Tuesday & Thursday 15:00-17:00", value: "Tue-Thu 15:00-17:00" },
+  { label: "Tuesday & Thursday 17:00-19:00", value: "Tue-Thu 17:00-19:00" },
+  { label: "Tuesday & Thursday 19:00-21:00", value: "Tue-Thu 19:00-21:00" },
+
+  { label: "Saturday 9:00-13:00", value: "Sat 9:00-13:00" },
+  { label: "Saturday 14:00-18:00", value: "Sat 14:00-18:00" },
+];
 export const TEACHER_PATHS = [
   "/teachers",
   "/teachers/faq",

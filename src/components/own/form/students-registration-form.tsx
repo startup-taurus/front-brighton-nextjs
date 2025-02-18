@@ -7,8 +7,10 @@ import * as Yup from "yup";
 import {
   LEVELS_FOR_ADULTS,
   LEVELS_FOR_KIDS,
+  SCHEDULE_DATES,
 } from "../../../../utils/constants";
 import { createRegisteredStudent } from "../../../../helper/api-data/registered-student";
+import { parse } from "date-fns";
 
 const StudentsRegistrationForm = () => {
   const validations = Yup.object().shape({
@@ -16,12 +18,30 @@ const StudentsRegistrationForm = () => {
     middle_name: Yup.string().required("The middle name is required"),
     last_name: Yup.string().required("The last name is required"),
     second_last_name: Yup.string().required("The second last name is required"),
-    id_number: Yup.string().required("The ID number is required"),
-    phone_number: Yup.string().required("The phone is required"),
+    id_number: Yup.string()
+      .min(10, "The ID number must be more than 10 characters long")
+      .max(10, "The ID number must be less than 10 characters long")
+      .required("The ID number is required"),
+    birthday: Yup.date()
+      .max(new Date(), "Select a valid date")
+      .transform((value, originalValue, schema) => {
+        if (schema.isType(value)) {
+          return value;
+        }
+        const result = parse(originalValue, "dd-MM-yyyy", new Date());
+        return result;
+      })
+      .typeError("Select a valid date")
+      .required("The birthday is required"),
+    phone_number: Yup.string()
+      .min(10, "The phone number must be more than 10 characters long")
+      .max(10, "The phone number must be less than 10 characters long")
+      .required("The phone is required"),
     email: Yup.string().required("The email is required"),
     address: Yup.string().required("The address is required"),
     age_category: Yup.string().required("The age category is required"),
     level: Yup.string().required("The level is required"),
+    schedule: Yup.string().required("The schedule is required"),
     same_billing: Yup.string().required("The billing is required"),
     billing_address: Yup.string(),
     isAcceptedTermsAndCondition: Yup.string().required(
@@ -29,6 +49,13 @@ const StudentsRegistrationForm = () => {
     ),
   });
 
+  const currentDate = new Date();
+  const maxDate =
+    currentDate.getFullYear() +
+    "-" +
+    String(currentDate.getMonth() + 1).padStart(2, "0") +
+    "-" +
+    String(currentDate.getDate()).padStart(2, "0");
   const [isSuccess, setIsSuccess] = useState(false);
 
   const initialValues = {
@@ -37,11 +64,13 @@ const StudentsRegistrationForm = () => {
     last_name: "",
     second_last_name: "",
     id_number: "",
+    birthday: "",
     phone_number: "",
     email: "",
     address: "",
     age_category: "",
     level: "",
+    schedule: "",
     same_billing: "",
     billing_address: "",
     where_hear_about_us: "",
@@ -141,6 +170,19 @@ const StudentsRegistrationForm = () => {
                     as={Input}
                   />
                   <ErrorMessage name="id_number" component={FormFeedback} />
+                </Col>
+                <Col xs={12}>
+                  <Label for="birthday">Birthday</Label>
+                  <Field
+                    id="birthday"
+                    name="birthday"
+                    type="date"
+                    placeholder="dd/mm/yyyy"
+                    invalid={touched.birthday && !!errors.birthday}
+                    max={maxDate}
+                    as={Input}
+                  />
+                  <ErrorMessage name="birthday" component={FormFeedback} />
                 </Col>
                 <Col xs={12}>
                   <Label for="phone_number">
@@ -277,6 +319,41 @@ const StudentsRegistrationForm = () => {
                     />
                   </Col>
                 )}
+                <Col xs={12}>
+                  <Label>
+                    Schedule <span className="required-input" />
+                  </Label>
+                  {SCHEDULE_DATES.map((schedule, index) => (
+                    <FormGroup
+                      check
+                      className="radio radio-primary"
+                      key={`schedule-${index}`}
+                    >
+                      <Field
+                        className="form-check-input"
+                        id={`schedule-${index}`}
+                        type="radio"
+                        name="schedule"
+                        value={schedule.value}
+                        invalid={touched.schedule && !!errors.schedule}
+                      />
+                      <Label
+                        className="form-check-label"
+                        htmlFor={`schedule-${index}`}
+                      >
+                        {schedule.label}
+                      </Label>
+                    </FormGroup>
+                  ))}
+                  <ErrorMessage
+                    name="schedule"
+                    component={({ children }: any) => (
+                      <FormFeedback className="d-block">
+                        {children}
+                      </FormFeedback>
+                    )}
+                  />
+                </Col>
 
                 <Col xs={12}>
                   <Label className="form-check-label">Same Billing Data?</Label>

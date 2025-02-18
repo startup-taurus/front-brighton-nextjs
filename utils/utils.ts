@@ -565,9 +565,20 @@ export const getColorOfAssistance = (value: any) => {
 export const formatExamParams = (result: any[]) => {
   const values = result?.map((exam) => {
     const name = exam.criterion?.toLowerCase().replace(" and ", "-");
+    const formatName = name
+      .split("-")
+      .map((word: string, index: number) => {
+        return index === 0
+          ? word
+          : word.charAt(0).toUpperCase() + word.slice(1);
+      })
+      .join("");
+
+    console.log(name, formatName);
+
     return {
-      [name]: `${exam.score}%`,
-      [`${name}Status`]: `${exam.grade}`,
+      [formatName]: `${exam?.score ? exam?.score : 0}%`,
+      [`${formatName}Status`]: `${exam.grade}`,
     };
   });
 
@@ -584,20 +595,22 @@ export const formatReportUrl = ({
   tests,
   testsStatus,
   exam,
-  reading,
-  readingStatus,
-  writing,
-  writingStatus,
-  speaking,
-  speakingStatus,
+  reading = "0.0%",
+  readingStatus = "NOT REPORTED",
+  listening = "0.0%",
+  listeningStatus = "NOT REPORTED",
+  writing = "0.0%",
+  writingStatus = "NOT REPORTED",
+  speaking = "0.0%",
+  speakingStatus = "NOT REPORTED",
   generalExamsTotal,
   //Young learners
-  readingWriting,
-  readingWritingStatus,
-  listeningYLE,
-  listeningYLEStatus,
-  speakingYLE,
-  speakingYLEStatus,
+  readingWriting = "0.0%",
+  readingWritingStatus = "NOT REPORTED",
+  listeningYLE = "0.0%",
+  listeningYLEStatus = "NOT REPORTED",
+  speakingYLE = "0.0%",
+  speakingYLEStatus = "NOT REPORTED",
   yleTotal,
   gpa,
   final,
@@ -626,8 +639,8 @@ export const formatReportUrl = ({
   if (exam === EXAMS_TYPE.PRELIM) {
     baseUrl.searchParams.append("reading", reading);
     baseUrl.searchParams.append("reading-status", readingStatus);
-    baseUrl.searchParams.append("listening", reading);
-    baseUrl.searchParams.append("listening-status", readingStatus);
+    baseUrl.searchParams.append("listening", listening);
+    baseUrl.searchParams.append("listening-status", listeningStatus);
     baseUrl.searchParams.append("writing", writing);
     baseUrl.searchParams.append("writing-status", writingStatus);
     baseUrl.searchParams.append("speaking", speaking);
