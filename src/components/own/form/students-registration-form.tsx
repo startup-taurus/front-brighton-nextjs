@@ -172,7 +172,7 @@ const StudentsRegistrationForm = () => {
                   <ErrorMessage name="id_number" component={FormFeedback} />
                 </Col>
                 <Col xs={12}>
-                  <Label for="birthday">Birthday</Label>
+                  <Label for="birthday">Birthdate</Label>
                   <Field
                     id="birthday"
                     name="birthday"

@@ -30,6 +30,7 @@ const StudentsRegisteredTable = ({
         lastName: "",
         email: data?.email,
       },
+      age_category: data?.age_category,
       courseId: "",
       cedula: data?.id_number,
       birth_date: data?.birthday,

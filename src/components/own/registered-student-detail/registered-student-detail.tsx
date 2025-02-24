@@ -35,9 +35,15 @@ const RegisteredStudentDetail = ({ data, isOpen, toggle }: any) => {
               </Col>
             </Row>
             <Row>
+              {!!data?.age_category && (
+                <Col xs={12} sm={6} md={4} className="mb-3">
+                  <strong>Age Category:</strong>&nbsp;
+                  {data.age_category}
+                </Col>
+              )}
               {!!data?.birthday && (
                 <Col xs={12} sm={6} md={4} className="mb-3">
-                  <strong>Birthday:</strong>&nbsp;
+                  <strong>Birthdate:</strong>&nbsp;
                   {data.birthday}
                 </Col>
               )}
@@ -71,7 +77,6 @@ const RegisteredStudentDetail = ({ data, isOpen, toggle }: any) => {
                   {data.billing_address}
                 </Col>
               )}
-
               {!!data.where_hear_about_us && (
                 <Col xs={12} sm={6} md={6} className="mb-3">
                   <strong>Where did you hear about ?:</strong> &nbsp;{" "}
