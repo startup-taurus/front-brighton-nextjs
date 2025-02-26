@@ -7,6 +7,7 @@ import { getDayOfClassesOfWeek } from "../../../../utils/utils";
 const ScheduleCalendar = ({ courses }: any) => {
   const [daysOfClasses, setDayOfClasses] = useState<any[]>([]);
 
+  console.log(courses);
   useEffect(() => {
     const schedule = getDayOfClassesOfWeek(courses);
     setDayOfClasses(schedule);

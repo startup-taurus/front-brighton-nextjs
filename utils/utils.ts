@@ -152,6 +152,7 @@ export const getDayOfClassesOfWeek = (courses: any): any[] => {
         title: course?.course_name,
         start: startDateTime,
         end: endDateTime,
+        url: `course/${course.course_id}/home`,
       };
     });
   });
