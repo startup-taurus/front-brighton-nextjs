@@ -83,7 +83,13 @@ const Dashboard = () => {
             <QuickLinksList
               title="Quick Links"
               quickLinks={QUICK_LINKS}
-              otherLinks={OTHER_LINKS}
+              otherLinks={[
+                {
+                  title: "Monthly reports",
+                  link: user?.report_link,
+                  icon: "📁",
+                },
+              ]}
             />
           </div>
           <div className="divider"></div>

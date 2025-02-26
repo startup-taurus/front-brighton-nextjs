@@ -42,20 +42,24 @@ const QuickLinksList = ({
       </Table>
       <Table className="link-list-small tertiary-bg mt-4">
         <tbody>
-          {otherLinks?.map((link, index) => (
-            <tr key={`dashboard-course-${index}`}>
-              <td className="link-list-title">{link.title}</td>
-              <td className="col-bg-primary ">
-                <a
-                  href={link.link}
-                  target="_blank"
-                  className="w-100 h-100 col-icon"
-                >
-                  {link.icon}
-                </a>
-              </td>
-            </tr>
-          ))}
+          {otherLinks?.map((link, index) =>
+            link?.link ? (
+              <tr key={`dashboard-course-${index}`}>
+                <td className="link-list-title">{link.title}</td>
+                <td className="col-bg-primary ">
+                  <a
+                    href={link.link}
+                    target="_blank"
+                    className="w-100 h-100 col-icon"
+                  >
+                    {link.icon}
+                  </a>
+                </td>
+              </tr>
+            ) : (
+              <></>
+            ),
+          )}
         </tbody>
       </Table>
     </div>
