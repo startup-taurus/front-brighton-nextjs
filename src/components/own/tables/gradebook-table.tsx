@@ -68,10 +68,11 @@ const GradebookTable = ({
     if (grade === "") return;
     if (Number(grade) >= 0 && Number(grade) <= 10) {
       grade = Number(grade).toFixed(2);
+      console.log();
       setGrades((grades: any) => ({
         ...grades,
         [gradingItemId]: {
-          ...grade[gradingItemId],
+          ...grades[gradingItemId],
           [studentId]: grade,
         },
       }));
