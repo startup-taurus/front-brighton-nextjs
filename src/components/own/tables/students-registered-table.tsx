@@ -15,6 +15,7 @@ const StudentsRegisteredTable = ({
   page,
   rowPerPage,
   filters,
+  loading,
 }: any) => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
@@ -99,6 +100,7 @@ const StudentsRegisteredTable = ({
           onDelete={() => handleDelete(row)}
         />
       ),
+      minWidth: "180px",
       sortable: false,
       center: false,
     },
@@ -142,10 +144,13 @@ const StudentsRegisteredTable = ({
         data={students?.data.result}
         pagination
         paginationServer
+        progressPending={loading}
+        paginationDefaultPage={page ?? 1}
+        paginationPerPage={rowPerPage ?? 10}
         paginationTotalRows={students.data.totalCount}
         onChangePage={(page) => setQueryStringValue("page", page, router)}
         onChangeRowsPerPage={(newPerPage) =>
-          setQueryStringValue("newPerPage", newPerPage, router)
+          setQueryStringValue("rowPerPage", newPerPage, router)
         }
         highlightOnHover
         selectableRows={false}

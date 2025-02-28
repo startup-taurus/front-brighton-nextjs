@@ -40,9 +40,9 @@ export const AdminMenuList: sidebarMenuType[] = [
         path: "dashboard",
       },
       {
-        title: "Student",
+        title: "Students",
         id: 4,
-        pathSlice: "students",
+        pathSlice: "admin/students",
         type: "link",
         icon: "blog",
         badge: "badge badge-light-primary",

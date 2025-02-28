@@ -89,6 +89,7 @@ const UsersTable = ({ reload }: any) => {
           stauts={row.status === "active" ? false : true}
         />
       ),
+      minWidth: "180px",
       sortable: false,
       center: false,
     },
@@ -172,6 +173,9 @@ const UsersTable = ({ reload }: any) => {
         pagination
         paginationServer
         paginationTotalRows={users.data.totalCount}
+        progressPending={isLoading}
+        paginationDefaultPage={page ?? 1}
+        paginationPerPage={rowPerPage ?? 10}
         onChangePage={(page) => {
           router.push({
             pathname: router.pathname,

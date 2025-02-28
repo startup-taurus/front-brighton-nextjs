@@ -57,7 +57,7 @@ const SyllabusTable = ({ reload }: any) => {
     error,
     isLoading,
   } = useSWR([`/syllabus/get-all`, page, rowPerPage], () =>
-    getAllSyllabus(page, rowPerPage)
+    getAllSyllabus(page, rowPerPage),
   );
 
   if (!syllabus?.data) return null;
@@ -72,6 +72,7 @@ const SyllabusTable = ({ reload }: any) => {
           onCopy={() => handleCopy(row)}
         />
       ),
+      minWidth: "200px",
       sortable: false,
       center: false,
     },
@@ -106,6 +107,9 @@ const SyllabusTable = ({ reload }: any) => {
       <DataTable
         columns={columns}
         data={syllabus.data}
+        progressPending={isLoading}
+        paginationDefaultPage={page ?? 1}
+        paginationPerPage={rowPerPage ?? 10}
         pagination
         paginationServer
         paginationTotalRows={syllabus.totalCount}

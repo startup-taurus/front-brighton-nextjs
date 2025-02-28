@@ -66,7 +66,7 @@ const HolidaysTable = ({ reload }: any) => {
     error,
     isLoading,
   } = useSWR([`/holidays/get-all`, page, rowPerPage], () =>
-    getAllHolidays(page, rowPerPage)
+    getAllHolidays(page, rowPerPage),
   );
 
   if (!holidays?.data?.result) return null;
@@ -128,6 +128,9 @@ const HolidaysTable = ({ reload }: any) => {
       <DataTable
         columns={columns}
         data={holidays.data.result}
+        progressPending={isLoading}
+        paginationDefaultPage={page ?? 1}
+        paginationPerPage={rowPerPage ?? 10}
         pagination
         paginationServer
         paginationTotalRows={holidays.data.totalCount}

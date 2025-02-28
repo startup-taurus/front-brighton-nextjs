@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-     "export": "next export"
+    "export": "next export"
   },
   "dependencies": {
     "@ckeditor/ckeditor5-build-classic": "^38.0.1",
@@ -37,6 +37,7 @@
     "chart.js": "^4.3.0",
     "cleave.js": "^1.6.0",
     "convert-size": "^1.2.1",
+    "cuba-next-ts": "file:",
     "date-fns": "^2.30.0",
     "easymde": "^2.18.0",
     "feather-icons": "^4.29.0",
@@ -51,7 +52,6 @@
     "next": "13.1.5",
     "npm": "^9.7.2",
     "photoswipe": "^5.4.2",
-    "prettier": "^3.3.3",
     "react": "18.2.0",
     "react-accessible-treeview": "^2.3.4",
     "react-ace": "^10.1.0",
@@ -114,6 +114,7 @@
     "@types/react-slick": "^0.23.10",
     "@types/react-table": "^7.7.20",
     "@types/react-vertical-timeline-component": "^3.3.3",
+    "prettier": "^3.5.2",
     "sass": "^1.57.1"
   },
   "resolutions": {

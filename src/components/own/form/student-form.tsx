@@ -15,6 +15,40 @@ import useSWR from "swr";
 import { getActiveCourses } from "helper/api-data/course";
 import { createStudent, updateStudent } from "helper/api-data/student";
 import { toast } from "react-toastify";
+import * as Yup from "yup";
+import { parse } from "date-fns";
+
+const validations = Yup.object().shape({
+  name: Yup.string().required("The name is required"),
+  email: Yup.string().required("The email is required"),
+  cedula: Yup.string()
+    .min(10, "Cédula must be more than 10 characters long")
+    .max(10, "Cédula must be less than 10 characters long")
+    .required("Cédula is required"),
+  courseId: Yup.string().required("The course is required"),
+  level: Yup.string().required("The level is required"),
+  status: Yup.string().required("The status is required"),
+  emergency_contact_name: Yup.string().required(
+    "Emergency contact name is required",
+  ),
+  emergency_contact_phone: Yup.string().required(
+    "Emergency contact phone is required",
+  ),
+  emergency_contact_relationship: Yup.string().required(
+    "Emergency contact relationship is required",
+  ),
+  birth_date: Yup.date()
+    .max(new Date(), "Select a valid date")
+    .transform((value, originalValue, schema) => {
+      if (schema.isType(value)) {
+        return value;
+      }
+      const result = parse(originalValue, "dd-MM-yyyy", new Date());
+      return result;
+    })
+    .typeError("Select a valid date")
+    .required("The birthdate is required"),
+});
 
 const StudentForm = ({
   data,
@@ -29,7 +63,7 @@ const StudentForm = ({
 
   const { data: course } = useSWR(
     ["/course/get-active", page, limit, searchTerm],
-    () => getActiveCourses(page, limit, searchTerm)
+    () => getActiveCourses(page, limit, searchTerm),
   );
 
   const save = async (row: any) => {
@@ -111,6 +145,7 @@ const StudentForm = ({
                   birth_date: "",
                 }
           }
+          validationSchema={validations}
           onSubmit={(info) => (data && !isTransfer ? update(info) : save(info))}
         >
           {(props) => {
@@ -121,6 +156,7 @@ const StudentForm = ({
               touched,
               setFieldValue,
             } = props;
+            // @ts-ignore
             return (
               <form
                 noValidate
@@ -130,7 +166,11 @@ const StudentForm = ({
               >
                 <Col xs={6}>
                   <Label for="name">Name</Label>
-                  <Field name="name" as={Input} />
+                  <Field
+                    name="name"
+                    as={Input}
+                    invalid={touched.name && !!errors.name}
+                  />
                   <ErrorMessage name="name" component={FormFeedback} />
                 </Col>
                 {/* <Col xs={6}>
@@ -140,7 +180,11 @@ const StudentForm = ({
                 </Col> */}
                 <Col xs={6}>
                   <Label for="email">Email</Label>
-                  <Field name="email" as={Input} />
+                  <Field
+                    name="email"
+                    as={Input}
+                    invalid={touched.email && !!errors.email}
+                  />
                   <ErrorMessage name="email" component={FormFeedback} />
                 </Col>
                 {/* <Col xs={6}>
@@ -150,34 +194,63 @@ const StudentForm = ({
                 </Col> */}
                 <Col xs={6}>
                   <Label for="cedula">Cédula</Label>
-                  <Field name="cedula" as={Input} />
+                  <Field
+                    name="cedula"
+                    as={Input}
+                    invalid={touched.cedula && !!errors.cedula}
+                  />
                   <ErrorMessage name="cedula" component={FormFeedback} />
                 </Col>
 
                 <Col xs={6}>
                   <Label for="courseId">Course</Label>
-                  <Select
-                    id="courseId"
-                    options={courseOptions}
-                    onChange={(selectedOption: any) =>
-                      setFieldValue("courseId", selectedOption.value)
-                    }
-                    value={
-                      courseOptions.find(
-                        (option: any) => option.value === props.values.courseId
-                      ) || null
-                    }
-                    placeholder="Select course"
-                    isSearchable
-                    onInputChange={(inputValue) => {
-                      setSearchTerm(inputValue);
-                    }}
-                  />
+                  <Field name="courseId">
+                    {({ field, form }: any) => (
+                      <Select
+                        {...field}
+                        id="courseId"
+                        options={courseOptions}
+                        onChange={(selectedOption: any) =>
+                          setFieldValue(
+                            "courseId",
+                            selectedOption ? selectedOption.value : "",
+                          )
+                        }
+                        value={
+                          courseOptions.find(
+                            (option: any) =>
+                              option.value === props.values.courseId,
+                          ) || null
+                        }
+                        placeholder="Select course"
+                        isSearchable
+                        onInputChange={(inputValue) => {
+                          setSearchTerm(inputValue);
+                        }}
+                      />
+                    )}
+                  </Field>
+
+                  {touched.courseId && !!errors.courseId && (
+                    <div className="invalid-input">
+                      <>
+                        {
+                          // @ts-ignore
+                          errors!.courseId
+                        }
+                      </>
+                    </div>
+                  )}
+
                   <ErrorMessage name="courseId" component={FormFeedback} />
                 </Col>
                 <Col xs={6}>
                   <Label for="level">Level</Label>
-                  <Field name="level" as={Input} />
+                  <Field
+                    name="level"
+                    as={Input}
+                    invalid={touched.level && !!errors.level}
+                  />
                   <ErrorMessage name="level" component={FormFeedback} />
                 </Col>
                 <Col xs={6}>
@@ -187,6 +260,7 @@ const StudentForm = ({
                     as={Input}
                     type="select"
                     id="studentFilter"
+                    invalid={touched.status && !!errors.status}
                   >
                     <option value="" disabled>
                       Select status of student
@@ -204,6 +278,7 @@ const StudentForm = ({
                     as={Input}
                     type="select"
                     id="age_category"
+                    invalid={touched.age_category && !!errors.age_category}
                   >
                     <option value="kids">Kids</option>
                     <option value="adults">Adults</option>
@@ -212,7 +287,12 @@ const StudentForm = ({
                 </Col>
                 <Col xs={6}>
                   <Label for="birth_date">Birth Date</Label>
-                  <Field type="date" name="birth_date" as={Input} />
+                  <Field
+                    type="date"
+                    name="birth_date"
+                    as={Input}
+                    invalid={touched.birth_date && !!errors.birth_date}
+                  />
                   <ErrorMessage name="birth_date" component={FormFeedback} />
                 </Col>
                 <Col xs={6}>
@@ -222,6 +302,7 @@ const StudentForm = ({
                     as={Input}
                     type="select"
                     id="book_given"
+                    invalid={touched.book_given && !!errors.book_given}
                   >
                     <option value="true">Yes</option>
                     <option value="false">No</option>
@@ -248,7 +329,14 @@ const StudentForm = ({
                   <Label for="emergency_contact_name">
                     Emergency Contact Name
                   </Label>
-                  <Field name="emergency_contact_name" as={Input} />
+                  <Field
+                    name="emergency_contact_name"
+                    as={Input}
+                    invalid={
+                      touched.emergency_contact_name &&
+                      !!errors.emergency_contact_name
+                    }
+                  />
                   <ErrorMessage
                     name="emergency_contact_name"
                     component={FormFeedback}
@@ -258,7 +346,14 @@ const StudentForm = ({
                   <Label for="emergency_contact_phone">
                     Emergency Contact Phone
                   </Label>
-                  <Field name="emergency_contact_phone" as={Input} />
+                  <Field
+                    name="emergency_contact_phone"
+                    as={Input}
+                    invalid={
+                      touched.emergency_contact_phone &&
+                      !!errors.emergency_contact_phone
+                    }
+                  />
                   <ErrorMessage
                     name="emergency_contact_phone"
                     component={FormFeedback}
@@ -268,7 +363,14 @@ const StudentForm = ({
                   <Label for="emergency_contact_relationship">
                     Emergency Contact Relationship
                   </Label>
-                  <Field name="emergency_contact_relationship" as={Input} />
+                  <Field
+                    name="emergency_contact_relationship"
+                    as={Input}
+                    invalid={
+                      touched.emergency_contact_relationship &&
+                      !!errors.emergency_contact_relationship
+                    }
+                  />
                   <ErrorMessage
                     name="emergency_contact_relationship"
                     component={FormFeedback}

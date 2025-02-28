@@ -36,6 +36,10 @@ const Students = () => {
 
   const selectFilters: FiltersProps[] = [
     {
+      labelName: "ID  Number",
+      name: "id_number",
+    },
+    {
       labelName: "Level",
       name: "level",
       type: "select",
@@ -57,7 +61,7 @@ const Students = () => {
     <div className="page-body">
       <Container className="basic_table" fluid>
         <Row>
-         <TableFilters selectFilters={selectFilters} />
+          <TableFilters selectFilters={selectFilters} />
         </Row>
         <Row>
           <Card>
@@ -70,6 +74,7 @@ const Students = () => {
                 rowPerPage={rowPerPage}
                 students={students?.data}
                 filters={filters}
+                loading={students?.isLoading}
               />
             </div>
           </Card>

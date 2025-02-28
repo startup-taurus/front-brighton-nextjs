@@ -85,6 +85,7 @@ const TeachersTable = ({ reload }: any) => {
           stauts={row.status === "active" ? false : true}
         />
       ),
+      minWidth: "140px",
       sortable: false,
       center: false,
     },
@@ -143,6 +144,9 @@ const TeachersTable = ({ reload }: any) => {
       <DataTable
         columns={columns}
         data={professors.data.result}
+        progressPending={isLoading}
+        paginationDefaultPage={page ?? 1}
+        paginationPerPage={rowPerPage ?? 10}
         pagination
         paginationServer
         paginationTotalRows={professors.data.totalCount}

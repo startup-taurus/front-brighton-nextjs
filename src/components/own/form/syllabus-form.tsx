@@ -13,6 +13,11 @@ import {
 } from "reactstrap";
 import { createSyllabus, updateSyllabus } from "helper/api-data/syllabus";
 import { FaTrash } from "react-icons/fa";
+import * as Yup from "yup";
+
+const validations = Yup.object().shape({
+  syllabus_name: Yup.string().required("The syllabus name is required"),
+});
 
 const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
   const save = async (syllabus: any, { setSubmitting }: any) => {
@@ -93,8 +98,11 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
                   ],
                 }
           }
+          validationSchema={validations}
           onSubmit={(values, othersProps) =>
-            data && !isCopy ? update(values, othersProps ) : save(values, othersProps)
+            data && !isCopy
+              ? update(values, othersProps)
+              : save(values, othersProps)
           }
         >
           {(props) => {
@@ -104,6 +112,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
               handleSubmit,
               isSubmitting,
               setFieldValue,
+              touched,
             } = props;
 
             const renderArrayField = (name: string, label: string) => (
@@ -126,7 +135,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
                                 onChange={(e) =>
                                   setFieldValue(
                                     `${name}[${index}]`,
-                                    e.target.value
+                                    e.target.value,
                                   )
                                 }
                                 placeholder={`Item ${index + 1}`}
@@ -140,7 +149,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
                                 <FaTrash />
                               </Button>
                             </Col>
-                          )
+                          ),
                         )}
                       </Row>
                       <Button
@@ -160,7 +169,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
               name: string,
               label: string,
               values: any,
-              setFieldValue: (field: string, value: any) => void
+              setFieldValue: (field: string, value: any) => void,
             ) => (
               <Col xs={12} className="mt-3">
                 <Label>{label}</Label>
@@ -178,7 +187,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
                               onChange={(e) =>
                                 setFieldValue(
                                   `${name}[${index}].name`,
-                                  e.target.value
+                                  e.target.value,
                                 )
                               }
                             />
@@ -191,7 +200,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
                               onChange={(e) =>
                                 setFieldValue(
                                   `${name}[${index}].min`,
-                                  e.target.value
+                                  e.target.value,
                                 )
                               }
                             />
@@ -204,7 +213,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
                               onChange={(e) =>
                                 setFieldValue(
                                   `${name}[${index}].max`,
-                                  e.target.value
+                                  e.target.value,
                                 )
                               }
                             />
@@ -248,7 +257,11 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
               >
                 <Col xs={12}>
                   <Label for="syllabus_name">Syllabus Name</Label>
-                  <Field name="syllabus_name" as={Input} />
+                  <Field
+                    name="syllabus_name"
+                    as={Input}
+                    invalid={touched.syllabus_name && !!errors.syllabus_name}
+                  />
                   <ErrorMessage name="syllabus_name" component={FormFeedback} />
                 </Col>
 
@@ -289,7 +302,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
                   "percentages",
                   "Custom Percentages",
                   values,
-                  setFieldValue
+                  setFieldValue,
                 )}
 
                 <Col xs={12} className="d-flex justify-content-end mt-5">

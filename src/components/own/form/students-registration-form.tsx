@@ -32,7 +32,7 @@ const StudentsRegistrationForm = () => {
         return result;
       })
       .typeError("Select a valid date")
-      .required("The birthday is required"),
+      .required("The birthdate is required"),
     phone_number: Yup.string()
       .min(10, "The phone number must be more than 10 characters long")
       .max(10, "The phone number must be less than 10 characters long")

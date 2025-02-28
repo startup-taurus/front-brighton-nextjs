@@ -30,7 +30,7 @@ const Students = () => {
     [
       `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ""}`,
     ],
-    () => getAllStudent(page, rowPerPage, filters)
+    () => getAllStudent(page, rowPerPage, filters),
   );
 
   const course = useSWR(`/course/get-all`, () => getAllCourses());
@@ -56,13 +56,11 @@ const Students = () => {
     {
       labelName: "Level",
       name: "level",
-      type: "select",
       items: LEVEL_FILTER,
     },
     {
       labelName: "Promotion",
       name: "promotion",
-      type: "select",
       items: PROMOTION_FILTER,
     },
   ];
@@ -100,6 +98,7 @@ const Students = () => {
                 rowPerPage={rowPerPage}
                 students={students?.data}
                 filters={filters}
+                loading={students.isLoading}
               />
             </div>
           </Card>

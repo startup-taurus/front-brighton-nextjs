@@ -96,6 +96,7 @@ const CoursesTable = ({ reload }: any) => {
           stauts={row.status === "active" ? false : true}
         />
       ),
+      minWidth: "180px",
       sortable: false,
       center: false,
     },
@@ -161,6 +162,9 @@ const CoursesTable = ({ reload }: any) => {
       <DataTable
         columns={columns}
         data={courses.data.result}
+        progressPending={isLoading}
+        paginationDefaultPage={page ?? 1}
+        paginationPerPage={rowPerPage ?? 10}
         pagination
         paginationServer
         paginationTotalRows={courses.data.totalCount}

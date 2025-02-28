@@ -9,7 +9,13 @@ import StudentDetail from "../student-detail/student-datail";
 import DataTable from "react-data-table-component";
 import { setQueryStringValue } from "../../../../utils/utils";
 
-const StudentsTable = ({ students, page, rowPerPage, filters }: any) => {
+const StudentsTable = ({
+  students,
+  page,
+  rowPerPage,
+  filters,
+  loading,
+}: any) => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenDetail, setIsOpenDetail] = useState(false);
@@ -78,6 +84,7 @@ const StudentsTable = ({ students, page, rowPerPage, filters }: any) => {
           status={row.status === "active" ? false : true}
         />
       ),
+      minWidth: "180px",
       sortable: false,
       center: false,
     },
@@ -137,7 +144,7 @@ const StudentsTable = ({ students, page, rowPerPage, filters }: any) => {
       sortable: true,
       center: false,
     },
-    
+
     {
       name: "Status payment",
       cell: (row: any) => (
@@ -159,11 +166,14 @@ const StudentsTable = ({ students, page, rowPerPage, filters }: any) => {
         data={students?.data.result}
         pagination
         paginationServer
+        paginationDefaultPage={page ?? 1}
+        paginationPerPage={rowPerPage ?? 10}
         paginationTotalRows={students.data.totalCount}
         onChangePage={(page) => setQueryStringValue("page", page, router)}
         onChangeRowsPerPage={(newPerPage) =>
-          setQueryStringValue("newPerPage", newPerPage, router)
+          setQueryStringValue("rowPerPage", newPerPage, router)
         }
+        progressPending={loading}
         highlightOnHover
         selectableRows={false}
       />
