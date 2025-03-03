@@ -59,16 +59,61 @@ const GradebookTable = ({
     setGrades(gradingGrade);
   }, [gradingGrade]);
 
-  const changeGrades = async (
+  const onChangeGrades = async (
     event: any,
     gradingItemId: any,
     studentId: any,
   ) => {
-    let grade = event.target.value;
-    if (grade === "") return;
-    if (Number(grade) >= 0 && Number(grade) <= 10) {
-      grade = Number(grade).toFixed(2);
-      console.log();
+    let grade = (grades[gradingItemId]?.[studentId] ?? "0.00").replace(".", "");
+    const newDigit = event.target.value.replace(/\D/g, "");
+    if (!newDigit || Number(newDigit) > 1000) return;
+
+    grade = grade + newDigit;
+    grade = grade.padStart(3, "0");
+    grade = grade.slice(-4);
+
+    const formattedGrade = Number(
+      grade.slice(0, grade.length - 2) + "." + grade.slice(-2),
+    );
+
+    if (formattedGrade >= 0 && formattedGrade <= 10) {
+      setGrades((grades: any) => ({
+        ...grades,
+        [gradingItemId]: {
+          ...grades[gradingItemId],
+          [studentId]: formattedGrade.toFixed(2),
+        },
+      }));
+
+      onSaveGrade({
+        course_id: courseId,
+        student_id: studentId,
+        grading_item_id: gradingItemId,
+        grade: formattedGrade,
+      });
+    }
+  };
+
+  const handleBackSpace = async (
+    event: any,
+    gradingItemId: any,
+    studentId: any,
+  ) => {
+    if (event.key === "Backspace") {
+      event.preventDefault();
+      let grade = (grades[gradingItemId]?.[studentId] ?? "0.00").replace(
+        ".",
+        "",
+      );
+
+      grade = grade.slice(0, -1);
+      if (grade.length === 0) grade = "000";
+
+      if (Number(grade) < 1000) {
+        grade = grade.padStart(3, "0");
+      }
+      grade = grade.slice(0, -2) + "." + grade.slice(-2);
+
       setGrades((grades: any) => ({
         ...grades,
         [gradingItemId]: {
@@ -262,9 +307,11 @@ const GradebookTable = ({
                   <td className="td-container" key={`grade-note-${j}`}>
                     <Input
                       className="td-input input-percentage"
-                      type="number"
                       onChange={(event) =>
-                        changeGrades(event, item.item_id, student?.id)
+                        onChangeGrades(event, item.item_id, student?.id)
+                      }
+                      onKeyDown={(event) =>
+                        handleBackSpace(event, item.item_id, student?.id)
                       }
                       value={grades[item.item_id][student.id] ?? ""}
                     />
@@ -285,9 +332,11 @@ const GradebookTable = ({
                   >
                     <Input
                       className="td-input input-percentage"
-                      type="number"
                       onChange={(event) =>
-                        changeGrades(event, item.item_id, student?.id)
+                        onChangeGrades(event, item.item_id, student?.id)
+                      }
+                      onKeyDown={(event) =>
+                        handleBackSpace(event, item.item_id, student?.id)
                       }
                       value={grades[item.item_id][student.id] ?? ""}
                     />
@@ -308,9 +357,11 @@ const GradebookTable = ({
                   >
                     <Input
                       className="td-input input-percentage"
-                      type="number"
                       onChange={(event) =>
-                        changeGrades(event, item.item_id, student?.id)
+                        onChangeGrades(event, item.item_id, student?.id)
+                      }
+                      onKeyDown={(event) =>
+                        handleBackSpace(event, item.item_id, student?.id)
                       }
                       value={grades[item.item_id][student.id] ?? ""}
                     />

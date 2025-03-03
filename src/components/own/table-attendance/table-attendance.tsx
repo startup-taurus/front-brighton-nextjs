@@ -51,7 +51,6 @@ const TableAttendance = ({
     studentId: any,
   ) => {
     const status = event.target.value;
-    if (status === "") return;
     setDates((date: any) => ({
       ...date,
       [syllabusItemId]: {
