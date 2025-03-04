@@ -28,28 +28,28 @@ const CommonHeaderWithDropDown = ({
     >
       <div className="header-top">
         <h5 className={headingClassName ? headingClassName : ""}>{heading}</h5>
-        <div className={`${dropDownClass ? dropDownClass : ""}`}>
-          <Dropdown isOpen={open} toggle={toggle}>
-            <DropdownToggle
-              className={dropDownToggleClassName ? dropDownToggleClassName : ""}
-              color="transparent"
-              caret={caret ? true : false}
-            >
-              {dropDownIcon ? (
-                <i className="icon-more-alt" />
-              ) : tag ? (
-                tag
-              ) : (
-                dropDownList[0]
-              )}
-            </DropdownToggle>
-            <DropdownMenu className="dropdown-menu-end">
-              {dropDownList.map((item, index) => (
-                <DropdownItem key={index}>{item}</DropdownItem>
-              ))}
-            </DropdownMenu>
-          </Dropdown>
-        </div>
+        {/*<div className={`${dropDownClass ? dropDownClass : ""}`}>*/}
+        {/*  <Dropdown isOpen={open} toggle={toggle}>*/}
+        {/*    <DropdownToggle*/}
+        {/*      className={dropDownToggleClassName ? dropDownToggleClassName : ""}*/}
+        {/*      color="transparent"*/}
+        {/*      caret={caret ? true : false}*/}
+        {/*    >*/}
+        {/*      {dropDownIcon ? (*/}
+        {/*        <i className="icon-more-alt" />*/}
+        {/*      ) : tag ? (*/}
+        {/*        tag*/}
+        {/*      ) : (*/}
+        {/*        dropDownList[0]*/}
+        {/*      )}*/}
+        {/*    </DropdownToggle>*/}
+        {/*    <DropdownMenu className="dropdown-menu-end">*/}
+        {/*      {dropDownList.map((item, index) => (*/}
+        {/*        <DropdownItem key={index}>{item}</DropdownItem>*/}
+        {/*      ))}*/}
+        {/*    </DropdownMenu>*/}
+        {/*  </Dropdown>*/}
+        {/*</div>*/}
       </div>
     </CardHeader>
   );

@@ -25,6 +25,19 @@ const CoursesList = ({ title, coursesList }: CoursesListProps) => {
                   📁
                 </Link>
               </td>
+              {course?.options && (
+                <td className="no-bg">
+                  <div className="d-flex align-items-center gap-1">
+                    {course?.options?.hasClassToday && <span> 📅</span>}
+                    {course?.options?.hasClassToday &&
+                      !course?.options?.hasBeenTakenAttendance && (
+                        <span>❗</span>
+                      )}
+                    {course?.options?.endThisMoth && <span>🏁</span>}
+                    {course?.options?.isAreadyEnd && <span>🎓</span>}
+                  </div>
+                </td>
+              )}
             </tr>
           ))}
         </tbody>

@@ -31,6 +31,8 @@ const CommonForm = ({ alignLogo }: commonFormPropsType) => {
     username: "",
     password: "",
   });
+  const [isLoading, setIsLoading] = useState(false);
+
   const { username, password } = formValues;
   const router = useRouter();
   const handleUserValue = (event: ChangeEvent<HTMLInputElement>) => {
@@ -38,6 +40,7 @@ const CommonForm = ({ alignLogo }: commonFormPropsType) => {
   };
   const formSubmitHandle = async (event: FormEvent) => {
     event.preventDefault();
+    setIsLoading(true);
     const response = await postLogin({ username, password });
 
     if (response?.status === "success") {
@@ -53,6 +56,7 @@ const CommonForm = ({ alignLogo }: commonFormPropsType) => {
       }
 
       toast.success("Login Success");
+      setIsLoading(false);
     }
   };
   return (
@@ -100,6 +104,7 @@ const CommonForm = ({ alignLogo }: commonFormPropsType) => {
                   color="primary"
                   className="btn-block w-100"
                   type="submit"
+                  disabled={isLoading}
                 >
                   {SignIn}
                 </Button>

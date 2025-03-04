@@ -23,6 +23,10 @@ td {
     text-transform: uppercase;
   }
 
+  td.no-bg {
+    background-color: white;
+  }
+
   a.col-icon {
     font-size: 1.5rem;
     line-height: 0;

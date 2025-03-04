@@ -90,6 +90,7 @@
     "react-table": "^7.8.0",
     "react-to-print": "^2.14.13",
     "react-toastify": "^9.1.2",
+    "react-tooltip": "^5.28.0",
     "react-vertical-timeline-component": "^3.6.0",
     "reactstrap": "^10.0.1-release-v10.0.0-c659629.0",
     "simplebar": "^6.2.0",

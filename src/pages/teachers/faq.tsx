@@ -18,6 +18,7 @@ const Faq = () => {
               useful nevertheless!
             </p>
           </div>
+          e{" "}
           <p className="divider w-75">
             <strong>- デイビッド</strong>
           </p>

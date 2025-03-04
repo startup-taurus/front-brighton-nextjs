@@ -116,8 +116,9 @@
  */
 // *** utils ***
 @import "utils/variables";
+@import "react-tooltip/dist/react-tooltip.css";
 
-:root {
+root {
   --theme-deafult: #ffa700;
   --theme-secondary: #f73164;
   --light-background: rgba(242, 243, 247, 0.7);
