@@ -15,10 +15,10 @@ import {
   Colors,
 } from "chart.js";
 import ConfigDB from "config/ThemeConfig";
+import { isBrowser } from "../../utils/utils";
 
 const primary = ConfigDB.data.color.primary_color;
 const secondary = ConfigDB.data.color.secondary_color;
-
 
 ChartJS.register(
   CategoryScale,
@@ -33,7 +33,7 @@ ChartJS.register(
   BarController,
   BarElement,
   ArcElement,
-  RadialLinearScale
+  RadialLinearScale,
 );
 export const barChartData = {
   labels: ["January", "February", "March", "April", "May", "June", "July"],
@@ -59,11 +59,46 @@ export const barChartData = {
   ],
 };
 
-export const barChartOptions = {
-  responsive: true,
-  legend: {
-    display: false,
-  },
+export const generateBarChartOptions = (): any => {
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: true,
+        position: "top",
+        labels: {
+          font: {
+            size: 12,
+          },
+        },
+      },
+    },
+    scales: {
+      x: {
+        ticks: {
+          maxRotation: 0,
+          minRotation: 0,
+          display: isBrowser() && window.innerWidth > 600,
+          font: {
+            size: 10,
+          },
+        },
+      },
+      y: {
+        ticks: {
+          font: {
+            size: 10,
+          },
+        },
+      },
+    },
+    layout: {
+      padding: {
+        bottom: 20,
+      },
+    },
+  };
 };
 
 export const lineChartData = {
@@ -238,7 +273,12 @@ export const lineChart2option = {
 };
 
 export const LineChartData = [
-  ["Month", "Guardians of the Galaxy", "The Avengers", "Transformers: Age of Extinction"],
+  [
+    "Month",
+    "Guardians of the Galaxy",
+    "The Avengers",
+    "Transformers: Age of Extinction",
+  ],
   [1, 37.8, 80.8, 41.8],
   [2, 30.9, 10.5, 32.4],
   [3, 40.4, 57, 25.7],

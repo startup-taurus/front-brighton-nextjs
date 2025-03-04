@@ -5,7 +5,7 @@ import ReportStatus from "@/components/own/report-status/report-status";
 import Link from "next/link";
 import { FaRegFilePdf } from "react-icons/fa";
 import { Bar } from "react-chartjs-2";
-import { barChartOptions } from "../../../../Data/Charts/ChartJsData";
+import { generateBarChartOptions } from "../../../../Data/Charts/ChartJsData";
 import {
   buildGradebookStructure,
   calculateAssignmentAverage,
@@ -13,13 +13,13 @@ import {
   calculateFinalGradingStatus,
   calculateReportExamAverage,
   calculateStudentAverage,
-  calculateTotalAverage,
   formatExamParams,
   formatGradebookComponents,
   formatReportBarChartData,
   formatReportUrl,
   formatStudentScoreAssignmentsGrades,
   formatStudentScoreExamGrades,
+  isBrowser,
 } from "../../../../utils/utils";
 import { ComponentsGradebook } from "../../../../Types/GradingItem";
 import {
@@ -85,6 +85,8 @@ const StudentReportTable = ({
   notesPercentages,
   selectedStudentId,
 }: any) => {
+  const barChartOptions = generateBarChartOptions();
+
   const [componentsGradebook, setComponentsGradebook] =
     useState<ComponentsGradebook>({
       assignments: [],
@@ -185,7 +187,6 @@ const StudentReportTable = ({
       studentAverage,
     );
 
-    console.log("ex", examProps);
     const url = formatReportUrl({
       student: selectedStudent?.name,
       ageGroup: courseDetail?.age_group,
@@ -265,7 +266,7 @@ const StudentReportTable = ({
         </div>
       </Col>
       <Col xs={12} sm={12} md={12} lg={4}>
-        {reportChartData && (
+        {reportChartData && isBrowser() && (
           <div className="chart-container">
             <Bar
               data={reportChartData}

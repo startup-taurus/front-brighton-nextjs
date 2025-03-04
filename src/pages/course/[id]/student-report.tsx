@@ -131,6 +131,7 @@ const StudentReport: NextPageWithLayout = () => {
                   ))}
                 </Input>
                 <Image
+                  className="warning-logo"
                   src={`${ImgPath}/course/warning-icon.png`}
                   alt="logo"
                   width={50}
