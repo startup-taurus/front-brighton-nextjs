@@ -25,6 +25,9 @@ import {
   updateAssignmentGradingItem,
 } from "../../../../helper/api-data/syllabus";
 import { mutate } from "swr";
+import Swal from "sweetalert2";
+import { deleteRegisteredStudent } from "../../../../helper/api-data/registered-student";
+import { toast } from "react-toastify";
 
 const GradebookTable = ({
   students,
@@ -139,11 +142,23 @@ const GradebookTable = ({
   );
 
   const addAssignmentCol = () => {
-    createAssignmentGradingItem({
-      syllabus_id: syllabusId,
-      course_id: courseId,
-    }).then(() => {
-      mutate(`/course/get-grading-items/${courseId}`);
+    Swal.fire({
+      title: "Are you sure you want to add a new assignment?",
+      text: "This action cannot be reversed",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Yes, add!",
+      cancelButtonText: "Cancel",
+      reverseButtons: true,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        createAssignmentGradingItem({
+          syllabus_id: syllabusId,
+          course_id: courseId,
+        }).then(() => {
+          mutate(`/course/get-grading-items/${courseId}`);
+        });
+      }
     });
   };
 
