@@ -77,7 +77,7 @@ export const AdminMenuList: sidebarMenuType[] = [
       },
 
       {
-        title: "Teachers",
+        title: "Professors",
         id: 5,
         pathSlice: "teachers",
         type: "link",

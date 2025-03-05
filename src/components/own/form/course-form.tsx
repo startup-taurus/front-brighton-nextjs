@@ -58,14 +58,17 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
       .join(", ");
   };
 
-  const { data: course } = useSWR(
+  const { data: course, isLoading: isLoadingCourse } = useSWR(
     ["/course/get-active", page, limit, searchTerm],
-    () => getActiveProfessors(page, limit, searchTerm)
+    () => getActiveProfessors(page, limit, searchTerm),
   );
 
-  const { data: syllabus } = useSWR(["/syllabus/get-all", page, limit], () =>
-    getAllSyllabus(page, limit)
+  const { data: syllabus, isLoading: isLoadingSyllabus } = useSWR(
+    ["/syllabus/get-all", page, limit],
+    () => getAllSyllabus(page, limit),
   );
+
+  if (isLoadingCourse || isLoadingSyllabus) return null;
 
   const syllabusOptions = syllabus?.data
     ? syllabus?.data.map((syllabusItem: any) => ({
@@ -208,7 +211,7 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                     value={
                       professorOptions.find(
                         (option: any) =>
-                          option.value === props.values.professor_id
+                          option.value === props.values.professor_id,
                       ) || null
                     }
                     isSearchable
@@ -230,7 +233,7 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                     value={
                       syllabusOptions.find(
                         (option: any) =>
-                          option.value === props.values.syllabus_id
+                          option.value === props.values.syllabus_id,
                       ) || null
                     }
                     isSearchable
@@ -346,7 +349,7 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                                 />
                               </Col>
                             </div>
-                          )
+                          ),
                         )}
                         {/* <div className="d-flex justify-content-end">
                           <Button
