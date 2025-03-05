@@ -29,7 +29,7 @@ export const COURSE_TYPE_FILTER = [
 
 export const USER_ROLES = [
   { value: "admin_staff", label: "Admin" },
-  { value: "teacher", label: "Teacher" },
+  { value: "professor", label: "Professor" },
   { value: "student", label: "Student" },
   { value: "financial", label: "Financial" },
 ];
