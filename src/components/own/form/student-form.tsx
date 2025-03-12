@@ -131,7 +131,13 @@ const StudentForm = ({
           })
       : [];
 
-    setCourseOptions((courses) => [...courses, ...options]);
+    setCourseOptions((prevOptions) => {
+      const combined = [...prevOptions, ...options];
+      return combined.filter(
+          (option, index, self) =>
+              self.findIndex((o) => o.value === option.value) === index
+      );
+    });
   }, [course, course?.data]);
 
   return (
