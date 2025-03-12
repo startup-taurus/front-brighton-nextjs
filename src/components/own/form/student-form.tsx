@@ -235,10 +235,7 @@ const StudentForm = ({
 
                 {courseOptions && courseOptions?.length > 0 && (
                   <Col xs={6}>
-                    <Label for="courseId">
-                      Course {course?.data?.length}
-                      {data?.course?.length}
-                    </Label>
+                    <Label for="courseId">Course</Label>
                     <Field name="courseId">
                       {({ field, form }: any) => (
                         <Select
