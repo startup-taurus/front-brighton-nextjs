@@ -1,4 +1,4 @@
-import React, { use, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import Select from "react-select";
 import { ErrorMessage, Field, Formik } from "formik";
 import {
@@ -11,7 +11,7 @@ import {
   ModalBody,
   ModalHeader,
 } from "reactstrap";
-import useSWR from "swr";
+import useSWR, { mutate } from "swr";
 import { getActiveCourses } from "helper/api-data/course";
 import { createStudent, updateStudent } from "helper/api-data/student";
 import { toast } from "react-toastify";
@@ -58,8 +58,9 @@ const StudentForm = ({
   onSuccessCreate,
 }: any) => {
   const limit = 10;
-  const page = 1;
+  const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
+  const [courseOptions, setCourseOptions] = useState<any[]>([]);
 
   const { data: course } = useSWR(
     ["/course/get-active", page, limit, searchTerm],
@@ -75,33 +76,63 @@ const StudentForm = ({
         onSuccessCreate && onSuccessCreate(data?.user?.id);
       }
     } catch (error) {
-      console.error("Error al crear estudiante:", error);
+      // console.error("Error al crear estudiante:", error);
     }
   };
 
-  const update = async (data: any) => {
+  const update = async (student: any) => {
     try {
-      toast.success("Student updated successfull!");
-      const response = await updateStudent(data.id, data);
+      const response = await updateStudent(data.id, student);
       if (response.statusCode === 200) {
+        toast.success("Student updated successfull!");
         toggle();
       }
     } catch (error) {
-      console.error("Error al actualizar usuario:", error);
+      // console.error("Error al actualizar usuario:", error);
     }
   };
 
-  const courseOptions = course?.data
-    ? course?.data.map((courseItem: any) => ({
-        value: courseItem.id,
-        label:
-          courseItem.course_number +
-          " - " +
-          courseItem.course_name +
-          " - " +
-          courseItem?.professor?.user?.name,
-      }))
-    : [];
+  const onCourseScrollToBottom = () => {
+    if (course?.data?.length != 0) {
+      const nextPage = page + 1;
+      setPage(nextPage);
+    }
+  };
+
+  useEffect(() => {
+    if (data?.course)
+      setCourseOptions([
+        {
+          value: data?.course[0].id,
+          label:
+            data?.course[0]?.course_number +
+            " - " +
+            data?.course[0]?.course_name +
+            " - " +
+            data?.course[0].professor,
+        },
+      ]);
+  }, []);
+
+  useEffect(() => {
+    const options = course?.data
+      ? course?.data
+          .map((courseItem: any) => ({
+            value: courseItem.id,
+            label:
+              courseItem.course_number +
+              " - " +
+              courseItem.course_name +
+              " - " +
+              courseItem?.professor?.user?.name,
+          }))
+          .filter((courseItem: any) => {
+            return courseItem?.value != data?.course[0]?.id;
+          })
+      : [];
+
+    setCourseOptions((courses) => [...courses, ...options]);
+  }, [course, course?.data]);
 
   return (
     <Modal isOpen={isOpen} toggle={toggle} size="lg">
@@ -202,48 +233,54 @@ const StudentForm = ({
                   <ErrorMessage name="cedula" component={FormFeedback} />
                 </Col>
 
-                <Col xs={6}>
-                  <Label for="courseId">Course</Label>
-                  <Field name="courseId">
-                    {({ field, form }: any) => (
-                      <Select
-                        {...field}
-                        id="courseId"
-                        options={courseOptions}
-                        onChange={(selectedOption: any) =>
-                          setFieldValue(
-                            "courseId",
-                            selectedOption ? selectedOption.value : "",
-                          )
-                        }
-                        value={
-                          courseOptions.find(
-                            (option: any) =>
-                              option.value === props.values.courseId,
-                          ) || null
-                        }
-                        placeholder="Select course"
-                        isSearchable
-                        onInputChange={(inputValue) => {
-                          setSearchTerm(inputValue);
-                        }}
-                      />
+                {courseOptions && courseOptions?.length > 0 && (
+                  <Col xs={6}>
+                    <Label for="courseId">
+                      Course {course?.data?.length}
+                      {data?.course?.length}
+                    </Label>
+                    <Field name="courseId">
+                      {({ field, form }: any) => (
+                        <Select
+                          {...field}
+                          id="courseId"
+                          options={courseOptions}
+                          onChange={(selectedOption: any) =>
+                            setFieldValue(
+                              "courseId",
+                              selectedOption ? selectedOption.value : "",
+                            )
+                          }
+                          value={
+                            courseOptions.find(
+                              (option: any) =>
+                                option.value === props.values.courseId,
+                            ) || null
+                          }
+                          placeholder="Select course"
+                          isSearchable
+                          onInputChange={(inputValue) => {
+                            setSearchTerm(inputValue);
+                          }}
+                          onMenuScrollToBottom={onCourseScrollToBottom}
+                        />
+                      )}
+                    </Field>
+
+                    {touched.courseId && !!errors.courseId && (
+                      <div className="invalid-input">
+                        <>
+                          {
+                            // @ts-ignore
+                            errors!.courseId
+                          }
+                        </>
+                      </div>
                     )}
-                  </Field>
 
-                  {touched.courseId && !!errors.courseId && (
-                    <div className="invalid-input">
-                      <>
-                        {
-                          // @ts-ignore
-                          errors!.courseId
-                        }
-                      </>
-                    </div>
-                  )}
-
-                  <ErrorMessage name="courseId" component={FormFeedback} />
-                </Col>
+                    <ErrorMessage name="courseId" component={FormFeedback} />
+                  </Col>
+                )}
                 <Col xs={6}>
                   <Label for="level">Level</Label>
                   <Field

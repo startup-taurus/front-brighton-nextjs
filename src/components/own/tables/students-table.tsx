@@ -67,7 +67,7 @@ const StudentsTable = ({
         ]);
       }
     } catch (error) {
-      console.error("Error al actualizar usuario:", error);
+      // console.error("Error al actualizar usuario:", error);
     }
   };
 
@@ -177,7 +177,9 @@ const StudentsTable = ({
         highlightOnHover
         selectableRows={false}
       />
-      <StudentForm isOpen={isOpen} toggle={toggle} data={selectedData} />
+      {isOpen && (
+        <StudentForm isOpen={isOpen} toggle={toggle} data={selectedData} />
+      )}
       <StudentDetail
         isOpen={isOpenDetail}
         toggle={toggleDetail}
