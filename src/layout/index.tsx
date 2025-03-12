@@ -11,6 +11,7 @@ import Sidebar from "./Sidebar";
 import { TeacherMenuList } from "./Sidebar/menu";
 import Taptop from "./Taptop";
 import { UserContext } from "../../helper/User";
+import Loader from "@/layout/loader";
 
 interface layoutProps {
   children: ReactNode;
@@ -96,7 +97,7 @@ const Layout = ({ children }: layoutProps) => {
       <Head>
         <title>Brighton School</title>
       </Head>
-      {/* <Loader /> */}
+      {/*<Loader />*/}
       <div
         className={`page-wrapper  ${user?.role === "admin_staff" ? "compact-wrapper" : "horizontal-wrapper"}`}
       >

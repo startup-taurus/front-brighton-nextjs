@@ -10,7 +10,8 @@ import {
   ModalBody,
   ModalHeader,
 } from "reactstrap";
-import { createUser, updateUser } from "helper/api-data/user"; // Función para crear usuario
+import { createUser, updateUser } from "helper/api-data/user";
+import { USER_ROLES } from "../../../../utils/constants"; // Función para crear usuario
 
 const UserForm = ({ data, isOpen, toggle }: any) => {
   const save = async (data: any) => {
@@ -99,10 +100,9 @@ const UserForm = ({ data, isOpen, toggle }: any) => {
                     <option value="" disabled>
                       Select role of user
                     </option>
-                    <option value="professor">Professor</option>
-                    <option value="student">Student</option>
-                    <option value="admin_staff">Admin Staff</option>
-                    <option value="financial">Financial</option>
+                    {USER_ROLES.map((role, index) => (
+                      <option value={role.value}>{role.label}</option>
+                    ))}
                   </Field>
                   <ErrorMessage name="role" component={FormFeedback} />
                 </Col>
