@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
-import useSWR, { mutate } from "swr";
-import { useRouter } from "next/router";
-import DataTable from "react-data-table-component";
-import { getAllSyllabus } from "helper/api-data/syllabus";
-import SyllabusItemsModal from "../form/syllabus-item";
-import TableActionButtons from "../table-action-buttons/table-action-buttons";
-import SyllabusForm from "../form/syllabus-form";
+import React, { useState, useEffect } from 'react';
+import useSWR, { mutate } from 'swr';
+import { useRouter } from 'next/router';
+import DataTable from 'react-data-table-component';
+import { getAllSyllabus } from 'helper/api-data/syllabus';
+import SyllabusItemsModal from '../form/syllabus-item';
+import TableActionButtons from '../table-action-buttons/table-action-buttons';
+import SyllabusForm from '../form/syllabus-form';
 
 const SyllabusTable = ({ reload }: any) => {
   const router = useRouter();
@@ -37,7 +37,7 @@ const SyllabusTable = ({ reload }: any) => {
   };
 
   const handleCopy = (syllabus: any) => {
-    const copiedData = { ...syllabus, id: "" };
+    const copiedData = { ...syllabus, id: '' };
     setSelectedData(copiedData);
     setIsCopyMode(true);
     setIsOpenDetail(true);
@@ -57,14 +57,14 @@ const SyllabusTable = ({ reload }: any) => {
     error,
     isLoading,
   } = useSWR([`/syllabus/get-all`, page, rowPerPage], () =>
-    getAllSyllabus(page, rowPerPage),
+    getAllSyllabus(page, rowPerPage)
   );
 
   if (!syllabus?.data) return null;
 
   const columns = [
     {
-      name: "Actions",
+      name: 'Actions',
       cell: (row: any) => (
         <TableActionButtons
           onView={() => toggle(row)}
@@ -72,30 +72,30 @@ const SyllabusTable = ({ reload }: any) => {
           onCopy={() => handleCopy(row)}
         />
       ),
-      minWidth: "200px",
+      minWidth: '200px',
       sortable: false,
       center: false,
     },
     {
-      name: "Syllabus Name",
+      name: 'Syllabus Name',
       selector: (row: any) => `${row.syllabus_name}`,
       sortable: true,
       center: false,
     },
     {
-      name: "Assig Percentage",
+      name: 'Assig Percentage',
       selector: (row: any) => `${row.percentages?.assig_percentage}%`,
       sortable: true,
       center: false,
     },
     {
-      name: "Test Percentage",
+      name: 'Test Percentage',
       selector: (row: any) => `${row.percentages?.test_percentage}%`,
       sortable: true,
       center: false,
     },
     {
-      name: "Exam Percentage",
+      name: 'Exam Percentage',
       selector: (row: any) => `${row.percentages?.exam_percentage}%`,
       sortable: true,
       center: false,
@@ -103,16 +103,16 @@ const SyllabusTable = ({ reload }: any) => {
   ];
 
   return (
-    <div className="table-responsive syllabus-table">
+    <div className='table-responsive syllabus-table'>
       <DataTable
         columns={columns}
-        data={syllabus.data}
+        data={syllabus.data?.results}
         progressPending={isLoading}
         paginationDefaultPage={page ?? 1}
         paginationPerPage={rowPerPage ?? 10}
         pagination
         paginationServer
-        paginationTotalRows={syllabus.totalCount}
+        paginationTotalRows={syllabus?.data?.totalCount}
         onChangePage={(page) => {
           router.push({
             pathname: router.pathname,
