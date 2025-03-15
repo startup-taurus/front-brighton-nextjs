@@ -3,3 +3,4 @@
 /.idea
 next.config.js
 build
+.DS_Store
