@@ -254,7 +254,8 @@ const StudentsRegistrationForm = () => {
                 </Col>
                 <Col xs={12}>
                   <Label for="emergency_contact_name">
-                    Emergency Contact Name {values.age_category === "kids" && <span className="required-input" />}
+                    Emergency Contact Name  
+                    {values.age_category === "kids" && <span className="required-input" />}
                   </Label>
                   <Field
                     id="emergency_contact_name"
@@ -266,7 +267,8 @@ const StudentsRegistrationForm = () => {
                 </Col>
                 <Col xs={12}>
                   <Label for="emergency_contact_phone">
-                    Emergency Contact Phone {values.age_category === "kids" && <span className="required-input" />}
+                    Emergency Contact Phone 
+                    {values.age_category === "kids" && <span className="required-input" />}
                   </Label>
                   <Field
                     id="emergency_contact_phone"
@@ -278,7 +280,8 @@ const StudentsRegistrationForm = () => {
                 </Col>
                 <Col xs={12}>
                   <Label for="emergency_contact_relationship">
-                    Emergency Contact Relationship {values.age_category === "kids" && <span className="required-input" />}
+                    Emergency Contact Relationship 
+                    {values.age_category === "kids" && <span className="required-input" />}
                   </Label>
                   <Field
                     id="emergency_contact_relationship"
