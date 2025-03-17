@@ -1,17 +1,17 @@
-import { deleteFetcher, getFetcher, postFetcher, putFetcher } from "../api";
+import { deleteFetcher, getFetcher, postFetcher, putFetcher } from '../api';
 export const getAllRegisteredStudents = (
   page: number,
   limit: number,
-  filters?: string,
+  filters?: string
 ) => {
   return getFetcher(
-    `/registered-student/get-all?page=${page}&limit=${limit}${filters ? `&${filters}` : ""}`,
-    false,
+    `/registered-student/get-all?page=${page}&limit=${limit}${filters ? `&${filters}` : ''}`,
+    false
   );
 };
 
 export const createRegisteredStudent = (data: any) => {
-  return postFetcher("/registered-student/create", data);
+  return postFetcher('/registered-student/create', data);
 };
 
 export const updateRegisteredStudent = (studentId: number, data: any) => {
