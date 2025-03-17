@@ -1,11 +1,11 @@
 import { deleteFetcher, getFetcher, postFetcher, putFetcher } from '../api';
 export const getAllRegisteredStudents = (
   page: number,
-  rowPerPage: number,
+  limit: number,
   filters?: string
 ) => {
   return getFetcher(
-    `/registered-student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}`,
+    `/registered-student/get-all?page=${page}&limit=${limit}${filters ? `&${filters}` : ''}`,
     false
   );
 };
