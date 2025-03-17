@@ -40,6 +40,35 @@ const StudentsRegistrationForm = () => {
     email: Yup.string().required("The email is required"),
     address: Yup.string().required("The address is required"),
     age_category: Yup.string().required("The age category is required"),
+    emergency_contact_name: Yup.string().when("age_category", {
+      is: "kids",
+      then: () => Yup.string().required("Emergency contact name is required for kids"),
+      otherwise: () => Yup.string(),
+    }),
+    emergency_contact_phone: Yup.string().when("age_category", {
+      is: "kids",
+      then: () => Yup.string()
+        .required("Emergency contact phone is required for kids")
+        .test(
+          "different-phone",
+          "Emergency contact phone must be different from your phone number",
+          function(value) {
+            return !value || this.parent.phone_number !== value;
+          }
+        ),
+      otherwise: () => Yup.string().test(
+        "different-phone",
+        "Emergency contact phone must be different from your phone number",
+        function(value) {
+          return !value || this.parent.phone_number !== value;
+        }
+      ),
+    }),
+    emergency_contact_relationship: Yup.string().when("age_category", {
+      is: "kids",
+      then: () => Yup.string().required("Emergency contact relationship is required for kids"),
+      otherwise: () => Yup.string(),
+    }),
     level: Yup.string().required("The level is required"),
     schedule: Yup.string().required("The schedule is required"),
     same_billing: Yup.string().required("The billing is required"),
@@ -69,6 +98,9 @@ const StudentsRegistrationForm = () => {
     email: "",
     address: "",
     age_category: "",
+    emergency_contact_name: "",
+    emergency_contact_phone: "",
+    emergency_contact_relationship: "",
     level: "",
     schedule: "",
     same_billing: "",
@@ -221,6 +253,45 @@ const StudentsRegistrationForm = () => {
                   <ErrorMessage name="address" component={FormFeedback} />
                 </Col>
                 <Col xs={12}>
+                  <Label for="emergency_contact_name">
+                    Emergency Contact Name {values.age_category === "kids" && <span className="required-input" />}
+                  </Label>
+                  <Field
+                    id="emergency_contact_name"
+                    name="emergency_contact_name"
+                    invalid={touched.emergency_contact_name && !!errors.emergency_contact_name}
+                    as={Input}
+                  />
+                  <ErrorMessage name="emergency_contact_name" component={FormFeedback} />
+                </Col>
+                <Col xs={12}>
+                  <Label for="emergency_contact_phone">
+                    Emergency Contact Phone {values.age_category === "kids" && <span className="required-input" />}
+                  </Label>
+                  <Field
+                    id="emergency_contact_phone"
+                    name="emergency_contact_phone"
+                    invalid={touched.emergency_contact_phone && !!errors.emergency_contact_phone}
+                    as={Input}
+                  />
+                  <ErrorMessage name="emergency_contact_phone" component={FormFeedback} />
+                </Col>
+                <Col xs={12}>
+                  <Label for="emergency_contact_relationship">
+                    Emergency Contact Relationship {values.age_category === "kids" && <span className="required-input" />}
+                  </Label>
+                  <Field
+                    id="emergency_contact_relationship"
+                    name="emergency_contact_relationship"
+                    invalid={touched.emergency_contact_relationship && !!errors.emergency_contact_relationship}
+                    as={Input}
+                  />
+                  <ErrorMessage name="emergency_contact_relationship" component={FormFeedback} />
+                </Col>
+                <Col xs={12}>
+                  <Label>
+                    Age Category
+                  </Label>
                   <FormGroup check className="radio radio-primary">
                     <Field
                       className="form-check-input"
