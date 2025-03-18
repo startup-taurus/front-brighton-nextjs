@@ -7,7 +7,7 @@ import {
 } from 'reactstrap';
 import { useLanguage } from '../context/LanguageContext';
 
-const LanguageToggle = ({ onChangeLanguage }: any) => {
+const LanguageToggle = ({ onChangeLanguage }: { onChangeLanguage: () => void }) => {
   const { language, setLanguage } = useLanguage();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement | null>(null);
@@ -25,12 +25,12 @@ const LanguageToggle = ({ onChangeLanguage }: any) => {
     es: 'es',
   };
 
-  const handleChangeLanguage = (language: string) => {
-    console.log(language);
-
-    setLanguage(language);
+ const handleChangeLanguage = (language: string) => {
+  setLanguage(language);
+  setTimeout(() => {
     onChangeLanguage();
-  };
+  }, 10);
+};
 
   return (
     <div className="language-toggle d-flex justify-content-end mb-3">

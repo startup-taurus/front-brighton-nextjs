@@ -1,5 +1,12 @@
 import React, { MutableRefObject, useRef, useState } from 'react';
-import { ErrorMessage, Field, Form, Formik } from 'formik';
+import {
+  ErrorMessage,
+  Field,
+  Form,
+  Formik,
+  FormikProps,
+  FormikHelpers,
+} from 'formik';
 import { Button, Col, FormFeedback, FormGroup, Input, Label } from 'reactstrap';
 
 import * as Yup from 'yup';
@@ -134,7 +141,12 @@ const RegistrationFormContent = () => {
     isAcceptedTermsAndCondition: '',
   };
 
-  const onSubmit = (body: any, { setSubmitting }: any) => {
+  type FormValues = typeof initialValues;
+
+  const onSubmit = (
+    body: FormValues,
+    { setSubmitting }: FormikHelpers<FormValues>
+  ) => {
     setSubmitting(true);
     createRegisteredStudent(body)
       .then((response) => {
@@ -147,12 +159,14 @@ const RegistrationFormContent = () => {
       });
   };
 
-  const formRef = useRef(null);
+  const formRef = useRef<FormikProps<typeof initialValues>>(null);
 
-  const onChangeLanguage = (ref: MutableRefObject<any>) => {
-    console.log(ref?.current);
-
-    if (ref?.current) ref.current.validateForm();
+  const onChangeLanguage = (
+    ref: MutableRefObject<FormikProps<typeof initialValues> | null>
+  ) => {
+    if (ref.current) {
+      ref.current.validateForm();
+    }
   };
 
   return (
