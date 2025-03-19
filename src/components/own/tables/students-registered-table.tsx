@@ -39,9 +39,9 @@ const StudentsRegisteredTable = ({
       status: 'active',
       bookGiven: false,
       pendingPayments: false,
-      emergency_contact_name: '',
-      emergency_contact_phone: '',
-      emergency_contact_relationship: '',
+      emergency_contact_name: data?.emergency_contact_name || '',
+      emergency_contact_phone: data?.emergency_contact_phone || '',
+      emergency_contact_relationship: data?.emergency_contact_relationship || '',
       promotion: 'Page',
       observations: '',
     });
@@ -132,6 +132,24 @@ const StudentsRegisteredTable = ({
     {
       name: 'Level',
       selector: (row: any) => `${row.level ?? ''}`,
+      sortable: true,
+      center: false,
+    },
+    {
+      name: 'emergency contact name',
+      selector: (row: any) => `${row.emergency_contact_name?? ''}`,
+      sortable: true,
+      center: false,
+    },
+    {
+      name: 'emergency contact phone',
+      selector: (row: any) => `${row.emergency_contact_phone?? ''}`,
+      sortable: true,
+      center: false,
+    },
+    {
+      name: 'emergency contact relationship',
+      selector: (row: any) => `${row.emergency_contact_relationship?? ''}`,
       sortable: true,
       center: false,
     },

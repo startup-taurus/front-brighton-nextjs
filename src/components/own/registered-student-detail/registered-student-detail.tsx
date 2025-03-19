@@ -83,6 +83,24 @@ const RegisteredStudentDetail = ({ data, isOpen, toggle }: any) => {
                   {data.where_hear_about_us}
                 </Col>
               )}
+              {!!data.emergency_contact_name && (
+                <Col xs={12} sm={6} md={6} className="mb-3">
+                  <strong>Emergency Contact Name:</strong> &nbsp;{" "}
+                  {data.emergency_contact_name}
+                </Col>
+              )}
+              {!!data.emergency_contact_phone && (
+                <Col xs={12} sm={6} md={6} className="mb-3">
+                  <strong>Emergency Contact Phone:</strong> &nbsp;{" "}
+                  {data.emergency_contact_phone}
+                </Col>
+              )}
+              {!!data.emergency_contact_relationship && (
+                <Col xs={12} sm={6} md={6} className="mb-3">
+                  <strong>Emergency Contact Relationship:</strong> &nbsp;{" "}
+                  {data.emergency_contact_relationship}
+                </Col>
+              )}
             </Row>
           </div>
         </div>
