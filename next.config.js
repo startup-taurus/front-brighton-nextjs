@@ -1,7 +1,7 @@
 const nextConfig = {
   distDir: 'build',
   env: {
-    // API_URL: 'http://localhost:3002/v1/api',
+    // API_URL: 'http://192.168.1.10:3002/v1/api',
     API_URL: 'https://api-sistema.bebrighton.net/v1/api',
     FILE_URL: 'https://api-sistema.bebrighton.net',
   },

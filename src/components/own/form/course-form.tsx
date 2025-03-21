@@ -10,9 +10,10 @@ import {
   ModalBody,
   ModalHeader,
 } from 'reactstrap';
+import LoadingButton from '../common/LoadingButton';
 import useSWR from 'swr';
 import Select from 'react-select';
-import { createCourse, updateCourse } from 'helper/api-data/course'; // Función para crear curso
+import { createCourse, updateCourse } from 'helper/api-data/course';
 import { getActiveProfessors } from 'helper/api-data/professor';
 import { getAllSyllabus } from 'helper/api-data/syllabus';
 const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
@@ -21,9 +22,11 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
   const page = 1;
   const [searchTerm, setSearchTerm] = useState('');
   const [searchTermSyllabus, setSearchTermSyllabus] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
   const save = async (data: any) => {
     try {
+      setIsLoading(true);
       const formattedSchedule = formatSchedule(data.schedules);
       const payload = { ...data, schedule: formattedSchedule };
       const response = await createCourse(payload);
@@ -32,11 +35,14 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
       }
     } catch (error) {
       console.error('Error al crear curso:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const update = async (data: any) => {
     try {
+      setIsLoading(true);
       const formattedSchedule = formatSchedule(data.schedules);
       const payload = { ...data, schedule: formattedSchedule };
       const response = await updateCourse(data.id, payload);
@@ -45,6 +51,8 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
       }
     } catch (error) {
       console.error('Error al actualizar usuario:', error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -85,7 +93,11 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
     : [];
 
   return (
-    <Modal isOpen={isOpen} toggle={toggle} size='lg'>
+    <Modal
+      isOpen={isOpen}
+      toggle={toggle}
+      size='lg'
+    >
       <ModalHeader toggle={toggle}>
         {data ? 'Edit Course' : 'Add New Course'}
       </ModalHeader>
@@ -136,7 +148,8 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
           onSubmit={(info) => (data ? update(info) : save(info))}
         >
           {(props) => {
-            const { errors, handleSubmit, isSubmitting, setFieldValue } = props;
+            const { errors, handleSubmit, isSubmitting, setFieldValue, dirty } =
+              props;
             return (
               <form
                 noValidate
@@ -146,39 +159,83 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
               >
                 <Col xs={6}>
                   <Label for='course_name'>Course Name</Label>
-                  <Field name='course_name' as={Input} />
-                  <ErrorMessage name='course_name' component={FormFeedback} />
+                  <Field
+                    name='course_name'
+                    as={Input}
+                  />
+                  <ErrorMessage
+                    name='course_name'
+                    component={FormFeedback}
+                  />
                 </Col>
                 <Col xs={6}>
                   <Label for='course_number'>Course Number</Label>
-                  <Field name='course_number' as={Input} />
-                  <ErrorMessage name='course_number' component={FormFeedback} />
+                  <Field
+                    name='course_number'
+                    as={Input}
+                  />
+                  <ErrorMessage
+                    name='course_number'
+                    component={FormFeedback}
+                  />
                 </Col>
                 <Col xs={6}>
                   <Label for='start_date'>Start Date</Label>
-                  <Field name='start_date' as={Input} type='date' />
-                  <ErrorMessage name='start_date' component={FormFeedback} />
+                  <Field
+                    name='start_date'
+                    as={Input}
+                    type='date'
+                  />
+                  <ErrorMessage
+                    name='start_date'
+                    component={FormFeedback}
+                  />
                 </Col>
                 <Col xs={12}>
                   <Label for='comment'>Comment</Label>
-                  <Field name='comment' as={Input} type='textarea' />
-                  <ErrorMessage name='comment' component={FormFeedback} />
+                  <Field
+                    name='comment'
+                    as={Input}
+                    type='textarea'
+                  />
+                  <ErrorMessage
+                    name='comment'
+                    component={FormFeedback}
+                  />
                 </Col>
                 <Col xs={4}>
                   <Label for='status'>Status</Label>
-                  <Field name='status' as={Input} type='select'>
-                    <option value='' disabled>
+                  <Field
+                    name='status'
+                    as={Input}
+                    type='select'
+                  >
+                    <option
+                      value=''
+                      disabled
+                    >
                       Select course status
                     </option>
                     <option value='active'>Active</option>
                     <option value='inactive'>Inactive</option>
                   </Field>
-                  <ErrorMessage name='status' component={FormFeedback} />
+                  <ErrorMessage
+                    name='status'
+                    component={FormFeedback}
+                  />
                 </Col>
                 <Col xs={4}>
                   <Label for='classroom'>Classroom</Label>
-                  <Field name='classroom' as={Input} type='select'>
-                    <option value='' selected disabled>
+                  <Field
+                    name='classroom'
+                    as={Input}
+                    type='select'
+                  >
+                    <option
+                      value=''
+                      selected
+                      disabled
+                    >
                       Select clasrroom
                     </option>
                     <option value='cambrige'>Cambrige</option>
@@ -186,18 +243,32 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                     <option value='brighton'>Brighton</option>
                     <option value='hardvard'>Hardvard</option>
                   </Field>
-                  <ErrorMessage name='classroom' component={FormFeedback} />
+                  <ErrorMessage
+                    name='classroom'
+                    component={FormFeedback}
+                  />
                 </Col>
                 <Col xs={4}>
                   <Label for='age_group'>Age Group</Label>
-                  <Field name='age_group' as={Input} type='select'>
-                    <option value='' selected disabled>
+                  <Field
+                    name='age_group'
+                    as={Input}
+                    type='select'
+                  >
+                    <option
+                      value=''
+                      selected
+                      disabled
+                    >
                       Select age group
                     </option>
                     <option value='adult'>Adult</option>
                     <option value='children'>Children</option>
                   </Field>
-                  <ErrorMessage name='age_group' component={FormFeedback} />
+                  <ErrorMessage
+                    name='age_group'
+                    component={FormFeedback}
+                  />
                 </Col>
                 <Col xs={6}>
                   <Label for='professor_id'>Professor</Label>
@@ -219,7 +290,10 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                       setSearchTerm(inputValue);
                     }}
                   />
-                  <ErrorMessage name='professor_id' component={FormFeedback} />
+                  <ErrorMessage
+                    name='professor_id'
+                    component={FormFeedback}
+                  />
                 </Col>
                 <Col xs={6}>
                   <Label for='hourly_rate'>Syllabus</Label>
@@ -237,11 +311,11 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                       ) || null
                     }
                     isSearchable
-                    // onInputChange={(inputValue) => {
-                    //   searchTermSyllabus(inputValue);
-                    // }}
                   />
-                  <ErrorMessage name='syllabus_id' component={FormFeedback} />
+                  <ErrorMessage
+                    name='syllabus_id'
+                    component={FormFeedback}
+                  />
                 </Col>
                 <Col xs={6}>
                   <Label for='course_type'>Course Type</Label>
@@ -251,10 +325,13 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                     as={Input}
                     type='select'
                     onChange={(e: any) => {
-                      props.setFieldValue('course_type', e.target.value); // Actualiza el valor en Formik
+                      props.setFieldValue('course_type', e.target.value);
                     }}
                   >
-                    <option value='' disabled>
+                    <option
+                      value=''
+                      disabled
+                    >
                       Select course type
                     </option>
                     <option value='online'>Online</option>
@@ -262,7 +339,10 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                     <option value='private'>Private</option>
                     <option value='private - online'>Private - Online</option>
                   </Field>
-                  <ErrorMessage name='course_type' component={FormFeedback} />
+                  <ErrorMessage
+                    name='course_type'
+                    component={FormFeedback}
+                  />
                 </Col>
                 <Col xs={6}>
                   <Label for='hourly_rate'>Hourly Rate</Label>
@@ -277,7 +357,10 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                       )
                     }
                   />
-                  <ErrorMessage name='hourly_rate' component={FormFeedback} />
+                  <ErrorMessage
+                    name='hourly_rate'
+                    component={FormFeedback}
+                  />
                 </Col>
                 <Col xs={12}>
                   <Label for='schedule'>Schedule</Label>
@@ -366,14 +449,25 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                   </FieldArray>
                 </Col>
 
-                <Col xs={12} className='d-flex justify-content-end mt-5'>
-                  <Button color='danger' onClick={toggle}>
+                <Col
+                  xs={12}
+                  className='d-flex justify-content-end mt-5'
+                >
+                  <Button
+                    color='danger'
+                    onClick={toggle}
+                  >
                     Close
                   </Button>
                   &nbsp; &nbsp;
-                  <Button color='primary' type='submit'>
-                    {data ? 'Update' : 'Save'}
-                  </Button>
+                  <LoadingButton
+                    color='primary'
+                    type='submit'
+                    isLoading={isLoading}
+                    disabled={data && !dirty}
+                    loadingText={data ? 'Updating...' : 'Saving...'}
+                    defaultText={data ? 'Update' : 'Save'}
+                  />
                 </Col>
               </form>
             );
