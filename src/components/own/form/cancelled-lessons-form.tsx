@@ -80,12 +80,16 @@ const CancelledLessonsForm = ({
   };
 
   return (
-    <Modal className="modal-dialog-centered" isOpen={isOpen} toggle={onClose}>
+    <Modal
+      className='modal-dialog-centered'
+      isOpen={isOpen}
+      toggle={onClose}
+    >
       <ModalHeader toggle={onClose}>
         {data ? 'Edit cancelled class' : 'Add cancelled class'}
       </ModalHeader>
       <ModalBody>
-        <div className="modal-toggle-wrapper">
+        <div className='modal-toggle-wrapper'>
           <Formik
             initialValues={data ? data : { cancel_reason: '', cancel_date: '' }}
             onSubmit={onSubmit}
@@ -94,40 +98,52 @@ const CancelledLessonsForm = ({
             {({ errors, handleSubmit, isSubmitting, touched }) => (
               <form
                 noValidate
-                autoComplete="off"
+                autoComplete='off'
                 onSubmit={handleSubmit}
                 className={`row g-3`}
               >
                 <Col xs={12}>
-                  <Label for="cancel_reason">Cancel Reason</Label>
+                  <Label for='cancel_reason'>Cancel Reason</Label>
                   <Field
-                    id="cancel_reason"
-                    name="cancel_reason"
+                    id='cancel_reason'
+                    name='cancel_reason'
                     invalid={touched.cancel_reason && !!errors.cancel_reason}
                     as={Input}
                   />
-                  <ErrorMessage name="cancel_reason" component={FormFeedback} />
+                  <ErrorMessage
+                    name='cancel_reason'
+                    component={FormFeedback}
+                  />
                 </Col>
                 <Col xs={12}>
-                  <Label for="cancel_date">Cancel Date</Label>
+                  <Label for='cancel_date'>Cancel Date</Label>
                   <Field
-                    id="cancel_date"
-                    name="cancel_date"
-                    type="date"
-                    placeholder="dd/mm/yyyy"
+                    id='cancel_date'
+                    name='cancel_date'
+                    type='date'
+                    placeholder='dd/mm/yyyy'
                     invalid={touched.cancel_date && !!errors.cancel_date}
                     as={Input}
                   />
-                  <ErrorMessage name="cancel_date" component={FormFeedback} />
+                  <ErrorMessage
+                    name='cancel_date'
+                    component={FormFeedback}
+                  />
                 </Col>
 
-                <Col xs={12} className="d-flex justify-content-center gap-2">
-                  <Button color="secondary" onClick={onClose}>
+                <Col
+                  xs={12}
+                  className='d-flex justify-content-center gap-2'
+                >
+                  <Button
+                    color='secondary'
+                    onClick={onClose}
+                  >
                     Close
                   </Button>
                   <LoadingButton
-                    color="primary"
-                    type="submit"
+                    color='primary'
+                    type='submit'
                     isLoading={isSubmitting}
                     loadingText={data ? 'Updating...' : 'Saving...'}
                     defaultText={data ? 'Edit' : 'Save'}

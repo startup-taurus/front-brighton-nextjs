@@ -2,37 +2,19 @@ import React from 'react';
 import { Button, Spinner, ButtonProps } from 'reactstrap';
 
 interface LoadingButtonProps extends Omit<ButtonProps, 'ref'> {
-  /**
-   * Whether the button is in loading state
-   */
   isLoading?: boolean;
-  /**
-   * Text to display when button is in loading state
-   */
+
   loadingText?: string;
-  /**
-   * Default text to display when button is not in loading state
-   */
+
   defaultText?: string;
-  /**
-   * Additional CSS class for the spinner
-   */
+
   spinnerClassName?: string;
-  /**
-   * Size of the spinner
-   */
+
   spinnerSize?: string;
-  /**
-   * Position of the spinner relative to the text
-   * 'start' - spinner appears before the text
-   * 'end' - spinner appears after the text
-   */
+
   spinnerPosition?: 'start' | 'end';
 }
 
-/**
- * LoadingButton component that shows a spinner when in loading state
- */
 const LoadingButton = React.forwardRef<HTMLButtonElement, LoadingButtonProps>(
   (
     {
@@ -48,7 +30,6 @@ const LoadingButton = React.forwardRef<HTMLButtonElement, LoadingButtonProps>(
     },
     ref
   ) => {
-    // If disabled is passed along with isLoading, we don't need to set disabled twice
     const isDisabled = isLoading || disabled;
 
     const renderContent = () => {
@@ -73,7 +54,11 @@ const LoadingButton = React.forwardRef<HTMLButtonElement, LoadingButtonProps>(
     };
 
     return (
-      <Button {...rest} disabled={isDisabled} innerRef={ref}>
+      <Button
+        {...rest}
+        disabled={isDisabled}
+        innerRef={ref}
+      >
         {renderContent()}
       </Button>
     );

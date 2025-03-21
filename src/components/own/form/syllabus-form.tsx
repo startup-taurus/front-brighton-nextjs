@@ -57,7 +57,11 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
   };
 
   return (
-    <Modal isOpen={isOpen} toggle={toggle} size="lg">
+    <Modal
+      isOpen={isOpen}
+      toggle={toggle}
+      size='lg'
+    >
       <ModalHeader toggle={toggle}>
         {isCopy
           ? 'Duplicate Syllabus'
@@ -125,7 +129,10 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
             } = props;
 
             const renderArrayField = (name: string, label: string) => (
-              <Col xs={12} className="mt-3">
+              <Col
+                xs={12}
+                className='mt-3'
+              >
                 <Label>{label}</Label>
                 <FieldArray
                   name={name}
@@ -137,7 +144,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
                             <Col
                               key={index}
                               xs={6}
-                              className="d-flex align-items-center mb-2"
+                              className='d-flex align-items-center mb-2'
                             >
                               <Input
                                 value={item}
@@ -148,11 +155,11 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
                                   )
                                 }
                                 placeholder={`Item ${index + 1}`}
-                                className="me-2"
+                                className='me-2'
                               />
                               <Button
-                                type="button"
-                                color="danger"
+                                type='button'
+                                color='danger'
                                 onClick={() => arrayHelpers.remove(index)}
                               >
                                 <FaTrash />
@@ -162,8 +169,8 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
                         )}
                       </Row>
                       <Button
-                        type="button"
-                        color="primary"
+                        type='button'
+                        color='primary'
                         onClick={() => arrayHelpers.push('')}
                       >
                         Add Item
@@ -180,18 +187,24 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
               values: any,
               setFieldValue: (field: string, value: any) => void
             ) => (
-              <Col xs={12} className="mt-3">
+              <Col
+                xs={12}
+                className='mt-3'
+              >
                 <Label>{label}</Label>
                 <FieldArray
                   name={name}
                   render={(arrayHelpers) => (
                     <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
                       {values[name].map((percentage: any, index: number) => (
-                        <Row key={index} className="mb-2">
+                        <Row
+                          key={index}
+                          className='mb-2'
+                        >
                           <Col md={4}>
                             <Label>Name</Label>
                             <Input
-                              type="text"
+                              type='text'
                               value={percentage.name}
                               onChange={(e) =>
                                 setFieldValue(
@@ -204,7 +217,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
                           <Col md={3}>
                             <Label>Min %</Label>
                             <Input
-                              type="number"
+                              type='number'
                               value={percentage.min}
                               onChange={(e) =>
                                 setFieldValue(
@@ -217,7 +230,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
                           <Col md={3}>
                             <Label>Max %</Label>
                             <Input
-                              type="number"
+                              type='number'
                               value={percentage.max}
                               onChange={(e) =>
                                 setFieldValue(
@@ -227,10 +240,13 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
                               }
                             />
                           </Col>
-                          <Col md={2} className="d-flex align-items-end">
+                          <Col
+                            md={2}
+                            className='d-flex align-items-end'
+                          >
                             <Button
-                              type="button"
-                              color="danger"
+                              type='button'
+                              color='danger'
                               onClick={() => arrayHelpers.remove(index)}
                             >
                               <FaTrash />
@@ -239,8 +255,8 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
                         </Row>
                       ))}
                       <Button
-                        type="button"
-                        color="primary"
+                        type='button'
+                        color='primary'
                         onClick={() =>
                           arrayHelpers.push({
                             name: '',
@@ -260,43 +276,58 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
             return (
               <form
                 noValidate
-                autoComplete="off"
+                autoComplete='off'
                 onSubmit={handleSubmit}
                 className={`row g-3`}
               >
                 <Col xs={12}>
-                  <Label for="syllabus_name">Syllabus Name</Label>
+                  <Label for='syllabus_name'>Syllabus Name</Label>
                   <Field
-                    name="syllabus_name"
+                    name='syllabus_name'
                     as={Input}
                     invalid={touched.syllabus_name && !!errors.syllabus_name}
                   />
-                  <ErrorMessage name="syllabus_name" component={FormFeedback} />
+                  <ErrorMessage
+                    name='syllabus_name'
+                    component={FormFeedback}
+                  />
                 </Col>
 
                 {renderArrayField('items', 'Items')}
 
                 <Col md={4}>
-                  <Label for="assig_percentage">Assignment Percentage %</Label>
-                  <Field name="assig_percentage" as={Input} type="number" />
+                  <Label for='assig_percentage'>Assignment Percentage %</Label>
+                  <Field
+                    name='assig_percentage'
+                    as={Input}
+                    type='number'
+                  />
                   <ErrorMessage
-                    name="assig_percentage"
+                    name='assig_percentage'
                     component={FormFeedback}
                   />
                 </Col>
                 <Col md={4}>
-                  <Label for="test_percentage">Test Percentage %</Label>
-                  <Field name="test_percentage" as={Input} type="number" />
+                  <Label for='test_percentage'>Test Percentage %</Label>
+                  <Field
+                    name='test_percentage'
+                    as={Input}
+                    type='number'
+                  />
                   <ErrorMessage
-                    name="test_percentage"
+                    name='test_percentage'
                     component={FormFeedback}
                   />
                 </Col>
                 <Col md={4}>
-                  <Label for="exam_percentage">Exam Percentage %</Label>
-                  <Field name="exam_percentage" as={Input} type="number" />
+                  <Label for='exam_percentage'>Exam Percentage %</Label>
+                  <Field
+                    name='exam_percentage'
+                    as={Input}
+                    type='number'
+                  />
                   <ErrorMessage
-                    name="exam_percentage"
+                    name='exam_percentage'
                     component={FormFeedback}
                   />
                 </Col>
@@ -314,14 +345,20 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
                   setFieldValue
                 )}
 
-                <Col xs={12} className="d-flex justify-content-end mt-5">
-                  <Button color="cancel" onClick={toggle}>
+                <Col
+                  xs={12}
+                  className='d-flex justify-content-end mt-5'
+                >
+                  <Button
+                    color='cancel'
+                    onClick={toggle}
+                  >
                     Close
                   </Button>
                   &nbsp;&nbsp;
                   <LoadingButton
-                    color="primary"
-                    type="submit"
+                    color='primary'
+                    type='submit'
                     isLoading={isSubmitting}
                     loadingText={
                       isCopy
@@ -333,7 +370,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
                     defaultText={
                       isCopy ? 'Duplicate' : data ? 'Update' : 'Save'
                     }
-                    disabled={!isCopy &&   !dirty}
+                    disabled={!isCopy && !dirty}
                   />
                 </Col>
               </form>

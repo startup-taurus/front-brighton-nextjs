@@ -127,15 +127,25 @@ const StudentForm = ({
       }))
     : [];
 
-  // Function to cancel course selection
   const handleCancelCourseSelection = () => {
     setShowWarning(false);
     setSelectedCourseId('');
   };
 
+  const handleContinueCourseSelection = () => {
+    setShowWarning(false);
+    if (formikSetFieldValueRef && selectedCourseId) {
+      formikSetFieldValueRef(selectedCourseId);
+    }
+  };
+
   return (
     <>
-      <Modal isOpen={isOpen} toggle={toggle} size="lg">
+      <Modal
+        isOpen={isOpen}
+        toggle={toggle}
+        size='lg'
+      >
         <ModalHeader toggle={toggle}>
           {isTransfer
             ? 'Transfer Student'
@@ -195,18 +205,21 @@ const StudentForm = ({
               return (
                 <form
                   noValidate
-                  autoComplete="off"
+                  autoComplete='off'
                   onSubmit={handleSubmit}
                   className={`row g-3`}
                 >
                   <Col xs={6}>
-                    <Label for="name">Name</Label>
+                    <Label for='name'>Name</Label>
                     <Field
-                      name="name"
+                      name='name'
                       as={Input}
                       invalid={touched.name && !!errors.name}
                     />
-                    <ErrorMessage name="name" component={FormFeedback} />
+                    <ErrorMessage
+                      name='name'
+                      component={FormFeedback}
+                    />
                   </Col>
                   {/* <Col xs={6}>
                   <Label for="username">Username</Label>
@@ -214,13 +227,16 @@ const StudentForm = ({
                   <ErrorMessage name="username" component={FormFeedback} />
                 </Col> */}
                   <Col xs={6}>
-                    <Label for="email">Email</Label>
+                    <Label for='email'>Email</Label>
                     <Field
-                      name="email"
+                      name='email'
                       as={Input}
                       invalid={touched.email && !!errors.email}
                     />
-                    <ErrorMessage name="email" component={FormFeedback} />
+                    <ErrorMessage
+                      name='email'
+                      component={FormFeedback}
+                    />
                   </Col>
                   {/* <Col xs={6}>
                   <Label for="password">Password</Label>
@@ -228,35 +244,36 @@ const StudentForm = ({
                   <ErrorMessage name="password" component={FormFeedback} />
                 </Col> */}
                   <Col xs={6}>
-                    <Label for="cedula">Cédula</Label>
+                    <Label for='cedula'>Cédula</Label>
                     <Field
-                      name="cedula"
+                      name='cedula'
                       as={Input}
                       invalid={touched.cedula && !!errors.cedula}
                     />
-                    <ErrorMessage name="cedula" component={FormFeedback} />
+                    <ErrorMessage
+                      name='cedula'
+                      component={FormFeedback}
+                    />
                   </Col>
 
                   <Col xs={6}>
-                    <Label for="courseId">Course</Label>
-                    <Field name="courseId">
+                    <Label for='courseId'>Course</Label>
+                    <Field name='courseId'>
                       {({ field, form }: any) => (
                         <Select
                           {...field}
-                          id="courseId"
+                          id='courseId'
                           options={courseOptions}
                           onChange={(selectedOption: any) => {
                             const courseId = selectedOption
                               ? selectedOption.value
                               : '';
 
-                            // Save reference to setFieldValue for later use in the confirmation modal
                             setFormikSetFieldValueRef(
                               () => (id: string) =>
                                 setFieldValue('courseId', id)
                             );
 
-                            // Check if the selected course is in the previous courses list
                             if (
                               courseId &&
                               previousCourses.some(
@@ -275,7 +292,7 @@ const StudentForm = ({
                                 option.value === props.values.courseId
                             ) || null
                           }
-                          placeholder="Select course"
+                          placeholder='Select course'
                           isSearchable
                           onInputChange={(inputValue) => {
                             setSearchTerm(inputValue);
@@ -285,7 +302,7 @@ const StudentForm = ({
                     </Field>
 
                     {touched.courseId && !!errors.courseId && (
-                      <div className="invalid-input">
+                      <div className='invalid-input'>
                         <>
                           {
                             // @ts-ignore
@@ -295,98 +312,116 @@ const StudentForm = ({
                       </div>
                     )}
 
-                    <ErrorMessage name="courseId" component={FormFeedback} />
+                    <ErrorMessage
+                      name='courseId'
+                      component={FormFeedback}
+                    />
                   </Col>
                   <Col xs={6}>
-                    <Label for="level">Level</Label>
+                    <Label for='level'>Level</Label>
                     <Field
-                      name="level"
+                      name='level'
                       as={Input}
                       invalid={touched.level && !!errors.level}
                     />
-                    <ErrorMessage name="level" component={FormFeedback} />
-                  </Col>
-                  <Col xs={6}>
-                    <Label for="status">Status</Label>
-                    <Field
-                      name="status"
-                      as={Input}
-                      type="select"
-                      id="studentFilter"
-                      invalid={touched.status && !!errors.status}
-                    >
-                      <option value="" disabled>
-                        Select status of student
-                      </option>
-                      <option value="active">Active</option>
-                      <option value="inactive">Inactive</option>
-                      <option value="finalized">Finalized</option>
-                    </Field>
-                    <ErrorMessage name="status" component={FormFeedback} />
-                  </Col>
-                  <Col xs={6}>
-                    <Label for="age_category">Age Category</Label>
-                    <Field
-                      name="age_category"
-                      as={Input}
-                      type="select"
-                      id="age_category"
-                      invalid={touched.age_category && !!errors.age_category}
-                    >
-                      <option value="kids">Kids</option>
-                      <option value="adults">Adults</option>
-                    </Field>
                     <ErrorMessage
-                      name="age_category"
+                      name='level'
                       component={FormFeedback}
                     />
                   </Col>
                   <Col xs={6}>
-                    <Label for="birth_date">Birth Date</Label>
+                    <Label for='status'>Status</Label>
                     <Field
-                      type="date"
-                      name="birth_date"
+                      name='status'
+                      as={Input}
+                      type='select'
+                      id='studentFilter'
+                      invalid={touched.status && !!errors.status}
+                    >
+                      <option
+                        value=''
+                        disabled
+                      >
+                        Select status of student
+                      </option>
+                      <option value='active'>Active</option>
+                      <option value='inactive'>Inactive</option>
+                      <option value='finalized'>Finalized</option>
+                    </Field>
+                    <ErrorMessage
+                      name='status'
+                      component={FormFeedback}
+                    />
+                  </Col>
+                  <Col xs={6}>
+                    <Label for='age_category'>Age Category</Label>
+                    <Field
+                      name='age_category'
+                      as={Input}
+                      type='select'
+                      id='age_category'
+                      invalid={touched.age_category && !!errors.age_category}
+                    >
+                      <option value='kids'>Kids</option>
+                      <option value='adults'>Adults</option>
+                    </Field>
+                    <ErrorMessage
+                      name='age_category'
+                      component={FormFeedback}
+                    />
+                  </Col>
+                  <Col xs={6}>
+                    <Label for='birth_date'>Birth Date</Label>
+                    <Field
+                      type='date'
+                      name='birth_date'
                       as={Input}
                       invalid={touched.birth_date && !!errors.birth_date}
                     />
-                    <ErrorMessage name="birth_date" component={FormFeedback} />
-                  </Col>
-                  <Col xs={6}>
-                    <Label for="book_given">Book Given</Label>
-                    <Field
-                      name="book_given"
-                      as={Input}
-                      type="select"
-                      id="book_given"
-                      invalid={touched.book_given && !!errors.book_given}
-                    >
-                      <option value="true">Yes</option>
-                      <option value="false">No</option>
-                    </Field>
-                    <ErrorMessage name="book_given" component={FormFeedback} />
-                  </Col>
-                  <Col xs={6}>
-                    <Label for="pendingPayments">Pending Payments</Label>
-                    <Field
-                      name="pendingPayments"
-                      as={Input}
-                      type="select"
-                      id="pendingPayments"
-                    >
-                      <option value="true">Yes</option>
-                      <option value="false">No</option>
-                    </Field>
                     <ErrorMessage
-                      name="pendingPayments"
+                      name='birth_date'
                       component={FormFeedback}
                     />
                   </Col>
                   <Col xs={6}>
-                    <Label for="emergency_contact_name">
+                    <Label for='book_given'>Book Given</Label>
+                    <Field
+                      name='book_given'
+                      as={Input}
+                      type='select'
+                      id='book_given'
+                      invalid={touched.book_given && !!errors.book_given}
+                    >
+                      <option value='true'>Yes</option>
+                      <option value='false'>No</option>
+                    </Field>
+                    <ErrorMessage
+                      name='book_given'
+                      component={FormFeedback}
+                    />
+                  </Col>
+                  <Col xs={6}>
+                    <Label for='pendingPayments'>Pending Payments</Label>
+                    <Field
+                      name='pendingPayments'
+                      as={Input}
+                      type='select'
+                      id='pendingPayments'
+                    >
+                      <option value='true'>Yes</option>
+                      <option value='false'>No</option>
+                    </Field>
+                    <ErrorMessage
+                      name='pendingPayments'
+                      component={FormFeedback}
+                    />
+                  </Col>
+                  <Col xs={6}>
+                    <Label for='emergency_contact_name'>
                       Emergency Contact Name
                     </Label>
                     <Field
-                      name="emergency_contact_name"
+                      name='emergency_contact_name'
                       as={Input}
                       invalid={
                         touched.emergency_contact_name &&
@@ -394,16 +429,16 @@ const StudentForm = ({
                       }
                     />
                     <ErrorMessage
-                      name="emergency_contact_name"
+                      name='emergency_contact_name'
                       component={FormFeedback}
                     />
                   </Col>
                   <Col xs={6}>
-                    <Label for="emergency_contact_phone">
+                    <Label for='emergency_contact_phone'>
                       Emergency Contact Phone
                     </Label>
                     <Field
-                      name="emergency_contact_phone"
+                      name='emergency_contact_phone'
                       as={Input}
                       invalid={
                         touched.emergency_contact_phone &&
@@ -411,16 +446,16 @@ const StudentForm = ({
                       }
                     />
                     <ErrorMessage
-                      name="emergency_contact_phone"
+                      name='emergency_contact_phone'
                       component={FormFeedback}
                     />
                   </Col>
                   <Col xs={6}>
-                    <Label for="emergency_contact_relationship">
+                    <Label for='emergency_contact_relationship'>
                       Emergency Contact Relationship
                     </Label>
                     <Field
-                      name="emergency_contact_relationship"
+                      name='emergency_contact_relationship'
                       as={Input}
                       invalid={
                         touched.emergency_contact_relationship &&
@@ -428,32 +463,48 @@ const StudentForm = ({
                       }
                     />
                     <ErrorMessage
-                      name="emergency_contact_relationship"
+                      name='emergency_contact_relationship'
                       component={FormFeedback}
                     />
                   </Col>
                   <Col xs={6}>
-                    <Label for="promotion">Promotion</Label>
-                    <Field name="promotion" as={Input} />
-                    <ErrorMessage name="promotion" component={FormFeedback} />
-                  </Col>
-                  <Col xs={12}>
-                    <Label for="observations">Observations</Label>
-                    <Field name="observations" type="textarea" as={Input} />
+                    <Label for='promotion'>Promotion</Label>
+                    <Field
+                      name='promotion'
+                      as={Input}
+                    />
                     <ErrorMessage
-                      name="observations"
-                      id="observations"
+                      name='promotion'
                       component={FormFeedback}
                     />
                   </Col>
-                  <Col xs={12} className="d-flex justify-content-end mt-5">
-                    <Button color="cancel" onClick={toggle}>
+                  <Col xs={12}>
+                    <Label for='observations'>Observations</Label>
+                    <Field
+                      name='observations'
+                      type='textarea'
+                      as={Input}
+                    />
+                    <ErrorMessage
+                      name='observations'
+                      id='observations'
+                      component={FormFeedback}
+                    />
+                  </Col>
+                  <Col
+                    xs={12}
+                    className='d-flex justify-content-end mt-5'
+                  >
+                    <Button
+                      color='cancel'
+                      onClick={toggle}
+                    >
                       Close
                     </Button>
                     &nbsp; &nbsp;
                     <LoadingButton
-                      color="primary"
-                      type="submit"
+                      color='primary'
+                      type='submit'
                       isLoading={isLoading || isSubmitting}
                       loadingText={
                         isTransfer
@@ -476,25 +527,26 @@ const StudentForm = ({
       </Modal>
 
       {/* Warning Modal */}
-      <Modal isOpen={showWarning} toggle={handleCancelCourseSelection} centered>
+      <Modal
+        isOpen={showWarning}
+        toggle={handleCancelCourseSelection}
+        centered
+      >
         <ModalHeader toggle={handleCancelCourseSelection}>Warning</ModalHeader>
         <ModalBody>
           This student has previously belonged to this course. Do you want to
           continue with the assignment?
         </ModalBody>
         <ModalFooter>
-          <Button color="secondary" onClick={handleCancelCourseSelection}>
+          <Button
+            color='secondary'
+            onClick={handleCancelCourseSelection}
+          >
             Cancel
           </Button>
           <Button
-            color="primary"
-            onClick={() => {
-              setShowWarning(false);
-              // Use the saved reference to setFieldValue
-              if (formikSetFieldValueRef && selectedCourseId) {
-                formikSetFieldValueRef(selectedCourseId);
-              }
-            }}
+            color='primary'
+            onClick={handleContinueCourseSelection}
           >
             Continue
           </Button>

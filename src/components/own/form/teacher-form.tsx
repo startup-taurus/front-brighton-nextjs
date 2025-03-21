@@ -54,7 +54,11 @@ const TeacherForm = ({ data, isOpen, toggle }: any) => {
   };
 
   return (
-    <Modal isOpen={isOpen} toggle={toggle} size="lg">
+    <Modal
+      isOpen={isOpen}
+      toggle={toggle}
+      size='lg'
+    >
       <ModalHeader toggle={toggle}>
         {data ? 'Editar Profesor' : 'Add New Professor'}
       </ModalHeader>
@@ -108,33 +112,33 @@ const TeacherForm = ({ data, isOpen, toggle }: any) => {
             return (
               <form
                 noValidate
-                autoComplete="off"
+                autoComplete='off'
                 onSubmit={handleSubmit}
                 className={`row g-3`}
               >
                 <Col
                   xs={12}
-                  className="user-profile d-flex justify-content-center"
+                  className='user-profile d-flex justify-content-center'
                 >
-                  <div className="hovercard text-center card mt-2">
-                    <div className="card-header mt-4"></div>
-                    <div className="user-image">
-                      <div className="avatar">
+                  <div className='hovercard text-center card mt-2'>
+                    <div className='card-header mt-4'></div>
+                    <div className='user-image'>
+                      <div className='avatar'>
                         <img
-                          alt="User Avatar"
+                          alt='User Avatar'
                           src={imagePreview || `${ImgPath}/user/7.jpg`}
-                          className="step1 media"
+                          className='step1 media'
                         />
                       </div>
-                      <div className="icon-wrapper step2">
-                        <i className="icofont icofont-pencil-alt-5">
+                      <div className='icon-wrapper step2'>
+                        <i className='icofont icofont-pencil-alt-5'>
                           <input
-                            className="upload"
-                            type="file"
-                            name="image"
-                            id="image"
+                            className='upload'
+                            type='file'
+                            name='image'
+                            id='image'
                             onChange={handleImageChange}
-                            accept="image/*"
+                            accept='image/*'
                             style={{
                               left: 0,
                               opacity: 0,
@@ -148,65 +152,131 @@ const TeacherForm = ({ data, isOpen, toggle }: any) => {
                   </div>
                 </Col>
                 <Col xs={6}>
-                  <Label for="name">Name</Label>
-                  <Field name="name" as={Input} />
-                  <ErrorMessage name="name" component={FormFeedback} />
+                  <Label for='name'>Name</Label>
+                  <Field
+                    name='name'
+                    as={Input}
+                  />
+                  <ErrorMessage
+                    name='name'
+                    component={FormFeedback}
+                  />
                 </Col>
                 <Col xs={6}>
-                  <Label for="username">Username</Label>
-                  <Field name="username" as={Input} />
-                  <ErrorMessage name="username" component={FormFeedback} />
+                  <Label for='username'>Username</Label>
+                  <Field
+                    name='username'
+                    as={Input}
+                  />
+                  <ErrorMessage
+                    name='username'
+                    component={FormFeedback}
+                  />
                 </Col>
                 <Col xs={6}>
-                  <Label for="email">Email</Label>
-                  <Field name="email" as={Input} />
-                  <ErrorMessage name="email" component={FormFeedback} />
+                  <Label for='email'>Email</Label>
+                  <Field
+                    name='email'
+                    as={Input}
+                  />
+                  <ErrorMessage
+                    name='email'
+                    component={FormFeedback}
+                  />
                 </Col>
                 <Col xs={6}>
-                  <Label for="password">Password</Label>
-                  <Field name="password" as={Input} type="password" />
-                  <ErrorMessage name="password" component={FormFeedback} />
+                  <Label for='password'>Password</Label>
+                  <Field
+                    name='password'
+                    as={Input}
+                    type='password'
+                  />
+                  <ErrorMessage
+                    name='password'
+                    component={FormFeedback}
+                  />
                 </Col>
                 <Col xs={6}>
-                  <Label for="status">Status</Label>
-                  <Field name="status" as={Input} type="select">
-                    <option value="" disabled>
+                  <Label for='status'>Status</Label>
+                  <Field
+                    name='status'
+                    as={Input}
+                    type='select'
+                  >
+                    <option
+                      value=''
+                      disabled
+                    >
                       Select status of professor
                     </option>
-                    <option value="active">Active</option>
-                    <option value="inactive">Inactive</option>
+                    <option value='active'>Active</option>
+                    <option value='inactive'>Inactive</option>
                   </Field>
-                  <ErrorMessage name="status" component={FormFeedback} />
+                  <ErrorMessage
+                    name='status'
+                    component={FormFeedback}
+                  />
                 </Col>
                 <Col xs={6}>
-                  <Label for="cedula">Cédula</Label>
-                  <Field name="cedula" as={Input} />
-                  <ErrorMessage name="cedula" component={FormFeedback} />
+                  <Label for='cedula'>Cédula</Label>
+                  <Field
+                    name='cedula'
+                    as={Input}
+                  />
+                  <ErrorMessage
+                    name='cedula'
+                    component={FormFeedback}
+                  />
                 </Col>
                 <Col xs={6}>
-                  <Label for="hourly_rate">Hourly Rate</Label>
-                  <Field name="hourly_rate" as={Input} type="number" />
-                  <ErrorMessage name="hourly_rate" component={FormFeedback} />
+                  <Label for='hourly_rate'>Hourly Rate</Label>
+                  <Field
+                    name='hourly_rate'
+                    as={Input}
+                    type='number'
+                  />
+                  <ErrorMessage
+                    name='hourly_rate'
+                    component={FormFeedback}
+                  />
                 </Col>
                 <Col xs={6}>
-                  <Label for="phone">Phone</Label>
-                  <Field name="phone" as={Input} />
-                  <ErrorMessage name="phone" component={FormFeedback} />
+                  <Label for='phone'>Phone</Label>
+                  <Field
+                    name='phone'
+                    as={Input}
+                  />
+                  <ErrorMessage
+                    name='phone'
+                    component={FormFeedback}
+                  />
                 </Col>
                 <Col xs={12}>
-                  <Label for="report_link">Report link </Label>
-                  <Field name="report_link" as={Input} />
-                  <ErrorMessage name="report_link" component={FormFeedback} />
+                  <Label for='report_link'>Report link </Label>
+                  <Field
+                    name='report_link'
+                    as={Input}
+                  />
+                  <ErrorMessage
+                    name='report_link'
+                    component={FormFeedback}
+                  />
                 </Col>
 
-                <Col xs={12} className="d-flex justify-content-end mt-5">
-                  <Button color="cancel" onClick={toggle}>
+                <Col
+                  xs={12}
+                  className='d-flex justify-content-end mt-5'
+                >
+                  <Button
+                    color='cancel'
+                    onClick={toggle}
+                  >
                     Close
                   </Button>
                   &nbsp; &nbsp;
                   <LoadingButton
-                    color="primary"
-                    type="submit"
+                    color='primary'
+                    type='submit'
                     isLoading={isSubmitting}
                     loadingText={data ? 'Updating...' : 'Saving...'}
                     defaultText={data ? 'Update' : 'Save'}

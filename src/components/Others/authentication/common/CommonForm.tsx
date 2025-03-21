@@ -60,37 +60,40 @@ const CommonForm = ({ alignLogo }: commonFormPropsType) => {
     setIsLoading(false);
   };
   return (
-    <div className="login-card login-dark">
+    <div className='login-card login-dark'>
       <div>
         <div>
           <CommonLogo alignLogo={alignLogo} />
         </div>
-        <div className="login-main">
-          <form className="theme-form" onSubmit={formSubmitHandle}>
+        <div className='login-main'>
+          <form
+            className='theme-form'
+            onSubmit={formSubmitHandle}
+          >
             <h4>{SignInAccount}</h4>
             <p>{EnterEmailPasswordLogin}</p>
             <FormGroup>
-              <Label className="col-form-label">{EmailAddress}</Label>
+              <Label className='col-form-label'>{EmailAddress}</Label>
               <Input
-                type="text"
+                type='text'
                 required
-                placeholder="Username"
+                placeholder='Username'
                 value={username}
-                name="username"
+                name='username'
                 onChange={handleUserValue}
               />
             </FormGroup>
             <FormGroup>
-              <Label className="col-form-label">{Password}</Label>
-              <div className="form-input position-relative">
+              <Label className='col-form-label'>{Password}</Label>
+              <div className='form-input position-relative'>
                 <Input
                   type={showPassWord ? 'text' : 'password'}
-                  placeholder="*********"
+                  placeholder='*********'
                   onChange={handleUserValue}
                   value={password}
-                  name="password"
+                  name='password'
                 />
-                <div className="show-hide">
+                <div className='show-hide'>
                   <span
                     onClick={() => setShowPassWord(!showPassWord)}
                     className={!showPassWord ? 'show' : ''}
@@ -98,12 +101,12 @@ const CommonForm = ({ alignLogo }: commonFormPropsType) => {
                 </div>
               </div>
             </FormGroup>
-            <FormGroup className="mb-0 position-relative">
-              <div className="text-end mt-3">
+            <FormGroup className='mb-0 position-relative'>
+              <div className='text-end mt-3'>
                 <Button
-                  color="primary"
-                  className="btn-block w-100"
-                  type="submit"
+                  color='primary'
+                  className='btn-block w-100'
+                  type='submit'
                   disabled={isLoading}
                 >
                   {SignIn}
