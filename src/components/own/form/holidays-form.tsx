@@ -1,5 +1,5 @@
-import React from "react";
-import { ErrorMessage, Field, Formik } from "formik";
+import React from 'react';
+import { ErrorMessage, Field, Formik } from 'formik';
 import {
   Button,
   Col,
@@ -9,8 +9,9 @@ import {
   Modal,
   ModalBody,
   ModalHeader,
-} from "reactstrap";
-import { createHoliday, updateHoliday } from "helper/api-data/holidays";
+} from 'reactstrap';
+import LoadingButton from '../common/LoadingButton';
+import { createHoliday, updateHoliday } from 'helper/api-data/holidays';
 
 const HolidayForm = ({ data, isOpen, toggle }: any) => {
   const save = async (data: any) => {
@@ -20,7 +21,7 @@ const HolidayForm = ({ data, isOpen, toggle }: any) => {
         toggle();
       }
     } catch (error) {
-      console.error("Error al crear feriado:", error);
+      console.error('Error al crear feriado:', error);
     }
   };
 
@@ -31,14 +32,14 @@ const HolidayForm = ({ data, isOpen, toggle }: any) => {
         toggle();
       }
     } catch (error) {
-      console.error("Error al actualizar feriado:", error);
+      console.error('Error al actualizar feriado:', error);
     }
   };
 
   return (
     <Modal isOpen={isOpen} toggle={toggle} size="lg">
       <ModalHeader toggle={toggle}>
-        {data ? "Edit Holiday" : "Add New Holiday"}
+        {data ? 'Edit Holiday' : 'Add New Holiday'}
       </ModalHeader>
       <ModalBody>
         <Formik
@@ -53,17 +54,17 @@ const HolidayForm = ({ data, isOpen, toggle }: any) => {
                   status: data.status,
                 }
               : {
-                  holiday_name: "",
-                  holiday_date: "",
-                  description: "",
-                  holiday_type: "national",
-                  status: "active",
+                  holiday_name: '',
+                  holiday_date: '',
+                  description: '',
+                  holiday_type: 'national',
+                  status: 'active',
                 }
           }
           onSubmit={(info) => (data ? update(info) : save(info))}
         >
           {(props) => {
-            const { errors, handleSubmit, isSubmitting } = props;
+            const { errors, handleSubmit, isSubmitting, dirty } = props;
             return (
               <form
                 noValidate
@@ -116,9 +117,14 @@ const HolidayForm = ({ data, isOpen, toggle }: any) => {
                     Close
                   </Button>
                   &nbsp; &nbsp;
-                  <Button color="primary" type="submit">
-                    {data ? "Update" : "Save"}
-                  </Button>
+                  <LoadingButton
+                    color="primary"
+                    type="submit"
+                    isLoading={isSubmitting}
+                    disabled={data && !dirty}
+                    loadingText={data ? 'Updating...' : 'Saving...'}
+                    defaultText={data ? 'Update' : 'Save'}
+                  />
                 </Col>
               </form>
             );

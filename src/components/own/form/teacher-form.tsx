@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { ErrorMessage, Field, Formik } from "formik";
+import React, { useState, useEffect } from 'react';
+import { ErrorMessage, Field, Formik } from 'formik';
 
 import {
   Button,
@@ -10,9 +10,10 @@ import {
   Modal,
   ModalBody,
   ModalHeader,
-} from "reactstrap";
-import { createProfessor, updateProfessor } from "helper/api-data/professor";
-import { ImgPath, UrlImage } from "utils/Constant";
+} from 'reactstrap';
+import LoadingButton from '../common/LoadingButton';
+import { createProfessor, updateProfessor } from 'helper/api-data/professor';
+import { ImgPath, UrlImage } from 'utils/Constant';
 
 const TeacherForm = ({ data, isOpen, toggle }: any) => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -37,7 +38,7 @@ const TeacherForm = ({ data, isOpen, toggle }: any) => {
         toggle();
       }
     } catch (error) {
-      console.error("Error al crear profesor:", error);
+      console.error('Error al crear profesor:', error);
     }
   };
 
@@ -48,14 +49,14 @@ const TeacherForm = ({ data, isOpen, toggle }: any) => {
         toggle();
       }
     } catch (error) {
-      console.error("Error al actualizar usuario:", error);
+      console.error('Error al actualizar usuario:', error);
     }
   };
 
   return (
     <Modal isOpen={isOpen} toggle={toggle} size="lg">
       <ModalHeader toggle={toggle}>
-        {data ? "Editar Profesor" : "Add New Professor"}
+        {data ? 'Editar Profesor' : 'Add New Professor'}
       </ModalHeader>
       <ModalBody>
         <Formik
@@ -76,30 +77,31 @@ const TeacherForm = ({ data, isOpen, toggle }: any) => {
                   report_link: data.report_link,
                 }
               : {
-                  name: "",
-                  username: "",
-                  email: "",
-                  password: "",
-                  status: "active",
-                  cedula: "",
-                  hourly_rate: "",
-                  phone: "",
-                  role: "",
-                  image: "",
-                  report_link: "",
+                  name: '',
+                  username: '',
+                  email: '',
+                  password: '',
+                  status: 'active',
+                  cedula: '',
+                  hourly_rate: '',
+                  phone: '',
+                  role: '',
+                  image: '',
+                  report_link: '',
                 }
           }
           onSubmit={(info) => (data ? update(info) : save(info))}
         >
           {(props) => {
-            const { errors, handleSubmit, isSubmitting, setFieldValue } = props;
+            const { errors, handleSubmit, isSubmitting, setFieldValue, dirty } =
+              props;
             const handleImageChange = (
               event: React.ChangeEvent<HTMLInputElement>
             ) => {
               const file = event.target.files?.[0];
               if (file) {
                 setImagePreview(URL.createObjectURL(file));
-                setFieldValue("image", file);
+                setFieldValue('image', file);
               }
             };
 
@@ -136,7 +138,7 @@ const TeacherForm = ({ data, isOpen, toggle }: any) => {
                             style={{
                               left: 0,
                               opacity: 0,
-                              position: "absolute",
+                              position: 'absolute',
                               right: 0,
                             }}
                           />
@@ -202,9 +204,14 @@ const TeacherForm = ({ data, isOpen, toggle }: any) => {
                     Close
                   </Button>
                   &nbsp; &nbsp;
-                  <Button color="primary" type="submit">
-                    {data ? "Update" : "Save"}
-                  </Button>
+                  <LoadingButton
+                    color="primary"
+                    type="submit"
+                    isLoading={isSubmitting}
+                    loadingText={data ? 'Updating...' : 'Saving...'}
+                    defaultText={data ? 'Update' : 'Save'}
+                    disabled={data && !dirty}
+                  />
                 </Col>
               </form>
             );

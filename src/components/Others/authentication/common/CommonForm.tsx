@@ -1,8 +1,8 @@
-"use client";
+'use client';
 
-import Link from "next/link";
-import { ChangeEvent, FormEvent, useContext, useState } from "react";
-import { Button, FormGroup, Input, Label } from "reactstrap";
+import Link from 'next/link';
+import { ChangeEvent, FormEvent, useContext, useState } from 'react';
+import { Button, FormGroup, Input, Label } from 'reactstrap';
 import {
   EmailAddress,
   EnterEmailPasswordLogin,
@@ -11,15 +11,15 @@ import {
   RememberPassword,
   SignIn,
   SignInAccount,
-} from "utils/Constant";
+} from 'utils/Constant';
 
-import Cookies from "js-cookie";
-import { toast } from "react-toastify";
-import CommonLogo from "./CommonLogo";
-import { useRouter } from "next/router";
-import { postLogin } from "helper/api-data/user";
-import { UserContext } from "helper/User";
-import { USER_ROLES, USER_TYPES } from "../../../../../utils/constants";
+import Cookies from 'js-cookie';
+import { toast } from 'react-toastify';
+import CommonLogo from './CommonLogo';
+import { useRouter } from 'next/router';
+import { postLogin } from 'helper/api-data/user';
+import { UserContext } from 'helper/User';
+import { USER_ROLES, USER_TYPES } from '../../../../../utils/constants';
 export interface commonFormPropsType {
   alignLogo?: string;
 }
@@ -28,8 +28,8 @@ const CommonForm = ({ alignLogo }: commonFormPropsType) => {
 
   const [showPassWord, setShowPassWord] = useState(false);
   const [formValues, setFormValues] = useState({
-    username: "",
-    password: "",
+    username: '',
+    password: '',
   });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -43,21 +43,21 @@ const CommonForm = ({ alignLogo }: commonFormPropsType) => {
     setIsLoading(true);
     const response = await postLogin({ username, password });
 
-    if (response?.status === "success") {
-      Cookies.set("token", JSON.stringify(response?.data));
+    if (response?.status === 'success') {
+      Cookies.set('token', JSON.stringify(response?.data));
       login(response.data);
 
       if (response.data.role === USER_TYPES.ADMIN) {
-        router.push("/dashboard");
+        router.push('/dashboard');
       }
 
       if (response.data.role === USER_TYPES.PROFESSOR) {
-        router.push("/teachers");
+        router.push('/teachers');
       }
 
-      toast.success("Login Success");
-      setIsLoading(false);
+      toast.success('Login Success');
     }
+    setIsLoading(false);
   };
   return (
     <div className="login-card login-dark">
@@ -84,7 +84,7 @@ const CommonForm = ({ alignLogo }: commonFormPropsType) => {
               <Label className="col-form-label">{Password}</Label>
               <div className="form-input position-relative">
                 <Input
-                  type={showPassWord ? "text" : "password"}
+                  type={showPassWord ? 'text' : 'password'}
                   placeholder="*********"
                   onChange={handleUserValue}
                   value={password}
@@ -93,7 +93,7 @@ const CommonForm = ({ alignLogo }: commonFormPropsType) => {
                 <div className="show-hide">
                   <span
                     onClick={() => setShowPassWord(!showPassWord)}
-                    className={!showPassWord ? "show" : ""}
+                    className={!showPassWord ? 'show' : ''}
                   />
                 </div>
               </div>

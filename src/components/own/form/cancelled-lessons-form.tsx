@@ -1,5 +1,5 @@
-import React from "react";
-import { ErrorMessage, Field, Formik } from "formik";
+import React from 'react';
+import { ErrorMessage, Field, Formik } from 'formik';
 import {
   Button,
   Col,
@@ -9,17 +9,18 @@ import {
   Modal,
   ModalBody,
   ModalHeader,
-} from "reactstrap";
+} from 'reactstrap';
+import LoadingButton from '../common/LoadingButton';
 
-import * as Yup from "yup";
-import { parse } from "date-fns";
+import * as Yup from 'yup';
+import { parse } from 'date-fns';
 import {
   createCancelLesson,
   updateCancelLesson,
-} from "../../../../helper/api-data/cancelled-lessons";
-import { mutate } from "swr";
-import { useRouter } from "next/router";
-import { toast } from "react-toastify";
+} from '../../../../helper/api-data/cancelled-lessons';
+import { mutate } from 'swr';
+import { useRouter } from 'next/router';
+import { toast } from 'react-toastify';
 
 type CancelledLessonsFormProps = {
   data?: any;
@@ -38,18 +39,18 @@ const CancelledLessonsForm = ({
 
   const validations = Yup.object().shape({
     cancel_reason: Yup.string()
-      .required("The cancel reason is required")
-      .min(3, "The minimum length of the description is 3 letters "),
+      .required('The cancel reason is required')
+      .min(3, 'The minimum length of the description is 3 letters '),
     cancel_date: Yup.date()
       .transform((value, originalValue, schema) => {
         if (schema.isType(value)) {
           return value;
         }
-        const result = parse(originalValue, "dd-MM-yyyy", new Date());
+        const result = parse(originalValue, 'dd-MM-yyyy', new Date());
         return result;
       })
-      .typeError("Select a valid date")
-      .required("The cancel date is required"),
+      .typeError('Select a valid date')
+      .required('The cancel date is required'),
   });
 
   const onSubmit = (body: any, { setSubmitting }: any) => {
@@ -57,7 +58,7 @@ const CancelledLessonsForm = ({
     if (data) {
       updateCancelLesson(data?.id, body).then(() => {
         setSubmitting(false);
-        toast.success("Record updated correctly");
+        toast.success('Record updated correctly');
         onClose();
       });
     } else {
@@ -65,7 +66,7 @@ const CancelledLessonsForm = ({
       createCancelLesson(body).then((res) => {
         setSubmitting(false);
         if (res.statusCode === 200) {
-          toast.success("Record saved correctly");
+          toast.success('Record saved correctly');
           onClose();
         }
       });
@@ -81,12 +82,12 @@ const CancelledLessonsForm = ({
   return (
     <Modal className="modal-dialog-centered" isOpen={isOpen} toggle={onClose}>
       <ModalHeader toggle={onClose}>
-        {data ? "Edit cancelled class" : "Add cancelled class"}
+        {data ? 'Edit cancelled class' : 'Add cancelled class'}
       </ModalHeader>
       <ModalBody>
         <div className="modal-toggle-wrapper">
           <Formik
-            initialValues={data ? data : { cancel_reason: "", cancel_date: "" }}
+            initialValues={data ? data : { cancel_reason: '', cancel_date: '' }}
             onSubmit={onSubmit}
             validationSchema={validations}
           >
@@ -124,9 +125,13 @@ const CancelledLessonsForm = ({
                   <Button color="secondary" onClick={onClose}>
                     Close
                   </Button>
-                  <Button color="primary" type="submit" disabled={isSubmitting}>
-                    {data ? "Edit" : "Save"}
-                  </Button>
+                  <LoadingButton
+                    color="primary"
+                    type="submit"
+                    isLoading={isSubmitting}
+                    loadingText={data ? 'Updating...' : 'Saving...'}
+                    defaultText={data ? 'Edit' : 'Save'}
+                  />
                 </Col>
               </form>
             )}

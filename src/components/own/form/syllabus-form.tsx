@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { ErrorMessage, Field, Formik, FieldArray } from "formik";
+import React, { useState } from 'react';
+import { ErrorMessage, Field, Formik, FieldArray } from 'formik';
 import {
   Button,
   Col,
@@ -10,18 +10,21 @@ import {
   ModalHeader,
   FormFeedback,
   Row,
-} from "reactstrap";
-import { createSyllabus, updateSyllabus } from "helper/api-data/syllabus";
-import { FaTrash } from "react-icons/fa";
-import * as Yup from "yup";
+} from 'reactstrap';
+import LoadingButton from '../common/LoadingButton';
+import { createSyllabus, updateSyllabus } from 'helper/api-data/syllabus';
+import { FaTrash } from 'react-icons/fa';
+import * as Yup from 'yup';
 
 const validations = Yup.object().shape({
-  syllabus_name: Yup.string().required("The syllabus name is required"),
+  syllabus_name: Yup.string().required('The syllabus name is required'),
 });
 
 const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
+  const [isLoading, setIsLoading] = useState(false);
   const save = async (syllabus: any, { setSubmitting }: any) => {
     setSubmitting(true);
+    setIsLoading(true);
     try {
       const response = await createSyllabus(syllabus);
       if (response.statusCode === 200) {
@@ -29,13 +32,16 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
         toggle();
       }
     } catch (error) {
+      console.error('Error al crear syllabus:', error);
+    } finally {
       setSubmitting(false);
-      console.error("Error al crear syllabus:", error);
+      setIsLoading(false);
     }
   };
 
   const update = async (syllabus: any, { setSubmitting }: any) => {
     setSubmitting(true);
+    setIsLoading(true);
     try {
       const response = await updateSyllabus(syllabus.id, syllabus);
       if (response.statusCode === 200) {
@@ -43,8 +49,10 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
         toggle();
       }
     } catch (error) {
+      console.error('Error al actualizar syllabus:', error);
+    } finally {
       setSubmitting(false);
-      console.error("Error al actualizar syllabus:", error);
+      setIsLoading(false);
     }
   };
 
@@ -52,46 +60,46 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
     <Modal isOpen={isOpen} toggle={toggle} size="lg">
       <ModalHeader toggle={toggle}>
         {isCopy
-          ? "Duplicate Syllabus"
+          ? 'Duplicate Syllabus'
           : data
-            ? "Edit Syllabus"
-            : "Add new Syllabus"}
+            ? 'Edit Syllabus'
+            : 'Add new Syllabus'}
       </ModalHeader>
       <ModalBody>
         <Formik
           initialValues={
             data
               ? {
-                  id: isCopy ? "" : data.id,
+                  id: isCopy ? '' : data.id,
                   syllabus_name: data.syllabus_name,
                   items: data?.items?.map((item: any) => item.item_name) || [],
                   test_percentage: data?.percentages?.test_percentage || 0,
                   exam_percentage: data?.percentages?.exam_percentage || 0,
                   assig_percentage: data?.percentages?.assig_percentage || 0,
-                  assignments: data?.assignments || [""],
-                  progress_tests: data?.progress_tests || [""],
-                  movers_exam: data?.movers_exam || [""],
+                  assignments: data?.assignments || [''],
+                  progress_tests: data?.progress_tests || [''],
+                  movers_exam: data?.movers_exam || [''],
                   percentages: data?.percentages_syllabus || [
                     {
-                      name: "",
+                      name: '',
                       min: 0,
                       max: 0,
                     },
                   ],
                 }
               : {
-                  id: "",
-                  syllabus_name: "",
-                  items: [""],
+                  id: '',
+                  syllabus_name: '',
+                  items: [''],
                   test_percentage: 0,
                   exam_percentage: 0,
                   assig_percentage: 0,
-                  assignments: [""],
-                  progress_tests: [""],
-                  movers_exam: [""],
+                  assignments: [''],
+                  progress_tests: [''],
+                  movers_exam: [''],
                   percentages: [
                     {
-                      name: "",
+                      name: '',
                       min: 0,
                       max: 0,
                     },
@@ -113,6 +121,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
               isSubmitting,
               setFieldValue,
               touched,
+              dirty,
             } = props;
 
             const renderArrayField = (name: string, label: string) => (
@@ -121,7 +130,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
                 <FieldArray
                   name={name}
                   render={(arrayHelpers) => (
-                    <div style={{ maxHeight: "300px", overflowY: "auto" }}>
+                    <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
                       <Row>
                         {(values[name as keyof typeof values] as string[]).map(
                           (item, index) => (
@@ -135,7 +144,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
                                 onChange={(e) =>
                                   setFieldValue(
                                     `${name}[${index}]`,
-                                    e.target.value,
+                                    e.target.value
                                   )
                                 }
                                 placeholder={`Item ${index + 1}`}
@@ -149,13 +158,13 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
                                 <FaTrash />
                               </Button>
                             </Col>
-                          ),
+                          )
                         )}
                       </Row>
                       <Button
                         type="button"
                         color="primary"
-                        onClick={() => arrayHelpers.push("")}
+                        onClick={() => arrayHelpers.push('')}
                       >
                         Add Item
                       </Button>
@@ -169,14 +178,14 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
               name: string,
               label: string,
               values: any,
-              setFieldValue: (field: string, value: any) => void,
+              setFieldValue: (field: string, value: any) => void
             ) => (
               <Col xs={12} className="mt-3">
                 <Label>{label}</Label>
                 <FieldArray
                   name={name}
                   render={(arrayHelpers) => (
-                    <div style={{ maxHeight: "300px", overflowY: "auto" }}>
+                    <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
                       {values[name].map((percentage: any, index: number) => (
                         <Row key={index} className="mb-2">
                           <Col md={4}>
@@ -187,7 +196,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
                               onChange={(e) =>
                                 setFieldValue(
                                   `${name}[${index}].name`,
-                                  e.target.value,
+                                  e.target.value
                                 )
                               }
                             />
@@ -200,7 +209,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
                               onChange={(e) =>
                                 setFieldValue(
                                   `${name}[${index}].min`,
-                                  e.target.value,
+                                  e.target.value
                                 )
                               }
                             />
@@ -213,7 +222,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
                               onChange={(e) =>
                                 setFieldValue(
                                   `${name}[${index}].max`,
-                                  e.target.value,
+                                  e.target.value
                                 )
                               }
                             />
@@ -234,7 +243,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
                         color="primary"
                         onClick={() =>
                           arrayHelpers.push({
-                            name: "",
+                            name: '',
                             min: 0,
                             max: 0,
                           })
@@ -265,7 +274,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
                   <ErrorMessage name="syllabus_name" component={FormFeedback} />
                 </Col>
 
-                {renderArrayField("items", "Items")}
+                {renderArrayField('items', 'Items')}
 
                 <Col md={4}>
                   <Label for="assig_percentage">Assignment Percentage %</Label>
@@ -292,17 +301,17 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
                   />
                 </Col>
                 <hr />
-                {renderArrayField("assignments", "Assignments")}
+                {renderArrayField('assignments', 'Assignments')}
                 <hr />
-                {renderArrayField("progress_tests", "Progress Tests")}
+                {renderArrayField('progress_tests', 'Progress Tests')}
                 <hr />
-                {renderArrayField("movers_exam", "Movers Exam")}
+                {renderArrayField('movers_exam', 'Movers Exam')}
                 <hr />
                 {renderPercentagesField(
-                  "percentages",
-                  "Custom Percentages",
+                  'percentages',
+                  'Custom Percentages',
                   values,
-                  setFieldValue,
+                  setFieldValue
                 )}
 
                 <Col xs={12} className="d-flex justify-content-end mt-5">
@@ -310,9 +319,22 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
                     Close
                   </Button>
                   &nbsp;&nbsp;
-                  <Button color="primary" type="submit" disabled={isSubmitting}>
-                    {isCopy ? "Duplicate" : data ? "Update" : "Save"}
-                  </Button>
+                  <LoadingButton
+                    color="primary"
+                    type="submit"
+                    isLoading={isSubmitting}
+                    loadingText={
+                      isCopy
+                        ? 'Duplicating...'
+                        : data
+                          ? 'Updating...'
+                          : 'Saving...'
+                    }
+                    defaultText={
+                      isCopy ? 'Duplicate' : data ? 'Update' : 'Save'
+                    }
+                    disabled={!isCopy &&   !dirty}
+                  />
                 </Col>
               </form>
             );
