@@ -124,11 +124,9 @@ const Students = () => {
           </Card>
         </Row>
       </Container>
-      <StudentForm
-        isOpen={isOpenModal}
-        toggle={toggle}
-        data={null}
-      />
+      {isOpenModal && (
+        <StudentForm isOpen={isOpenModal} toggle={toggle} data={null} />
+      )}
     </div>
   );
 };
