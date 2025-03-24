@@ -125,7 +125,12 @@ const Students = () => {
         </Row>
       </Container>
       {isOpenModal && (
-        <StudentForm isOpen={isOpenModal} toggle={toggle} data={null} />
+        <StudentForm
+          isOpen={isOpenModal}
+          toggle={toggle}
+          data={null}
+          onReload={handleReload}
+        />
       )}
     </div>
   );

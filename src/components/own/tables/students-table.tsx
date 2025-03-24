@@ -24,11 +24,6 @@ const StudentsTable = ({
   const toggle = (data: any) => {
     setSelectedData(data);
     setIsOpen(!isOpen);
-    if (isOpen) {
-      mutate([
-        `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}&order=desc&orderBy=createdAt`,
-      ]);
-    }
   };
 
   const toggleDetail = (data: any) => {
@@ -193,6 +188,11 @@ const StudentsTable = ({
         isOpen={isOpen}
         toggle={toggle}
         data={selectedData}
+        onReload={() => {
+          mutate([
+            `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}&order=desc&orderBy=createdAt`,
+          ]);
+        }}
       />
       <StudentDetail
         isOpen={isOpenDetail}
