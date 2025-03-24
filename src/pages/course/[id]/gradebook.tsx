@@ -1,22 +1,23 @@
-import useSWR from "swr";
+import useSWR from 'swr';
 
-import CourseLayout from "@/components/own/course-layout/course-layout";
-import TabsTeachers from "@/components/own/tabs-teachers/tabs-teachers";
-import React, { ReactElement } from "react";
-import { Card, CardBody } from "reactstrap";
-import { NextPageWithLayout } from "@/pages/_app";
-import { useRouter } from "next/router";
+import CourseLayout from '@/components/own/course-layout/course-layout';
+import TabsTeachers from '@/components/own/tabs-teachers/tabs-teachers';
+import React, { ReactElement } from 'react';
+import { Card, CardBody } from 'reactstrap';
+import { NextPageWithLayout } from '@/pages/_app';
+import { useRouter } from 'next/router';
 import {
   getCourseById,
   getCourseWithStudents,
   getGradingItems,
   getGradingPercentageBySyllabus,
-} from "../../../../helper/api-data/course";
-import GradebookTable from "@/components/own/tables/gradebook-table";
-import { getGradesByCourse } from "../../../../helper/api-data/student-grades";
-import { getFinalPercentageBySyllabusId } from "../../../../helper/api-data/syllabus";
+} from '../../../../helper/api-data/course';
+import GradebookTable from '@/components/own/tables/gradebook-table';
+import { getGradesByCourse } from '../../../../helper/api-data/student-grades';
+import { getFinalPercentageBySyllabusId } from '../../../../helper/api-data/syllabus';
+import useFilteredGradingItems from '../../../../hooks/useFilteredGradingItems';
 
-const tabsName = "GRADEBOOK";
+const tabsName = 'GRADEBOOK';
 
 const Gradebook: NextPageWithLayout = () => {
   const router = useRouter();
@@ -24,22 +25,26 @@ const Gradebook: NextPageWithLayout = () => {
 
   const courseDetail = useSWR(
     courseId ? `/course/get-one/${courseId}` : null,
-    () => getCourseById(courseId),
+    () => getCourseById(courseId)
   );
 
   const gradingItems = useSWR(
     courseId ? `/course/get-grading-items/${courseId}` : null,
-    () => getGradingItems(courseId),
+    () => getGradingItems(courseId)
+  );
+
+  const filteredGradingItems = useFilteredGradingItems(
+    gradingItems?.data?.data
   );
 
   const courseStudents = useSWR(
     courseId ? `/course/get-students/${courseId}` : null,
-    () => getCourseWithStudents(courseId!.toString()),
+    () => getCourseWithStudents(courseId!.toString())
   );
 
   const gradesByCourse = useSWR(
     courseId ? `/student-grades/get-grades-by-course/${courseId}` : null,
-    () => getGradesByCourse(courseId!.toString()),
+    () => getGradesByCourse(courseId!.toString())
   );
 
   const gradingPercentage = useSWR(
@@ -48,8 +53,8 @@ const Gradebook: NextPageWithLayout = () => {
       : null,
     () =>
       getGradingPercentageBySyllabus(
-        courseDetail?.data?.data?.syllabus_id!.toString(),
-      ),
+        courseDetail?.data?.data?.syllabus_id!.toString()
+      )
   );
 
   const notesPercentages = useSWR(
@@ -58,25 +63,28 @@ const Gradebook: NextPageWithLayout = () => {
       : null,
     () =>
       getFinalPercentageBySyllabusId(
-        courseDetail?.data?.data?.syllabus_id!.toString(),
-      ),
+        courseDetail?.data?.data?.syllabus_id!.toString()
+      )
   );
 
   return (
-    <Card tag="section" className="gradebook">
+    <Card
+      tag='section'
+      className='gradebook'
+    >
       <CardBody>
         <TabsTeachers
-          numberOfClass={courseDetail?.data?.data?.course_number ?? ""}
+          numberOfClass={courseDetail?.data?.data?.course_number ?? ''}
           tabsName={tabsName}
         />
-        {gradingItems?.data?.data &&
+        {filteredGradingItems.length > 0 &&
           courseStudents?.data?.data?.students &&
           gradingPercentage?.data?.data &&
           courseDetail?.data?.data &&
           notesPercentages?.data?.data && (
             <GradebookTable
               students={courseStudents?.data?.data?.students}
-              gradingItems={gradingItems?.data?.data}
+              gradingItems={filteredGradingItems}
               studentsGrades={gradesByCourse?.data?.data}
               gradingPercentages={gradingPercentage?.data?.data}
               notesPercentages={notesPercentages?.data?.data}

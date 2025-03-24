@@ -1,40 +1,41 @@
-import React, { ChangeEvent, ReactElement, useState } from "react";
-import { Card, CardBody, Col, Input, Row } from "reactstrap";
-import { NextPageWithLayout } from "@/pages/_app";
+import React, { ChangeEvent, ReactElement, useState } from 'react';
+import { Card, CardBody, Col, Input, Row } from 'reactstrap';
+import { NextPageWithLayout } from '@/pages/_app';
 
-import CourseLayout from "@/components/own/course-layout/course-layout";
-import TabsTeachers from "@/components/own/tabs-teachers/tabs-teachers";
-import { useRouter } from "next/router";
-import useSWR from "swr";
+import CourseLayout from '@/components/own/course-layout/course-layout';
+import TabsTeachers from '@/components/own/tabs-teachers/tabs-teachers';
+import { useRouter } from 'next/router';
+import useSWR from 'swr';
 import {
   getCourseById,
   getCourseWithStudents,
   getGradingItems,
   getGradingPercentageBySyllabus,
-} from "../../../../helper/api-data/course";
-import { getAttendanceByCourseAndStudent } from "../../../../helper/api-data/attendance";
-import { getGradesByCourseAndStudent } from "../../../../helper/api-data/student-grades";
-import StudentReportTable from "@/components/own/tables/student-report-table";
-import Image from "next/image";
-import { ImgPath } from "../../../../utils/Constant";
-import { getFinalPercentageBySyllabusId } from "../../../../helper/api-data/syllabus";
+} from '../../../../helper/api-data/course';
+import { getAttendanceByCourseAndStudent } from '../../../../helper/api-data/attendance';
+import { getGradesByCourseAndStudent } from '../../../../helper/api-data/student-grades';
+import StudentReportTable from '@/components/own/tables/student-report-table';
+import Image from 'next/image';
+import { ImgPath } from '../../../../utils/Constant';
+import { getFinalPercentageBySyllabusId } from '../../../../helper/api-data/syllabus';
+import useFilteredGradingItems from '../../../../hooks/useFilteredGradingItems';
 
-const tabsName = "STUDENT REPORT";
+const tabsName = 'STUDENT REPORT';
 
 const StudentReport: NextPageWithLayout = () => {
   const router = useRouter();
   const courseId = router.query.id as string;
-  const [selectedStudentId, setSelectedStudentId] = useState("");
-  const [selectedStudent, setSelectedStudent] = useState("");
+  const [selectedStudentId, setSelectedStudentId] = useState('');
+  const [selectedStudent, setSelectedStudent] = useState('');
 
   const courseDetail = useSWR(
     courseId ? `/course/get-one/${courseId}` : null,
-    () => getCourseById(courseId),
+    () => getCourseById(courseId)
   );
 
   const courseStudents = useSWR(
     courseId ? `/course/get-students/${courseId}` : null,
-    () => getCourseWithStudents(courseId!.toString()),
+    () => getCourseWithStudents(courseId!.toString())
   );
 
   const studentAttendance = useSWR(
@@ -42,19 +43,23 @@ const StudentReport: NextPageWithLayout = () => {
       ? `/attendance/get-attendance-by-student/course/${courseId}/student/${selectedStudentId}`
       : null,
     () =>
-      getAttendanceByCourseAndStudent(courseId!.toString(), selectedStudentId),
+      getAttendanceByCourseAndStudent(courseId!.toString(), selectedStudentId)
   );
 
   const gradesByStudent = useSWR(
     courseId && selectedStudentId
       ? `/student-grades/get-grades-by-course-and-student/${courseId}/${selectedStudentId}`
       : null,
-    () => getGradesByCourseAndStudent(courseId!.toString(), selectedStudentId),
+    () => getGradesByCourseAndStudent(courseId!.toString(), selectedStudentId)
   );
 
   const gradingItems = useSWR(
     courseId ? `/course/get-grading-items/${courseId}` : null,
-    () => getGradingItems(courseId),
+    () => getGradingItems(courseId)
+  );
+
+  const filteredGradingItems = useFilteredGradingItems(
+    gradingItems?.data?.data
   );
 
   const gradingPercentage = useSWR(
@@ -63,8 +68,8 @@ const StudentReport: NextPageWithLayout = () => {
       : null,
     () =>
       getGradingPercentageBySyllabus(
-        courseDetail?.data?.data?.syllabus_id!.toString(),
-      ),
+        courseDetail?.data?.data?.syllabus_id!.toString()
+      )
   );
 
   const notesPercentages = useSWR(
@@ -73,15 +78,15 @@ const StudentReport: NextPageWithLayout = () => {
       : null,
     () =>
       getFinalPercentageBySyllabusId(
-        courseDetail?.data?.data?.syllabus_id!.toString(),
-      ),
+        courseDetail?.data?.data?.syllabus_id!.toString()
+      )
   );
 
   const changeSelectedStudent = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSelectedStudentId(value);
     const student = courseStudents?.data?.data?.students?.find(
-      (s: any) => s.id == value,
+      (s: any) => s.id == value
     );
 
     setSelectedStudent(student);
@@ -90,14 +95,14 @@ const StudentReport: NextPageWithLayout = () => {
   const shouldRenderStudentReport =
     courseStudents?.data?.data &&
     gradingPercentage?.data?.data &&
-    gradingItems?.data?.data &&
+    filteredGradingItems.length > 0 &&
     gradesByStudent?.data?.data &&
     courseDetail?.data?.data &&
     notesPercentages?.data?.data &&
     selectedStudentId;
 
   return (
-    <Card tag="section">
+    <Card tag='section'>
       <CardBody>
         {courseDetail?.data?.data && (
           <TabsTeachers
@@ -106,21 +111,26 @@ const StudentReport: NextPageWithLayout = () => {
           />
         )}
 
-        <div className="report-container">
+        <div className='report-container'>
           <Row>
-            <Col xs={12} sm={12} md={12} lg={8}>
-              <div className="student-selector">
-                <p className="field-description">STUDENT</p>
+            <Col
+              xs={12}
+              sm={12}
+              md={12}
+              lg={8}
+            >
+              <div className='student-selector'>
+                <p className='field-description'>STUDENT</p>
 
                 <Input
-                  type="select"
-                  name="student"
-                  id="studentFilter"
-                  className="report-student-filter"
+                  type='select'
+                  name='student'
+                  id='studentFilter'
+                  className='report-student-filter'
                   defaultValue={selectedStudentId}
                   onChange={changeSelectedStudent}
                 >
-                  <option value="">Select the student</option>
+                  <option value=''>Select the student</option>
                   {courseStudents?.data?.data?.students?.map((student: any) => (
                     <option
                       value={student?.id}
@@ -131,9 +141,9 @@ const StudentReport: NextPageWithLayout = () => {
                   ))}
                 </Input>
                 <Image
-                  className="warning-logo"
+                  className='warning-logo'
                   src={`${ImgPath}/course/warning-icon.png`}
-                  alt="logo"
+                  alt='logo'
                   width={50}
                   height={70}
                 />
@@ -146,7 +156,7 @@ const StudentReport: NextPageWithLayout = () => {
                 students={courseStudents?.data?.data?.students}
                 studentAttendance={studentAttendance?.data?.data}
                 gradingPercentage={gradingPercentage?.data?.data}
-                gradingItems={gradingItems?.data?.data}
+                gradingItems={filteredGradingItems}
                 gradesByStudent={gradesByStudent?.data?.data}
                 notesPercentages={notesPercentages?.data?.data}
                 selectedStudentId={selectedStudentId}
