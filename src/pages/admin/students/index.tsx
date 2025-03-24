@@ -1,20 +1,20 @@
-import React, { useState } from "react";
-import { Card, CardHeader, Container, Row } from "reactstrap";
-import StudentsTable from "@/components/own/tables/students-table";
-import TableHeaderActions from "@/components/own/table-header-actions/table-header-actions";
-import StudentForm from "@/components/own/form/student-form";
-import { useRouter } from "next/router";
-import { FiltersProps } from "../../../../Types/types";
-import TableFilters from "@/components/own/table-filters/table-filters";
-import { getFiltersString } from "../../../../utils/utils";
-import useSWR, { mutate } from "swr";
-import { getAllStudent } from "../../../../helper/api-data/student";
-import { getAllCourses } from "../../../../helper/api-data/course";
+import React, { useState } from 'react';
+import { Card, CardHeader, Container, Row } from 'reactstrap';
+import StudentsTable from '@/components/own/tables/students-table';
+import TableHeaderActions from '@/components/own/table-header-actions/table-header-actions';
+import StudentForm from '@/components/own/form/student-form';
+import { useRouter } from 'next/router';
+import { FiltersProps } from '../../../../Types/types';
+import TableFilters from '@/components/own/table-filters/table-filters';
+import { getFiltersString } from '../../../../utils/utils';
+import useSWR, { mutate } from 'swr';
+import { getAllStudent } from '../../../../helper/api-data/student';
+import { getAllCourses } from '../../../../helper/api-data/course';
 import {
   LEVEL_FILTER,
   PROMOTION_FILTER,
   STATUS_FILTER,
-} from "../../../../utils/constants";
+} from '../../../../utils/constants';
 
 const Students = () => {
   const router = useRouter();
@@ -28,24 +28,41 @@ const Students = () => {
 
   const students = useSWR(
     [
-      `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ""}`,
+      `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}&order=desc&orderBy=createdAt`,
     ],
-    () => getAllStudent(page, rowPerPage, filters),
+    () =>
+      getAllStudent(
+        page,
+        rowPerPage,
+        filters
+          ? `${filters}&order=desc&orderBy=createdAt`
+          : 'order=desc&orderBy=createdAt'
+      )
   );
 
   const course = useSWR(`/course/get-all`, () => getAllCourses());
 
   const selectFilters: FiltersProps[] = [
     {
-      labelName: "Status",
-      name: "status",
-      type: "select",
+      labelName: 'ID',
+      name: 'cedula',
+      type: 'text',
+    },
+    {
+      labelName: 'Name',
+      name: 'name',
+      type: 'text',
+    },
+    {
+      labelName: 'Status',
+      name: 'status',
+      type: 'select',
       items: STATUS_FILTER,
     },
     {
-      labelName: "Course No",
-      name: "course",
-      type: "select",
+      labelName: 'Course No',
+      name: 'course',
+      type: 'select',
       items: course?.data
         ? course?.data?.data?.result?.map((item: any) => ({
             label: item.course_number,
@@ -54,13 +71,13 @@ const Students = () => {
         : [],
     },
     {
-      labelName: "Level",
-      name: "level",
+      labelName: 'Level',
+      name: 'level',
       items: LEVEL_FILTER,
     },
     {
-      labelName: "Promotion",
-      name: "promotion",
+      labelName: 'Promotion',
+      name: 'promotion',
       items: PROMOTION_FILTER,
     },
   ];
@@ -71,28 +88,31 @@ const Students = () => {
 
   const handleReload = () => {
     mutate([
-      `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ""}`,
+      `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}&order=desc&orderBy=createdAt`,
     ]);
   };
 
   return (
-    <div className="page-body">
-      <Container className="basic_table" fluid>
+    <div className='page-body'>
+      <Container
+        className='basic_table'
+        fluid
+      >
         <Row>
           <TableFilters selectFilters={selectFilters} />
         </Row>
         <Row>
           <Card>
-            <CardHeader className="d-flex justify-content-end">
+            <CardHeader className='d-flex justify-content-end'>
               <TableHeaderActions
                 onReload={handleReload}
                 addButton={{
-                  title: "Create Student",
+                  title: 'Create Student',
                   onClick: () => toggle(),
                 }}
               />
             </CardHeader>
-            <div className="pb-4">
+            <div className='pb-4'>
               <StudentsTable
                 page={page}
                 rowPerPage={rowPerPage}
@@ -104,7 +124,11 @@ const Students = () => {
           </Card>
         </Row>
       </Container>
-      <StudentForm isOpen={isOpenModal} toggle={toggle} data={null} />
+      <StudentForm
+        isOpen={isOpenModal}
+        toggle={toggle}
+        data={null}
+      />
     </div>
   );
 };

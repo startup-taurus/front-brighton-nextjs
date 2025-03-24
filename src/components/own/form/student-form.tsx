@@ -13,7 +13,7 @@ import {
   ModalFooter,
 } from 'reactstrap';
 import LoadingButton from '../common/LoadingButton';
-import useSWR from 'swr';
+import useSWR, { mutate } from 'swr';
 import { getActiveCourses } from 'helper/api-data/course';
 import { createStudent, updateStudent } from 'helper/api-data/student';
 import { toast } from 'react-toastify';
@@ -50,6 +50,10 @@ const validations = Yup.object().shape({
     })
     .typeError('Select a valid date')
     .required('The birthdate is required'),
+  phone_number: Yup.string()
+    .min(10, 'Phone number must be at least 10 characters long')
+    .max(10, 'Phone number must be less than 10 characters long')
+    .required('Phone number is required'),
 });
 
 const StudentForm = ({
@@ -91,6 +95,10 @@ const StudentForm = ({
       if (response.statusCode === 200) {
         toast.success('Student created successfull!');
         toggle();
+        // Actualizar la tabla después de crear un estudiante
+        mutate([
+          `/student/get-all?page=1&rowPerPage=10&order=desc&orderBy=createdAt`,
+        ]);
         onSuccessCreate && onSuccessCreate(data?.user?.id);
       }
     } catch (error) {
@@ -107,6 +115,10 @@ const StudentForm = ({
       if (response.statusCode === 200) {
         toggle();
         toast.success('Student updated successfull!');
+        // Actualizar la tabla después de editar un estudiante
+        mutate([
+          `/student/get-all?page=1&rowPerPage=10&order=desc&orderBy=createdAt`,
+        ]);
       }
     } catch (error) {
       console.error('Error al actualizar usuario:', error);
@@ -163,6 +175,8 @@ const StudentForm = ({
                     lastName: data?.user?.lastName,
                     username: data?.user?.username,
                     email: data?.user?.email,
+                    phone_number: data?.phone_number || '',
+
                     courseId:
                       data?.course?.length > 0 ? data?.course[0]?.id : '',
                   }
@@ -171,6 +185,7 @@ const StudentForm = ({
                     username: '',
                     email: '',
                     password: '',
+                    phone_number: '',
                     cedula: '',
                     lastName: '',
                     courseId: '',
@@ -235,6 +250,18 @@ const StudentForm = ({
                     />
                     <ErrorMessage
                       name='email'
+                      component={FormFeedback}
+                    />
+                  </Col>
+                  <Col xs={6}>
+                    <Label for='phone_number'>Phone Number</Label>
+                    <Field
+                      name='phone_number'
+                      as={Input}
+                      invalid={touched.phone_number && !!errors.phone_number}
+                    />
+                    <ErrorMessage
+                      name='phone_number'
                       component={FormFeedback}
                     />
                   </Col>
