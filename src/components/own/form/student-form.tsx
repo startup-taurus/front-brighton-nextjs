@@ -152,20 +152,23 @@ const StudentForm = ({
 
   useEffect(() => {
     const options = course?.data
-      ? course?.data
-          .map((courseItem: any) => ({
-            value: courseItem.id,
-            label:
-              courseItem.course_number +
-              ' - ' +
-              courseItem.course_name +
-              ' - ' +
-              courseItem?.professor?.user?.name,
-          }))
-          .filter((courseItem: any) => {
-            return courseItem?.value != data?.course[0]?.id;
-          })
+      ? course?.data.map((courseItem: any) => ({
+          value: courseItem.id,
+          label:
+            courseItem.course_number +
+            ' - ' +
+            courseItem.course_name +
+            ' - ' +
+            courseItem?.professor?.user?.name,
+        }))
       : [];
+
+    let filteredOptions = options;
+    if (!isTransfer) {
+      filteredOptions = options.filter((courseItem: any) => {
+        return courseItem?.value != data?.course[0]?.id;
+      });
+    }
 
     setCourseOptions((prevOptions) => {
       const combined = [...prevOptions, ...options];
