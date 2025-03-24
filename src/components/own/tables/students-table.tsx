@@ -1,13 +1,13 @@
-import React, { useEffect, useState } from "react";
-import { mutate } from "swr";
-import { useRouter } from "next/router";
-import { updateStatusStudent } from "helper/api-data/student";
-import TableActionButtons from "@/components/own/table-action-buttons/table-action-buttons";
-import Swal from "sweetalert2";
-import StudentForm from "../form/student-form";
-import StudentDetail from "../student-detail/student-datail";
-import DataTable from "react-data-table-component";
-import { setQueryStringValue } from "../../../../utils/utils";
+import React, { useEffect, useState } from 'react';
+import { mutate } from 'swr';
+import { useRouter } from 'next/router';
+import { updateStatusStudent } from 'helper/api-data/student';
+import TableActionButtons from '@/components/own/table-action-buttons/table-action-buttons';
+import Swal from 'sweetalert2';
+import StudentForm from '../form/student-form';
+import StudentDetail from '../student-detail/student-datail';
+import DataTable from 'react-data-table-component';
+import { setQueryStringValue } from '../../../../utils/utils';
 
 const StudentsTable = ({
   students,
@@ -24,11 +24,6 @@ const StudentsTable = ({
   const toggle = (data: any) => {
     setSelectedData(data);
     setIsOpen(!isOpen);
-    if (isOpen) {
-      mutate([
-        `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ""}`,
-      ]);
-    }
   };
 
   const toggleDetail = (data: any) => {
@@ -37,20 +32,20 @@ const StudentsTable = ({
   };
 
   const handleAlert = (row: any) => {
-    let status = row?.status === "active" ? "deactivate" : "active";
+    let status = row?.status === 'active' ? 'deactivate' : 'active';
     Swal.fire({
-      title: "Are you sure to " + status + "?",
-      text: "You are about to " + status + " this user",
-      icon: "warning",
+      title: 'Are you sure to ' + status + '?',
+      text: 'You are about to ' + status + ' this user',
+      icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: "Yes, " + status + "!",
-      cancelButtonText: "Cancel",
+      confirmButtonText: 'Yes, ' + status + '!',
+      cancelButtonText: 'Cancel',
       reverseButtons: true,
     }).then((result) => {
       if (result.isConfirmed) {
         updateStatus(row).then(() => {
           mutate([
-            `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ""}`,
+            `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}`,
           ]);
         });
       }
@@ -59,15 +54,15 @@ const StudentsTable = ({
 
   const updateStatus = async (data: any) => {
     try {
-      let status = data?.status === "active" ? "inactive" : "active";
+      let status = data?.status === 'active' ? 'inactive' : 'active';
       const response = await updateStatusStudent(data.id, status);
       if (response.statusCode === 200) {
         mutate([
-          `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ""}`,
+          `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}`,
         ]);
       }
     } catch (error) {
-      // console.error("Error al actualizar usuario:", error);
+      console.error('Error al actualizar usuario:', error);
     }
   };
 
@@ -75,36 +70,48 @@ const StudentsTable = ({
 
   const columns = [
     {
-      name: "Acción",
+      name: 'Acción',
       cell: (row: any) => (
         <TableActionButtons
           onView={() => toggleDetail(row)}
           onBlock={() => handleAlert(row)}
           onEdit={() => toggle(row)}
-          status={row.status === "active" ? false : true}
+          status={row.status === 'active' ? false : true}
         />
       ),
-      minWidth: "180px",
+      minWidth: '180px',
       sortable: false,
       center: false,
     },
     {
-      name: "ID",
+      name: 'ID',
       selector: (row: any) => `${row.cedula}`,
       sortable: true,
       center: false,
     },
     {
-      name: "Student name",
+      name: 'Student name',
       selector: (row: any) => `${row.user.name}`,
       sortable: true,
       center: false,
     },
     {
-      name: "Status",
+      name: 'Email',
+      selector: (row: any) => `${row.user.email}`,
+      sortable: true,
+      center: false,
+    },
+    {
+      name: 'Phone',
+      selector: (row: any) => `${row.phone_number}`,
+      sortable: true,
+      center: false,
+    },
+    {
+      name: 'Status',
       cell: (row: any) => (
         <span
-          className={`badge ${row.status === "active" ? "badge-success" : "badge-danger"}`}
+          className={`badge ${row.status === 'active' ? 'badge-success' : 'badge-danger'}`}
         >
           {row?.status?.charAt(0).toUpperCase() + row?.status?.slice(1)}
         </span>
@@ -113,45 +120,45 @@ const StudentsTable = ({
       center: false,
     },
     {
-      name: "Course",
+      name: 'Course',
       selector: (row: any) =>
-        row.course[0]?.course_name ? row.course[0].course_name : "",
+        row.course[0]?.course_name ? row.course[0].course_name : '',
       sortable: true,
       center: false,
     },
     {
-      name: "Course No",
+      name: 'Course No',
       selector: (row: any) =>
-        row.course[0]?.course_number ? row.course[0].course_number : "",
+        row.course[0]?.course_number ? row.course[0].course_number : '',
       sortable: true,
       center: false,
     },
     {
-      name: "Level",
+      name: 'Level',
       selector: (row: any) => `${row.level}`,
       sortable: true,
       center: false,
     },
     {
-      name: "Promotion",
-      selector: (row: any) => `${row.promotion ?? ""}`,
+      name: 'Promotion',
+      selector: (row: any) => `${row.promotion ?? ''}`,
       sortable: true,
       center: false,
     },
     {
-      name: "Age Category",
-      selector: (row: any) => `${row.age_category ?? ""}`,
+      name: 'Age Category',
+      selector: (row: any) => `${row.age_category ?? ''}`,
       sortable: true,
       center: false,
     },
 
     {
-      name: "Status payment",
+      name: 'Status payment',
       cell: (row: any) => (
         <span
-          className={`badge ${row.pending_payments ? "badge-success" : "badge-danger"}`}
+          className={`badge ${row.pending_payments ? 'badge-success' : 'badge-danger'}`}
         >
-          {row.pending_payments ? "Pagado" : "No Pagado"}
+          {row.pending_payments ? 'Pagado' : 'No Pagado'}
         </span>
       ),
       sortable: true,
@@ -160,7 +167,7 @@ const StudentsTable = ({
   ];
 
   return (
-    <div className="table-responsive signal-table">
+    <div className='table-responsive signal-table'>
       <DataTable
         columns={columns}
         data={students?.data.result}
@@ -169,17 +176,24 @@ const StudentsTable = ({
         paginationDefaultPage={page ?? 1}
         paginationPerPage={rowPerPage ?? 10}
         paginationTotalRows={students.data.totalCount}
-        onChangePage={(page) => setQueryStringValue("page", page, router)}
+        onChangePage={(page) => setQueryStringValue('page', page, router)}
         onChangeRowsPerPage={(newPerPage) =>
-          setQueryStringValue("rowPerPage", newPerPage, router)
+          setQueryStringValue('rowPerPage', newPerPage, router)
         }
         progressPending={loading}
         highlightOnHover
         selectableRows={false}
       />
-      {isOpen && (
-        <StudentForm isOpen={isOpen} toggle={toggle} data={selectedData} />
-      )}
+      <StudentForm
+        isOpen={isOpen}
+        toggle={toggle}
+        data={selectedData}
+        onReload={() => {
+          mutate([
+            `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}&order=desc&orderBy=createdAt`,
+          ]);
+        }}
+      />
       <StudentDetail
         isOpen={isOpenDetail}
         toggle={toggleDetail}
