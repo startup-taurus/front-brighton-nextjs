@@ -136,6 +136,21 @@ const StudentForm = ({
   };
 
   useEffect(() => {
+    if (data?.course)
+      setCourseOptions([
+        {
+          value: data?.course[0].id,
+          label:
+            data?.course[0]?.course_number +
+            ' - ' +
+            data?.course[0]?.course_name +
+            ' - ' +
+            data?.course[0].professor,
+        },
+      ]);
+  }, []);
+
+  useEffect(() => {
     const options = course?.data
       ? course?.data
           .map((courseItem: any) => ({
