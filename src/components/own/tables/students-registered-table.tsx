@@ -24,6 +24,7 @@ const StudentsRegisteredTable = ({
   const [selectedStudent, setSelectedStudent] = useState<any>(null);
 
   const toggleStudentForm = (data: any) => {
+    console.log(data);
     setSelectedStudent({
       user: {
         id: data?.id,
@@ -31,6 +32,7 @@ const StudentsRegisteredTable = ({
         lastName: '',
         email: data?.email,
       },
+      phone_number: data?.phone_number,
       age_category: data?.age_category,
       courseId: '',
       cedula: data?.id_number,
@@ -41,7 +43,8 @@ const StudentsRegisteredTable = ({
       pendingPayments: false,
       emergency_contact_name: data?.emergency_contact_name || '',
       emergency_contact_phone: data?.emergency_contact_phone || '',
-      emergency_contact_relationship: data?.emergency_contact_relationship || '',
+      emergency_contact_relationship:
+        data?.emergency_contact_relationship || '',
       promotion: 'Page',
       observations: '',
     });
@@ -137,19 +140,19 @@ const StudentsRegisteredTable = ({
     },
     {
       name: 'emergency contact name',
-      selector: (row: any) => `${row.emergency_contact_name?? ''}`,
+      selector: (row: any) => `${row.emergency_contact_name ?? ''}`,
       sortable: true,
       center: false,
     },
     {
       name: 'emergency contact phone',
-      selector: (row: any) => `${row.emergency_contact_phone?? ''}`,
+      selector: (row: any) => `${row.emergency_contact_phone ?? ''}`,
       sortable: true,
       center: false,
     },
     {
       name: 'emergency contact relationship',
-      selector: (row: any) => `${row.emergency_contact_relationship?? ''}`,
+      selector: (row: any) => `${row.emergency_contact_relationship ?? ''}`,
       sortable: true,
       center: false,
     },
