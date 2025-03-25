@@ -9,6 +9,7 @@ import { setQueryStringValue } from '../../../../utils/utils';
 import { deleteRegisteredStudent } from '../../../../helper/api-data/registered-student';
 import RegisteredStudentDetail from '@/components/own/registered-student-detail/registered-student-detail';
 import { toast } from 'react-toastify';
+import TableSkeleton from '../common/TableSkeleton';
 
 const StudentsRegisteredTable = ({
   students,
@@ -90,6 +91,17 @@ const StudentsRegisteredTable = ({
       ]);
     });
   };
+  
+  if (loading) {
+    return (
+      <TableSkeleton
+        rows={10}
+        columns={8}
+        showHeader={true}
+        animated={true}
+      />
+    ); 
+  }
 
   if (!students?.data?.result) return null;
 

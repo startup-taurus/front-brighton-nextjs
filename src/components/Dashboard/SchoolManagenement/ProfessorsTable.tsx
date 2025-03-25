@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
-import useSWR, { mutate } from "swr";
-import { Card, CardBody, Col, Table } from "reactstrap";
-import { CommonHeader } from "./AcademicPerformance/CommonHeader";
-import { getProfessorsCoursesAndStudents } from "helper/api-data/professor";
+import React, { useEffect, useState } from 'react';
+import useSWR, { mutate } from 'swr';
+import { Card, CardBody, Col, Table } from 'reactstrap';
+import { CommonHeader } from './AcademicPerformance/CommonHeader';
+import { getProfessorsCoursesAndStudents } from 'helper/api-data/professor';
 
 const ProfessorsTable = () => {
   const [data, setData] = useState([]);
@@ -21,9 +21,12 @@ const ProfessorsTable = () => {
   return (
     <Col xl={12}>
       <Card>
-        <CommonHeader title="Professors" />
-        <CardBody className="pt-0">
-          <Table responsive striped>
+        <CommonHeader title='Professors' />
+        <CardBody className='pt-0'>
+          <Table
+            responsive
+            striped
+          >
             <thead>
               <tr>
                 <th>#</th>

@@ -10,6 +10,7 @@ import Swal from "sweetalert2";
 import DataTable from "react-data-table-component";
 import CourseForm from "../form/course-form";
 import { getFiltersString } from "../../../../utils/utils";
+import TableSkeleton from "../common/TableSkeleton";
 
 const CoursesTable = ({ reload }: any) => {
   const router = useRouter();
@@ -83,6 +84,17 @@ const CoursesTable = ({ reload }: any) => {
     ],
     () => getCourseWithProfessors(page, rowPerPage, filters),
   );
+
+  if (isLoading) {
+    return (
+      <TableSkeleton
+        rows={10}
+        columns={12}
+        showHeader={true}
+        animated={true}
+      />
+    );
+  }
 
   if (!courses?.data?.result) return null;
 

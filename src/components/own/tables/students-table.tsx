@@ -8,6 +8,7 @@ import StudentForm from '../form/student-form';
 import StudentDetail from '../student-detail/student-datail';
 import DataTable from 'react-data-table-component';
 import { setQueryStringValue } from '../../../../utils/utils';
+import TableSkeleton from '@/components/own/common/TableSkeleton';
 
 const StudentsTable = ({
   students,
@@ -65,6 +66,17 @@ const StudentsTable = ({
       console.error('Error al actualizar usuario:', error);
     }
   };
+
+  if (loading) {
+    return (
+      <TableSkeleton
+        rows={10}
+        columns={12}
+        showHeader={true}
+        animated={true}
+      />
+    );
+  }
 
   if (!students?.data?.result) return null;
 

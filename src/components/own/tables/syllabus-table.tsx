@@ -6,6 +6,7 @@ import { getAllSyllabus } from 'helper/api-data/syllabus';
 import SyllabusItemsModal from '../form/syllabus-item';
 import TableActionButtons from '../table-action-buttons/table-action-buttons';
 import SyllabusForm from '../form/syllabus-form';
+import TableSkeleton from '../common/TableSkeleton';
 
 const SyllabusTable = ({ reload }: any) => {
   const router = useRouter();
@@ -17,13 +18,23 @@ const SyllabusTable = ({ reload }: any) => {
   const [selectedData, setSelectedData] = useState(null);
   const [isCopyMode, setIsCopyMode] = useState(false);
 
+  const [page, rowPerPage] = React.useMemo(
+    () => [
+      router.query.page ? Number(router.query.page) : 1,
+      router.query.rowPerPage ? Number(router.query.rowPerPage) : 10,
+    ],
+    [router.query.page, router.query.rowPerPage]
+  );
+
+  const syllabusKey = `/syllabus/get-all?page=${page}&limit=${rowPerPage}`;
+
   const toggle = (syllabus: any) => {
     setIsOpen(!isOpen);
     setSelectedItems(syllabus.items || []);
     setSelectedSyllabus(syllabus.syllabus_name);
 
     if (isOpen) {
-      mutate([`/syllabus/get-all`, page, rowPerPage]);
+      mutate(syllabusKey);
     }
   };
 
@@ -32,7 +43,7 @@ const SyllabusTable = ({ reload }: any) => {
     setIsCopyMode(false);
     setIsOpenDetail(!isOpenDetail);
     if (isOpenDetail) {
-      mutate([`/syllabus/get-all`, page, rowPerPage]);
+      mutate(syllabusKey);
     }
   };
 
@@ -44,21 +55,32 @@ const SyllabusTable = ({ reload }: any) => {
   };
 
   useEffect(() => {
-    mutate([`/syllabus/get-all`, page, rowPerPage]);
-  }, [reload]);
-
-  const page = router.query.page ? Number(router.query.page) : 1;
-  const rowPerPage = router.query.rowPerPage
-    ? Number(router.query.rowPerPage)
-    : 10;
+    if (syllabusKey) {
+      mutate(syllabusKey);
+    }
+  }, [reload, syllabusKey]);
 
   const {
     data: syllabus,
     error,
     isLoading,
-  } = useSWR([`/syllabus/get-all`, page, rowPerPage], () =>
-    getAllSyllabus(page, rowPerPage)
-  );
+  } = useSWR(syllabusKey, () => getAllSyllabus(page, rowPerPage), {
+    revalidateOnFocus: false,
+    revalidateOnReconnect: false,
+    dedupingInterval: 10000, 
+    revalidateIfStale: false,
+  });
+
+  if (isLoading) {
+    return (
+      <TableSkeleton
+        rows={10}
+        columns={5}
+        showHeader={true}
+        animated={true}
+      />
+    );
+  }
 
   if (!syllabus?.data) return null;
 

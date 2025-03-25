@@ -6,6 +6,7 @@ import TableActionButtons from "@/components/own/table-action-buttons/table-acti
 import Swal from "sweetalert2";
 import DataTable from "react-data-table-component";
 import HolidaysForm from "../form/holidays-form";
+import TableSkeleton from "../common/TableSkeleton";
 
 const HolidaysTable = ({ reload }: any) => {
   const router = useRouter();
@@ -68,6 +69,17 @@ const HolidaysTable = ({ reload }: any) => {
   } = useSWR([`/holidays/get-all`, page, rowPerPage], () =>
     getAllHolidays(page, rowPerPage),
   );
+
+  if (isLoading) {
+    return (
+      <TableSkeleton
+        rows={10}
+        columns={6}
+        showHeader={true}
+        animated={true}
+      />
+    ); 
+  }
 
   if (!holidays?.data?.result) return null;
 
