@@ -41,7 +41,6 @@ const UserForm = ({ data, isOpen, toggle }: any) => {
           value={baseValue}
           onChange={(e) => {
             const newValue = e.target.value;
-            // Al actualizar, se guarda la concatenación del valor base + sufijo
             form.setFieldValue(field.name, newValue + suffix);
           }}
         />
