@@ -1,4 +1,4 @@
-import { getFetcher, postFetcher, putFetcher } from "../api";
+import { getFetcher, postFetcher, putFetcher } from '../api';
 
 export const getCourseById = (courseId: string) => {
   return getFetcher(`/course/get-one/${courseId}`, false);
@@ -14,18 +14,18 @@ export const getGradingItems = (courseId: string) => {
 export const getGradingPercentageBySyllabus = (syllabusId: string) => {
   return getFetcher(
     `/course/get-grading-percentage-by-syllabus/${syllabusId}`,
-    false,
+    false
   );
 };
 
 export const getActiveCourses = (
   page: number,
   limit: number,
-  searchTerm = "",
+  searchTerm = ''
 ) => {
   return getFetcher(
     `/course/get-active?page=${page}&limit=${limit}&search=${searchTerm}`,
-    false,
+    false
   );
 };
 
@@ -36,12 +36,16 @@ export const getAllCourses = () => {
 export const getCourseWithProfessors = (
   page: number,
   limit: number,
-  filters: any,
+  filters: any
 ) => {
   return getFetcher(
-    `/course/get-all-with-professors?page=${page}&limit=${limit}${filters ? `&${filters}` : ""}`,
-    false,
+    `/course/get-all-with-professors?page=${page}&limit=${limit}${filters ? `&${filters}` : ''}`,
+    false
   );
+};
+
+export const getAcademicPerformance = () => {
+  return getFetcher(`/course/get-academic-performance`, false);
 };
 
 export const createCourse = (data: any) => {

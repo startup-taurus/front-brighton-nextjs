@@ -1,4 +1,4 @@
-import { getFetcher, postFetcher, putFetcher } from "../api";
+import { getFetcher, postFetcher, putFetcher } from '../api';
 
 export const getProfessorCourses = (userId: number) => {
   return getFetcher(`/professor/${userId}/courses`, false);
@@ -10,7 +10,7 @@ export const getAllProfessors = (
   filters?: any
 ) => {
   return getFetcher(
-    `/professor/get-all?page=${page}&limit=${limit}${filters ? `&${filters}` : ""}`,
+    `/professor/get-all?page=${page}&limit=${limit}${filters ? `&${filters}` : ''}`,
     false
   );
 };
@@ -18,7 +18,7 @@ export const getAllProfessors = (
 export const getActiveProfessors = (
   page: number,
   limit: number,
-  searchTerm = ""
+  searchTerm = ''
 ) => {
   return getFetcher(
     `/professor/get-active?page=${page}&limit=${limit}&search=${searchTerm}`,

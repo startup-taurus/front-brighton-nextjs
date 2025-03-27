@@ -12,11 +12,11 @@ const SchoolData = () => {
 
   return (
     <>
-      {schoolCardData?.data?.map((schoolCardItem: any, index: number) => (
+      {schoolCardData?.data?.map((schoolCardItem: any) => (
         <Col
           md={4}
           className={schoolCardItem.smallScreenClass ? 'col-sm-6' : ''}
-          key={index}
+          key={`school-card-${schoolCardItem.header?.toLowerCase().replace(/\s+/g, '-')}`}
         >
           <Card className='widget-hover overflow-hidden'>
             <DashboardHead

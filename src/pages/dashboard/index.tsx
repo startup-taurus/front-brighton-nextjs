@@ -8,7 +8,7 @@ import Breadcrumbs from 'CommonElements/Breadcrumbs';
 import dynamic from 'next/dynamic';
 import { Col, Container, Row } from 'reactstrap';
 import { SchoolManage, SchoolManagementHeading } from 'utils/Constant';
-import CardSkeleton from '@/components/own/common/CardSkeleton';
+import CardSkeleton from '@/components/own/common/card-skeleton';
 import TableSkeleton from '@/components/own/common/TableSkeleton';
 
 const SchoolManagement = () => {
