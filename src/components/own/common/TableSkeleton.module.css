@@ -25,7 +25,6 @@
   opacity: 0.7;
 }
 
-/* Animación de pulso */
 .pulse {
   animation: pulse 1.5s ease-in-out infinite;
 }
@@ -42,7 +41,6 @@
   }
 }
 
-/* Estilos responsivos */
 @media (max-width: 768px) {
   .tableSkeletonContainer {
     overflow-x: auto;

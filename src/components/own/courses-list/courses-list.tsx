@@ -41,6 +41,7 @@ const CoursesList = ({ title, coursesList }: CoursesListProps) => {
                     )}
                     {course?.options?.hasClassToday && (
                       <Tooltip
+                        innerClassName='text-dark'
                         isOpen={tooltips[`calendar-${index}`]}
                         target={`calendar-${index}`}
                         toggle={() => toggle(`calendar-${index}`)}
@@ -55,6 +56,7 @@ const CoursesList = ({ title, coursesList }: CoursesListProps) => {
                     {course?.options?.hasClassToday &&
                       !course?.options?.hasBeenTakenAttendance && (
                         <Tooltip
+                          innerClassName='text-dark'
                           isOpen={tooltips[`alert-${index}`]}
                           target={`alert-${index}`}
                           toggle={() => toggle(`alert-${index}`)}
@@ -67,6 +69,7 @@ const CoursesList = ({ title, coursesList }: CoursesListProps) => {
                     )}
                     {course?.options?.endThisMoth && (
                       <Tooltip
+                        innerClassName='text-dark'
                         isOpen={tooltips[`finish-${index}`]}
                         target={`finish-${index}`}
                         toggle={() => toggle(`finish-${index}`)}
@@ -79,6 +82,7 @@ const CoursesList = ({ title, coursesList }: CoursesListProps) => {
                     )}
                     {course?.options?.isAreadyEnd && (
                       <Tooltip
+                        innerClassName='text-dark'
                         isOpen={tooltips[`graduate-${index}`]}
                         target={`graduate-${index}`}
                         toggle={() => toggle(`graduate-${index}`)}

@@ -1,28 +1,19 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import ReactApexChart from 'react-apexcharts';
 import { Card, CardBody, Col } from 'reactstrap';
 import { CommonHeader } from './CommonHeader';
-import { getFetcher } from 'helper/api';
+import useSWR from 'swr';
 
 const AcademicPerformance = () => {
-  const [chartData, setChartData] = useState({
-    series: [],
-    options: {},
-  });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    getFetcher('/course/get-academic-performance', false)
-      .then((response) => {
-        setChartData(response.data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError(err);
-        setLoading(false);
-      });
-  }, []);
+  const {
+    data: chartData,
+    error,
+    isLoading,
+  } = useSWR('/course/get-academic-performance', (url) =>
+    fetch(`${process.env.API_URL}${url}`)
+      .then((res) => res.json())
+      .then((res) => res.data)
+  );
 
   return (
     <Col
@@ -37,12 +28,14 @@ const AcademicPerformance = () => {
               id='academic_performance-chart'
               style={{ minHeight: 245 }}
             >
-              <ReactApexChart
-                options={chartData.options}
-                type='area'
-                series={chartData.series}
-                height={230}
-              />
+              {!isLoading && chartData && (
+                <ReactApexChart
+                  options={chartData.options || {}}
+                  type='area'
+                  series={chartData.series || []}
+                  height={230}
+                />
+              )}
             </div>
           </div>
         </CardBody>

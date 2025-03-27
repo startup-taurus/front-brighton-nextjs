@@ -1,4 +1,4 @@
-import React, { CSSProperties, useState } from 'react';
+import React, { useState } from 'react';
 import { ErrorMessage, Field, Formik, FieldArray } from 'formik';
 import {
   Button,
@@ -11,33 +11,16 @@ import {
   FormFeedback,
   Row,
 } from 'reactstrap';
-import LoadingButton from '../common/LoadingButton';
-import { createSyllabus, updateSyllabus } from 'helper/api-data/syllabus';
 import { FaTrash } from 'react-icons/fa';
 import * as Yup from 'yup';
+
+import LoadingButton from '../common/LoadingButton';
+import { createSyllabus, updateSyllabus } from 'helper/api-data/syllabus';
+
 
 const validations = Yup.object().shape({
   syllabus_name: Yup.string().required('The syllabus name is required'),
 });
-
-const containerStyle: CSSProperties = {
-  border: '1px solid #ccc',
-  padding: '20px 15px',
-  borderRadius: '4px',
-  backgroundColor: '#f9f9f9',
-  marginBottom: '10px',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '10px',
-  maxHeight: '350px',
-  overflowY: 'auto',
-  overflowX: 'hidden',
-};
-
-const inputStyle: CSSProperties = { width: '160px', maxWidth: '70%' };
-const inputStyleTitle: CSSProperties = {
-  maxWidth: '100%',
-};
 
 const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -55,7 +38,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
         }
       }
     } catch (error) {
-      console.error('Error al crear syllabus:', error);
+      console.error('Error creating syllabus:', error);
     } finally {
       setSubmitting(false);
       setIsLoading(false);
@@ -75,7 +58,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
         }
       }
     } catch (error) {
-      console.error('Error al actualizar syllabus:', error);
+      console.error('Error updating syllabus:', error);
     } finally {
       setSubmitting(false);
       setIsLoading(false);
@@ -163,7 +146,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                           Add Item
                         </Button>
                       </div>
-                      <div style={containerStyle}>
+                      <div className='syllabus-container'>
                         <Row className='mb-2'>
                           {(
                             values[name as keyof typeof values] as string[]
@@ -182,8 +165,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                                   )
                                 }
                                 placeholder={`Item ${index + 1}`}
-                                className='me-2'
-                                style={inputStyle}
+                                className='me-2 syllabus-input'
                               />
                               <Button
                                 type='button'
@@ -228,7 +210,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                           Add Percentage
                         </Button>
                       </div>
-                      <div style={{ ...containerStyle }}>
+                      <div className='syllabus-container'>
                         {values[name].map((percentage: any, index: number) => (
                           <Row
                             key={index}
@@ -245,7 +227,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                                     e.target.value
                                   )
                                 }
-                                style={inputStyle}
+                                className='syllabus-input'
                               />
                             </Col>
                             <Col md={3}>
@@ -259,7 +241,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                                     e.target.value
                                   )
                                 }
-                                style={inputStyle}
+                                className='syllabus-input'
                               />
                             </Col>
                             <Col md={3}>
@@ -273,7 +255,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                                     e.target.value
                                   )
                                 }
-                                style={inputStyle}
+                                className='syllabus-input'
                               />
                             </Col>
                             <Col
@@ -310,7 +292,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                     name='syllabus_name'
                     as={Input}
                     invalid={touched.syllabus_name && !!errors.syllabus_name}
-                    style={inputStyleTitle}
+                    className='syllabus-input-title'
                   />
                   <ErrorMessage
                     name='syllabus_name'
@@ -326,7 +308,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                     name='assig_percentage'
                     as={Input}
                     type='number'
-                    style={inputStyle}
+                    className='syllabus-input'
                   />
                   <ErrorMessage
                     name='assig_percentage'
@@ -339,7 +321,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                     name='test_percentage'
                     as={Input}
                     type='number'
-                    style={inputStyle}
+                    className='syllabus-input'
                   />
                   <ErrorMessage
                     name='test_percentage'
@@ -352,7 +334,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                     name='exam_percentage'
                     as={Input}
                     type='number'
-                    style={inputStyle}
+                    className='syllabus-input'
                   />
                   <ErrorMessage
                     name='exam_percentage'
