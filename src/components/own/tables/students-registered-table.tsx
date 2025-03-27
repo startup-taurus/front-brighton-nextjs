@@ -25,7 +25,6 @@ const StudentsRegisteredTable = ({
   const [selectedStudent, setSelectedStudent] = useState<any>(null);
 
   const toggleStudentForm = (data: any) => {
-    console.log(data);
     setSelectedStudent({
       user: {
         id: data?.id,
