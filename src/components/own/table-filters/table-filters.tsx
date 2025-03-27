@@ -85,7 +85,7 @@ const TableFilters = ({ selectFilters }: TableFiltersProps) => {
                       <Label for='studentFilter'>{item.labelName}</Label>
                       {item?.type === 'select' ? (
                         <Field
-                          {...item}
+                          name={item.name}
                           type='select'
                           as={Input}
                         >
@@ -93,7 +93,7 @@ const TableFilters = ({ selectFilters }: TableFiltersProps) => {
                           {item?.items?.map((item, j) => (
                             <option
                               value={item.value}
-                              key={`item-${item.value}-${i}`}
+                              key={`item-${item.label}-${item.value}-${i}-${j}`}
                             >
                               {item.label}
                             </option>
@@ -101,7 +101,7 @@ const TableFilters = ({ selectFilters }: TableFiltersProps) => {
                         </Field>
                       ) : (
                         <Field
-                          {...item}
+                          name={item.name}
                           type='text'
                           as={Input}
                         />

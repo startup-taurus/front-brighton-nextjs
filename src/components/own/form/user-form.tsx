@@ -5,6 +5,8 @@ import {
   Col,
   FormFeedback,
   Input,
+  InputGroup,
+  InputGroupText,
   Label,
   Modal,
   ModalBody,
@@ -24,6 +26,28 @@ const UserForm = ({ data, isOpen, toggle }: any) => {
     } catch (error) {
       console.error('Error al crear usuario:', error);
     }
+  };
+  const NameField = ({ field, form, ...props }: any) => {
+    const suffix = 'Brighton';
+    let baseValue = field.value || '';
+    if (baseValue.endsWith(suffix)) {
+      baseValue = baseValue.slice(0, -suffix.length);
+    }
+    return (
+      <InputGroup>
+        <Input
+          {...field}
+          {...props}
+          value={baseValue}
+          onChange={(e) => {
+            const newValue = e.target.value;
+            // Al actualizar, se guarda la concatenación del valor base + sufijo
+            form.setFieldValue(field.name, newValue + suffix);
+          }}
+        />
+        <InputGroupText>{suffix.trim()}</InputGroupText>
+      </InputGroup>
+    );
   };
 
   const update = async (data: any) => {
@@ -95,6 +119,7 @@ const UserForm = ({ data, isOpen, toggle }: any) => {
                   <Field
                     name='username'
                     as={Input}
+                    component={NameField}
                   />
                   <ErrorMessage
                     name='username'

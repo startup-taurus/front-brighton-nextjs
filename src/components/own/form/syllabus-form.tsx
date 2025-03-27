@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { CSSProperties, useState } from 'react';
 import { ErrorMessage, Field, Formik, FieldArray } from 'formik';
 import {
   Button,
@@ -20,8 +20,28 @@ const validations = Yup.object().shape({
   syllabus_name: Yup.string().required('The syllabus name is required'),
 });
 
-const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
+const containerStyle: CSSProperties = {
+  border: '1px solid #ccc',
+  padding: '20px 15px',
+  borderRadius: '4px',
+  backgroundColor: '#f9f9f9',
+  marginBottom: '10px',
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '10px',
+  maxHeight: '350px',
+  overflowY: 'auto',
+  overflowX: 'hidden',
+};
+
+const inputStyle: CSSProperties = { width: '160px', maxWidth: '70%' };
+const inputStyleTitle: CSSProperties = {
+  maxWidth: '100%',
+};
+
+const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
   const [isLoading, setIsLoading] = useState(false);
+
   const save = async (syllabus: any, { setSubmitting }: any) => {
     setSubmitting(true);
     setIsLoading(true);
@@ -30,6 +50,9 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
       if (response.statusCode === 200) {
         setSubmitting(false);
         toggle();
+        if (onReload) {
+          onReload();
+        }
       }
     } catch (error) {
       console.error('Error al crear syllabus:', error);
@@ -47,6 +70,9 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
       if (response.statusCode === 200) {
         setSubmitting(false);
         toggle();
+        if (onReload) {
+          onReload();
+        }
       }
     } catch (error) {
       console.error('Error al actualizar syllabus:', error);
@@ -84,11 +110,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
                   progress_tests: data?.progress_tests || [''],
                   movers_exam: data?.movers_exam || [''],
                   percentages: data?.percentages_syllabus || [
-                    {
-                      name: '',
-                      min: 0,
-                      max: 0,
-                    },
+                    { name: '', min: 0, max: 0 },
                   ],
                 }
               : {
@@ -101,13 +123,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
                   assignments: [''],
                   progress_tests: [''],
                   movers_exam: [''],
-                  percentages: [
-                    {
-                      name: '',
-                      min: 0,
-                      max: 0,
-                    },
-                  ],
+                  percentages: [{ name: '', min: 0, max: 0 }],
                 }
           }
           validationSchema={validations}
@@ -137,10 +153,21 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
                 <FieldArray
                   name={name}
                   render={(arrayHelpers) => (
-                    <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
-                      <Row>
-                        {(values[name as keyof typeof values] as string[]).map(
-                          (item, index) => (
+                    <>
+                      <div className='d-flex justify-content-start my-2'>
+                        <Button
+                          type='button'
+                          color='primary'
+                          onClick={() => arrayHelpers.push('')}
+                        >
+                          Add Item
+                        </Button>
+                      </div>
+                      <div style={containerStyle}>
+                        <Row className='mb-2'>
+                          {(
+                            values[name as keyof typeof values] as string[]
+                          ).map((item, index) => (
                             <Col
                               key={index}
                               xs={6}
@@ -156,6 +183,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
                                 }
                                 placeholder={`Item ${index + 1}`}
                                 className='me-2'
+                                style={inputStyle}
                               />
                               <Button
                                 type='button'
@@ -165,17 +193,10 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
                                 <FaTrash />
                               </Button>
                             </Col>
-                          )
-                        )}
-                      </Row>
-                      <Button
-                        type='button'
-                        color='primary'
-                        onClick={() => arrayHelpers.push('')}
-                      >
-                        Add Item
-                      </Button>
-                    </div>
+                          ))}
+                        </Row>
+                      </div>
+                    </>
                   )}
                 />
               </Col>
@@ -195,79 +216,82 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
                 <FieldArray
                   name={name}
                   render={(arrayHelpers) => (
-                    <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
-                      {values[name].map((percentage: any, index: number) => (
-                        <Row
-                          key={index}
-                          className='mb-2'
+                    <>
+                      <div className='d-flex justify-content-start my-2'>
+                        <Button
+                          type='button'
+                          color='primary'
+                          onClick={() =>
+                            arrayHelpers.push({ name: '', min: 0, max: 0 })
+                          }
                         >
-                          <Col md={4}>
-                            <Label>Name</Label>
-                            <Input
-                              type='text'
-                              value={percentage.name}
-                              onChange={(e) =>
-                                setFieldValue(
-                                  `${name}[${index}].name`,
-                                  e.target.value
-                                )
-                              }
-                            />
-                          </Col>
-                          <Col md={3}>
-                            <Label>Min %</Label>
-                            <Input
-                              type='number'
-                              value={percentage.min}
-                              onChange={(e) =>
-                                setFieldValue(
-                                  `${name}[${index}].min`,
-                                  e.target.value
-                                )
-                              }
-                            />
-                          </Col>
-                          <Col md={3}>
-                            <Label>Max %</Label>
-                            <Input
-                              type='number'
-                              value={percentage.max}
-                              onChange={(e) =>
-                                setFieldValue(
-                                  `${name}[${index}].max`,
-                                  e.target.value
-                                )
-                              }
-                            />
-                          </Col>
-                          <Col
-                            md={2}
-                            className='d-flex align-items-end'
+                          Add Percentage
+                        </Button>
+                      </div>
+                      <div style={{ ...containerStyle }}>
+                        {values[name].map((percentage: any, index: number) => (
+                          <Row
+                            key={index}
+                            className='mb-2 align-items-center'
                           >
-                            <Button
-                              type='button'
-                              color='danger'
-                              onClick={() => arrayHelpers.remove(index)}
+                            <Col md={4}>
+                              <Label>Name</Label>
+                              <Input
+                                type='text'
+                                value={percentage.name}
+                                onChange={(e) =>
+                                  setFieldValue(
+                                    `${name}[${index}].name`,
+                                    e.target.value
+                                  )
+                                }
+                                style={inputStyle}
+                              />
+                            </Col>
+                            <Col md={3}>
+                              <Label>Min %</Label>
+                              <Input
+                                type='number'
+                                value={percentage.min}
+                                onChange={(e) =>
+                                  setFieldValue(
+                                    `${name}[${index}].min`,
+                                    e.target.value
+                                  )
+                                }
+                                style={inputStyle}
+                              />
+                            </Col>
+                            <Col md={3}>
+                              <Label>Max %</Label>
+                              <Input
+                                type='number'
+                                value={percentage.max}
+                                onChange={(e) =>
+                                  setFieldValue(
+                                    `${name}[${index}].max`,
+                                    e.target.value
+                                  )
+                                }
+                                style={inputStyle}
+                              />
+                            </Col>
+                            <Col
+                              md={2}
+                              className='d-flex align-items-end'
                             >
-                              <FaTrash />
-                            </Button>
-                          </Col>
-                        </Row>
-                      ))}
-                      <Button
-                        type='button'
-                        color='primary'
-                        onClick={() =>
-                          arrayHelpers.push({
-                            name: '',
-                            min: 0,
-                            max: 0,
-                          })
-                        }
-                      >
-                        Add Percentage
-                      </Button>
-                    </div>
+                              <Button
+                                type='button'
+                                color='danger'
+                                onClick={() => arrayHelpers.remove(index)}
+                              >
+                                <FaTrash />
+                              </Button>
+                            </Col>
+                          </Row>
+                        ))}
+                      </div>
+                    </>
                   )}
                 />
               </Col>
@@ -278,7 +302,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
                 noValidate
                 autoComplete='off'
                 onSubmit={handleSubmit}
-                className={`row g-3`}
+                className='row g-3'
               >
                 <Col xs={12}>
                   <Label for='syllabus_name'>Syllabus Name</Label>
@@ -286,6 +310,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
                     name='syllabus_name'
                     as={Input}
                     invalid={touched.syllabus_name && !!errors.syllabus_name}
+                    style={inputStyleTitle}
                   />
                   <ErrorMessage
                     name='syllabus_name'
@@ -301,6 +326,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
                     name='assig_percentage'
                     as={Input}
                     type='number'
+                    style={inputStyle}
                   />
                   <ErrorMessage
                     name='assig_percentage'
@@ -313,6 +339,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
                     name='test_percentage'
                     as={Input}
                     type='number'
+                    style={inputStyle}
                   />
                   <ErrorMessage
                     name='test_percentage'
@@ -325,19 +352,20 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
                     name='exam_percentage'
                     as={Input}
                     type='number'
+                    style={inputStyle}
                   />
                   <ErrorMessage
                     name='exam_percentage'
                     component={FormFeedback}
                   />
                 </Col>
-                <hr />
+                <hr className='my-4' />
                 {renderArrayField('assignments', 'Assignments')}
-                <hr />
+                <hr className='my-4' />
                 {renderArrayField('progress_tests', 'Progress Tests')}
-                <hr />
+                <hr className='my-4' />
                 {renderArrayField('movers_exam', 'Movers Exam')}
-                <hr />
+                <hr className='my-4' />
                 {renderPercentagesField(
                   'percentages',
                   'Custom Percentages',
@@ -350,7 +378,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy }: any) => {
                   className='d-flex justify-content-end mt-5'
                 >
                   <Button
-                    color='cancel'
+                    color='secondary'
                     onClick={toggle}
                   >
                     Close

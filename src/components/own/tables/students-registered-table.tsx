@@ -91,7 +91,7 @@ const StudentsRegisteredTable = ({
       ]);
     });
   };
-  
+
   if (loading) {
     return (
       <TableSkeleton
@@ -100,7 +100,7 @@ const StudentsRegisteredTable = ({
         showHeader={true}
         animated={true}
       />
-    ); 
+    );
   }
 
   if (!students?.data?.result) return null;
@@ -115,7 +115,7 @@ const StudentsRegisteredTable = ({
           onDelete={() => handleDelete(row)}
         />
       ),
-      minWidth: '180px',
+      width: '180px',
       sortable: false,
       center: false,
     },

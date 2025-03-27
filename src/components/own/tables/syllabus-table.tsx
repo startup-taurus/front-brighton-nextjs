@@ -67,7 +67,7 @@ const SyllabusTable = ({ reload }: any) => {
   } = useSWR(syllabusKey, () => getAllSyllabus(page, rowPerPage), {
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
-    dedupingInterval: 10000, 
+    dedupingInterval: 10000,
     revalidateIfStale: false,
   });
 
@@ -161,6 +161,7 @@ const SyllabusTable = ({ reload }: any) => {
         toggle={toggleDetail}
         data={selectedData}
         isCopy={isCopyMode}
+        onReload={() => mutate(syllabusKey)}
       />
     </div>
   );
