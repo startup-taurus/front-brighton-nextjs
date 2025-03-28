@@ -1,10 +1,39 @@
 import React from 'react';
-import ReactApexChart from 'react-apexcharts';
 import { Card, CardBody, Col } from 'reactstrap';
 import { CommonHeader } from './CommonHeader';
 import useSWR from 'swr';
 import { getAcademicPerformance } from 'helper/api-data/course';
 import CardSkeleton from '@/components/own/common/card-skeleton';
+import { Chart } from 'react-google-charts';
+
+const transformDataForGoogleCharts = (chartData: any) => {
+  if (!chartData || !chartData.series || !chartData.options) {
+    return [
+      ['Period', 'Performance'],
+      ['No Data', 0],
+    ];
+  }
+
+  const header = [
+    'Period',
+    ...chartData.series.map((s: any) => s.name || 'Performance'),
+  ];
+
+  const categories = Array.isArray(chartData.options.xaxis.categories)
+    ? chartData.options.xaxis.categories
+    : chartData.series[0].data.map((_: any, i: number) => `Period ${i + 1}`);
+
+  const rows = categories.map((category: string, index: number) => {
+    return [
+      category,
+      ...chartData.series.map((s: any) =>
+        s.data && s.data[index] !== undefined ? s.data[index] : 0
+      ),
+    ];
+  });
+
+  return [header, ...rows];
+};
 
 const AcademicPerformance = () => {
   const { data: performanceData, error } = useSWR(
@@ -42,11 +71,21 @@ const AcademicPerformance = () => {
               id='academic_performance-chart'
               style={{ minHeight: 245 }}
             >
-              <ReactApexChart
-                options={performanceData.data?.options || {}}
-                type='area'
-                series={performanceData.data?.series || []}
+              <Chart
+                chartType='AreaChart'
+                width='100%'
                 height={230}
+                data={transformDataForGoogleCharts(performanceData.data)}
+                options={{
+                  hAxis: { titleTextStyle: { color: '#333' } },
+                  vAxis: { minValue: 0 },
+                  colors: performanceData.data?.options?.colors || [
+                    '#7366FF',
+                    '#FF3364',
+                  ],
+                  chartArea: { width: '80%', height: '60%' },
+                  backgroundColor: 'transparent',
+                }}
               />
             </div>
           </div>
