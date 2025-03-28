@@ -83,8 +83,8 @@ const SchoolManagement = () => {
             </Row>
           </Col>
           <Col
-            xxl={12}
-            className='d-xxl-block d-none box-col-none'
+            xs={12}
+            className='box-col-12'
           >
             <Row>
               {loading ? (
