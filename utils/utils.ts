@@ -1,7 +1,7 @@
-import Cookies from "js-cookie";
-import { toast } from "react-toastify";
-import { COMPONENTS_GRADEBOOK, ERROR_MESSAGE, EXAMS_TYPE } from "./constants";
-import { NextRouter } from "next/router";
+import Cookies from 'js-cookie';
+import { toast } from 'react-toastify';
+import { COMPONENTS_GRADEBOOK, ERROR_MESSAGE, EXAMS_TYPE } from './constants';
+import { NextRouter } from 'next/router';
 import {
   addDays,
   addWeeks,
@@ -9,28 +9,28 @@ import {
   isBefore,
   parseISO,
   startOfWeek,
-} from "date-fns";
+} from 'date-fns';
 import {
   ComponentsGradebook,
   GradingItem,
   GradingPercentage,
-} from "../Types/GradingItem";
+} from '../Types/GradingItem';
 
-export const isBrowser = () => typeof window !== "undefined";
+export const isBrowser = () => typeof window !== 'undefined';
 
 export const handleError = (
   e: any,
   hideError?: boolean,
-  stopRedirect?: boolean,
+  stopRedirect?: boolean
 ) => {
   if (
-    (e?.response?.data?.message == "No autorizado, no se envió el token" ||
+    (e?.response?.data?.message == 'No autorizado, no se envió el token' ||
       e?.response?.status == 401) &&
     isBrowser() &&
     !stopRedirect
   ) {
-    Cookies.remove("token");
-    window.location.replace("/dashboard/login");
+    Cookies.remove('token');
+    window.location.replace('/dashboard/login');
   }
   if (!hideError) {
     toast.error(e?.response?.data?.message ?? ERROR_MESSAGE);
@@ -38,12 +38,12 @@ export const handleError = (
   return e;
 };
 
-export const getToken = () => Cookies.get("token");
+export const getToken = () => Cookies.get('token');
 
 export const setQueryStringValue = (
   key: string,
   value: string | number,
-  router: NextRouter,
+  router: NextRouter
 ) => {
   const query = { ...router.query, [key]: value };
 
@@ -53,7 +53,7 @@ export const setQueryStringValue = (
       query,
     },
     undefined,
-    { shallow: true },
+    { shallow: true }
   );
 };
 
@@ -73,19 +73,19 @@ export const setQueryStringValue = (
 
 export const getFiltersString = (router: NextRouter) => {
   return Object.entries(router.query)
-    .filter(([, value]) => value && value !== "all")
+    .filter(([, value]) => value && value !== 'all')
     .map(
       ([key, value]) =>
-        `${encodeURIComponent(key)}=${encodeURIComponent(value as string)}`,
+        `${encodeURIComponent(key)}=${encodeURIComponent(value as string)}`
     )
-    .join("&");
+    .join('&');
 };
 
 export const cleanAndFormatQuery = (values: any) => {
   return Object.fromEntries(
     Object.entries(values)
-      .filter(([, value]) => value && value !== "all")
-      .map((item) => item),
+      .filter(([, value]) => value && value !== 'all')
+      .map((item) => item)
   );
 };
 
@@ -95,14 +95,14 @@ export const clearQueryString = (router: NextRouter) => {
       pathname: router.pathname,
     },
     undefined,
-    { shallow: true },
+    { shallow: true }
   );
 };
 
 export const handleChangeFilter = (
   key: string,
   value: string | number,
-  router: NextRouter,
+  router: NextRouter
 ) => {
   setQueryStringValue(key, value, router);
 };
@@ -110,13 +110,13 @@ export const handleChangeFilter = (
 export const textEllipsis = (
   str: string,
   maxLength: number,
-  { side = "end", ellipsis = "..." } = {},
+  { side = 'end', ellipsis = '...' } = {}
 ) => {
   if (str?.length > maxLength) {
     switch (side) {
-      case "start":
+      case 'start':
         return ellipsis + str.slice(-(maxLength - ellipsis.length));
-      case "end":
+      case 'end':
       default:
         return str.slice(0, maxLength - ellipsis.length) + ellipsis;
     }
@@ -126,13 +126,13 @@ export const textEllipsis = (
 
 const getDayNumber = (dayName: string) => {
   const days = [
-    "Sunday",
-    "Monday",
-    "Tuesday",
-    "Wednesday",
-    "Thursday",
-    "Friday",
-    "Saturday",
+    'Sunday',
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
   ];
   return days.indexOf(dayName);
 };
@@ -144,8 +144,8 @@ export const getDayOfClassesOfWeek = (courses: any): any[] => {
     return course?.schedule?.map((item: any, index: number) => {
       const dayNumber = getDayNumber(item.day);
       const date = addDays(weekStart, dayNumber);
-      const startDateTime = `${format(date, "yyyy-MM-dd")}T${item.startTime}:00`;
-      const endDateTime = `${format(date, "yyyy-MM-dd")}T${item.endTime}:00`;
+      const startDateTime = `${format(date, 'yyyy-MM-dd')}T${item.startTime}:00`;
+      const endDateTime = `${format(date, 'yyyy-MM-dd')}T${item.endTime}:00`;
 
       return {
         id: index,
@@ -166,7 +166,7 @@ export const getDayOfClassesOfWeek = (courses: any): any[] => {
 export const getAllCourseDays = (
   startDate: any,
   endDate: any,
-  schedule: any,
+  schedule: any
 ) => {
   let currentDate = new Date(startDate);
   let daysOfClasses: any = [];
@@ -175,13 +175,13 @@ export const getAllCourseDays = (
       daysOfClasses.push(
         format(
           getDateByDateAndDayName(currentDate, weekDay.day),
-          "EEE, MMM d, yy",
-        ),
-      ),
+          'EEE, MMM d, yy'
+        )
+      )
     );
     currentDate = addWeeks(currentDate, 1);
   }
-  daysOfClasses.push(format(new Date(endDate), "EEE, MMM d, yy"));
+  daysOfClasses.push(format(new Date(endDate), 'EEE, MMM d, yy'));
   return daysOfClasses;
 };
 
@@ -192,17 +192,17 @@ const getDateByDateAndDayName = (date: any, day: string) => {
 };
 
 export const formatDate = (date: string): string =>
-  format(parseISO(date), "EEE, MMM d");
+  format(parseISO(date), 'EEE, MMM d');
 
 export const initializeAttendanceStructure = (
   courseSchedule: any,
   students: any,
-  attendanceDate: any,
+  attendanceDate: any
 ) => {
   courseSchedule?.forEach((courseScheduleItem: any) => {
     attendanceDate[courseScheduleItem.id] = {};
     students?.forEach((student: any) => {
-      attendanceDate[courseScheduleItem.id][student.id] = "";
+      attendanceDate[courseScheduleItem.id][student.id] = '';
     });
   });
 };
@@ -210,7 +210,7 @@ export const initializeAttendanceStructure = (
 export const buildAttendanceStructure = (
   courseSchedule: any,
   students: any,
-  studentsAttendance: any,
+  studentsAttendance: any
 ) => {
   let attendanceDate: any = {};
   initializeAttendanceStructure(courseSchedule, students, attendanceDate);
@@ -228,15 +228,15 @@ export const buildAttendanceStructure = (
 
 export const formatGradebookComponents = (data: any = []) => {
   const assignments = data.filter(
-    (item: any) => item.category === COMPONENTS_GRADEBOOK.ASSIGNMENTS,
+    (item: any) => item.category === COMPONENTS_GRADEBOOK.ASSIGNMENTS
   );
 
   const progressTest = data.filter(
-    (item: any) => item.category === COMPONENTS_GRADEBOOK.PROGRESS_TESTS,
+    (item: any) => item.category === COMPONENTS_GRADEBOOK.PROGRESS_TESTS
   );
 
   const moversExam = data.filter(
-    (item: any) => item.category === COMPONENTS_GRADEBOOK.MOVERS_EXAM,
+    (item: any) => item.category === COMPONENTS_GRADEBOOK.MOVERS_EXAM
   );
 
   return {
@@ -249,12 +249,12 @@ export const formatGradebookComponents = (data: any = []) => {
 export const initializeGradebookStructure = (
   courseGrading: any,
   students: any,
-  studentsGrades: any,
+  studentsGrades: any
 ) => {
   courseGrading?.forEach((courseGradingItem: any) => {
     studentsGrades[courseGradingItem.item_id] = {};
     students?.forEach((student: any) => {
-      studentsGrades[courseGradingItem.item_id][student.id] = "";
+      studentsGrades[courseGradingItem.item_id][student.id] = '';
     });
   });
 };
@@ -262,7 +262,7 @@ export const initializeGradebookStructure = (
 export const buildGradebookStructure = (
   courseGrading: any,
   students: any,
-  studentsGrades: any,
+  studentsGrades: any
 ) => {
   let gradingNotes: any = {};
   initializeGradebookStructure(courseGrading, students, gradingNotes);
@@ -284,11 +284,11 @@ export const calculateRelativePercentage = (percentage: string) => {
 export const calculateAverage = (
   grades: any[],
   notes: GradingItem[],
-  studentId: string,
+  studentId: string
 ) => {
   let sumResult = 0;
   let totalExpected = notes.length * 10;
-  let averageResult = "0";
+  let averageResult = '0';
 
   notes.map((note) => {
     sumResult += !!grades[note.item_id][studentId]
@@ -305,7 +305,7 @@ export const calculateTotalAverage = (
   grades: any[],
   notes: ComponentsGradebook,
   studentId: string,
-  gradingPercentages: GradingPercentage,
+  gradingPercentages: GradingPercentage
 ) => {
   let result = 0;
   const assignments = calculateAverage(grades, notes.assignments, studentId);
@@ -327,25 +327,25 @@ export const calculateClassTotalAverage = (
   grades: any[],
   componentsGradebook: any,
   gradingPercentages: GradingPercentage,
-  students: any[],
+  students: any[]
 ) => {
   const gradesTotalSum = students?.reduce((acc, student) => {
     const totalAverage = calculateTotalAverage(
       grades,
       componentsGradebook,
       student.id,
-      gradingPercentages,
+      gradingPercentages
     );
 
     return acc + Number(totalAverage);
   }, 0);
   const totalClassAverage = gradesTotalSum / students.length;
-  return !!totalClassAverage ? Number(totalClassAverage).toFixed(2) : "0";
+  return !!totalClassAverage ? Number(totalClassAverage).toFixed(2) : '0';
 };
 
 export const calculateFinalGradingStatus = (
   notesPercentages: any[] = [],
-  note: any,
+  note: any
 ) => {
   const percentage = Number(note);
 
@@ -356,25 +356,25 @@ export const calculateFinalGradingStatus = (
     );
   });
 
-  return !!gradingStatus ? gradingStatus?.name : "NOT REPORTED";
+  return !!gradingStatus ? gradingStatus?.name : 'NOT REPORTED';
 };
 export const determineResult = (totalAverage: number) => {
   if (totalAverage > 70) {
     return {
-      resultClass: "result-pass",
-      result: "PASS",
+      resultClass: 'result-pass',
+      result: 'PASS',
     };
   } else {
     return {
-      resultClass: "result-failed",
-      result: "FAIL",
+      resultClass: 'result-failed',
+      result: 'FAIL',
     };
   }
 };
 
 export const formatStudentScoreAssignmentsGrades = (
   scoreGrades: any,
-  courseLevel: string,
+  courseLevel: string
 ): any[] => {
   const assignmentsScore = determineResult(scoreGrades?.assignments);
   const progressTestScore = determineResult(scoreGrades?.progressTest);
@@ -402,7 +402,7 @@ export const formatStudentScoreExamGrades = (
   courseLevel: string,
   studentId: string,
   grades: any,
-  notesPercentages: any,
+  notesPercentages: any
 ) => {
   return moversExamScore?.map((moverExamScore, index) => {
     const scorePercentage = (
@@ -412,7 +412,7 @@ export const formatStudentScoreExamGrades = (
 
     const gradeResult = calculateFinalGradingStatus(
       notesPercentages,
-      scorePercentage,
+      scorePercentage
     );
 
     return {
@@ -421,14 +421,14 @@ export const formatStudentScoreExamGrades = (
       level: moverExamScore?.category,
       score: scorePercentage,
       grade: gradeResult,
-      class: `result-${gradeResult?.split(" ")[0].toLowerCase()}`,
+      class: `result-${gradeResult?.split(' ')[0].toLowerCase()}`,
     };
   });
 };
 
 export const calculateAssignmentAverage = (
   scoreGrades: any,
-  gradingPercentage: GradingPercentage,
+  gradingPercentage: GradingPercentage
 ) => {
   let totalPercentage = 0;
   let average = 0;
@@ -448,7 +448,7 @@ export const calculateAssignmentAverage = (
 
 export const calculateStudentAverage = (
   scoreGrades: any,
-  gradingPercentage: GradingPercentage,
+  gradingPercentage: GradingPercentage
 ) => {
   let totalPercentage = 0;
   let average = 0;
@@ -472,7 +472,7 @@ export const calculateStudentAverage = (
 export const calculateReportExamAverage = (
   moversExamScore: any[] = [],
   grades: any,
-  studentId: string,
+  studentId: string
 ) => {
   let moverExamSum = 0;
   let moversExamProm = 0;
@@ -489,7 +489,7 @@ export const calculateReportExamAverage = (
 export const formatReportBarChartData = (
   moversExamScore: any[] = [],
   grades: any,
-  studentId: string,
+  studentId: string
 ) => {
   let labels: string[] = [];
   let data: number[] = [];
@@ -503,9 +503,9 @@ export const formatReportBarChartData = (
     labels,
     datasets: [
       {
-        label: "SKILLS",
-        backgroundColor: "rgba(255, 167 ,0, 1)",
-        highlightFill: "rgba(255, 151 , 0, 1)",
+        label: 'SKILLS',
+        backgroundColor: 'rgba(255, 167 ,0, 1)',
+        highlightFill: 'rgba(255, 151 , 0, 1)',
         borderWidth: 2,
         data,
       },
@@ -518,11 +518,11 @@ export const countAttendance = (dates: any = {}, studentId: any) => {
   let attendanceAverage = 0;
   const attendanceTotal = datesValues.reduce((acc: number, attendance: any) => {
     if (
-      attendance[studentId] === "present" ||
-      attendance[studentId] === "recovered"
+      attendance[studentId] === 'present' ||
+      attendance[studentId] === 'recovered'
     )
       return acc + 1;
-    if (attendance[studentId] === "late") return acc + 0.5;
+    if (attendance[studentId] === 'late') return acc + 0.5;
     return acc;
   }, 0);
 
@@ -538,8 +538,8 @@ export const countAbsences = (dates: any = {}, studentId: any) => {
   const datesValues = Object.values(dates);
   let attendanceAverage = 0;
   const attendanceTotal = datesValues.reduce((acc: number, attendance: any) => {
-    if (attendance[studentId] === "absent") return acc + 1;
-    if (attendance[studentId] === "late") return acc + 0.5;
+    if (attendance[studentId] === 'absent') return acc + 1;
+    if (attendance[studentId] === 'late') return acc + 0.5;
     return acc;
   }, 0);
 
@@ -554,28 +554,26 @@ export const countAbsences = (dates: any = {}, studentId: any) => {
 export const getColorOfAssistance = (value: any) => {
   const percentage = Number(value);
   if (percentage >= 12 && percentage < 20) {
-    return "warning-field";
+    return 'warning-field';
   }
   if (percentage >= 20) {
-    return "danger-field";
+    return 'danger-field';
   }
 
-  return "";
+  return '';
 };
 
 export const formatExamParams = (result: any[]) => {
   const values = result?.map((exam) => {
-    const name = exam.criterion?.toLowerCase().replace(" and ", "-");
+    const name = exam.criterion?.toLowerCase().replace(' and ', '-');
     const formatName = name
-      .split("-")
+      .split('-')
       .map((word: string, index: number) => {
         return index === 0
           ? word
           : word.charAt(0).toUpperCase() + word.slice(1);
       })
-      .join("");
-
-    console.log(name, formatName);
+      .join('');
 
     return {
       [formatName]: `${exam?.score ? exam?.score : 0}%`,
@@ -596,68 +594,68 @@ export const formatReportUrl = ({
   tests,
   testsStatus,
   exam,
-  reading = "0.0%",
-  readingStatus = "NOT REPORTED",
-  listening = "0.0%",
-  listeningStatus = "NOT REPORTED",
-  writing = "0.0%",
-  writingStatus = "NOT REPORTED",
-  speaking = "0.0%",
-  speakingStatus = "NOT REPORTED",
+  reading = '0.0%',
+  readingStatus = 'NOT REPORTED',
+  listening = '0.0%',
+  listeningStatus = 'NOT REPORTED',
+  writing = '0.0%',
+  writingStatus = 'NOT REPORTED',
+  speaking = '0.0%',
+  speakingStatus = 'NOT REPORTED',
   generalExamsTotal,
   //Young learners
-  readingWriting = "0.0%",
-  readingWritingStatus = "NOT REPORTED",
-  listeningYLE = "0.0%",
-  listeningYLEStatus = "NOT REPORTED",
-  speakingYLE = "0.0%",
-  speakingYLEStatus = "NOT REPORTED",
+  readingWriting = '0.0%',
+  readingWritingStatus = 'NOT REPORTED',
+  listeningYLE = '0.0%',
+  listeningYLEStatus = 'NOT REPORTED',
+  speakingYLE = '0.0%',
+  speakingYLEStatus = 'NOT REPORTED',
   yleTotal,
   gpa,
   final,
 }: any) => {
   const baseUrl = new URL(
-    "https://chiispiitas.github.io/Brighton/Certificate%20Generator/index.html",
+    'https://chiispiitas.github.io/Brighton/Certificate%20Generator/index.html'
   );
-  baseUrl.searchParams.append("student", student.toUpperCase());
+  baseUrl.searchParams.append('student', student.toUpperCase());
   baseUrl.searchParams.append(
-    "program",
-    ageGroup === "adult" ? "General English" : "Young Learners",
+    'program',
+    ageGroup === 'adult' ? 'General English' : 'Young Learners'
   );
-  baseUrl.searchParams.append("level", level);
-  baseUrl.searchParams.append("short-level", level?.split(" ")[0]);
-  baseUrl.searchParams.append("assignments", assignments);
-  baseUrl.searchParams.append("assignments-total", assignmentsTotal);
-  baseUrl.searchParams.append("assignments-status", assignmentsStatus);
-  baseUrl.searchParams.append("tests", tests);
-  baseUrl.searchParams.append("tests-status", testsStatus);
-  baseUrl.searchParams.append("exam", exam);
+  baseUrl.searchParams.append('level', level);
+  baseUrl.searchParams.append('short-level', level?.split(' ')[0]);
+  baseUrl.searchParams.append('assignments', assignments);
+  baseUrl.searchParams.append('assignments-total', assignmentsTotal);
+  baseUrl.searchParams.append('assignments-status', assignmentsStatus);
+  baseUrl.searchParams.append('tests', tests);
+  baseUrl.searchParams.append('tests-status', testsStatus);
+  baseUrl.searchParams.append('exam', exam);
 
-  baseUrl.searchParams.append("gpa", gpa);
-  baseUrl.searchParams.append("final", final);
-  baseUrl.searchParams.append("password", "Brighton1234@");
+  baseUrl.searchParams.append('gpa', gpa);
+  baseUrl.searchParams.append('final', final);
+  baseUrl.searchParams.append('password', 'Brighton1234@');
 
   if (exam === EXAMS_TYPE.PRELIM) {
-    baseUrl.searchParams.append("reading", reading);
-    baseUrl.searchParams.append("reading-status", readingStatus);
-    baseUrl.searchParams.append("listening", listening);
-    baseUrl.searchParams.append("listening-status", listeningStatus);
-    baseUrl.searchParams.append("writing", writing);
-    baseUrl.searchParams.append("writing-status", writingStatus);
-    baseUrl.searchParams.append("speaking", speaking);
-    baseUrl.searchParams.append("speaking-status", speakingStatus);
-    baseUrl.searchParams.append("general-exams-total", generalExamsTotal);
+    baseUrl.searchParams.append('reading', reading);
+    baseUrl.searchParams.append('reading-status', readingStatus);
+    baseUrl.searchParams.append('listening', listening);
+    baseUrl.searchParams.append('listening-status', listeningStatus);
+    baseUrl.searchParams.append('writing', writing);
+    baseUrl.searchParams.append('writing-status', writingStatus);
+    baseUrl.searchParams.append('speaking', speaking);
+    baseUrl.searchParams.append('speaking-status', speakingStatus);
+    baseUrl.searchParams.append('general-exams-total', generalExamsTotal);
   } else {
-    baseUrl.searchParams.append("reading-and-writing", readingWriting);
+    baseUrl.searchParams.append('reading-and-writing', readingWriting);
     baseUrl.searchParams.append(
-      "reading-and-writing-status",
-      readingWritingStatus,
+      'reading-and-writing-status',
+      readingWritingStatus
     );
-    baseUrl.searchParams.append("listening-yle", listeningYLE);
-    baseUrl.searchParams.append("listening-yle-status", listeningYLEStatus);
-    baseUrl.searchParams.append("speaking-yle", speakingYLE);
-    baseUrl.searchParams.append("speaking-yle-status", speakingYLEStatus);
-    baseUrl.searchParams.append("yle-total", yleTotal);
+    baseUrl.searchParams.append('listening-yle', listeningYLE);
+    baseUrl.searchParams.append('listening-yle-status', listeningYLEStatus);
+    baseUrl.searchParams.append('speaking-yle', speakingYLE);
+    baseUrl.searchParams.append('speaking-yle-status', speakingYLEStatus);
+    baseUrl.searchParams.append('yle-total', yleTotal);
   }
 
   return baseUrl;

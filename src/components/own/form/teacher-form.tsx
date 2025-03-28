@@ -11,7 +11,7 @@ import {
   ModalBody,
   ModalHeader,
 } from 'reactstrap';
-import LoadingButton from '../common/LoadingButton';
+import LoadingButton from '../common/loading-button/LoadingButton';
 import { createProfessor, updateProfessor } from 'helper/api-data/professor';
 import { ImgPath, UrlImage } from 'utils/Constant';
 

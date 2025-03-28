@@ -11,14 +11,16 @@ import {
   ModalBody,
   ModalHeader,
   ModalFooter,
+  InputGroup,
+  InputGroupText,
 } from 'reactstrap';
-import LoadingButton from '../common/LoadingButton';
+import LoadingButton from '../common/loading-button/LoadingButton';
 import useSWR from 'swr';
 import { getActiveCourses } from 'helper/api-data/course';
 import { createStudent, updateStudent } from 'helper/api-data/student';
 import { toast } from 'react-toastify';
 import * as Yup from 'yup';
-import { parse, set } from 'date-fns';
+import { parse } from 'date-fns';
 
 const validations = Yup.object().shape({
   name: Yup.string().required('The name is required'),

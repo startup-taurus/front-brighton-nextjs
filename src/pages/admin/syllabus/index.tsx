@@ -1,8 +1,8 @@
-import SyllabusForm from "@/components/own/form/syllabus-form";
-import TableHeaderActions from "@/components/own/table-header-actions/table-header-actions";
-import SyllabusTable from "@/components/own/tables/syllabus-table";
-import React, { useState } from "react";
-import { Card, CardHeader, Container, Row } from "reactstrap";
+import SyllabusForm from '@/components/own/form/syllabus-form';
+import TableHeaderActions from '@/components/own/table-header-actions/table-header-actions';
+import SyllabusTable from '@/components/own/tables/syllabus-table';
+import React, { useState } from 'react';
+import { Card, CardHeader, Container, Row } from 'reactstrap';
 
 const Syllabus = () => {
   const [isOpenModal, setIsOpenModal] = useState(false);
@@ -16,26 +16,34 @@ const Syllabus = () => {
   };
 
   return (
-    <div className="page-body">
-      <Container className="basic_table" fluid>
+    <div className='page-body'>
+      <Container
+        className='basic_table'
+        fluid
+      >
         <Row>
           <Card>
-            <CardHeader className="d-flex justify-content-end">
+            <CardHeader className='d-flex justify-content-end'>
               <TableHeaderActions
                 onReload={handleReload}
                 addButton={{
-                  title: "Create syllabus",
+                  title: 'Create syllabus',
                   onClick: () => toggle(),
                 }}
               />
             </CardHeader>
-            <div className="pb-4">
+            <div className='pb-4'>
               <SyllabusTable reload={reload} />
             </div>
           </Card>
         </Row>
       </Container>
-      <SyllabusForm isOpen={isOpenModal} toggle={toggle} data={null} />
+      <SyllabusForm
+        isOpen={isOpenModal}
+        toggle={toggle}
+        data={null}
+        onReload={handleReload}
+      />
     </div>
   );
 };

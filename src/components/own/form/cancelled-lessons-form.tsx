@@ -10,7 +10,7 @@ import {
   ModalBody,
   ModalHeader,
 } from 'reactstrap';
-import LoadingButton from '../common/LoadingButton';
+import LoadingButton from '../common/loading-button/LoadingButton';
 
 import * as Yup from 'yup';
 import { parse } from 'date-fns';

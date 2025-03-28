@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from "react";
-import useSWR, { mutate } from "swr";
-import { useRouter } from "next/router";
-import { getAllUsers, updateStatusUser } from "helper/api-data/user";
-import TableActionButtons from "@/components/own/table-action-buttons/table-action-buttons";
-import Swal from "sweetalert2";
-import DataTable from "react-data-table-component";
-import UserForm from "../form/user-form";
-import { getFiltersString } from "../../../../utils/utils";
+import React, { useState, useEffect } from 'react';
+import useSWR, { mutate } from 'swr';
+import { useRouter } from 'next/router';
+import { getAllUsers, updateStatusUser } from 'helper/api-data/user';
+import TableActionButtons from '@/components/own/table-action-buttons/table-action-buttons';
+import Swal from 'sweetalert2';
+import DataTable from 'react-data-table-component';
+import UserForm from '../form/user-form';
+import { getFiltersString } from '../../../../utils/utils';
+import TableSkeleton from '@/components/own/common/table-skeleton/TableSkeleton';
 
 const UsersTable = ({ reload }: any) => {
   const router = useRouter();
@@ -15,7 +16,7 @@ const UsersTable = ({ reload }: any) => {
 
   useEffect(() => {
     mutate([
-      `/user/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ""}`,
+      `/user/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}`,
     ]);
   }, [reload]);
 
@@ -25,26 +26,26 @@ const UsersTable = ({ reload }: any) => {
 
     if (isOpen) {
       mutate([
-        `/user/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ""}`,
+        `/user/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}`,
       ]);
     }
   };
 
   const handleAlert = (row: any) => {
-    let status = row?.status === "active" ? "deactivate" : "active";
+    let status = row?.status === 'active' ? 'deactivate' : 'active';
     Swal.fire({
-      title: "Are you sure to " + status + "?",
-      text: "You are about to " + status + " this user",
-      icon: "warning",
+      title: 'Are you sure to ' + status + '?',
+      text: 'You are about to ' + status + ' this user',
+      icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: "Yes, " + status + "!",
-      cancelButtonText: "Cancel",
+      confirmButtonText: 'Yes, ' + status + '!',
+      cancelButtonText: 'Cancel',
       reverseButtons: true,
     }).then((result) => {
       if (result.isConfirmed) {
         updateStatus(row).then(() => {
           mutate([
-            `/user/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ""}`,
+            `/user/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}`,
           ]);
         });
       }
@@ -53,10 +54,10 @@ const UsersTable = ({ reload }: any) => {
 
   const updateStatus = async (data: any) => {
     try {
-      let status = data?.status === "active" ? "inactive" : "active";
+      let status = data?.status === 'active' ? 'inactive' : 'active';
       const response = await updateStatusUser(data.id, status);
     } catch (error) {
-      console.error("Error al actualizar usuario:", error);
+      console.error('Error al actualizar usuario:', error);
     }
   };
 
@@ -72,71 +73,82 @@ const UsersTable = ({ reload }: any) => {
     isLoading,
   } = useSWR(
     [
-      `/user/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ""}`,
+      `/user/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}`,
     ],
-    () => getAllUsers(page, rowPerPage, filters),
+    () => getAllUsers(page, rowPerPage, filters)
   );
+
+  if (isLoading) {
+    return (
+      <TableSkeleton
+        rows={10}
+        columns={9}
+        showHeader={true}
+        animated={true}
+      />
+    );
+  }
 
   if (!users?.data?.result) return null;
 
   const columns = [
     {
-      name: "Actions",
+      name: 'Actions',
       cell: (row: any) => (
         <TableActionButtons
           onEdit={() => toggle(row)}
           onBlock={() => handleAlert(row)}
-          stauts={row.status === "active" ? false : true}
+          stauts={row.status === 'active' ? false : true}
         />
       ),
-      minWidth: "180px",
+      minWidth: '180px',
       sortable: false,
       center: false,
     },
     {
-      name: "Names",
+      name: 'Names',
       selector: (row: any) => `${row.name}`,
       sortable: true,
       center: false,
     },
     {
-      name: "Username",
+      name: 'Username',
       selector: (row: any) => `${row.username}`,
       sortable: true,
       center: false,
     },
     {
-      name: "Email",
+      name: 'Email',
       selector: (row: any) => `${row.email}`,
       sortable: true,
       center: false,
     },
     {
-      name: "Rol",
+      name: 'Rol',
       cell: (row: any) => (
         <span
           className={`badge ${
-            row.role === "professor"
-              ? "badge-primary"
-              : row.role === "student"
-                ? "badge-info"
-                : row.role === "admin_staff"
-                  ? "badge-warning"
-                  : "badge-secondary"
+            row.role === 'professor'
+              ? 'badge-primary'
+              : row.role === 'student'
+                ? 'badge-info'
+                : row.role === 'admin_staff'
+                  ? 'badge-warning'
+                  : 'badge-secondary'
           }`}
         >
           {row.role.charAt(0).toUpperCase() +
-            row.role.slice(1).replace("_", " ")}
+            row.role.slice(1).replace('_', ' ')}
         </span>
       ),
       sortable: true,
       center: false,
     },
     {
-      name: "Status",
+      name: 'Status',
       cell: (row: any) => (
         <span
-          className={`badge ${row.status === "active" ? "badge-success" : "badge-danger"}`}
+          className={`badge ${row.status === 'active' ? 'badge-success' : 'badge-danger'}`}
         >
           {row?.status?.charAt(0).toUpperCase() + row?.status?.slice(1)}
         </span>
@@ -145,20 +157,20 @@ const UsersTable = ({ reload }: any) => {
       center: false,
     },
     {
-      name: "Failed Attempts",
+      name: 'Failed Attempts',
       selector: (row: any) =>
         row.failed_attempts != null ? row.failed_attempts : 0,
       sortable: true,
       center: false,
     },
     {
-      name: "Created At",
+      name: 'Created At',
       selector: (row: any) => new Date(row.created_at).toLocaleString(),
       sortable: true,
       center: false,
     },
     {
-      name: "Last Login",
+      name: 'Last Login',
       selector: (row: any) => new Date(row.last_login).toLocaleString(),
       sortable: true,
       center: false,
@@ -166,7 +178,7 @@ const UsersTable = ({ reload }: any) => {
   ];
 
   return (
-    <div className="table-responsive signal-table">
+    <div className='table-responsive signal-table'>
       <DataTable
         columns={columns}
         data={users.data.result}
@@ -191,7 +203,11 @@ const UsersTable = ({ reload }: any) => {
         highlightOnHover
         selectableRows={false}
       />
-      <UserForm isOpen={isOpen} toggle={toggle} data={selectedData} />
+      <UserForm
+        isOpen={isOpen}
+        toggle={toggle}
+        data={selectedData}
+      />
       {/* <StudentDetail
         isOpen={isOpenDetail}
         toggle={toggleDetail}

@@ -1,19 +1,6 @@
 import React from 'react';
-import { Button, Spinner, ButtonProps } from 'reactstrap';
-
-interface LoadingButtonProps extends Omit<ButtonProps, 'ref'> {
-  isLoading?: boolean;
-
-  loadingText?: string;
-
-  defaultText?: string;
-
-  spinnerClassName?: string;
-
-  spinnerSize?: string;
-
-  spinnerPosition?: 'start' | 'end';
-}
+import { Button, Spinner } from 'reactstrap';
+import { LoadingButtonProps } from 'Types/Components';
 
 const LoadingButton = React.forwardRef<HTMLButtonElement, LoadingButtonProps>(
   (

@@ -10,6 +10,8 @@ import { ReactElement, ReactNode } from "react";
 import { NextPage } from "next";
 import { AppProps } from "next/app";
 import UserProvider from "helper/User/UserProvider";
+import '../../public/assets/scss/themes/_custom.scss';
+
 
 export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
   getLayout?: (page: ReactElement) => ReactNode;

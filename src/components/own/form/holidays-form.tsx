@@ -10,7 +10,7 @@ import {
   ModalBody,
   ModalHeader,
 } from 'reactstrap';
-import LoadingButton from '../common/LoadingButton';
+import LoadingButton from '../common/loading-button/LoadingButton';
 import { createHoliday, updateHoliday } from 'helper/api-data/holidays';
 
 const HolidayForm = ({ data, isOpen, toggle }: any) => {

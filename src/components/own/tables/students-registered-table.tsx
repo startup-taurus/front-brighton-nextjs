@@ -9,6 +9,7 @@ import { setQueryStringValue } from '../../../../utils/utils';
 import { deleteRegisteredStudent } from '../../../../helper/api-data/registered-student';
 import RegisteredStudentDetail from '@/components/own/registered-student-detail/registered-student-detail';
 import { toast } from 'react-toastify';
+import TableSkeleton from '../common/table-skeleton/TableSkeleton';
 
 const StudentsRegisteredTable = ({
   students,
@@ -24,7 +25,6 @@ const StudentsRegisteredTable = ({
   const [selectedStudent, setSelectedStudent] = useState<any>(null);
 
   const toggleStudentForm = (data: any) => {
-    console.log(data);
     setSelectedStudent({
       user: {
         id: data?.id,
@@ -91,6 +91,17 @@ const StudentsRegisteredTable = ({
     });
   };
 
+  if (loading) {
+    return (
+      <TableSkeleton
+        rows={10}
+        columns={8}
+        showHeader={true}
+        animated={true}
+      />
+    );
+  }
+
   if (!students?.data?.result) return null;
 
   const columns = [
@@ -103,7 +114,7 @@ const StudentsRegisteredTable = ({
           onDelete={() => handleDelete(row)}
         />
       ),
-      minWidth: '180px',
+      width: '180px',
       sortable: false,
       center: false,
     },

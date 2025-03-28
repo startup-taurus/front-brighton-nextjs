@@ -1,15 +1,16 @@
-import React, { useState, useEffect } from "react";
-import useSWR, { mutate } from "swr";
-import { useRouter } from "next/router";
+import React, { useState, useEffect } from 'react';
+import useSWR, { mutate } from 'swr';
+import { useRouter } from 'next/router';
 import {
   getCourseWithProfessors,
   updateStatusCourse,
-} from "helper/api-data/course";
-import TableActionButtons from "@/components/own/table-action-buttons/table-action-buttons";
-import Swal from "sweetalert2";
-import DataTable from "react-data-table-component";
-import CourseForm from "../form/course-form";
-import { getFiltersString } from "../../../../utils/utils";
+} from 'helper/api-data/course';
+import TableActionButtons from '@/components/own/table-action-buttons/table-action-buttons';
+import Swal from 'sweetalert2';
+import DataTable from 'react-data-table-component';
+import CourseForm from '../form/course-form';
+import { getFiltersString } from '../../../../utils/utils';
+import TableSkeleton from '../common/table-skeleton/TableSkeleton';
 
 const CoursesTable = ({ reload }: any) => {
   const router = useRouter();
@@ -23,7 +24,7 @@ const CoursesTable = ({ reload }: any) => {
 
   useEffect(() => {
     mutate([
-      `/course/get-all-with-professors?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ""}`,
+      `/course/get-all-with-professors?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}`,
     ]);
   }, [reload]);
 
@@ -33,26 +34,26 @@ const CoursesTable = ({ reload }: any) => {
 
     if (isOpen) {
       mutate([
-        `/course/get-all-with-professors?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ""}`,
+        `/course/get-all-with-professors?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}`,
       ]);
     }
   };
 
   const handleAlert = (row: any) => {
-    let status = row?.status === "active" ? "deactivate" : "active";
+    let status = row?.status === 'active' ? 'deactivate' : 'active';
     Swal.fire({
-      title: "Are you sure to " + status + "?",
-      text: "You are about to " + status + " this user",
-      icon: "warning",
+      title: 'Are you sure to ' + status + '?',
+      text: 'You are about to ' + status + ' this user',
+      icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: "Yes, " + status + "!",
-      cancelButtonText: "Cancel",
+      confirmButtonText: 'Yes, ' + status + '!',
+      cancelButtonText: 'Cancel',
       reverseButtons: true,
     }).then((result) => {
       if (result.isConfirmed) {
         updateStatus(row).then(() => {
           mutate([
-            `/course/get-all-with-professors?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ""}`,
+            `/course/get-all-with-professors?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}`,
           ]);
         });
       }
@@ -61,15 +62,15 @@ const CoursesTable = ({ reload }: any) => {
 
   const updateStatus = async (data: any) => {
     try {
-      let status = data?.status === "active" ? "inactive" : "active";
+      let status = data?.status === 'active' ? 'inactive' : 'active';
       const response = await updateStatusCourse(data.id, status);
       if (response.statusCode === 200) {
         mutate([
-          `/course/get-all-with-professors?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ""}`,
+          `/course/get-all-with-professors?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}`,
         ]);
       }
     } catch (error) {
-      console.error("Error al actualizar usuario:", error);
+      console.error('Error al actualizar usuario:', error);
     }
   };
 
@@ -79,63 +80,74 @@ const CoursesTable = ({ reload }: any) => {
     isLoading,
   } = useSWR(
     [
-      `/course/get-all-with-professors?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ""}`,
+      `/course/get-all-with-professors?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}`,
     ],
-    () => getCourseWithProfessors(page, rowPerPage, filters),
+    () => getCourseWithProfessors(page, rowPerPage, filters)
   );
+
+  if (isLoading) {
+    return (
+      <TableSkeleton
+        rows={10}
+        columns={12}
+        showHeader={true}
+        animated={true}
+      />
+    );
+  }
 
   if (!courses?.data?.result) return null;
 
   const columns = [
     {
-      name: "Acción",
+      name: 'Acción',
       cell: (row: any) => (
         <TableActionButtons
           onEdit={() => toggle(row)}
           onBlock={() => handleAlert(row)}
-          stauts={row.status === "active" ? false : true}
+          stauts={row.status === 'active' ? false : true}
         />
       ),
-      minWidth: "180px",
+      minWidth: '180px',
       sortable: false,
       center: false,
     },
     {
-      name: "N° of course",
+      name: 'N° of course',
       selector: (row: any) => `${row.course_number}`,
       sortable: true,
       center: false,
     },
     {
-      name: "Name",
+      name: 'Name',
       selector: (row: any) => `${row.course_name}`,
       sortable: true,
       center: false,
     },
     {
-      name: "Professor",
+      name: 'Professor',
       selector: (row: any) => `${row.professor?.user?.name}`,
       sortable: true,
       center: false,
     },
     {
-      name: "Classroom",
+      name: 'Classroom',
       selector: (row: any) => `${row.classroom}`.toLocaleUpperCase(),
       sortable: true,
       center: false,
     },
     {
-      name: "Start date",
+      name: 'Start date',
       selector: (row: any) => `${row.start_date}`,
       sortable: true,
       center: false,
     },
 
     {
-      name: "Status",
+      name: 'Status',
       cell: (row: any) => (
         <span
-          className={`badge ${row.status === "active" ? "badge-success" : "badge-danger"}`}
+          className={`badge ${row.status === 'active' ? 'badge-success' : 'badge-danger'}`}
         >
           {row?.status?.charAt(0).toUpperCase() + row?.status?.slice(1)}
         </span>
@@ -144,13 +156,13 @@ const CoursesTable = ({ reload }: any) => {
       center: false,
     },
     {
-      name: "Type",
+      name: 'Type',
       selector: (row: any) => `${row.course_type.toLocaleUpperCase()}`,
       sortable: true,
       center: false,
     },
     {
-      name: "Schedule",
+      name: 'Schedule',
       selector: (row: any) => `${row.schedule}`,
       sortable: true,
       center: false,
@@ -158,7 +170,7 @@ const CoursesTable = ({ reload }: any) => {
   ];
 
   return (
-    <div className="table-responsive signal-table">
+    <div className='table-responsive signal-table'>
       <DataTable
         columns={columns}
         data={courses.data.result}
@@ -183,7 +195,11 @@ const CoursesTable = ({ reload }: any) => {
         highlightOnHover
         selectableRows={false}
       />
-      <CourseForm isOpen={isOpen} toggle={toggle} data={selectedData} />
+      <CourseForm
+        isOpen={isOpen}
+        toggle={toggle}
+        data={selectedData}
+      />
     </div>
   );
 };

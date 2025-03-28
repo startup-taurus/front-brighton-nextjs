@@ -2,3 +2,29 @@
  custom CSS Start
 ==========================**/
 // you can add your custom css here
+.syllabus-container {
+  border: 1px solid #ccc;
+  padding: 20px 15px;
+  border-radius: 4px;
+  background-color: #f9f9f9;
+  margin-bottom: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 350px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.syllabus-input {
+  width: 160px;
+  max-width: 70%;
+}
+
+.syllabus-input-title {
+  max-width: 100%;
+}
+
+.tooltip-inner {
+  color: blue;
+}
