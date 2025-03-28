@@ -1,15 +1,7 @@
 import React from 'react';
 import { Card, CardBody, Col } from 'reactstrap';
 import styles from './CardSkeleton.module.css';
-
-interface CardSkeletonProps {
-  height?: number;
-  className?: string;
-  colProps?: any;
-  headerHeight?: number;
-  bodyHeight?: number;
-  showHeader?: boolean;
-}
+import { CardSkeletonProps } from 'Types/SkeletonType';
 
 const CardSkeleton: React.FC<CardSkeletonProps> = ({
   height = 300,

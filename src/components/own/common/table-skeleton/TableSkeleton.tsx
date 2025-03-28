@@ -1,16 +1,6 @@
 import React from 'react';
 import styles from './TableSkeleton.module.css';
-
-interface TableSkeletonProps {
-  rows?: number;
-  columns?: number;
-  showHeader?: boolean;
-  headerHeight?: number;
-  rowHeight?: number;
-  className?: string;
-  cellWidths?: number[];
-  animated?: boolean;
-}
+import { TableSkeletonProps } from 'Types/SkeletonType';
 
 const TableSkeleton: React.FC<TableSkeletonProps> = ({
   rows = 5,

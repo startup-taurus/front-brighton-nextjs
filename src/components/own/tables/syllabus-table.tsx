@@ -6,7 +6,7 @@ import { getAllSyllabus } from 'helper/api-data/syllabus';
 import SyllabusItemsModal from '../form/syllabus-item';
 import TableActionButtons from '../table-action-buttons/table-action-buttons';
 import SyllabusForm from '../form/syllabus-form';
-import TableSkeleton from '../common/TableSkeleton';
+import TableSkeleton from '../common/table-skeleton/TableSkeleton';
 
 const SyllabusTable = ({ reload }: any) => {
   const router = useRouter();

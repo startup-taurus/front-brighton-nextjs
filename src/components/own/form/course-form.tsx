@@ -10,7 +10,7 @@ import {
   ModalBody,
   ModalHeader,
 } from 'reactstrap';
-import LoadingButton from '../common/LoadingButton';
+import LoadingButton from '../common/loading-button/LoadingButton';
 import useSWR from 'swr';
 import Select from 'react-select';
 import { createCourse, updateCourse } from 'helper/api-data/course';

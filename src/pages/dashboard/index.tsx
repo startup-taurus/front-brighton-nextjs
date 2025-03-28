@@ -9,7 +9,7 @@ import dynamic from 'next/dynamic';
 import { Col, Container, Row } from 'reactstrap';
 import { SchoolManage, SchoolManagementHeading } from 'utils/Constant';
 import CardSkeleton from '@/components/own/common/card-skeleton';
-import TableSkeleton from '@/components/own/common/TableSkeleton';
+import TableSkeleton from '@/components/own/common/table-skeleton/TableSkeleton';
 
 const SchoolManagement = () => {
   const [loading, setLoading] = useState(true);

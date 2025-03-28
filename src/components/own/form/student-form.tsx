@@ -14,7 +14,7 @@ import {
   InputGroup,
   InputGroupText,
 } from 'reactstrap';
-import LoadingButton from '../common/LoadingButton';
+import LoadingButton from '../common/loading-button/LoadingButton';
 import useSWR from 'swr';
 import { getActiveCourses } from 'helper/api-data/course';
 import { createStudent, updateStudent } from 'helper/api-data/student';

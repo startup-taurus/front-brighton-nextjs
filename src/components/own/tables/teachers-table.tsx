@@ -10,7 +10,7 @@ import Swal from 'sweetalert2';
 import DataTable from 'react-data-table-component';
 import TeacherForm from '../form/teacher-form';
 import { getFiltersString } from '../../../../utils/utils';
-import TableSkeleton from '@/components/own/common/TableSkeleton';
+import TableSkeleton from '@/components/own/common/table-skeleton/TableSkeleton';
 
 const TeachersTable = ({ reload }: any) => {
   const router = useRouter();

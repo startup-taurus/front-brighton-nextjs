@@ -14,9 +14,8 @@ import {
 import { FaTrash } from 'react-icons/fa';
 import * as Yup from 'yup';
 
-import LoadingButton from '../common/LoadingButton';
+import LoadingButton from '../common/loading-button/LoadingButton';
 import { createSyllabus, updateSyllabus } from 'helper/api-data/syllabus';
-
 
 const validations = Yup.object().shape({
   syllabus_name: Yup.string().required('The syllabus name is required'),

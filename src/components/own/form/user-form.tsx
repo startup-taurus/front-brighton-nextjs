@@ -12,7 +12,7 @@ import {
   ModalBody,
   ModalHeader,
 } from 'reactstrap';
-import LoadingButton from '../common/LoadingButton';
+import LoadingButton from '../common/loading-button/LoadingButton';
 import { createUser, updateUser } from 'helper/api-data/user';
 import { USER_ROLES } from '../../../../utils/constants';
 

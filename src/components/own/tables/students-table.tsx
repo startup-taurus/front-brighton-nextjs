@@ -8,7 +8,7 @@ import StudentForm from '../form/student-form';
 import StudentDetail from '../student-detail/student-datail';
 import DataTable from 'react-data-table-component';
 import { setQueryStringValue } from '../../../../utils/utils';
-import TableSkeleton from '@/components/own/common/TableSkeleton';
+import TableSkeleton from '@/components/own/common/table-skeleton/TableSkeleton';
 
 const StudentsTable = ({
   students,

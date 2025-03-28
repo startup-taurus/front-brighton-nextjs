@@ -3,21 +3,20 @@ import useSWR from 'swr';
 import { Card, CardBody, Col, Table, Spinner, Alert } from 'reactstrap';
 import { CommonHeader } from './AcademicPerformance/CommonHeader';
 import { getProfessorsCoursesAndStudents } from 'helper/api-data/professor';
-
-// Define a TypeScript interface for the professor data
-interface ProfessorData {
-  id: string | number;
-  professorName: string;
-  totalCourses: number;
-  totalStudents: number;
-}
+import { ProfessorData } from 'Types/ProfessorType';
+import { ApiResponse } from 'Types/ApiResponse';
 
 const ProfessorsTable: React.FC = () => {
   const {
-    data: professors,
+    data: professorsResponse,
     error,
     isLoading,
-  } = useSWR<ProfessorData[]>('professorData', getProfessorsCoursesAndStudents);
+  } = useSWR<ApiResponse<ProfessorData[]>>(
+    'professorData',
+    getProfessorsCoursesAndStudents
+  );
+
+  const professors = professorsResponse?.data;
 
   if (isLoading) {
     return (
@@ -66,7 +65,7 @@ const ProfessorsTable: React.FC = () => {
             </thead>
             <tbody>
               {professors && professors.length > 0 ? (
-                professors.map((prof, index) => (
+                professors.map((prof: ProfessorData, index: number) => (
                   <tr key={prof.id || `professor-${index}`}>
                     <td>{index + 1}</td>
                     <td>{prof.professorName}</td>

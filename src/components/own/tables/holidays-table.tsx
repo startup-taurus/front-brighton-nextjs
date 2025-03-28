@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
-import useSWR, { mutate } from "swr";
-import { useRouter } from "next/router";
-import { getAllHolidays, updateHolidayStatus } from "helper/api-data/holidays";
-import TableActionButtons from "@/components/own/table-action-buttons/table-action-buttons";
-import Swal from "sweetalert2";
-import DataTable from "react-data-table-component";
-import HolidaysForm from "../form/holidays-form";
-import TableSkeleton from "../common/TableSkeleton";
+import React, { useState, useEffect } from 'react';
+import useSWR, { mutate } from 'swr';
+import { useRouter } from 'next/router';
+import { getAllHolidays, updateHolidayStatus } from 'helper/api-data/holidays';
+import TableActionButtons from '@/components/own/table-action-buttons/table-action-buttons';
+import Swal from 'sweetalert2';
+import DataTable from 'react-data-table-component';
+import HolidaysForm from '../form/holidays-form';
+import TableSkeleton from '../common/table-skeleton/TableSkeleton';
 
 const HolidaysTable = ({ reload }: any) => {
   const router = useRouter();
@@ -27,14 +27,14 @@ const HolidaysTable = ({ reload }: any) => {
   };
 
   const handleAlert = (row: any) => {
-    let status = row?.status === "active" ? "deactivate" : "activate";
+    let status = row?.status === 'active' ? 'deactivate' : 'activate';
     Swal.fire({
-      title: "Are you sure to " + status + " this holiday?",
-      text: "You are about to " + status + " this holiday",
-      icon: "warning",
+      title: 'Are you sure to ' + status + ' this holiday?',
+      text: 'You are about to ' + status + ' this holiday',
+      icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: "Yes, " + status + "!",
-      cancelButtonText: "Cancel",
+      confirmButtonText: 'Yes, ' + status + '!',
+      cancelButtonText: 'Cancel',
       reverseButtons: true,
     }).then((result) => {
       if (result.isConfirmed) {
@@ -47,13 +47,13 @@ const HolidaysTable = ({ reload }: any) => {
 
   const updateStatus = async (data: any) => {
     try {
-      let status = data?.status === "active" ? "inactive" : "active";
+      let status = data?.status === 'active' ? 'inactive' : 'active';
       const response = await updateHolidayStatus(data.id, status);
       if (response.statusCode === 200) {
         mutate([`/holidays/get-all`, page, rowPerPage]);
       }
     } catch (error) {
-      console.error("Error updating holiday status:", error);
+      console.error('Error updating holiday status:', error);
     }
   };
 
@@ -67,7 +67,7 @@ const HolidaysTable = ({ reload }: any) => {
     error,
     isLoading,
   } = useSWR([`/holidays/get-all`, page, rowPerPage], () =>
-    getAllHolidays(page, rowPerPage),
+    getAllHolidays(page, rowPerPage)
   );
 
   if (isLoading) {
@@ -78,54 +78,54 @@ const HolidaysTable = ({ reload }: any) => {
         showHeader={true}
         animated={true}
       />
-    ); 
+    );
   }
 
   if (!holidays?.data?.result) return null;
 
   const columns = [
     {
-      name: "Actions",
+      name: 'Actions',
       cell: (row: any) => (
         <TableActionButtons
           onBlock={() => handleAlert(row)}
           onEdit={() => toggle(row)}
-          stauts={row.status === "active" ? false : true}
+          stauts={row.status === 'active' ? false : true}
         />
       ),
       sortable: false,
       center: false,
     },
     {
-      name: "Holiday Name",
+      name: 'Holiday Name',
       selector: (row: any) => `${row.holiday_name}`,
       sortable: true,
       center: false,
     },
     {
-      name: "Holiday Date",
+      name: 'Holiday Date',
       selector: (row: any) => `${row.holiday_date}`,
       sortable: true,
       center: false,
     },
     {
-      name: "Description",
-      selector: (row: any) => `${row.description || ""}`,
+      name: 'Description',
+      selector: (row: any) => `${row.description || ''}`,
       sortable: false,
       center: false,
     },
     {
-      name: "Type",
+      name: 'Type',
       selector: (row: any) =>
         `${row.holiday_type.charAt(0).toUpperCase() + row.holiday_type.slice(1)}`,
       sortable: true,
       center: false,
     },
     {
-      name: "Status",
+      name: 'Status',
       cell: (row: any) => (
         <span
-          className={`badge ${row.status === "active" ? "badge-success" : "badge-danger"}`}
+          className={`badge ${row.status === 'active' ? 'badge-success' : 'badge-danger'}`}
         >
           {row?.status?.charAt(0).toUpperCase() + row?.status?.slice(1)}
         </span>
@@ -136,7 +136,7 @@ const HolidaysTable = ({ reload }: any) => {
   ];
 
   return (
-    <div className="table-responsive">
+    <div className='table-responsive'>
       <DataTable
         columns={columns}
         data={holidays.data.result}
@@ -161,7 +161,11 @@ const HolidaysTable = ({ reload }: any) => {
         highlightOnHover
         selectableRows={false}
       />
-      <HolidaysForm isOpen={isOpen} toggle={toggle} data={selectedData} />
+      <HolidaysForm
+        isOpen={isOpen}
+        toggle={toggle}
+        data={selectedData}
+      />
     </div>
   );
 };

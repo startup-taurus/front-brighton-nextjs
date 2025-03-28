@@ -3,17 +3,31 @@ import ReactApexChart from 'react-apexcharts';
 import { Card, CardBody, Col } from 'reactstrap';
 import { CommonHeader } from './CommonHeader';
 import useSWR from 'swr';
+import { getAcademicPerformance } from 'helper/api-data/course';
+import CardSkeleton from '@/components/own/common/card-skeleton';
 
 const AcademicPerformance = () => {
-  const {
-    data: chartData,
-    error,
-    isLoading,
-  } = useSWR('/course/get-academic-performance', (url) =>
-    fetch(`${process.env.API_URL}${url}`)
-      .then((res) => res.json())
-      .then((res) => res.data)
+  const { data: performanceData, error } = useSWR(
+    ['/course/get-academic-performance'],
+    () => getAcademicPerformance()
   );
+
+  if (error)
+    return (
+      <Col
+        xxl={6}
+        md={5}
+      >
+        <div>Failed to load academic performance data</div>
+      </Col>
+    );
+  if (!performanceData)
+    return (
+      <CardSkeleton
+        colProps={{ xxl: 6, md: 5 }}
+        height={350}
+      />
+    );
 
   return (
     <Col
@@ -28,14 +42,12 @@ const AcademicPerformance = () => {
               id='academic_performance-chart'
               style={{ minHeight: 245 }}
             >
-              {!isLoading && chartData && (
-                <ReactApexChart
-                  options={chartData.options || {}}
-                  type='area'
-                  series={chartData.series || []}
-                  height={230}
-                />
-              )}
+              <ReactApexChart
+                options={performanceData.data?.options || {}}
+                type='area'
+                series={performanceData.data?.series || []}
+                height={230}
+              />
             </div>
           </div>
         </CardBody>
