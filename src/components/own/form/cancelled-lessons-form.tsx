@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { ErrorMessage, Field, Formik } from 'formik';
 import {
   Button,
@@ -11,6 +11,9 @@ import {
   ModalHeader,
 } from 'reactstrap';
 import LoadingButton from '../common/loading-button/LoadingButton';
+import { UserContext } from '../../../../helper/User';
+import usePermission from '../../../../hooks/usePermission';
+import { PERMISSIONS } from '../../../../utils/permissions';
 
 import * as Yup from 'yup';
 import { parse } from 'date-fns';
@@ -21,6 +24,7 @@ import {
 import { mutate } from 'swr';
 import { useRouter } from 'next/router';
 import { toast } from 'react-toastify';
+import { USER_TYPES } from 'utils/constants';
 
 type CancelledLessonsFormProps = {
   data?: any;
@@ -36,6 +40,11 @@ const CancelledLessonsForm = ({
   setData,
 }: CancelledLessonsFormProps) => {
   const router = useRouter();
+  const { user } = useContext(UserContext);
+  const { can } = usePermission();
+  const isCoordinator = user?.role === USER_TYPES.COORDINATOR;
+  const canCreateHoliday = can(PERMISSIONS.CREATE_HOLIDAY);
+  const canEditHoliday = can(PERMISSIONS.EDIT_HOLIDAY);
 
   const validations = Yup.object().shape({
     cancel_reason: Yup.string()
@@ -54,6 +63,12 @@ const CancelledLessonsForm = ({
   });
 
   const onSubmit = (body: any, { setSubmitting }: any) => {
+    if (isCoordinator) {
+      toast.error(
+        'Coordinators do not have permission to add or edit cancelled lessons'
+      );
+      return;
+    }
     setSubmitting(true);
     if (data) {
       updateCancelLesson(data?.id, body).then(() => {

@@ -47,13 +47,16 @@ const CommonForm = ({ alignLogo }: commonFormPropsType) => {
       Cookies.set('token', JSON.stringify(response?.data));
       login(response.data);
 
-      if (response.data.role === USER_TYPES.ADMIN) {
-        router.push('/dashboard');
-      }
+      const roleRedirectMap = {
+        [USER_TYPES.ADMIN]: '/dashboard',
+        [USER_TYPES.PROFESSOR]: '/teachers',
+        [USER_TYPES.STUDENT]: '/dashboard/student',
+        [USER_TYPES.FINANCIAL]: '/dashboard/financial',
+        [USER_TYPES.COORDINATOR]: '/dashboard/coordinator',
+      };
 
-      if (response.data.role === USER_TYPES.PROFESSOR) {
-        router.push('/teachers');
-      }
+      const redirectPath = roleRedirectMap[response.data.role] || '/dashboard';
+      router.push(redirectPath);
 
       toast.success('Login Success');
     }

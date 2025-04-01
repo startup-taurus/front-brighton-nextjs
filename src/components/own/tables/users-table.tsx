@@ -8,6 +8,7 @@ import DataTable from 'react-data-table-component';
 import UserForm from '../form/user-form';
 import { getFiltersString } from '../../../../utils/utils';
 import TableSkeleton from '@/components/own/common/table-skeleton/TableSkeleton';
+import { USER_TYPES } from 'utils/constants';
 
 const UsersTable = ({ reload }: any) => {
   const router = useRouter();
@@ -128,11 +129,11 @@ const UsersTable = ({ reload }: any) => {
       cell: (row: any) => (
         <span
           className={`badge ${
-            row.role === 'professor'
+            row.role === USER_TYPES.PROFESSOR
               ? 'badge-primary'
-              : row.role === 'student'
+              : row.role === USER_TYPES.STUDENT
                 ? 'badge-info'
-                : row.role === 'admin_staff'
+                : row.role === USER_TYPES.ADMIN
                   ? 'badge-warning'
                   : 'badge-secondary'
           }`}

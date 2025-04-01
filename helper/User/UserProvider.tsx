@@ -1,9 +1,9 @@
-import Cookies from "js-cookie";
-import { useRouter } from "next/router";
-import { ReactNode, useEffect, useState } from "react";
-import { initialUserState, UserContext } from "./";
-import { NextResponse } from "next/server";
-import { TEACHER_PATHS, USER_TYPES } from "../../utils/constants";
+import Cookies from 'js-cookie';
+import { useRouter } from 'next/router';
+import { ReactNode, useEffect, useState } from 'react';
+import { initialUserState, UserContext } from './';
+import { NextResponse } from 'next/server';
+import { TEACHER_PATHS, USER_TYPES } from '../../utils/constants';
 
 interface contextType {
   children: ReactNode;
@@ -18,8 +18,8 @@ const UserProvider = ({ children }: contextType) => {
 
   const logout = () => {
     setUser({});
-    Cookies.remove("token");
-    router.push("/authentication/login");
+    Cookies.remove('token');
+    router.push('/authentication/login');
   };
 
   const value = {
@@ -29,51 +29,49 @@ const UserProvider = ({ children }: contextType) => {
   };
 
   useEffect(() => {
-    const user = JSON.parse(Cookies.get("token") ?? "{}");
+    const user = JSON.parse(Cookies.get('token') ?? '{}');
     setUser(user);
   }, []);
 
   useEffect(() => {
-    const user = JSON.parse(Cookies.get("token") ?? "{}");
+    const user = JSON.parse(Cookies.get('token') ?? '{}');
 
-    const path = router.pathname.split("/")[1];
+    const path = router.pathname.split('/')[1];
     const isUserLogged = Object.keys(user).length > 1;
 
     const pathTeacherRegex = new RegExp(
-      `^(${TEACHER_PATHS.map((path) => path.replace(/:\w+/g, "\\w+")).join(
-        "|",
-      )})$`,
+      `^(${TEACHER_PATHS.map((path) => path.replace(/:\w+/g, '\\w+')).join(
+        '|'
+      )})\/?$`
     );
-    if (path === "students-registration") {
-    } else if (!isUserLogged && path !== "authentication") {
-      router.push("/authentication/login");
+    if (path === 'students-registration') {
+    } else if (!isUserLogged && path !== 'authentication') {
+      router.push('/authentication/login');
     } else if (
-      path === "authentication" &&
+      path === 'authentication' &&
       isUserLogged &&
       user?.role === USER_TYPES.PROFESSOR
     ) {
-      router.push("/teachers");
+      router.push('/teachers');
     } else if (
-      path === "authentication" &&
+      path === 'authentication' &&
       isUserLogged &&
       user?.role === USER_TYPES.ADMIN
     ) {
-      router.push("/dashboard");
+      router.push('/dashboard');
     } else if (
       pathTeacherRegex.test(router.pathname) &&
+      router.pathname !== '/teachers' &&
       isUserLogged &&
       user?.role !== USER_TYPES.PROFESSOR
     ) {
-      router.push("/dashboard");
+      router.push('/dashboard');
     } else if (
       new RegExp(`^(/dashboard|/admin(\\/.*)?)$`).test(path) &&
       isUserLogged &&
       user?.role !== USER_TYPES.ADMIN
     ) {
-      router.push("/teachers");
-    } else {
-      // Cookies.remove("token");
-      // router.push("/authentication/login");
+      router.push('/teachers');
     }
   }, [router.pathname]);
 

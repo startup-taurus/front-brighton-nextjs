@@ -4,19 +4,24 @@ import React, {
   useMemo,
   ChangeEvent,
   useCallback,
-} from "react";
-import { Input, Table } from "reactstrap";
+  useContext,
+} from 'react';
+import { Input, Table, Alert } from 'reactstrap';
 import {
   buildAttendanceStructure,
   countAbsences,
   countAttendance,
   formatDate,
   getColorOfAssistance,
-} from "../../../../utils/utils";
-import { createAttendance } from "../../../../helper/api-data/attendance";
-import { updateLessonTaught } from "../../../../helper/api-data/course-schedule";
-import { toast } from "react-toastify";
-import { debounce } from "lodash";
+} from '../../../../utils/utils';
+import { createAttendance } from '../../../../helper/api-data/attendance';
+import { updateLessonTaught } from '../../../../helper/api-data/course-schedule';
+import { toast } from 'react-toastify';
+import { debounce } from 'lodash';
+import { UserContext } from '../../../../helper/User';
+import usePermission from '../../../../hooks/usePermission';
+import { PERMISSIONS } from '../../../../utils/permissions';
+import { USER_TYPES } from 'utils/constants';
 
 type TableAttendance = {
   courseSchedule: any;
@@ -36,6 +41,10 @@ const TableAttendance = ({
 }: TableAttendance) => {
   const [dates, setDates] = useState<any>([]);
   const [scheduleItems, setScheduleItems] = useState(courseSchedule);
+  const { user } = useContext(UserContext);
+  const { can } = usePermission();
+  const isCoordinator = user?.role === USER_TYPES.COORDINATOR;
+  const canMarkAttendance = can(PERMISSIONS.MARK_ATTENDANCE);
 
   useEffect(() => {
     setDates(studentsAttendance);
@@ -48,8 +57,13 @@ const TableAttendance = ({
   const changeAttendance = async (
     event: any,
     syllabusItemId: any,
-    studentId: any,
+    studentId: any
   ) => {
+    if (isCoordinator) {
+      toast.error('Coordinators do not have permission to mark attendance');
+      return;
+    }
+
     const status = event.target.value;
     setDates((date: any) => ({
       ...date,
@@ -77,8 +91,13 @@ const TableAttendance = ({
   const updateScheduleItem = (
     e: ChangeEvent,
     lessonId: number,
-    index: number,
+    index: number
   ) => {
+    if (isCoordinator) {
+      toast.error('Coordinators do not have permission to update lessons');
+      return;
+    }
+
     const value = (e.target as HTMLInputElement).value;
 
     const updatedScheduleItems = scheduleItems.map((item: any, i: number) => {
@@ -94,7 +113,7 @@ const TableAttendance = ({
     debounce(async (lesson: string, lessonId: number) => {
       await updateLessonTaught(lessonId, { lesson_taught: lesson });
     }, 600),
-    [],
+    []
   );
 
   const renderStatisticsCol = (studentId: number) => {
@@ -108,7 +127,7 @@ const TableAttendance = ({
         <td>{absentStatistics.attendanceCount}</td>
         <td
           className={getColorOfAssistance(
-            absentStatistics.attendancePercentage,
+            absentStatistics.attendancePercentage
           )}
         >
           {absentStatistics.attendancePercentage}%
@@ -119,19 +138,40 @@ const TableAttendance = ({
 
   return (
     <div>
-      <Table responsive bordered className="main-table w-100">
+      {isCoordinator && (
+        <Alert
+          color='warning'
+          className='mb-3'
+        >
+          As a coordinator, you can only view attendance but cannot modify it.
+        </Alert>
+      )}
+      <Table
+        responsive
+        bordered
+        className='main-table w-100'
+      >
         <thead>
           <tr>
-            <th className="main-col-title student-col">STUDENT</th>
+            <th className='main-col-title student-col'>STUDENT</th>
             {scheduleItems?.map((date: any, index: number) => (
-              <th className="col-vertical" key={`date-attendance-${index}`}>
+              <th
+                className='col-vertical'
+                key={`date-attendance-${index}`}
+              >
                 {formatDate(date?.scheduled_date)}
               </th>
             ))}
-            <th className="main-col-title" colSpan={2}>
+            <th
+              className='main-col-title'
+              colSpan={2}
+            >
               ATTENDANCE
             </th>
-            <th className="main-col-title" colSpan={2}>
+            <th
+              className='main-col-title'
+              colSpan={2}
+            >
               ABSENCES
             </th>
           </tr>
@@ -142,20 +182,25 @@ const TableAttendance = ({
               <tr key={`date-student-${index}`}>
                 <td>{student?.name}</td>
                 {Object.keys(dates).map((courseScheduleId: any, index2) => (
-                  <td key={`attendance-${index2}`} className={`td-attendance`}>
+                  <td
+                    key={`attendance-${index2}`}
+                    className={`td-attendance`}
+                  >
                     <Input
-                      type="select"
-                      className="attendance-input"
+                      type='select'
+                      className='attendance-input bg-white text-black'
+                      style={{ cursor: 'not-allowed' }}
                       value={dates[courseScheduleId][student?.id]}
                       onChange={(event) =>
                         changeAttendance(event, courseScheduleId, student?.id)
                       }
+                      disabled={isCoordinator}
                     >
-                      <option value="">&nbsp;</option>
-                      <option value="present">P</option>
-                      <option value="absent">F</option>
-                      <option value="late">A</option>
-                      <option value="recovered">R</option>
+                      <option value=''>&nbsp;</option>
+                      <option value='present'>P</option>
+                      <option value='absent'>F</option>
+                      <option value='late'>A</option>
+                      <option value='recovered'>R</option>
                     </Input>
                   </td>
                 ))}
@@ -166,7 +211,7 @@ const TableAttendance = ({
             <tr>
               <td
                 colSpan={Object.keys(dates).length + 4}
-                className="text-center"
+                className='text-center'
               >
                 This course doesn't have student
               </td>
@@ -175,40 +220,47 @@ const TableAttendance = ({
 
           {students && students.length > 0 && (
             <>
-              <tr className="py-2">
-                <td className="border-none"></td>
+              <tr className='py-2'>
+                <td className='border-none'></td>
               </tr>
               <tr>
-                <td className="main-col-description student-col">LESSON:</td>
+                <td className='main-col-description student-col'>LESSON:</td>
                 {scheduleItems.map((item: any, index: number) => (
                   <td
-                    className="col-vertical"
+                    className='col-vertical'
                     key={`current-lesson-col-${index}`}
                   >
                     <Input
-                      type="text"
-                      className="attendance-input"
-                      // @ts-ignore
+                      type='text'
+                      className='attendance-input bg-white text-black'
+                      style={{ cursor: 'not-allowed' }}
                       onChange={(e) => updateScheduleItem(e, item.id, index)}
-                      value={scheduleItems[index].lesson_taught ?? ""}
+                      value={scheduleItems[index].lesson_taught ?? ''}
+                      disabled={isCoordinator}
                     />
                   </td>
                 ))}
-                <td className="main-col-description" colSpan={4}></td>
+                <td
+                  className='main-col-description'
+                  colSpan={4}
+                ></td>
               </tr>
               <tr>
-                <td className="main-col-description student-col">
+                <td className='main-col-description student-col'>
                   CURRICULUM:
                 </td>
                 {scheduleItems?.map((item: any, index: number) => (
                   <td
-                    className="col-vertical highlighted-col text-center"
+                    className='col-vertical highlighted-col text-center'
                     key={`curriculum-lesson-col-${index}`}
                   >
                     {item.syllabusItem.item_name}
                   </td>
                 ))}
-                <td className="main-col-description" colSpan={4}></td>
+                <td
+                  className='main-col-description'
+                  colSpan={4}
+                ></td>
               </tr>
             </>
           )}
