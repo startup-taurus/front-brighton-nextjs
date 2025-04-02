@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import React, { useState } from 'react';
 import { Table, Tooltip } from 'reactstrap';
+import { useRouter } from 'next/router';
 
 interface CoursesListProps {
   title: string;
@@ -9,6 +10,8 @@ interface CoursesListProps {
 
 const CoursesList = ({ title, coursesList }: CoursesListProps) => {
   const [tooltips, setTooltips] = useState<Record<string, boolean>>({});
+  const router = useRouter();
+  const professorId = router.query.professorId;
 
   const toggle = (tooltipId: string) => {
     setTooltips((prev) => ({
@@ -27,7 +30,7 @@ const CoursesList = ({ title, coursesList }: CoursesListProps) => {
               <td>{`${course?.course_name} - ${course.classSchedule}`}</td>
               <td className='col-bg-primary '>
                 <Link
-                  href={`/course/${course?.course_id}/home`}
+                  href={`/course/${course?.course_id}/home${professorId ? `?professorId=${professorId}` : ''}`}
                   className='w-100 h-100 col-icon'
                 >
                   📁

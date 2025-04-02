@@ -1,54 +1,9 @@
 'use client';
 import React, { useContext } from 'react';
 import { useRouter } from 'next/router';
-
-import SectionTitle from '@/components/own/section-title/section-title';
-import { Card, CardBody } from 'reactstrap';
-import TeacherProfile from '@/components/own/teacher-profile/teacher-profile';
-import { UrlImage } from 'utils/Constant';
-import CoursesList from '@/components/own/courses-list/courses-list';
-import QuickLinksList from '@/components/own/quick-links-list/quick-links-list';
-import ScheduleCalendar from '@/components/own/schedule-calendar/schedule-calendar';
-import useSWR from 'swr';
 import { UserContext } from '../../../helper/User';
-import { getProfessorCourses } from '../../../helper/api-data/professor';
 import { USER_TYPES } from 'utils/constants';
-
-const QUICK_LINKS = [
-  {
-    title: 'Personal Best',
-    link: 'https://drive.google.com/drive/folders/1570aSXIRsYP2h8BFHzsXyzJrZ5nCGd1F',
-    icon: '📚',
-  },
-  {
-    title: 'Study Guides',
-    link: 'https://drive.google.com/drive/folders/1uA2VgHN_SZUz8dqwtohTiAJ-qx18phuc',
-    icon: '🎒',
-  },
-  {
-    title: 'Final Projects',
-    link: 'https://drive.google.com/drive/folders/1uLk_oPsPtNhJ0UJAbC51_48r5Y19E6Qx',
-    icon: '🎓',
-  },
-  {
-    title: 'Final Exams',
-    link: 'https://drive.google.com/drive/folders/1NYeWSHLyHa-K1qvOST0dIq-ihoEKLLIO',
-    icon: '📝',
-  },
-  {
-    title: 'Rulebooks',
-    link: 'https://drive.google.com/drive/folders/1D7UJ5u8r9KHkSZq1KG9nhp5uOfP5SyB1',
-    icon: '📔',
-  },
-];
-
-const OTHER_LINKS = [
-  {
-    title: 'Monthly reports',
-    link: 'https://drive.google.com/drive/folders/13yP6HYfuUjwnhVwV0K3hYUE_FC_juCAQ',
-    icon: '📁',
-  },
-];
+import TeacherDashboard from '@/components/own/teacher-dashboard';
 
 const Dashboard = () => {
   const { user } = useContext(UserContext);
@@ -59,65 +14,13 @@ const Dashboard = () => {
     : user?.id;
 
   const isCoordinator =
-    user?.role === USER_TYPES.COORDINATOR && router.query.professorId;
+    user?.role === USER_TYPES.COORDINATOR && !!router.query.professorId;
 
-  const courses = useSWR(
-    professorId ? `/professor/${professorId}/courses` : null,
-    () => getProfessorCourses(professorId)
-  );
-
-  if (!courses?.data?.data?.courses) return null;
-
-  const displayUser = isCoordinator
-    ? {
-        name: router.query.name as string,
-        image: router.query.image as string,
-        role: router.query.role as string,
-        report_link: null,
-      }
-    : user;
-  console.log(displayUser);
-  console.log(courses?.data);
   return (
-    <div className='page-body pt-2'>
-      <Card>
-        <CardBody>
-          <SectionTitle title='Dashboard' />
-          <TeacherProfile
-            profileData={{
-              profileImage: displayUser.image
-                ? `${UrlImage}/${displayUser.image}`
-                : '/assets/images/user/user.png',
-              firstName: displayUser?.name?.split(' ')[0],
-              lastName: displayUser?.name?.split(' ')[1],
-              position: displayUser?.role,
-              studentQty: courses?.data?.data?.total_students,
-              coursesQty: courses?.data?.data?.total_courses,
-            }}
-          />
-          <div className='divider'></div>
-          <div className='d-flex flex-column flex-lg-row justify-content-between pb-5'>
-            <CoursesList
-              title='Courses'
-              coursesList={courses?.data?.data?.courses}
-            />
-            <QuickLinksList
-              title='Quick Links'
-              quickLinks={QUICK_LINKS}
-              otherLinks={[
-                {
-                  title: 'Monthly reports',
-                  link: displayUser?.report_link,
-                  icon: '📁',
-                },
-              ]}
-            />
-          </div>
-          <div className='divider'></div>
-          <ScheduleCalendar courses={courses?.data?.data?.courses} />
-        </CardBody>
-      </Card>
-    </div>
+    <TeacherDashboard
+      professorId={professorId}
+      isCoordinator={isCoordinator}
+    />
   );
 };
 

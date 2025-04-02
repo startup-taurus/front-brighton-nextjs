@@ -34,9 +34,6 @@ const TeacherCard = ({ teacher }: TeacherCardProps) => {
         pathname: '/teachers',
         query: {
           professorId: teacher.user.id,
-          name: teacher.name,
-          image: teacher.image,
-          role: teacher.role,
         },
       });
     }

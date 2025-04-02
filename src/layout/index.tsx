@@ -115,7 +115,7 @@ const Layout = ({ children }: layoutProps) => {
       </Head>
       {/* <Loader /> */}
       <div
-        className={`page-wrapper  ${user?.role === USER_TYPES.ADMIN ? 'compact-wrapper' : 'horizontal-wrapper'}`}
+        className={`page-wrapper  ${user?.role === USER_TYPES.ADMIN || user?.role === USER_TYPES.COORDINATOR ? 'compact-wrapper' : 'horizontal-wrapper'}`}
       >
         <Header />
         <div className='page-body-wrapper'>
