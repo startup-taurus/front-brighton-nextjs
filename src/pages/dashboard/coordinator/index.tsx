@@ -14,48 +14,37 @@ import TeacherCard from '@/components/own/teacher-card';
 import { getAllProfessors } from 'helper/api-data/professor';
 import CardSkeleton from '@/components/own/common/card-skeleton';
 import { Teacher } from 'Types/TeacherType';
+import useSWR from 'swr';
 
 const CoordinatorDashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
-  const [teachers, setTeachers] = useState<Teacher[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchTeachers = async () => {
-      try {
-        const response = await getAllProfessors(1, 100, '');
-        if (response?.data?.result) {
-          const formattedTeachers = response.data.result.map(
-            (professor: any) => ({
-              id: professor.id,
-              name: professor.user?.name || 'No name',
-              image: professor.user?.image || '',
-              role: professor.user?.role || 'No role',
-              students: professor.students_count || 0,
-              courses: professor.courses?.length || 0,
-              coursesList:
-                professor.courses?.map((course: any) => ({
-                  code: course.code || 'N/A',
-                  name: course.name || 'No name',
-                  schedule: course.schedule || 'Hours not available',
-                })) || [],
-              user: {
-                id: professor.user?.id,
-              },
-            })
-          );
-          setTeachers(formattedTeachers);
-        }
-        setLoading(false);
-      } catch (error) {
-        console.error('Error when obtaining teachers:', error);
-        setLoading(false);
-      }
-    };
+  const { data: response, error } = useSWR('professors', () =>
+    getAllProfessors(1, 100, '')
+  );
 
-    fetchTeachers();
-  }, []);
+  const loading = !response && !error;
+
+  const teachers: Teacher[] = response?.data?.result
+    ? response.data.result.map((professor: any) => ({
+        id: professor.id,
+        name: professor.user?.name || 'No name',
+        image: professor.user?.image || '',
+        role: professor.user?.role || 'No role',
+        students: professor.students_count || 0,
+        courses: professor.courses?.length || 0,
+        coursesList:
+          professor.courses?.map((course: any) => ({
+            code: course.code || 'N/A',
+            name: course.name || 'No name',
+            schedule: course.schedule || 'Hours not available',
+          })) || [],
+        user: {
+          id: professor.user?.id,
+        },
+      }))
+    : [];
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -70,6 +59,12 @@ const CoordinatorDashboard = () => {
   const filteredTeachers = teachers.filter((teacher) =>
     teacher.name.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
   );
+
+  useEffect(() => {
+    if (error) {
+      console.error('Error when obtaining teachers:', error);
+    }
+  }, [error]);
 
   return (
     <div className='page-body'>

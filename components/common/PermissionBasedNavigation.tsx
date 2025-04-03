@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { hasPermission } from '../../utils/permissions';
 import { PERMISSIONS } from '../../utils/permissions';
+import { isBrowser } from 'utils/utils';
 
 interface NavItem {
   title: string;
@@ -121,7 +122,7 @@ const PermissionBasedNavigation: React.FC<PermissionBasedNavigationProps> = ({
   const router = useRouter();
 
   const getUserRole = (): string | null => {
-    if (typeof window === 'undefined') return null;
+    if (!isBrowser) return null;
 
     try {
       const userStr = localStorage.getItem('token');

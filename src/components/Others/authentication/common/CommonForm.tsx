@@ -55,7 +55,7 @@ const CommonForm = ({ alignLogo }: commonFormPropsType) => {
         [USER_TYPES.COORDINATOR]: '/dashboard',
       };
 
-      const redirectPath = roleRedirectMap[response.data.role] || '/dashboard';
+      const redirectPath = roleRedirectMap[response.data.role] || '/login';
       router.push(redirectPath);
 
       toast.success('Login Success');

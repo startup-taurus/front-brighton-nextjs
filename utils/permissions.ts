@@ -1,6 +1,3 @@
-// This file defines the permission structure for role-based access control
-
-// Define all possible permissions as constants for consistency
 export const PERMISSIONS = {
   // Dashboard permissions
   VIEW_DASHBOARD: 'view_dashboard',
@@ -166,7 +163,6 @@ export const ROLE_PERMISSIONS = {
   ],
 };
 
-// Helper function to check if a user has a specific permission
 export const hasPermission = (
   userRole: string,
   permission: string
@@ -180,7 +176,6 @@ export const hasPermission = (
   return rolePermissions.includes(permission);
 };
 
-// Helper function to check if a user has any of the specified permissions
 export const hasAnyPermission = (
   userRole: string,
   permissions: string[]
@@ -190,7 +185,6 @@ export const hasAnyPermission = (
   return permissions.some((permission) => hasPermission(userRole, permission));
 };
 
-// Helper function to check if a user has all of the specified permissions
 export const hasAllPermissions = (
   userRole: string,
   permissions: string[]
@@ -201,19 +195,15 @@ export const hasAllPermissions = (
 };
 
 // Example of how the frontend would use this to make a request to the backend
-// This is just a structure, the actual implementation would depend on your API
 export const checkPermissionFromBackend = async (
   permission: string
 ): Promise<boolean> => {
   try {
-    // Get the user from localStorage or context
     const userStr = localStorage.getItem('token');
     if (!userStr) return false;
 
     const user = JSON.parse(userStr);
 
-    // In a real implementation, you would make an API call to verify permissions
-    // For now, we'll use the local permission check
     return hasPermission(user.role, permission);
 
     // Example of how an API call would look:

@@ -4,6 +4,7 @@ import {
   hasAnyPermission,
   hasAllPermissions,
 } from '../../utils/permissions';
+import { isBrowser } from 'utils/utils';
 
 interface PermissionGuardProps {
   permission?: string;
@@ -21,7 +22,7 @@ const PermissionGuard: React.FC<PermissionGuardProps> = ({
   fallback = null,
 }) => {
   const getUserRole = (): string | null => {
-    if (typeof window === 'undefined') return null;
+    if (!isBrowser) return null;
 
     try {
       const userStr = localStorage.getItem('token');

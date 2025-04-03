@@ -4,12 +4,13 @@ import {
   hasAnyPermission,
   hasAllPermissions,
 } from '../utils/permissions';
+import { isBrowser } from 'utils/utils';
 
 const usePermission = () => {
   const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    if (!isBrowser) return;
 
     try {
       const userStr = localStorage.getItem('token');
