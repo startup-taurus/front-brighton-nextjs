@@ -10,7 +10,7 @@ const usePermission = () => {
   const [userRole, setUserRole] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!isBrowser) return;
+    if (!isBrowser()) return;
 
     try {
       const userStr = localStorage.getItem('token');

@@ -19,6 +19,7 @@ import useSWR from 'swr';
 const CoordinatorDashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+  const [teachers, setTeachers] = useState<Teacher[]>([]);
 
   const { data: response, error } = useSWR('professors', () =>
     getAllProfessors(1, 100, '')
@@ -26,8 +27,9 @@ const CoordinatorDashboard = () => {
 
   const loading = !response && !error;
 
-  const teachers: Teacher[] = response?.data?.result
-    ? response.data.result.map((professor: any) => ({
+  useEffect(() => {
+    if (response?.data?.result) {
+      const formattedTeachers = response.data.result.map((professor: any) => ({
         id: professor.id,
         name: professor.user?.name || 'No name',
         image: professor.user?.image || '',
@@ -43,8 +45,13 @@ const CoordinatorDashboard = () => {
         user: {
           id: professor.user?.id,
         },
-      }))
-    : [];
+      }));
+
+      setTeachers(formattedTeachers);
+    } else {
+      setTeachers([]);
+    }
+  }, [response]);
 
   useEffect(() => {
     const handler = setTimeout(() => {

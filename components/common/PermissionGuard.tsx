@@ -22,7 +22,7 @@ const PermissionGuard: React.FC<PermissionGuardProps> = ({
   fallback = null,
 }) => {
   const getUserRole = (): string | null => {
-    if (!isBrowser) return null;
+    if (!isBrowser()) return null;
 
     try {
       const userStr = localStorage.getItem('token');
