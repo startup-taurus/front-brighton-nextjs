@@ -57,18 +57,10 @@ export const CoordinatorMenuList: sidebarMenuType[] = [
         badge: 'badge badge-light-primary',
         path: 'admin/students',
       },
-      {
-        title: 'Registered Students',
-        id: 4,
-        pathSlice: 'registered-students',
-        type: 'link',
-        icon: 'blog',
-        badge: 'badge badge-light-primary',
-        path: 'admin/registered-students',
-      },
+
       {
         title: 'Syllabus',
-        id: 5,
+        id: 4,
         pathSlice: 'Syllabus',
         type: 'link',
         icon: 'layout',
@@ -77,7 +69,7 @@ export const CoordinatorMenuList: sidebarMenuType[] = [
       },
       {
         title: 'Courses',
-        id: 6,
+        id: 5,
         pathSlice: 'courses',
         type: 'link',
         icon: 'others',
@@ -86,7 +78,7 @@ export const CoordinatorMenuList: sidebarMenuType[] = [
       },
       {
         title: 'Professors',
-        id: 7,
+        id: 6,
         pathSlice: 'teachers-table',
         type: 'link',
         icon: 'learning',
@@ -95,7 +87,7 @@ export const CoordinatorMenuList: sidebarMenuType[] = [
       },
       {
         title: 'Holidays',
-        id: 8,
+        id: 7,
         pathSlice: 'holidays',
         type: 'link',
         icon: 'calendar',
@@ -104,7 +96,7 @@ export const CoordinatorMenuList: sidebarMenuType[] = [
       },
       {
         title: '❓ FAQ',
-        id: 9,
+        id: 8,
         pathSlice: 'faq',
         type: 'link',
         badge: 'badge badge-light-primary',

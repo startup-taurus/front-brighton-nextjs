@@ -31,10 +31,6 @@ const HolidaysTable = ({ reload }: any) => {
   }, [reload]);
 
   const toggle = (data: any) => {
-    if (isCoordinator && !canEditHoliday) {
-      toast.error('Coordinators do not have permission to edit holidays');
-      return;
-    }
     setSelectedData(data);
     setIsOpen(!isOpen);
     if (isOpen) {
@@ -43,12 +39,6 @@ const HolidaysTable = ({ reload }: any) => {
   };
 
   const handleAlert = (row: any) => {
-    if (isCoordinator && !canDeleteHoliday) {
-      toast.error(
-        'Coordinators do not have permission to activate/deactivate holidays'
-      );
-      return;
-    }
     let status = row?.status === 'active' ? 'deactivate' : 'activate';
     Swal.fire({
       title: 'Are you sure to ' + status + ' this holiday?',
@@ -113,7 +103,6 @@ const HolidaysTable = ({ reload }: any) => {
           onBlock={() => handleAlert(row)}
           onEdit={() => toggle(row)}
           stauts={row.status === 'active' ? false : true}
-
         />
       ),
       sortable: false,
@@ -160,15 +149,6 @@ const HolidaysTable = ({ reload }: any) => {
 
   return (
     <div className='table-responsive'>
-      {isCoordinator && (
-        <Alert
-          color='warning'
-          className='mb-3'
-        >
-          As a coordinator, you can only see the holidays but you cannot modify
-          them or add new ones.
-        </Alert>
-      )}
       <DataTable
         columns={columns}
         data={holidays.data.result}

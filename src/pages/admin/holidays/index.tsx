@@ -18,10 +18,6 @@ const Holidays = () => {
   const canCreateHoliday = can(PERMISSIONS.CREATE_HOLIDAY);
 
   const toggle = () => {
-    if (isCoordinator && !canCreateHoliday) {
-      toast.error('Coordinators do not have permission to create holidays');
-      return;
-    }
     setIsOpenModal(!isOpenModal);
   };
 
@@ -37,22 +33,12 @@ const Holidays = () => {
       >
         <Row>
           <Card>
-            {isCoordinator && (
-              <Alert
-                color='warning'
-                className='m-3'
-              >
-                As a coordinator, you can only see the holidays but you cannot
-                modify them or add new ones.
-              </Alert>
-            )}
             <CardHeader className='d-flex justify-content-end'>
               <TableHeaderActions
                 onReload={handleReload}
                 addButton={{
                   title: 'Create holiday',
                   onClick: () => toggle(),
-                  disabled: isCoordinator && !canCreateHoliday,
                 }}
               />
             </CardHeader>
