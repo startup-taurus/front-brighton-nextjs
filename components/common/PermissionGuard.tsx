@@ -38,7 +38,8 @@ const PermissionGuard: React.FC<PermissionGuardProps> = ({
 
   const userRole = getUserRole();
 
-  if (!userRole) return fallback;
+  // Modificación: Envolver el fallback en un fragmento de React para garantizar que devuelva un ReactElement
+  if (!userRole) return <>{fallback}</>;
 
   let hasAccess = false;
 
