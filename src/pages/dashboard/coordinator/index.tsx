@@ -28,20 +28,23 @@ const CoordinatorDashboard = () => {
   const loading = !response && !error;
 
   useEffect(() => {
-    if (response?.data?.result) {
-      const formattedTeachers = response.data.result.map((professor: any) => ({
+    const professorsData = response?.data?.result || response?.data;
+
+    if (Array.isArray(professorsData)) {
+      const formattedTeachers = professorsData.map((professor: any) => ({
         id: professor.id,
         name: professor.user?.name || 'No name',
         image: professor.user?.image || '',
         role: professor.user?.role || 'No role',
         students: professor.students_count || 0,
         courses: professor.courses?.length || 0,
-        coursesList:
-          professor.courses?.map((course: any) => ({
-            code: course.code || 'N/A',
-            name: course.name || 'No name',
-            schedule: course.schedule || 'Hours not available',
-          })) || [],
+        coursesList: Array.isArray(professor.courses)
+          ? professor.courses.map((course: any) => ({
+              code: course.code || 'N/A',
+              name: course.name || 'No name',
+              schedule: course.schedule || 'Hours not available',
+            }))
+          : [],
         user: {
           id: professor.user?.id,
         },
