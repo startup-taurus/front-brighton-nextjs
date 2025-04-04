@@ -90,6 +90,8 @@ export const SCHEDULE_DATES = [
   { label: 'Tuesday & Thursday 17:00-19:00', value: 'Tue-Thu 17:00-19:00' },
   { label: 'Tuesday & Thursday 19:00-21:00', value: 'Tue-Thu 19:00-21:00' },
 
+  { label: 'Friday Intensive', value: 'Fri intensive' },
+
   { label: 'Saturday 9:00-13:00', value: 'Sat 9:00-13:00' },
   { label: 'Saturday 14:00-18:00', value: 'Sat 14:00-18:00' },
 ];
