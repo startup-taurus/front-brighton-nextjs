@@ -9,6 +9,7 @@ import {
   Label,
   Row,
 } from 'reactstrap';
+import Select from 'react-select';
 import { FaChevronDown, FaFilter } from 'react-icons/fa6';
 import { FiltersProps } from '../../../../Types/types';
 import { clearQueryString } from '../../../../utils/utils';
@@ -87,23 +88,51 @@ const TableFilters = ({ selectFilters }: TableFiltersProps) => {
                         <Field
                           name={item.name}
                           type='select'
-                          as={Input}
                         >
-                          <option value=''>All</option>
-                          {item?.items?.map((item, j) => (
-                            <option
-                              value={item.value}
-                              key={`item-${item.label}-${item.value}-${i}-${j}`}
-                            >
-                              {item.label}
-                            </option>
-                          ))}
+                          {({ field, form }: any) => (
+                            <Select
+                              styles={{
+                                menu: (provided) => ({
+                                  ...provided,
+                                  zIndex: 9999,
+                                }),
+                              }}
+                              {...field}
+                              id={item.name}
+                              options={item.items}
+                              onChange={(selectedOption: any) => {
+                                const value = selectedOption
+                                  ? selectedOption.value
+                                  : '';
+                                form.setFieldValue(item.name, value);
+                              }}
+                              value={
+                                item.items?.find(
+                                  (option: any) => option.value === field.value
+                                ) || null
+                              }
+                              placeholder={`Select ${item.labelName}`}
+                              isSearchable
+                              onInputChange={item.onInputChange}
+                              onMenuScrollToBottom={item.onMenuScrollToBottom}
+                              menuPortalTarget={document.body}
+                            />
+                          )}
+                        </Field>
+                      ) : item?.type === 'async-select' &&
+                        item.asyncComponent ? (
+                        <Field name={item.name}>
+                          {(props: any) =>
+                            item.asyncComponent && item.asyncComponent(props)
+                          }
                         </Field>
                       ) : (
                         <Field
                           name={item.name}
-                          type='text'
                           as={Input}
+                          type={item.type || 'text'}
+                          id={item.name}
+                          placeholder={`Search by ${item.labelName}`}
                         />
                       )}
                     </Col>
@@ -112,16 +141,17 @@ const TableFilters = ({ selectFilters }: TableFiltersProps) => {
                 <div className='d-flex justify-content-end gap-2'>
                   <button
                     type='button'
-                    className='btn btn-cancel'
+                    className='btn btn-outline-primary'
                     onClick={() => clearForm(resetForm)}
                   >
-                    Reset
+                    Clear
                   </button>
                   <button
                     type='submit'
-                    className='btn btn-save'
+                    className='btn btn-primary d-flex align-items-center gap-2'
                   >
-                    <FaFilter /> <span>Filter</span>
+                    <FaFilter />
+                    <span>Filter</span>
                   </button>
                 </div>
               </form>

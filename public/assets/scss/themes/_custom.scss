@@ -28,3 +28,12 @@
 .tooltip-inner {
   color: blue;
 }
+
+.select__menu {
+  z-index: 9999 !important;
+}
+
+.card-body,
+.card {
+  overflow: visible !important;
+}

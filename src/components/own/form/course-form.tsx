@@ -272,24 +272,38 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                 </Col>
                 <Col xs={6}>
                   <Label for='professor_id'>Professor</Label>
-                  <Select
-                    id='professor_id'
-                    options={professorOptions}
-                    onChange={(selectedOption: any) =>
-                      setFieldValue('professor_id', selectedOption.value)
-                    }
-                    placeholder='Select a professor'
-                    value={
-                      professorOptions.find(
-                        (option: any) =>
-                          option.value === props.values.professor_id
-                      ) || null
-                    }
-                    isSearchable
-                    onInputChange={(inputValue) => {
-                      setSearchTerm(inputValue);
-                    }}
-                  />
+                  <Field name='professor_id'>
+                    {({ field, form }: any) => (
+                      <Select
+                        {...field}
+                        id='professor_id'
+                        options={professorOptions}
+                        onChange={(selectedOption: any) => {
+                          const professorId = selectedOption
+                            ? selectedOption.value
+                            : '';
+                          setFieldValue('professor_id', professorId);
+                        }}
+                        placeholder='Select a professor'
+                        value={
+                          professorOptions.find(
+                            (option: any) =>
+                              option.value === props.values.professor_id
+                          ) || null
+                        }
+                        isSearchable
+                        onInputChange={(inputValue) => {
+                          setSearchTerm(inputValue);
+                        }}
+                      />
+                    )}
+                  </Field>
+                  {props.touched.professor_id &&
+                    !!props.errors.professor_id && (
+                      <div className='invalid-input'>
+                        <>{props.errors.professor_id}</>
+                      </div>
+                    )}
                   <ErrorMessage
                     name='professor_id'
                     component={FormFeedback}

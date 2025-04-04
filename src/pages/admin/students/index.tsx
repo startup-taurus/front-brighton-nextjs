@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardHeader, Container, Row } from 'reactstrap';
 import StudentsTable from '@/components/own/tables/students-table';
 import TableHeaderActions from '@/components/own/table-header-actions/table-header-actions';
@@ -8,13 +8,15 @@ import { FiltersProps } from '../../../../Types/types';
 import TableFilters from '@/components/own/table-filters/table-filters';
 import { getFiltersString } from '../../../../utils/utils';
 import useSWR, { mutate } from 'swr';
-import { getAllStudent } from '../../../../helper/api-data/student';
-import { getAllCourses } from '../../../../helper/api-data/course';
 import {
-  LEVEL_FILTER,
-  PROMOTION_FILTER,
-  STATUS_FILTER,
-} from '../../../../utils/constants';
+  getAllStudent,
+  getDistinctLevel,
+} from '../../../../helper/api-data/student';
+import {
+  getAllCourses,
+  getActiveCourses,
+} from '../../../../helper/api-data/course';
+import { PROMOTION_FILTER, STATUS_FILTER } from '../../../../utils/constants';
 
 const Students = () => {
   const router = useRouter();
@@ -23,6 +25,14 @@ const Students = () => {
   const rowPerPage = router.query.rowPerPage
     ? Number(router.query.rowPerPage)
     : 10;
+
+  const limit = 10;
+  const [coursePage, setCoursePage] = useState(1);
+  const [levelPage, setLevelPage] = useState(1);
+  const [courseSearchTerm, setCourseSearchTerm] = useState('');
+  const [levelSearchTerm, setLevelSearchTerm] = useState('');
+  const [courseOptions, setCourseOptions] = useState<any[]>([]);
+  const [levelOptions, setLevelOptions] = useState<any[]>([]);
 
   const filters = getFiltersString(router);
 
@@ -40,7 +50,74 @@ const Students = () => {
       )
   );
 
-  const course = useSWR(`/course/get-all`, () => getAllCourses());
+  const { data: course } = useSWR(
+    ['/course/get-active', coursePage, limit, courseSearchTerm],
+    () => getActiveCourses(coursePage, limit, courseSearchTerm)
+  );
+
+  const { data: levels } = useSWR(
+    ['/student/get-distinct-levels', levelPage, limit, levelSearchTerm],
+    () => getDistinctLevel(levelPage, limit)
+  );
+
+  const onCourseScrollToBottom = () => {
+    if (course?.data?.length !== 0) {
+      const nextPage = coursePage + 1;
+      setCoursePage(nextPage);
+    }
+  };
+
+  const onLevelScrollToBottom = () => {
+    if (levels?.data?.length !== 0) {
+      const nextPage = levelPage + 1;
+      setLevelPage(nextPage);
+    }
+  };
+
+  useEffect(() => {
+    if (course?.data) {
+      const courseResults = Array.isArray(course.data)
+        ? course.data
+        : course.data.result;
+      if (courseResults) {
+        const options = courseResults.map((courseItem: any) => ({
+          value: courseItem.id,
+          label: `${courseItem.course_number} `,
+        }));
+
+        setCourseOptions((prevOptions) => {
+          const combined = [...prevOptions, ...options];
+          return combined.filter(
+            (option, index, self) =>
+              self.findIndex((o) => o.value === option.value) === index
+          );
+        });
+      }
+    }
+  }, [course]);
+
+  useEffect(() => {
+    if (levels?.data) {
+      const levelsArray = Array.isArray(levels.data)
+        ? levels.data
+        : levels.data.result
+          ? levels.data.result
+          : [];
+
+      const levelOpts = levelsArray.map((item: any) => ({
+        value: item,
+        label: item,
+      }));
+
+      setLevelOptions((prevOptions) => {
+        const combined = [...prevOptions, ...levelOpts];
+        return combined.filter(
+          (option, index, self) =>
+            self.findIndex((o) => o.value === option.value) === index
+        );
+      });
+    }
+  }, [levels]);
 
   const selectFilters: FiltersProps[] = [
     {
@@ -63,17 +140,17 @@ const Students = () => {
       labelName: 'Course No',
       name: 'course',
       type: 'select',
-      items: course?.data
-        ? course?.data?.data?.result?.map((item: any) => ({
-            label: item.course_number,
-            value: item.id,
-          }))
-        : [],
+      items: courseOptions.length > 0 ? courseOptions : [],
+      onInputChange: (inputValue: string) => setCourseSearchTerm(inputValue),
+      onMenuScrollToBottom: onCourseScrollToBottom,
     },
     {
       labelName: 'Level',
       name: 'level',
-      items: LEVEL_FILTER,
+      type: 'select',
+      items: levelOptions.length > 0 ? levelOptions : [],
+      onInputChange: (inputValue: string) => setLevelSearchTerm(inputValue),
+      onMenuScrollToBottom: onLevelScrollToBottom,
     },
     {
       labelName: 'Promotion',
