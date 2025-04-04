@@ -17,7 +17,11 @@ import {
 import LoadingButton from '../common/loading-button/LoadingButton';
 import useSWR from 'swr';
 import { getActiveCourses } from 'helper/api-data/course';
-import { createStudent, updateStudent } from 'helper/api-data/student';
+import {
+  createStudent,
+  updateStudent,
+  getDistinctLevel,
+} from 'helper/api-data/student';
 import { toast } from 'react-toastify';
 import * as Yup from 'yup';
 import { parse } from 'date-fns';
@@ -76,10 +80,17 @@ const StudentForm = ({
     useState<any>(null);
   const [previousCourses, setPreviousCourses] = useState<any[]>([]);
   const [courseOptions, setCourseOptions] = useState<any[]>([]);
+  const [levelOptions, setLevelOptions] = useState<any[]>([]);
+  const [levelSearchTerm, setLevelSearchTerm] = useState('');
 
   const { data: course } = useSWR(
     ['/course/get-active', page, limit, searchTerm],
     () => getActiveCourses(page, limit, searchTerm)
+  );
+
+  const { data: levels } = useSWR(
+    ['/student/get-distinct-levels', page, limit],
+    () => getDistinctLevel(page, limit)
   );
 
   useEffect(() => {
@@ -132,6 +143,13 @@ const StudentForm = ({
 
   const onCourseScrollToBottom = () => {
     if (course?.data?.length != 0) {
+      const nextPage = page + 1;
+      setPage(nextPage);
+    }
+  };
+
+  const onLevelScrollToBottom = () => {
+    if (levels?.data?.length != 0) {
       const nextPage = page + 1;
       setPage(nextPage);
     }
@@ -192,6 +210,23 @@ const StudentForm = ({
       );
     });
   }, [course, course?.data]);
+
+  useEffect(() => {
+    if (levels?.data?.result) {
+      const levelOpts = levels.data.result.map((item: any) => ({
+        value: item,
+        label: item,
+      }));
+
+      setLevelOptions((prevOptions) => {
+        const combined = [...prevOptions, ...levelOpts];
+        return combined.filter(
+          (option, index, self) =>
+            self.findIndex((o) => o.value === option.value) === index
+        );
+      });
+    }
+  }, [levels]);
 
   return (
     <>
@@ -386,11 +421,38 @@ const StudentForm = ({
                   )}
                   <Col xs={6}>
                     <Label for='level'>Level</Label>
-                    <Field
-                      name='level'
-                      as={Input}
-                      invalid={touched.level && !!errors.level}
-                    />
+                    <Field name='level'>
+                      {({ field, form }: any) => (
+                        <Select
+                          {...field}
+                          id='level'
+                          options={levelOptions}
+                          onChange={(selectedOption: any) => {
+                            const level = selectedOption
+                              ? selectedOption.value
+                              : '';
+                            setFieldValue('level', level);
+                          }}
+                          value={
+                            levelOptions.find(
+                              (option: any) =>
+                                option.value === props.values.level
+                            ) || null
+                          }
+                          placeholder='Select level'
+                          isSearchable
+                          onInputChange={(inputValue) => {
+                            setLevelSearchTerm(inputValue);
+                          }}
+                          onMenuScrollToBottom={onLevelScrollToBottom}
+                        />
+                      )}
+                    </Field>
+                    {touched.level && !!errors.level && (
+                      <div className='invalid-input'>
+                        <>{errors!.level}</>
+                      </div>
+                    )}
                     <ErrorMessage
                       name='level'
                       component={FormFeedback}

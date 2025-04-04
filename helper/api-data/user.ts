@@ -1,11 +1,11 @@
-import { getFetcher, postFetcher, putFetcher } from "helper/api";
+import { getFetcher, postFetcher, putFetcher } from 'helper/api';
 
 export const postLogin = (data: any) => {
-  return postFetcher("/user/login", data, "", false, true);
+  return postFetcher('/user/login', data, '', false, true);
 };
 
 export const createUser = (data: any) => {
-  return postFetcher("/user/register", data);
+  return postFetcher('/user/register', data);
 };
 
 export const updateUser = (userId: number, data: any) => {
@@ -18,8 +18,8 @@ export const updateStatusUser = (userId: number, status: string) => {
 
 export const getAllUsers = (page: number, limit: number, filters?: any) => {
   return getFetcher(
-    `/user/get-all?page=${page}&limit=${limit}${filters ? `&${filters}` : ""}`,
-    false,
+    `/user/get-all?page=${page}&limit=${limit}${filters ? `&${filters}` : ''}`,
+    false
   );
 };
 

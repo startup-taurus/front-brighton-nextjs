@@ -1,17 +1,27 @@
-import { getFetcher, postFetcher, putFetcher } from "../api";
+import { getFetcher, postFetcher, putFetcher } from '../api';
 export const getAllStudent = (
   page: number,
   limit: number,
-  filters?: string,
+  filters?: string
 ) => {
   return getFetcher(
-    `/student/get-all?page=${page}&limit=${limit}${filters ? `&${filters}` : ""}`,
-    false,
+    `/student/get-all?page=${page}&limit=${limit}${filters ? `&${filters}` : ''}`,
+    false
+  );
+};
+export const getDistinctLevel = (
+  page: number ,
+  limit: number ,
+
+) => {
+  return getFetcher(
+    `/student/get-distinct-levels?page=${page}&limit=${limit}`,
+    false
   );
 };
 
 export const createStudent = (data: any) => {
-  return postFetcher("/student/create", data);
+  return postFetcher('/student/create', data);
 };
 
 export const updateStudent = (studentId: number, data: any) => {
