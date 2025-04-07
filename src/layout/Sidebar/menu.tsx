@@ -46,7 +46,7 @@ export const CoordinatorMenuList: sidebarMenuType[] = [
         type: 'link',
         icon: 'task',
         badge: 'badge badge-light-primary',
-        path: 'dashboard/coordinator',
+        path: 'coordinator/professors',
       },
       {
         title: 'Students',

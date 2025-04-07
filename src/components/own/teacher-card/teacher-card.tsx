@@ -42,7 +42,7 @@ const TeacherCard = ({ teacher }: TeacherCardProps) => {
   return (
     <Card className='overflow-hidden mb-4 shadow-sm border-0 h-100 '>
       <CardBody className='p-4 d-flex flex-column '>
-        <div className='d-flex flex-column flex-sm-row align-items-center gap-3 mb-3'>
+        <div className='d-flex flex-column flex-sm-row align-items-center gap-3 '>
           <div className='flex-shrink-0'>
             {teacher.image ? (
               <Image
@@ -70,7 +70,7 @@ const TeacherCard = ({ teacher }: TeacherCardProps) => {
           </div>
           <div className='text-center text-sm-start'>
             <h5 className='fw-bold mb-1'>{teacher.name}</h5>
-            <p className='text-muted mb-2'>{teacher.role}</p>
+            <p className='text-muted '>{teacher.role}</p>
             <div className='d-flex flex-wrap gap-3 justify-content-center justify-content-sm-start'>
               <div className='d-flex align-items-center gap-2'>
                 <Image

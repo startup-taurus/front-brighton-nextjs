@@ -5,6 +5,8 @@ export interface Teacher {
   role: string;
   students: number;
   courses: number;
+  status?: string;
+  coursesList?: Array<{ code: string; name: string; schedule: string }>;
   user?: {
     id: number;
   };
