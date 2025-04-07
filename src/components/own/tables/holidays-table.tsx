@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import useSWR, { mutate } from 'swr';
 import { useRouter } from 'next/router';
 import { getAllHolidays, updateHolidayStatus } from 'helper/api-data/holidays';
@@ -7,12 +7,24 @@ import Swal from 'sweetalert2';
 import DataTable from 'react-data-table-component';
 import HolidaysForm from '../form/holidays-form';
 import TableSkeleton from '../common/table-skeleton/TableSkeleton';
+import { UserContext } from '../../../../helper/User';
+import usePermission from '../../../../hooks/usePermission';
+import { PERMISSIONS } from '../../../../utils/permissions';
+import { Alert } from 'reactstrap';
+import { toast } from 'react-toastify';
+import { USER_TYPES } from 'utils/constants';
 
 const HolidaysTable = ({ reload }: any) => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenDetail, setIsOpenDetail] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
+  const { user } = useContext(UserContext);
+  const { can } = usePermission();
+  const isCoordinator = user?.role === USER_TYPES.COORDINATOR;
+  const canCreateHoliday = can(PERMISSIONS.CREATE_HOLIDAY);
+  const canEditHoliday = can(PERMISSIONS.EDIT_HOLIDAY);
+  const canDeleteHoliday = can(PERMISSIONS.DELETE_HOLIDAY);
 
   useEffect(() => {
     mutate([`/holidays/get-all`, page, rowPerPage]);

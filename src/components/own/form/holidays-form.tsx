@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { ErrorMessage, Field, Formik } from 'formik';
 import {
   Button,
@@ -12,27 +12,45 @@ import {
 } from 'reactstrap';
 import LoadingButton from '../common/loading-button/LoadingButton';
 import { createHoliday, updateHoliday } from 'helper/api-data/holidays';
+import { UserContext } from '../../../../helper/User';
+import usePermission from '../../../../hooks/usePermission';
+import { PERMISSIONS } from '../../../../utils/permissions';
+import { toast } from 'react-toastify';
+import { USER_TYPES } from 'utils/constants';
 
 const HolidayForm = ({ data, isOpen, toggle }: any) => {
+  const { user } = useContext(UserContext);
+  const { can } = usePermission();
+  const isCoordinator = user?.role === USER_TYPES.COORDINATOR;
+  const canCreateHoliday = can(PERMISSIONS.CREATE_HOLIDAY);
+  const canEditHoliday = can(PERMISSIONS.EDIT_HOLIDAY);
   const save = async (data: any) => {
+    if (isCoordinator && !canCreateHoliday) {
+      toast.error('Coordinators do not have permission to create holidays');
+      return;
+    }
     try {
       const response = await createHoliday(data);
       if (response.statusCode === 200) {
         toggle();
       }
     } catch (error) {
-      console.error('Error al crear feriado:', error);
+      console.error('Error creating holiday:', error);
     }
   };
 
   const update = async (data: any) => {
+    if (isCoordinator && !canEditHoliday) {
+      toast.error('Coordinators do not have permission to edit holidays');
+      return;
+    }
     try {
       const response = await updateHoliday(data.id, data);
       if (response.statusCode === 200) {
         toggle();
       }
     } catch (error) {
-      console.error('Error al actualizar feriado:', error);
+      console.error('Error updating holiday:', error);
     }
   };
 

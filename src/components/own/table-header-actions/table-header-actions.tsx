@@ -7,6 +7,7 @@ type TableHeaderActions = {
   addButton?: {
     title: string;
     onClick: () => void;
+    disabled?: boolean;
   };
 };
 

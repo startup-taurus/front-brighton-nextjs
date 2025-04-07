@@ -4,6 +4,9 @@ export const SUCCESS_MESSAGE = 'Success!';
 export const USER_TYPES = {
   ADMIN: 'admin_staff',
   PROFESSOR: 'professor',
+  STUDENT: 'student',
+  FINANCIAL: 'financial',
+  COORDINATOR: 'coordinator',
 };
 
 export const STATUS_FILTER = [
@@ -32,6 +35,7 @@ export const USER_ROLES = [
   { value: 'professor', label: 'Professor' },
   { value: 'student', label: 'Student' },
   { value: 'financial', label: 'Financial' },
+  { value: 'coordinator', label: 'Coordinator' },
 ];
 
 export const COMPONENTS_GRADEBOOK = {
@@ -93,6 +97,7 @@ export const SCHEDULE_DATES = [
 ];
 export const TEACHER_PATHS = [
   '/teachers',
+  '/teachers/',
   '/teachers/faq',
   '/course/:id/home',
   '/course/:id/attendance',
