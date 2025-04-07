@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardHeader, Container, Row } from 'reactstrap';
 import StudentsTable from '@/components/own/tables/students-table';
 import TableHeaderActions from '@/components/own/table-header-actions/table-header-actions';
@@ -21,6 +21,8 @@ import { PROMOTION_FILTER, STATUS_FILTER } from '../../../../utils/constants';
 const Students = () => {
   const router = useRouter();
   const [isOpenModal, setIsOpenModal] = useState(false);
+  const [selectedStudentsCount, setSelectedStudentsCount] = useState(0);
+  const transferButtonRef = useRef(null);
   const page = router.query.page ? Number(router.query.page) : 1;
   const rowPerPage = router.query.rowPerPage
     ? Number(router.query.rowPerPage)
@@ -181,13 +183,20 @@ const Students = () => {
         <Row>
           <Card>
             <CardHeader className='d-flex justify-content-end'>
-              <TableHeaderActions
-                onReload={handleReload}
-                addButton={{
-                  title: 'Create Student',
-                  onClick: () => toggle(),
-                }}
-              />
+              <div className='d-flex align-items-center'>
+                {/* Botón de transferencia grupal */}
+                <div
+                  className='mr-3'
+                  id='transferTooltip'
+                ></div>
+                <TableHeaderActions
+                  onReload={handleReload}
+                  addButton={{
+                    title: 'Create Student',
+                    onClick: () => toggle(),
+                  }}
+                />
+              </div>
             </CardHeader>
             <div className='pb-4'>
               <StudentsTable
@@ -196,19 +205,18 @@ const Students = () => {
                 students={students?.data}
                 filters={filters}
                 loading={students.isLoading}
+                onSelectedStudentsChange={setSelectedStudentsCount}
               />
             </div>
           </Card>
         </Row>
       </Container>
-      {isOpenModal && (
-        <StudentForm
-          isOpen={isOpenModal}
-          toggle={toggle}
-          data={null}
-          onReload={handleReload}
-        />
-      )}
+      <StudentForm
+        isOpen={isOpenModal}
+        toggle={toggle}
+        data={null}
+        onReload={handleReload}
+      />
     </div>
   );
 };
