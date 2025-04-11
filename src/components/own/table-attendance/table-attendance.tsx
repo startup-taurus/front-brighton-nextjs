@@ -44,6 +44,7 @@ const TableAttendance = ({
   const { user } = useContext(UserContext);
   const { can } = usePermission();
   const isCoordinator = user?.role === USER_TYPES.COORDINATOR;
+  const isReceptionist = user?.role === USER_TYPES.RECEPTIONIST;
   const canMarkAttendance = can(PERMISSIONS.MARK_ATTENDANCE);
 
   useEffect(() => {
@@ -188,13 +189,12 @@ const TableAttendance = ({
                   >
                     <Input
                       type='select'
-                      className='attendance-input bg-white text-black'
-                      style={{ cursor: 'not-allowed' }}
+                      className={`attendance-input bg-white text-black ${isCoordinator || isReceptionist ? 'cursor-no-allowed' : ''}`}
                       value={dates[courseScheduleId][student?.id]}
                       onChange={(event) =>
                         changeAttendance(event, courseScheduleId, student?.id)
                       }
-                      disabled={isCoordinator}
+                      disabled={isCoordinator || isReceptionist}
                     >
                       <option value=''>&nbsp;</option>
                       <option value='present'>P</option>
@@ -232,11 +232,10 @@ const TableAttendance = ({
                   >
                     <Input
                       type='text'
-                      className='attendance-input bg-white text-black'
-                      style={{ cursor: 'not-allowed' }}
+                      className={`attendance-input bg-white text-black ${isCoordinator || isReceptionist ? 'cursor-no-allowed' : ''}`}
                       onChange={(e) => updateScheduleItem(e, item.id, index)}
                       value={scheduleItems[index].lesson_taught ?? ''}
-                      disabled={isCoordinator}
+                      disabled={isCoordinator || isReceptionist}
                     />
                   </td>
                 ))}

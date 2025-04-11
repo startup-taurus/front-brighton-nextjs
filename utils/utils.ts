@@ -24,7 +24,7 @@ export const handleError = (
   stopRedirect?: boolean
 ) => {
   if (
-    (e?.response?.data?.message == 'No autorizado, no se envió el token' ||
+    (e?.response?.data?.message == 'Not authorized, token not sent' ||
       e?.response?.status == 401) &&
     isBrowser() &&
     !stopRedirect
@@ -56,20 +56,6 @@ export const setQueryStringValue = (
     { shallow: true }
   );
 };
-
-// export const getFiltersString = (
-//   filters: Array<{ key: string; value: string }>,
-// ) => {
-//   return filters
-//     .reduce(
-//       (prev, current) =>
-//         current.value !== "all"
-//           ? prev.concat(`${current.key}=${current.value}&`)
-//           : prev,
-//       "",
-//     )
-//     .slice(0, -1);
-// };
 
 export const getFiltersString = (router: NextRouter) => {
   return Object.entries(router.query)
@@ -511,6 +497,86 @@ export const formatReportBarChartData = (
       },
     ],
   };
+};
+
+/**
+ * Obtiene el siguiente nivel en la secuencia de progresión basado en el nivel actual
+ * @param currentLevel - El nivel actual del estudiante (puede ser el nombre completo o abreviado)
+ * @param isKid - Indica si el estudiante es niño o adulto
+ * @returns El objeto con el siguiente nivel o null si no se encuentra
+ */
+export const getNextLevelFromProgression = (
+  currentLevel: string,
+  isKid: boolean = false
+) => {
+  // Importar las progresiones desde levelProgression.ts
+  const {
+    ADULT_LEVEL_PROGRESSION,
+    KIDS_LEVEL_PROGRESSION,
+  } = require('./levelProgression');
+
+  // Determinar qué progresión usar
+  const progression = isKid ? KIDS_LEVEL_PROGRESSION : ADULT_LEVEL_PROGRESSION;
+
+  // Normalizar el nivel actual a mayúsculas para comparación
+  const upperCurrentLevel = currentLevel.toUpperCase();
+
+  // Buscar el nivel actual en la progresión
+  let currentIndex = -1;
+
+  // Primero buscar coincidencia exacta
+  currentIndex = progression.findIndex(
+    (level: { full_level: string; short_level: string }) =>
+      level.full_level.toUpperCase() === upperCurrentLevel ||
+      level.short_level.toUpperCase() === upperCurrentLevel
+  );
+
+  // Si no se encuentra, buscar coincidencia parcial
+  if (currentIndex === -1) {
+    currentIndex = progression.findIndex(
+      (level: { full_level: string; short_level: string }) =>
+        level.full_level.toUpperCase() === upperCurrentLevel ||
+        level.short_level.toUpperCase() === upperCurrentLevel
+    );
+  }
+
+  // Si no se encuentra o es el último nivel, devolver null
+  if (currentIndex === -1 || currentIndex === progression.length - 1) {
+    return null;
+  }
+
+  // Devolver el siguiente nivel en la secuencia
+  return progression[currentIndex + 1];
+};
+
+export const getKidsLevelById = (levelId: string) => {
+  const kidsLevelMapping: Record<string, string> = {
+    '7': 'Pre-A1 Starter',
+    '8': 'A1.1 Movers',
+    '12': 'A1.2 Movers',
+    '13': 'A2.1 Flyers',
+    '9': 'A2.2 Flyers',
+    '10': 'B1.1 Preintermediate',
+    '11': 'B1.2 Pre-Intermediate',
+    '14': 'Private Classes',
+  };
+
+  return kidsLevelMapping[levelId];
+};
+
+export const getAdultLevelById = (levelId: string) => {
+  const adultLevelMapping: Record<string, string> = {
+    '1': 'A1 Beginner',
+    '2': 'A2 Elementary',
+    '3': 'B1 Pre-Intermediate',
+    '4': 'B1+ Intermediate',
+    '5': 'B2 Upper Intermediate',
+    '6': 'B2 First Preparation',
+    '7': 'Pre-A1 Starter',
+    '14': 'Private Classes',
+  };
+
+  return adultLevelMapping[levelId];
 };
 
 export const countAttendance = (dates: any = {}, studentId: any) => {

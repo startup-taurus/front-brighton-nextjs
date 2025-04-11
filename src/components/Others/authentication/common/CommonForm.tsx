@@ -53,6 +53,7 @@ const CommonForm = ({ alignLogo }: commonFormPropsType) => {
         [USER_TYPES.STUDENT]: '/dashboard/student',
         [USER_TYPES.FINANCIAL]: '/dashboard/financial',
         [USER_TYPES.COORDINATOR]: '/dashboard',
+        [USER_TYPES.RECEPTIONIST]: '/dashboard',
       };
 
       const redirectPath = roleRedirectMap[response.data.role] || '/login';

@@ -102,7 +102,7 @@ const RegistrationFormContent = () => {
             Yup.string().required(t('emergency_relationship_required')),
           otherwise: () => Yup.string(),
         }),
-        level: Yup.string().required(t('level_required')),
+        level_id: Yup.string().required(t('level_required')),
         schedule: Yup.string().required(t('schedule_required')),
         same_billing: Yup.string().required(t('billing_required')),
         billing_address: Yup.string(),
@@ -134,7 +134,7 @@ const RegistrationFormContent = () => {
     emergency_contact_name: '',
     emergency_contact_phone: '',
     emergency_contact_relationship: '',
-    level: '',
+    level_id: '',
     schedule: '',
     same_billing: '',
     billing_address: '',
@@ -471,15 +471,15 @@ const RegistrationFormContent = () => {
                               className='form-check-input'
                               id={`level-kids-${index}`}
                               type='radio'
-                              name='level'
+                              name='level_id'
                               value={level.value}
-                              invalid={touched.level && !!errors.level}
+                              invalid={touched.level_id && !!errors.level_id}
                             />
                             <Label
                               className='form-check-label'
                               htmlFor={`level-kids-${index}`}
                             >
-                              {level.label}
+                              {level.label}{level.value}
                             </Label>
                           </FormGroup>
                         ))
@@ -493,9 +493,9 @@ const RegistrationFormContent = () => {
                               className='form-check-input'
                               id={`level-adults-${index}`}
                               type='radio'
-                              name='level'
+                              name='level_id'
                               value={level.value}
-                              invalid={touched.level && !!errors.level}
+                              invalid={touched.level_id && !!errors.level_id}
                             />
                             <Label
                               className='form-check-label'
@@ -506,7 +506,7 @@ const RegistrationFormContent = () => {
                           </FormGroup>
                         ))}
                     <ErrorMessage
-                      name='level'
+                      name='level_id'
                       component={({ children }: any) => (
                         <FormFeedback className='d-block'>
                           {children}

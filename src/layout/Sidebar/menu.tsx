@@ -186,3 +186,48 @@ export const AdminMenuList: sidebarMenuType[] = [
     ],
   },
 ];
+
+export const ReceptionistMenuList: sidebarMenuType[] = [
+  {
+    title: 'General',
+    menucontent: 'Módulo de inicio',
+    Items: [
+      {
+        title: 'dashboard',
+        id: 1,
+        pathSlice: 'dashboard',
+        type: 'link',
+        icon: 'home',
+        badge: 'badge badge-light-primary',
+        path: 'dashboard',
+      },
+      {
+        title: 'Professors View',
+        id: 2,
+        pathSlice: 'coodinator/teachers',
+        type: 'link',
+        icon: 'task',
+        badge: 'badge badge-light-primary',
+        path: 'coordinator/professors',
+      },
+      {
+        title: 'Students',
+        id: 3,
+        pathSlice: 'admin/students',
+        type: 'link',
+        icon: 'blog',
+        badge: 'badge badge-light-primary',
+        path: 'admin/students',
+      },
+      {
+        title: 'Professors',
+        id: 6,
+        pathSlice: 'teachers-table',
+        type: 'link',
+        icon: 'learning',
+        badge: 'badge badge-light-primary',
+        path: 'admin/teachers',
+      },
+    ],
+  },
+];

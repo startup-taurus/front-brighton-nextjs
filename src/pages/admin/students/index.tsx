@@ -8,10 +8,8 @@ import { FiltersProps } from '../../../../Types/types';
 import TableFilters from '@/components/own/table-filters/table-filters';
 import { getFiltersString } from '../../../../utils/utils';
 import useSWR, { mutate } from 'swr';
-import {
-  getAllStudent,
-  getDistinctLevel,
-} from '../../../../helper/api-data/student';
+import { getAllStudent } from '../../../../helper/api-data/student';
+import { getAllLevels } from '../../../../helper/api-data/level';
 import {
   getAllCourses,
   getActiveCourses,
@@ -58,8 +56,8 @@ const Students = () => {
   );
 
   const { data: levels } = useSWR(
-    ['/student/get-distinct-levels', levelPage, limit, levelSearchTerm],
-    () => getDistinctLevel(levelPage, limit)
+    ['/level/get-all', levelPage, limit, levelSearchTerm],
+    () => getAllLevels(levelPage, limit, levelSearchTerm)
   );
 
   const onCourseScrollToBottom = () => {
@@ -100,19 +98,21 @@ const Students = () => {
 
   useEffect(() => {
     if (levels?.data) {
-      const levelsArray = Array.isArray(levels.data)
+      // Manejar tanto la estructura antigua como la nueva
+      const levelData = Array.isArray(levels.data)
         ? levels.data
-        : levels.data.result
-          ? levels.data.result
-          : [];
+        : levels.data?.result || [];
 
-      const levelOpts = levelsArray.map((item: any) => ({
-        value: item,
-        label: item,
+      const options = levelData.map((item: any) => ({
+        value: typeof item === 'string' ? item : item.id || item.level || item,
+        label:
+          typeof item === 'string'
+            ? item
+            : item.full_level || item.level || item,
       }));
 
       setLevelOptions((prevOptions) => {
-        const combined = [...prevOptions, ...levelOpts];
+        const combined = [...prevOptions, ...options];
         return combined.filter(
           (option, index, self) =>
             self.findIndex((o) => o.value === option.value) === index
@@ -148,7 +148,7 @@ const Students = () => {
     },
     {
       labelName: 'Level',
-      name: 'level',
+      name: 'level_id',
       type: 'select',
       items: levelOptions.length > 0 ? levelOptions : [],
       onInputChange: (inputValue: string) => setLevelSearchTerm(inputValue),
@@ -184,7 +184,6 @@ const Students = () => {
           <Card>
             <CardHeader className='d-flex justify-content-end'>
               <div className='d-flex align-items-center'>
-                {/* Botón de transferencia grupal */}
                 <div
                   className='mr-3'
                   id='transferTooltip'
