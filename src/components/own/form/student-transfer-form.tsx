@@ -29,6 +29,7 @@ import {
   USER_TYPES,
 } from 'utils/constants';
 import { getNextLevel as getNextLevelFromProgression } from 'utils/levelProgression';
+import { getUserRoleFromLocalStorage } from '../../../../utils/auth';
 
 interface StudentTransferFormProps {
   isOpen: boolean;
@@ -56,9 +57,6 @@ const StudentTransferForm: React.FC<StudentTransferFormProps> = ({
   const [selectedNextLevel, setSelectedNextLevel] =
     useState<LevelOption | null>(null);
   const [nextLevelOptions, setNextLevelOptions] = useState<LevelOption[]>([]);
-  const [transferType, setTransferType] = useState<'course' | 'level'>(
-    'course'
-  );
   const [doTransferCourse, setDoTransferCourse] = useState(false);
   const [doProgressLevel, setDoProgressLevel] = useState(false);
   const [pendingTransfer, setPendingTransfer] = useState<any>(null);
@@ -66,15 +64,20 @@ const StudentTransferForm: React.FC<StudentTransferFormProps> = ({
 
   const limit = 10;
 
-  // Fetch active courses
   const { data: coursesData } = useSWR(['/course/get-active', limit], () =>
     getActiveCourses(1, limit)
   );
 
-  // Fetch pending transfers for the student
   const { data: transferData } = useSWR(
-    isOpen && students.length === 1 ? `/student/${students[0]?.id}` : null,
-    () => (students.length === 1 ? getStudentTransfers(students[0].id) : null)
+    isOpen ? `/student/transfers` : null,
+    () => {
+      if (students.length === 1) {
+        return getStudentTransfers(students[0].id);
+      } else if (isGroupTransfer && students.length > 1) {
+        return getStudentTransfers(students[0].id);
+      }
+      return null;
+    }
   );
 
   useEffect(() => {
@@ -87,7 +90,6 @@ const StudentTransferForm: React.FC<StudentTransferFormProps> = ({
     }
   }, [coursesData]);
 
-  // Procesar datos de transferencias pendientes
   useEffect(() => {
     if (transferData?.data && Array.isArray(transferData.data)) {
       const pendingTransfers = transferData.data.filter(
@@ -99,7 +101,7 @@ const StudentTransferForm: React.FC<StudentTransferFormProps> = ({
         setPendingTransfer(pendingTransfers[0]);
         setHasPendingTransfer(true);
 
-        // Si hay una transferencia pendiente con selected_course_id, establecer el curso seleccionado
+        // Si hay curso seleccionado
         if (pendingTransfers[0].selected_course_id) {
           const courseOption = courseOptions.find(
             (option) => option.value === pendingTransfers[0].selected_course_id
@@ -110,6 +112,7 @@ const StudentTransferForm: React.FC<StudentTransferFormProps> = ({
           }
         }
 
+        // Si hay nivel seleccionado
         if (
           pendingTransfers[0].selected_level_id &&
           pendingTransfers[0].status_level_change === 'pending'
@@ -121,8 +124,62 @@ const StudentTransferForm: React.FC<StudentTransferFormProps> = ({
         setPendingTransfer(null);
         setHasPendingTransfer(false);
       }
+
+      if (isGroupTransfer) {
+        console.log('Procesando transferencia grupal:', pendingTransfers);
+      }
     }
-  }, [transferData, courseOptions]);
+  }, [transferData, courseOptions, isGroupTransfer]);
+
+  const getTransferAlertMessage = () => {
+    if (!hasPendingTransfer) return null;
+
+    if (isGroupTransfer) {
+      return (
+        <Alert
+          color='info'
+          className='mb-3'
+        >
+          Hay una transferencia pendiente para el primer estudiante del grupo.
+          {pendingTransfer?.selected_course_id && (
+            <span>
+              {' '}
+              La opción de transferir a otro curso ha sido seleccionada
+              automáticamente.
+            </span>
+          )}
+          {pendingTransfer?.selected_level_id && (
+            <span>
+              {' '}
+              The level progression option has been automatically selected.
+            </span>
+          )}
+        </Alert>
+      );
+    }
+
+    return (
+      <Alert
+        color='info'
+        className='mb-3'
+      >
+        There is a pending transfer request for this student.
+        {pendingTransfer?.selected_course_id && (
+          <span>
+            {' '}
+            The option to transfer to another course has been automatically
+            selected.
+          </span>
+        )}
+        {pendingTransfer?.selected_level_id && (
+          <span>
+            {' '}
+            The progression option is automatically selected at next level.
+          </span>
+        )}
+      </Alert>
+    );
+  };
 
   const isKidsGroup = () => {
     if (students.length === 0) return false;
@@ -131,7 +188,6 @@ const StudentTransferForm: React.FC<StudentTransferFormProps> = ({
         ? students[0].level
         : students[0].level?.name || '';
     const levelNormalized = studentLevel.trim().toLowerCase();
-
     return LEVELS_FOR_KIDS.some(
       (kidLvl) => kidLvl.label.toLowerCase() === levelNormalized
     );
@@ -156,7 +212,7 @@ const StudentTransferForm: React.FC<StudentTransferFormProps> = ({
       return;
     }
 
-    // Determinar si el estudiante es de nivel infantil o adulto
+    // Determinar si es kids
     const isKids = isKidsGroup();
 
     const studentLevel =
@@ -164,7 +220,6 @@ const StudentTransferForm: React.FC<StudentTransferFormProps> = ({
         ? students[0].level
         : students[0].level?.name || '';
 
-    // Obtener el siguiente nivel según la progresión
     const nextLevelStr = getNextLevelFromProgression(studentLevel, isKids);
     const nextLevelOption = convertLevelToOption(nextLevelStr, isKids);
 
@@ -177,34 +232,8 @@ const StudentTransferForm: React.FC<StudentTransferFormProps> = ({
     }
   }, [students]);
 
-  // Obtener el rol directamente de cookies para asegurar que esté disponible inmediatamente
-  const getUserRoleFromLocalStorage = (): string | null => {
-    if (typeof window === 'undefined') return null;
-
-    try {
-      // Intentar obtener el token de las cookies usando js-cookie
-      const cookieToken = Cookies.get('token');
-
-      if (cookieToken) {
-        const user = JSON.parse(cookieToken);
-        return user.role;
-      }
-
-      // Si no está en cookies, intentar con localStorage como fallback
-      const userStr = localStorage.getItem('token');
-      if (!userStr) return null;
-
-      const user = JSON.parse(userStr);
-      return user.role;
-    } catch (error) {
-      console.error('Error getting user role:', error);
-      return null;
-    }
-  };
-
-  // Usar el rol obtenido para el texto del botón
   const userRoleFromStorage = getUserRoleFromLocalStorage();
-  console.log('User Role:', userRoleFromStorage);
+  const isProgressDisabled = doProgressLevel && nextLevelOptions.length === 0;
 
   const handleSubmit = async () => {
     if (!doTransferCourse && !doProgressLevel) {
@@ -231,15 +260,15 @@ const StudentTransferForm: React.FC<StudentTransferFormProps> = ({
     const levelId = doProgressLevel ? selectedNextLevel?.value || null : null;
 
     try {
-      // Determinar qué función usar según el rol
-      // Los coordinadores y otros roles (excepto recepcionistas) pueden transferir directamente
-      // Los recepcionistas deben solicitar aprobación
-      const transferFunction =
+      const response =
         userRoleFromStorage === USER_TYPES.RECEPTIONIST
-          ? requestTransferAndProgress
-          : transferAndProgressStudents;
-
-      const response = await transferFunction(studentIds, courseId, levelId);
+          ? await requestTransferAndProgress(
+              studentIds,
+              courseId,
+              levelId,
+              isGroupTransfer
+            )
+          : await transferAndProgressStudents(studentIds, courseId, levelId);
 
       if (response.statusCode === 200) {
         let successMsg = `${students.length} student(s) `;
@@ -259,12 +288,9 @@ const StudentTransferForm: React.FC<StudentTransferFormProps> = ({
 
         toast.success(successMsg);
 
+        // 1) Limpia los filtros y 2) Llama al callback
         if (onSuccess) {
-          onSuccess(
-            doTransferCourse
-              ? selectedCourse.value
-              : selectedNextLevel?.value || ''
-          );
+          onSuccess(doTransferCourse ? selectedCourse.value : levelId || '');
         }
 
         toggle();
@@ -289,28 +315,7 @@ const StudentTransferForm: React.FC<StudentTransferFormProps> = ({
         {isGroupTransfer ? 'Group Transfer' : 'Individual Transfer'}
       </ModalHeader>
       <ModalBody>
-        {hasPendingTransfer && (
-          <Alert
-            color='info'
-            className='mb-3'
-          >
-            Hay una solicitud de transferencia pendiente para este estudiante.
-            {pendingTransfer?.selected_course_id && (
-              <span>
-                {' '}
-                Se ha seleccionado automáticamente la opción de transferir a
-                otro curso.
-              </span>
-            )}
-            {pendingTransfer?.selected_level_id && (
-              <span>
-                {' '}
-                Se ha seleccionado automáticamente la opción de progresión al
-                siguiente nivel.
-              </span>
-            )}
-          </Alert>
-        )}
+        {getTransferAlertMessage()}
         <Form>
           <Row>
             <Col md='12'>
@@ -329,7 +334,11 @@ const StudentTransferForm: React.FC<StudentTransferFormProps> = ({
                       </div>
                     </div>
                     <span
-                      className={`badge ${student.status === 'active' ? 'badge-success' : 'badge-danger'}`}
+                      className={`badge ${
+                        student.status === 'active'
+                          ? 'badge-success'
+                          : 'badge-danger'
+                      }`}
                     >
                       {student.status.charAt(0).toUpperCase() +
                         student.status.slice(1)}
@@ -437,9 +446,10 @@ const StudentTransferForm: React.FC<StudentTransferFormProps> = ({
           color='primary'
           onClick={handleSubmit}
           loading={isLoading}
+          disabled={isProgressDisabled}
         >
           {userRoleFromStorage === USER_TYPES.RECEPTIONIST
-            ? 'Solicitud de transferencia'
+            ? 'Transfer request'
             : 'Transfer Students'}
         </LoadingButton>
       </ModalFooter>

@@ -23,6 +23,7 @@ import { toast } from 'react-toastify';
 import * as Yup from 'yup';
 import { parse } from 'date-fns';
 import { USER_TYPES } from 'utils/constants';
+import { getUserRoleFromLocalStorage } from '../../../../utils/auth';
 
 const validations = Yup.object().shape({
   name: Yup.string().required('The name is required'),
@@ -61,27 +62,7 @@ const validations = Yup.object().shape({
   book_given: Yup.boolean().required('Book given status is required'),
 });
 
-const getUserRoleFromLocalStorage = (): string | null => {
-  if (typeof window === 'undefined') return null;
-
-  try {
-    const cookieToken = Cookies.get('token');
-
-    if (cookieToken) {
-      const user = JSON.parse(cookieToken);
-      return user.role;
-    }
-
-    const userStr = localStorage.getItem('token');
-    if (!userStr) return null;
-
-    const user = JSON.parse(userStr);
-    return user.role;
-  } catch (error) {
-    console.error('Error getting user role:', error);
-    return null;
-  }
-};
+// Usar la función de utilidad importada desde utils/auth
 
 const StudentForm = ({
   data,

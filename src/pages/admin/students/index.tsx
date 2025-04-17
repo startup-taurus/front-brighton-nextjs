@@ -14,7 +14,7 @@ import {
   getAllCourses,
   getActiveCourses,
 } from '../../../../helper/api-data/course';
-import { PROMOTION_FILTER, STATUS_FILTER } from '../../../../utils/constants';
+import { PROMOTION_FILTER, STATUS_FILTER, STATUS_LEVEL_CHANGE } from '../../../../utils/constants';
 
 const Students = () => {
   const router = useRouter();
@@ -159,6 +159,7 @@ const Students = () => {
       name: 'promotion',
       items: PROMOTION_FILTER,
     },
+    
   ];
 
   const toggle = () => {

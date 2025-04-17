@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useRef } from 'react';
 import {
   Card,
   CardBody,
@@ -24,6 +24,7 @@ interface TableFiltersProps {
 const TableFilters = ({ selectFilters }: TableFiltersProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
+  const formikRef = useRef<any>(null);
 
   const initialValues = selectFilters.reduce(
     (acc, field) => {
@@ -33,13 +34,56 @@ const TableFilters = ({ selectFilters }: TableFiltersProps) => {
     {} as Record<string, string>
   );
 
+  // Expandir automáticamente los filtros si hay parámetros en la URL
+  useEffect(() => {
+    const hasFilters = Object.keys(router.query).some(
+      (key) =>
+        key !== 'page' && key !== 'rowPerPage' && router.query[key] !== ''
+    );
+
+    if (hasFilters) {
+      setIsOpen(true);
+    }
+
+    // Actualizar los valores del formulario cuando cambian los parámetros de la URL
+    if (formikRef.current) {
+      const currentValues = formikRef.current.values;
+      let hasChanged = false;
+
+      const newValues = { ...currentValues };
+
+      // Actualizar los valores del formulario con los parámetros de la URL
+      selectFilters.forEach((field) => {
+        const urlValue = (router.query[field.name] as string) || '';
+        if (currentValues[field.name] !== urlValue) {
+          newValues[field.name] = urlValue;
+          hasChanged = true;
+        }
+      });
+
+      // Si hay cambios, actualizar el formulario
+      if (hasChanged) {
+        formikRef.current.setValues(newValues);
+      }
+    }
+  }, [router.query, selectFilters]);
+
   const handleCollapse = () => {
     setIsOpen(!isOpen);
   };
 
-  const clearForm = (resetForm: () => void) => {
+  const clearForm = (
+    resetForm: ReturnType<typeof Formik>['props']['resetForm']
+  ) => {
     clearQueryString(router);
-    resetForm();
+    const emptyValues = selectFilters.reduce(
+      (acc, field) => {
+        acc[field.name] = '';
+        return acc;
+      },
+      {} as Record<string, string>
+    );
+    resetForm({ values: emptyValues });
   };
 
   const onSubmit = (data: any) => {
@@ -71,6 +115,7 @@ const TableFilters = ({ selectFilters }: TableFiltersProps) => {
           <Formik
             initialValues={initialValues}
             onSubmit={onSubmit}
+            innerRef={formikRef}
           >
             {({ handleSubmit, resetForm }) => (
               <form onSubmit={handleSubmit}>

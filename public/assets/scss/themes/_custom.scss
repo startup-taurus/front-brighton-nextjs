@@ -40,3 +40,17 @@
 .cursor-no-allowed {
   cursor: not-allowed;
 }
+
+// Aplica a los checkboxes del encabezado y de cada fila
+.rdthead input[type='checkbox'],
+.rdt_TableBody input[type='checkbox'] {
+  transform: scale(1.3); // Ajusta este valor según tu preferencia
+  cursor: pointer;
+  margin: 0;
+}
+
+// Para asegurar que el input no se desborde del contenedor
+.rdthead .rdt_TableCol,
+.rdt_TableRow .rdt_TableCell {
+  overflow: visible;
+}

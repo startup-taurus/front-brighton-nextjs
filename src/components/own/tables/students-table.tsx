@@ -1,21 +1,29 @@
-import React, { useEffect, useState } from 'react';
-import { mutate } from 'swr';
+import React, { useEffect, useMemo, useState } from 'react';
+import useSWR, { mutate } from 'swr';
 import { useRouter } from 'next/router';
+import Swal from 'sweetalert2';
+import { toast } from 'react-toastify';
+import DataTable from 'react-data-table-component';
+import { FaUsers } from 'react-icons/fa6';
+
 import {
   updateStatusStudent,
   updateStudentLevelChangeStatus,
+  getPendingStudentTransfers,
 } from 'helper/api-data/student';
+
 import TableActionButtons from '@/components/own/table-action-buttons/table-action-buttons';
-import Swal from 'sweetalert2';
 import StudentForm from '../form/student-form';
 import StudentDetail from '../student-detail/student-datail';
-import DataTable from 'react-data-table-component';
-import { setQueryStringValue } from '../../../../utils/utils';
+import StudentTransferForm from '../form/student-transfer-form';
+
 import TableSkeleton from '@/components/own/common/table-skeleton/TableSkeleton';
 import usePermission from '../../../../hooks/usePermission';
 import { USER_TYPES } from '../../../../utils/constants';
-import { toast } from 'react-toastify';
-import StudentTransferForm from '../form/student-transfer-form';
+import { getUserRoleFromLocalStorage } from '../../../../utils/auth';
+import { setQueryStringValue, clearQueryString } from '../../../../utils/utils';
+import { getNextLevel } from 'utils/levelProgression';
+import { FaUser } from 'react-icons/fa';
 
 const StudentsTable = ({
   students,
@@ -26,17 +34,24 @@ const StudentsTable = ({
   onSelectedStudentsChange,
 }: any) => {
   const router = useRouter();
+  const { userRole } = usePermission();
+  const isCoordinator = userRole === USER_TYPES.COORDINATOR;
+
+  // Estados para modales
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenDetail, setIsOpenDetail] = useState(false);
-  const [selectedData, setSelectedData] = useState(null);
+  const [selectedData, setSelectedData] = useState<any>(null);
   const [selectedStudents, setSelectedStudents] = useState<any[]>([]);
   const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
   const [isGroupTransfer, setIsGroupTransfer] = useState(false);
-  const { userRole, can } = usePermission();
-  const isCoordinator = userRole === USER_TYPES.COORDINATOR;
 
+  // Para limpiar la selección de filas en DataTable
   const [toggleClearRows, setToggleClearRows] = useState(false);
 
+
+ 
+
+  // Limpia la selección de filas
   const clearSelections = () => {
     setSelectedStudents([]);
     setToggleClearRows((prev) => !prev);
@@ -44,24 +59,40 @@ const StudentsTable = ({
       onSelectedStudentsChange(0);
     }
   };
+
   const toggle = (data: any) => {
     setSelectedData(data);
     setIsOpen(!isOpen);
-    if (!isOpen) {
-      clearSelections();
-    }
+    if (!isOpen) clearSelections();
   };
 
   const toggleDetail = (data: any) => {
     setSelectedData(data);
     setIsOpenDetail(!isOpenDetail);
-    if (!isOpenDetail) {
-      clearSelections();
+    if (!isOpenDetail) clearSelections();
+  };
+
+  // Actualiza estado del estudiante (activo/inactivo)
+  const updateStatus = async (data: any) => {
+    try {
+      const newStatus = data?.status === 'active' ? 'inactive' : 'active';
+      const response = await updateStatusStudent(data.id, newStatus);
+      if (response.statusCode === 200) {
+        // Limpia query + recarga
+        clearQueryString(router);
+        mutate([
+          `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${
+            filters ? `&${filters}` : ''
+          }`,
+        ]);
+      }
+    } catch (error) {
+      console.error('Error al actualizar usuario:', error);
     }
   };
 
   const handleAlert = (row: any) => {
-    let status = row?.status === 'active' ? 'deactivate' : 'active';
+    const status = row?.status === 'active' ? 'deactivate' : 'active';
     Swal.fire({
       title: 'Are you sure to ' + status + '?',
       text: 'You are about to ' + status + ' this user',
@@ -72,75 +103,13 @@ const StudentsTable = ({
       reverseButtons: true,
     }).then((result) => {
       if (result.isConfirmed) {
-        updateStatus(row).then(() => {
-          mutate([
-            `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}`,
-          ]);
-        });
+        updateStatus(row);
       }
       clearSelections();
     });
   };
 
-  const handleApproveReject = (row: any, action: 'approved' | 'rejected') => {
-    if (action === 'approved' && !canApproveLevel(row.level)) {
-      toast.warning(
-        'Need at least 5 pending students of the same level to approve'
-      );
-      return;
-    }
-
-    Swal.fire({
-      title: `Are you sure you want to ${action === 'approved' ? 'approve' : 'reject'} this student?`,
-      text: `You are about to ${action === 'approved' ? 'approve' : 'reject'} the level change for this student`,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: `Yes, ${action === 'approved' ? 'approve' : 'reject'}!`,
-      cancelButtonText: 'Cancel',
-      reverseButtons: true,
-    }).then((result) => {
-      if (result.isConfirmed) {
-        updateLevelChangeStatus(row, action).then(() => {
-          mutate([
-            `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}`,
-          ]);
-          toast.success(`Student ${action} successfully`);
-          if (action === 'approved') {
-            Swal.fire({
-              title: 'Level Change Approved!',
-              text: `The student has been approved for level change from ${row.level} to ${getNextLevel(row.level)}`,
-              icon: 'success',
-              confirmButtonText: 'OK',
-            });
-          }
-        });
-      } else {
-        clearSelections();
-      }
-    });
-  };
-
-  const getNextLevel = (currentLevel: string): string => {
-    const levels = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
-    const currentIndex = levels.indexOf(currentLevel);
-    if (currentIndex !== -1 && currentIndex < levels.length - 1) {
-      return levels[currentIndex + 1];
-    }
-    return currentLevel;
-  };
-
-  const updateLevelChangeStatus = async (
-    data: any,
-    status: 'approved' | 'rejected'
-  ) => {
-    try {
-      const response = await updateStudentLevelChangeStatus(data.id, status);
-      return response;
-    } catch (error) {
-      toast.error('Error updating student level change status');
-    }
-  };
-
+  // Transferencia individual
   const handleTransferIndividual = (row: any) => {
     setSelectedData(row);
     setIsGroupTransfer(false);
@@ -148,6 +117,7 @@ const StudentsTable = ({
     clearSelections();
   };
 
+  // Transferencia grupal
   const handleTransferGroup = () => {
     if (selectedStudents.length < 5) {
       Swal.fire({
@@ -158,14 +128,12 @@ const StudentsTable = ({
       });
       return;
     }
-
-    const levels = selectedStudents.map((student) => {
-      if (typeof student.level === 'object') {
-        return student.level.full_level || student.level.name;
-      }
-      return student.level;
-    });
-
+    // Validar que todos estén en el mismo level
+    const levels = selectedStudents.map((s) =>
+      typeof s.level === 'object'
+        ? s.level?.name || s.level?.full_level
+        : s.level
+    );
     const uniqueLevels = Array.from(new Set(levels));
 
     if (uniqueLevels.length > 1) {
@@ -182,20 +150,24 @@ const StudentsTable = ({
     setIsTransferModalOpen(true);
   };
 
+  // Aprobación / Rechazo a nivel grupal
   const handleGroupAction = (action: 'approved' | 'rejected') => {
     if (selectedStudents.length < 5) {
       toast.error(
-        `You need to select at least 5 students to ${action === 'approved' ? 'approve' : 'reject'} level change`
+        `You need to select at least 5 students to ${
+          action === 'approved' ? 'approve' : 'reject'
+        } level change`
       );
       return;
     }
-
-    const levels = selectedStudents.map((student) => student.level);
+    const levels = selectedStudents.map((s) => s.level);
     const uniqueLevels = Array.from(new Set(levels));
 
     if (uniqueLevels.length > 1) {
       toast.warning(
-        `All selected students must be from the same level for group ${action === 'approved' ? 'approval' : 'rejection'}`
+        `All selected students must be from the same level for group ${
+          action === 'approved' ? 'approval' : 'rejection'
+        }`
       );
       return;
     }
@@ -203,7 +175,6 @@ const StudentsTable = ({
     const allPending = selectedStudents.every(
       (student) => student.status_level_change === 'pending'
     );
-
     if (!allPending) {
       toast.warning(
         'All selected students must have pending status for group action'
@@ -215,11 +186,15 @@ const StudentsTable = ({
       title: `${action === 'approved' ? 'Approve' : 'Reject'} Level Change`,
       text:
         action === 'approved'
-          ? `Are you sure you want to approve level change for ${selectedStudents.length} students from ${uniqueLevels[0]} to ${getNextLevel(uniqueLevels[0])}?`
+          ? `Are you sure you want to approve level change for ${
+              selectedStudents.length
+            } students from ${uniqueLevels[0]} to ${getNextLevel(uniqueLevels[0])}?`
           : `Are you sure you want to reject level change for ${selectedStudents.length} students?`,
       icon: 'warning',
       showCancelButton: true,
-      confirmButtonText: `Yes, ${action === 'approved' ? 'approve' : 'reject'}!`,
+      confirmButtonText: `Yes, ${
+        action === 'approved' ? 'approve' : 'reject'
+      }!`,
       cancelButtonText: 'Cancel',
       reverseButtons: true,
     }).then(async (result) => {
@@ -228,31 +203,39 @@ const StudentsTable = ({
           const promises = selectedStudents.map((student) =>
             updateStudentLevelChangeStatus(student.id, action)
           );
-
           await Promise.all(promises);
 
+          // Limpia query + recarga
+          clearQueryString(router);
           mutate([
-            `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}`,
+            `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${
+              filters ? `&${filters}` : ''
+            }`,
           ]);
 
           Swal.fire({
             title: 'Success!',
             text:
               action === 'approved'
-                ? `${selectedStudents.length} students approved for level change from ${uniqueLevels[0]} to ${getNextLevel(uniqueLevels[0])}`
+                ? `${selectedStudents.length} students approved for level change from ${
+                    uniqueLevels[0]
+                  } to ${getNextLevel(uniqueLevels[0])}`
                 : `${selectedStudents.length} students rejected for level change`,
             icon: 'success',
             confirmButtonText: 'OK',
           });
-
           setSelectedStudents([]);
         } catch (error) {
           console.error(
-            `Error ${action === 'approved' ? 'approving' : 'rejecting'} students:`,
+            `Error ${
+              action === 'approved' ? 'approving' : 'rejecting'
+            } students:`,
             error
           );
           toast.error(
-            `Error ${action === 'approved' ? 'approving' : 'rejecting'} students`
+            `Error ${
+              action === 'approved' ? 'approving' : 'rejecting'
+            } students`
           );
         }
       }
@@ -260,28 +243,57 @@ const StudentsTable = ({
   };
 
   const handleGroupApprove = () => handleGroupAction('approved');
-
   const handleGroupReject = () => handleGroupAction('rejected');
 
-  const handleRowSelected = (state: any) => {
-    setSelectedStudents(state.selectedRows);
-    if (onSelectedStudentsChange) {
-      onSelectedStudentsChange(state.selectedRows.length);
+  // Aprobaciones individuales
+  const handleApproveReject = (row: any, action: 'approved' | 'rejected') => {
+    if (action === 'approved' && !canApproveLevel(row.level)) {
+      toast.warning(
+        'Need at least 5 pending students of the same level to approve'
+      );
+      return;
     }
-  };
 
-  const updateStatus = async (data: any) => {
-    try {
-      let status = data?.status === 'active' ? 'inactive' : 'active';
-      const response = await updateStatusStudent(data.id, status);
-      if (response.statusCode === 200) {
-        mutate([
-          `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}`,
-        ]);
+    Swal.fire({
+      title: `Are you sure you want to ${
+        action === 'approved' ? 'approve' : 'reject'
+      } this student?`,
+      text: `You are about to ${
+        action === 'approved' ? 'approve' : 'reject'
+      } the level change for this student`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: `Yes, ${
+        action === 'approved' ? 'approve' : 'reject'
+      }!`,
+      cancelButtonText: 'Cancel',
+      reverseButtons: true,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        updateStudentLevelChangeStatus(row.id, action).then(() => {
+          // Limpia query + recarga
+          clearQueryString(router);
+          mutate([
+            `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${
+              filters ? `&${filters}` : ''
+            }`,
+          ]);
+          toast.success(`Student ${action} successfully`);
+          if (action === 'approved') {
+            Swal.fire({
+              title: 'Level Change Approved!',
+              text: `The student has been approved for level change from ${row.level} to ${getNextLevel(
+                row.level
+              )}`,
+              icon: 'success',
+              confirmButtonText: 'OK',
+            });
+          }
+        });
+      } else {
+        clearSelections();
       }
-    } catch (error) {
-      console.error('Error al actualizar usuario:', error);
-    }
+    });
   };
 
   const countPendingStudentsByLevel = (level: string) => {
@@ -296,13 +308,21 @@ const StudentsTable = ({
     return countPendingStudentsByLevel(level) >= 5;
   };
 
+  // Callback cuando cambian las filas seleccionadas en DataTable
+  const handleRowSelected = (state: any) => {
+    setSelectedStudents(state.selectedRows);
+    if (onSelectedStudentsChange) {
+      onSelectedStudentsChange(state.selectedRows.length);
+    }
+  };
+
   if (loading) {
     return (
       <TableSkeleton
         rows={10}
         columns={12}
-        showHeader={true}
-        animated={true}
+        showHeader
+        animated
       />
     );
   }
@@ -311,95 +331,47 @@ const StudentsTable = ({
 
   const columns = [
     {
-      name: 'Acción',
+      name: 'Actions',
       cell: (row: any) => {
-        if (isCoordinator && row.status_level_change === 'pending') {
-          return (
-            <div className='d-flex'>
-              <TableActionButtons
-                onView={() => toggleDetail(row)}
-                onBlock={() => handleAlert(row)}
-                onEdit={() => toggle(row)}
-                onTransfer={() => handleTransferIndividual(row)}
-                status={row.status === 'active' ? false : true}
-              />
-              <div className='ml-2'>
-                <button
-                  className='btn btn-success btn-sm mr-1'
-                  onClick={() => handleApproveReject(row, 'approved')}
-                  disabled={!canApproveLevel(row.level)}
-                  title={
-                    !canApproveLevel(row.level)
-                      ? 'Need at least 5 pending students of the same level'
-                      : ''
-                  }
-                >
-                  Approve
-                </button>
-                <button
-                  className='btn btn-danger btn-sm'
-                  onClick={() => handleApproveReject(row, 'rejected')}
-                >
-                  Reject
-                </button>
-              </div>
-            </div>
-          );
-        }
 
         return (
-          <TableActionButtons
-            onView={() => toggleDetail(row)}
-            onBlock={() => handleAlert(row)}
-            onEdit={() => toggle(row)}
-            onTransfer={() => handleTransferIndividual(row)}
-            status={row.status === 'active' ? false : true}
-          />
+          <div className='d-flex align-items-center gap-2'>
+            <TableActionButtons
+              onView={() => toggleDetail(row)}
+              onBlock={() => handleAlert(row)}
+              onEdit={() => toggle(row)}
+              onTransfer={() => handleTransferIndividual(row)}
+              status={row.status === 'active' ? false : true}
+            />
+          </div>
         );
       },
-      minWidth: '220px',
+      minWidth: '240px',
       sortable: false,
       center: false,
     },
     {
-      name: 'Status level change',
-      cell: (row: any) => {
-        const status = row.status_level_change || 'none';
-        let badgeClass = 'badge-secondary';
-
-        if (status === 'pending') badgeClass = 'badge-warning';
-        if (status === 'approved') badgeClass = 'badge-success';
-        if (status === 'rejected') badgeClass = 'badge-danger';
-
-        return (
-          <span className={`badge ${badgeClass}`}>
-            {status.charAt(0).toUpperCase() + status.slice(1)}
-          </span>
-        );
-      },
-      sortable: true,
-    },
-    {
       name: 'ID',
-      selector: (row: any) => `${row.cedula}`,
+      selector: (row: any) => row.cedula,
       sortable: true,
       center: false,
     },
     {
       name: 'Student name',
-      selector: (row: any) => `${row.user.name}`,
+      selector: (row: any) => row.user.name,
       sortable: true,
       center: false,
     },
     {
       name: 'Email',
-      selector: (row: any) => `${row.user.email}`,
+      selector: (row: any) => row.user.email,
       sortable: true,
       center: false,
     },
     {
       name: 'Phone',
-      selector: (row: any) => `${row.phone_number}`,
+      selector: (row: any) =>
+        row.phone_number?.trim() ? row.phone_number : 'No phone number',
       sortable: true,
       center: false,
     },
@@ -407,7 +379,9 @@ const StudentsTable = ({
       name: 'Status',
       cell: (row: any) => (
         <span
-          className={`badge ${row.status === 'active' ? 'badge-success' : 'badge-danger'}`}
+          className={`badge ${
+            row.status === 'active' ? 'badge-success' : 'badge-danger'
+          }`}
         >
           {row?.status?.charAt(0).toUpperCase() + row?.status?.slice(1)}
         </span>
@@ -433,13 +407,10 @@ const StudentsTable = ({
       name: 'Level',
       selector: (row: any) => {
         if (!row.level) return '';
-
         if (typeof row.level === 'string') return row.level;
-
         if (typeof row.level === 'object') {
           return row.level.name || row.level.full_level || '';
         }
-
         return '';
       },
       sortable: true,
@@ -447,13 +418,13 @@ const StudentsTable = ({
     },
     {
       name: 'Promotion',
-      selector: (row: any) => `${row.promotion ?? ''}`,
+      selector: (row: any) => row.promotion ?? '',
       sortable: true,
       center: false,
     },
     {
       name: 'Age Category',
-      selector: (row: any) => `${row.age_category ?? ''}`,
+      selector: (row: any) => row.age_category ?? '',
       sortable: true,
       center: false,
     },
@@ -461,7 +432,9 @@ const StudentsTable = ({
       name: 'Status payment',
       cell: (row: any) => (
         <span
-          className={`badge ${row.pending_payments ? 'badge-success' : 'badge-danger'}`}
+          className={`badge ${
+            row.pending_payments ? 'badge-success' : 'badge-danger'
+          }`}
         >
           {row.pending_payments ? 'Pagado' : 'No Pagado'}
         </span>
@@ -473,6 +446,7 @@ const StudentsTable = ({
 
   return (
     <div className='table-responsive signal-table'>
+      {/* Opciones de grupo solo para Coordinador */}
       {isCoordinator && (
         <div className='mb-3'>
           <div className='d-flex justify-content-between'>
@@ -528,7 +502,7 @@ const StudentsTable = ({
         </div>
       )}
 
-      {/* Añadir botón de transferencia para todos los usuarios, no solo coordinadores */}
+      {/* Opciones de grupo para otros roles */}
       {!isCoordinator && (
         <div className='mb-3 d-flex justify-content-between align-items-center'>
           <button
@@ -564,34 +538,42 @@ const StudentsTable = ({
         paginationDefaultPage={page ?? 1}
         paginationPerPage={rowPerPage ?? 10}
         paginationTotalRows={students.data.totalCount}
-        onChangePage={(page) => setQueryStringValue('page', page, router)}
+        onChangePage={(newPage) => setQueryStringValue('page', newPage, router)}
         onChangeRowsPerPage={(newPerPage) =>
           setQueryStringValue('rowPerPage', newPerPage, router)
         }
         progressPending={loading}
         highlightOnHover
-        selectableRows={true}
         selectableRowsHighlight
         onSelectedRowsChange={handleRowSelected}
-        selectableRowsNoSelectAll={true}
         clearSelectedRows={toggleClearRows}
       />
+
+      {/* Modal crear/editar Student */}
       <StudentForm
         isOpen={isOpen}
         toggle={toggle}
         data={selectedData}
         onReload={() => {
+          // Limpia query + recarga
+          clearQueryString(router);
           mutate([
-            `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}&order=desc&orderBy=createdAt`,
+            `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${
+              filters ? `&${filters}` : ''
+            }&order=desc&orderBy=createdAt`,
           ]);
           clearSelections();
         }}
       />
+
+      {/* Modal ver detalle Student */}
       <StudentDetail
         isOpen={isOpenDetail}
         toggle={toggleDetail}
         data={selectedData}
       />
+
+      {/* Modal Transferencia */}
       {isTransferModalOpen && (
         <StudentTransferForm
           isOpen={isTransferModalOpen}
@@ -601,20 +583,27 @@ const StudentsTable = ({
           }}
           students={isGroupTransfer ? selectedStudents : [selectedData]}
           isGroupTransfer={isGroupTransfer}
-          onSuccess={(courseId) => {
-            clearSelections();
-
+          onSuccess={() => {
+            // Limpia query + recarga
+            clearQueryString(router);
             mutate([
-              `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}&order=desc&orderBy=createdAt`,
+              `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${
+                filters ? `&${filters}` : ''
+              }&order=desc&orderBy=createdAt`,
             ]);
 
+            const userRole = getUserRoleFromLocalStorage();
             Swal.fire({
               title: 'Success!',
-              text: `${isGroupTransfer ? selectedStudents.length : 1} students${isGroupTransfer && selectedStudents.length > 1 ? 's' : ''} transferred${isGroupTransfer && selectedStudents.length > 1 ? 's' : ''} successfully`,
+              text:
+                userRole === USER_TYPES.RECEPTIONIST
+                  ? 'Transfer request successfully submitted'
+                  : `${isGroupTransfer ? selectedStudents.length : 1} student${
+                      isGroupTransfer && selectedStudents.length > 1 ? 's' : ''
+                    } transferred successfully`,
               icon: 'success',
               confirmButtonText: 'OK',
             });
-
             setSelectedStudents([]);
             clearSelections();
           }}

@@ -31,6 +31,13 @@ export const COURSE_TYPE_FILTER = [
   { label: 'ONLINE', value: 'online' },
 ];
 
+export const STATUS_LEVEL_CHANGE = [
+  { label: 'Pending', value: 'pending' },
+  { label: 'Approved', value: 'approved' },
+  { label: 'Rejected', value: 'rejected' },
+  { label: 'n/a', value: 'n/a' },
+];
+
 export const USER_ROLES = [
   { value: 'admin_staff', label: 'Admin' },
   { value: 'professor', label: 'Professor' },

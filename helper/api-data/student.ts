@@ -9,12 +9,6 @@ export const getAllStudent = (
     false
   );
 };
-export const getDistinctLevel = (page: number, limit: number) => {
-  return getFetcher(
-    `/student/get-distinct-levels?page=${page}&limit=${limit}`,
-    false
-  );
-};
 
 export const createStudent = (data: any) => {
   return postFetcher('/student/create', data);
@@ -40,7 +34,8 @@ export const updateStudentLevelChangeStatus = (
 export const requestTransferAndProgress = (
   studentIds: number[],
   courseId: string | null,
-  levelId: string | null
+  levelId: string | null,
+  isGroup: boolean | false
 ) => {
   // Validar que al menos uno de los parámetros sea proporcionado
   if (!courseId && !levelId) {
@@ -55,6 +50,7 @@ export const requestTransferAndProgress = (
     studentIds,
     courseId,
     levelId,
+    isGroup,
   })
     .then((response) => {
       return response;
@@ -112,5 +108,5 @@ export const getStudentTransfers = (studentId: number) => {
 };
 
 export const getPendingStudentTransfers = () => {
-  return getFetcher(`/student-transfer-data/pending`, false);
+  return getFetcher(`/transfer-data/get-pending`, false);
 };

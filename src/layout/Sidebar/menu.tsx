@@ -57,7 +57,15 @@ export const CoordinatorMenuList: sidebarMenuType[] = [
         badge: 'badge badge-light-primary',
         path: 'admin/students',
       },
-
+      {
+        title: 'Transfer Students',
+        id: 9,
+        pathSlice: 'admin/transfer-students',
+        type: 'link',
+        icon: 'blog',
+        badge: 'badge badge-light-primary',
+        path: 'admin/transfer-students',
+      },
       {
         title: 'Syllabus',
         id: 4,
@@ -128,6 +136,15 @@ export const AdminMenuList: sidebarMenuType[] = [
         icon: 'blog',
         badge: 'badge badge-light-primary',
         path: 'admin/students',
+      },
+      {
+        title: 'Transfer Students',
+        id: 9,
+        pathSlice: 'admin/transfer-students',
+        type: 'link',
+        icon: 'blog',
+        badge: 'badge badge-light-primary',
+        path: 'admin/transfer-students',
       },
       {
         title: 'Registered Students',
@@ -218,6 +235,15 @@ export const ReceptionistMenuList: sidebarMenuType[] = [
         icon: 'blog',
         badge: 'badge badge-light-primary',
         path: 'admin/students',
+      },
+      {
+        title: 'Transfer Students',
+        id: 9,
+        pathSlice: 'admin/transfer-students',
+        type: 'link',
+        icon: 'blog',
+        badge: 'badge badge-light-primary',
+        path: 'admin/transfer-students',
       },
       {
         title: 'Professors',
