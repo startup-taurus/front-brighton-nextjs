@@ -1,7 +1,3 @@
-/**=====================
- custom CSS Start
-==========================**/
-// you can add your custom css here
 .syllabus-container {
   border: 1px solid #ccc;
   padding: 20px 15px;
@@ -41,16 +37,51 @@
   cursor: not-allowed;
 }
 
-// Aplica a los checkboxes del encabezado y de cada fila
 .rdthead input[type='checkbox'],
 .rdt_TableBody input[type='checkbox'] {
-  transform: scale(1.3); // Ajusta este valor según tu preferencia
+  transform: scale(1.3); 
   cursor: pointer;
   margin: 0;
 }
 
-// Para asegurar que el input no se desborde del contenedor
 .rdthead .rdt_TableCol,
 .rdt_TableRow .rdt_TableCell {
   overflow: visible;
+}
+
+.react-select__menu,
+.react-select__menu-list {
+  z-index: 9999 !important;
+}
+
+
+.student-droppable {
+  position: relative;
+}
+
+.drop-hint {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+}
+
+.student-item:hover {
+  border-color: #3a86ff;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.student-item:hover .drag-icon {
+  color: #3a86ff !important;
+}
+
+.student-item .drag-icon {
+  opacity: 0.6;
+  transition: all 0.2s ease;
+}
+
+.student-item:hover .drag-icon {
+  opacity: 1;
 }

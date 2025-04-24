@@ -14,7 +14,11 @@ import {
   getAllCourses,
   getActiveCourses,
 } from '../../../../helper/api-data/course';
-import { PROMOTION_FILTER, STATUS_FILTER, STATUS_LEVEL_CHANGE } from '../../../../utils/constants';
+import {
+  PROMOTION_FILTER,
+  STATUS_FILTER,
+  STATUS_LEVEL_CHANGE,
+} from '../../../../utils/constants';
 
 const Students = () => {
   const router = useRouter();
@@ -98,7 +102,6 @@ const Students = () => {
 
   useEffect(() => {
     if (levels?.data) {
-      // Manejar tanto la estructura antigua como la nueva
       const levelData = Array.isArray(levels.data)
         ? levels.data
         : levels.data?.result || [];
@@ -159,7 +162,6 @@ const Students = () => {
       name: 'promotion',
       items: PROMOTION_FILTER,
     },
-    
   ];
 
   const toggle = () => {

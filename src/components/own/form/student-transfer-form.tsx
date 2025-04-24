@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Select from 'react-select';
 import Cookies from 'js-cookie';
 import {
@@ -12,227 +12,178 @@ import {
   ModalHeader,
   ModalFooter,
   Row,
-  Alert,
 } from 'reactstrap';
 import useSWR from 'swr';
 import { toast } from 'react-toastify';
 import LoadingButton from '../common/loading-button/LoadingButton';
-import {
-  transferAndProgressStudents,
-  requestTransferAndProgress,
-  getStudentTransfers,
-} from 'helper/api-data/student';
 import { getActiveCourses } from 'helper/api-data/course';
+import {
+  approveTransfer,
+  createTransferData,
+} from 'helper/api-data/transfer-data';
 import {
   LEVELS_FOR_KIDS,
   LEVELS_FOR_ADULTS,
   USER_TYPES,
 } from 'utils/constants';
 import { getNextLevel as getNextLevelFromProgression } from 'utils/levelProgression';
-import { getUserRoleFromLocalStorage } from '../../../../utils/auth';
+import { getUserRoleFromLocalStorage } from 'utils/auth';
+import { decrypt } from 'utils/encryption';
+
+interface LevelOption {
+  label: string;
+  value: any;
+}
 
 interface StudentTransferFormProps {
   isOpen: boolean;
   toggle: () => void;
   students: any[];
   isGroupTransfer?: boolean;
-  onSuccess?: (courseId: string) => void;
-}
-
-interface LevelOption {
-  label: string;
-  value: string;
+  description?: string;
+  initialTransferData?: {
+    id?: number;
+    description?: string;
+    selected_course?: LevelOption;
+    selected_level?: LevelOption;
+    is_group?: boolean;
+  };
+  onSuccess?: (id: string) => void;
 }
 
 const StudentTransferForm: React.FC<StudentTransferFormProps> = ({
   isOpen,
   toggle,
   students,
+  description,
   isGroupTransfer = false,
+  initialTransferData,
   onSuccess,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [selectedCourse, setSelectedCourse] = useState<any>(null);
-  const [courseOptions, setCourseOptions] = useState<any[]>([]);
+
+  const [selectedCourse, setSelectedCourse] = useState<LevelOption | null>(
+    null
+  );
+  const [courseOptions, setCourseOptions] = useState<LevelOption[]>([]);
+  const [doTransferCourse, setDoTransferCourse] = useState<boolean>(false);
+
   const [selectedNextLevel, setSelectedNextLevel] =
     useState<LevelOption | null>(null);
   const [nextLevelOptions, setNextLevelOptions] = useState<LevelOption[]>([]);
-  const [doTransferCourse, setDoTransferCourse] = useState(false);
-  const [doProgressLevel, setDoProgressLevel] = useState(false);
-  const [pendingTransfer, setPendingTransfer] = useState<any>(null);
-  const [hasPendingTransfer, setHasPendingTransfer] = useState(false);
+  const [doProgressLevel, setDoProgressLevel] = useState<boolean>(false);
 
   const limit = 10;
-
   const { data: coursesData } = useSWR(['/course/get-active', limit], () =>
     getActiveCourses(1, limit)
   );
 
-  const { data: transferData } = useSWR(
-    isOpen ? `/student/transfers` : null,
-    () => {
-      if (students.length === 1) {
-        return getStudentTransfers(students[0].id);
-      } else if (isGroupTransfer && students.length > 1) {
-        return getStudentTransfers(students[0].id);
-      }
-      return null;
-    }
-  );
+  const currentCourseIds = useMemo(() => {
+    return students.flatMap(
+      (student) => student.course?.map((c: any) => c.id) || []
+    );
+  }, [students]);
 
   useEffect(() => {
     if (coursesData?.data) {
-      const options = coursesData.data.map((course: any) => ({
+      const opts = coursesData.data.map((course: any) => ({
         value: course.id,
         label: `${course.course_number} - ${course.course_name}`,
       }));
-      setCourseOptions(options);
+      setCourseOptions(opts);
+
+      if (initialTransferData?.selected_course?.value) {
+        const foundCourse = opts.find(
+          (opt: any) => opt.value === initialTransferData.selected_course?.value
+        );
+        setSelectedCourse(foundCourse || initialTransferData.selected_course);
+      }
     }
-  }, [coursesData]);
+  }, [coursesData, initialTransferData?.selected_course]);
 
   useEffect(() => {
-    if (transferData?.data && Array.isArray(transferData.data)) {
-      const pendingTransfers = transferData.data.filter(
-        (transfer: { status_level_change: string }) =>
-          transfer.status_level_change === 'pending'
-      );
-
-      if (pendingTransfers.length > 0) {
-        setPendingTransfer(pendingTransfers[0]);
-        setHasPendingTransfer(true);
-
-        // Si hay curso seleccionado
-        if (pendingTransfers[0].selected_course_id) {
-          const courseOption = courseOptions.find(
-            (option) => option.value === pendingTransfers[0].selected_course_id
-          );
-          if (courseOption) {
-            setSelectedCourse(courseOption);
-            setDoTransferCourse(true);
-          }
-        }
-
-        // Si hay nivel seleccionado
-        if (
-          pendingTransfers[0].selected_level_id &&
-          pendingTransfers[0].status_level_change === 'pending'
-        ) {
-          setDoProgressLevel(true);
-          console.log('Activando checkbox de progresión de nivel');
-        }
-      } else {
-        setPendingTransfer(null);
-        setHasPendingTransfer(false);
-      }
-
-      if (isGroupTransfer) {
-        console.log('Procesando transferencia grupal:', pendingTransfers);
-      }
-    }
-  }, [transferData, courseOptions, isGroupTransfer]);
-
-  const getTransferAlertMessage = () => {
-    if (!hasPendingTransfer) return null;
-
-    if (isGroupTransfer) {
-      return (
-        <Alert
-          color='info'
-          className='mb-3'
-        >
-          Hay una transferencia pendiente para el primer estudiante del grupo.
-          {pendingTransfer?.selected_course_id && (
-            <span>
-              {' '}
-              La opción de transferir a otro curso ha sido seleccionada
-              automáticamente.
-            </span>
-          )}
-          {pendingTransfer?.selected_level_id && (
-            <span>
-              {' '}
-              The level progression option has been automatically selected.
-            </span>
-          )}
-        </Alert>
-      );
+    if (!isOpen) {
+      return;
     }
 
-    return (
-      <Alert
-        color='info'
-        className='mb-3'
-      >
-        There is a pending transfer request for this student.
-        {pendingTransfer?.selected_course_id && (
-          <span>
-            {' '}
-            The option to transfer to another course has been automatically
-            selected.
-          </span>
-        )}
-        {pendingTransfer?.selected_level_id && (
-          <span>
-            {' '}
-            The progression option is automatically selected at next level.
-          </span>
-        )}
-      </Alert>
-    );
-  };
+    if (initialTransferData) {
+      const hasInitialCourse = Boolean(
+        initialTransferData.selected_course?.value
+      );
+      setSelectedCourse(initialTransferData.selected_course || null);
+      setDoTransferCourse(hasInitialCourse);
+
+      const hasInitialLevel = Boolean(
+        initialTransferData.selected_level?.value
+      );
+      setDoProgressLevel(hasInitialLevel);
+    } else {
+      setSelectedCourse(null);
+      setDoTransferCourse(false);
+      setSelectedNextLevel(null);
+      setDoProgressLevel(false);
+    }
+  }, [isOpen, initialTransferData]);
 
   const isKidsGroup = () => {
     if (students.length === 0) return false;
-    const studentLevel =
-      typeof students[0].level === 'string'
-        ? students[0].level
-        : students[0].level?.name || '';
-    const levelNormalized = studentLevel.trim().toLowerCase();
+    // Use level name for comparison
+    const studentLevelName =
+      students[0].level?.name ||
+      (typeof students[0].level === 'string' ? students[0].level : '');
+    const levelNormalized = studentLevelName.trim().toLowerCase();
     return LEVELS_FOR_KIDS.some(
       (kidLvl) => kidLvl.label.toLowerCase() === levelNormalized
     );
   };
 
-  const convertLevelToOption = (
-    levelStr: string,
+  const convertLevelNameToOption = (
+    levelName: string,
     isKid: boolean
   ): LevelOption | null => {
     const levelsArray = isKid ? LEVELS_FOR_KIDS : LEVELS_FOR_ADULTS;
-    const lvlLower = levelStr.toLowerCase().trim();
+    const lvlLower = levelName.toLowerCase().trim();
     const found = levelsArray.find(
       (lvl) => lvl.label.toLowerCase().trim() === lvlLower
     );
-    return found ? { label: found.label, value: found.value } : null;
+    return found ? { label: found.label, value: found.label } : null;
   };
 
   useEffect(() => {
     if (students.length === 0) {
       setNextLevelOptions([]);
-      setSelectedNextLevel(null);
       return;
     }
 
-    // Determinar si es kids
-    const isKids = isKidsGroup();
+    const isKid = isKidsGroup();
+    const currentLevelName =
+      students[0].level?.name ||
+      (typeof students[0].level === 'string' ? students[0].level : '');
 
-    const studentLevel =
-      typeof students[0].level === 'string'
-        ? students[0].level
-        : students[0].level?.name || '';
+    const nextLevelStr = getNextLevelFromProgression(currentLevelName, isKid);
+    const nextOpt = convertLevelNameToOption(nextLevelStr, isKid);
 
-    const nextLevelStr = getNextLevelFromProgression(studentLevel, isKids);
-    const nextLevelOption = convertLevelToOption(nextLevelStr, isKids);
+    if (nextOpt) {
+      setNextLevelOptions([nextOpt]);
 
-    if (nextLevelOption) {
-      setNextLevelOptions([nextLevelOption]);
-      setSelectedNextLevel(nextLevelOption);
+      if (!initialTransferData) {
+        setDoProgressLevel(true);
+      }
     } else {
       setNextLevelOptions([]);
-      setSelectedNextLevel(null);
+      if (!initialTransferData) {
+        setDoProgressLevel(false);
+      }
     }
-  }, [students]);
+  }, [students, initialTransferData]);
 
-  const userRoleFromStorage = getUserRoleFromLocalStorage();
+  useEffect(() => {
+    if (doProgressLevel && nextLevelOptions.length === 1) {
+      setSelectedNextLevel(nextLevelOptions[0]);
+    }
+  }, [doProgressLevel, nextLevelOptions]);
+
+  const userRole = getUserRoleFromLocalStorage();
   const isProgressDisabled = doProgressLevel && nextLevelOptions.length === 0;
 
   const handleSubmit = async () => {
@@ -249,56 +200,62 @@ const StudentTransferForm: React.FC<StudentTransferFormProps> = ({
     }
 
     if (doProgressLevel && !selectedNextLevel) {
-      toast.error('No next level is available or you have not selected one.');
+      toast.error('Please select the next level to progress to.');
       return;
     }
 
     setIsLoading(true);
 
     const studentIds = students.map((s) => s.id);
-    const courseId = doTransferCourse ? selectedCourse.value : null;
-    const levelId = doProgressLevel ? selectedNextLevel?.value || null : null;
+    const courseId = doTransferCourse ? selectedCourse?.value : null;
+    const levelId =
+      doProgressLevel && selectedNextLevel?.value
+        ? findLevelIdByName(
+            selectedNextLevel.value,
+            LEVELS_FOR_ADULTS,
+            LEVELS_FOR_KIDS
+          )
+        : null;
+
+    const encryptedId =
+      Cookies.get('user_id') || localStorage.getItem('user_id');
+    const createdById = encryptedId ? Number(decrypt(encryptedId)) : 0;
+
+    const payload = {
+      selected_course_id: courseId,
+      selected_level_id: levelId,
+      status_level_change: 'pending',
+      description: description,
+      is_group: isGroupTransfer,
+      created_by_id: createdById,
+      student_ids: studentIds,
+    };
 
     try {
-      const response =
-        userRoleFromStorage === USER_TYPES.RECEPTIONIST
-          ? await requestTransferAndProgress(
-              studentIds,
-              courseId,
-              levelId,
-              isGroupTransfer
-            )
-          : await transferAndProgressStudents(studentIds, courseId, levelId);
-
-      if (response.statusCode === 200) {
-        let successMsg = `${students.length} student(s) `;
-
-        if (userRoleFromStorage === USER_TYPES.RECEPTIONIST) {
-          successMsg =
-            'Transfer request created successfully. Pending approval.';
-        } else {
-          if (doTransferCourse && doProgressLevel) {
-            successMsg += `transferred to "${selectedCourse.label}" and progressed to "${selectedNextLevel?.label}"`;
-          } else if (doTransferCourse) {
-            successMsg += `transferred successfully to "${selectedCourse.label}"`;
-          } else if (doProgressLevel) {
-            successMsg += `progressed successfully to "${selectedNextLevel?.label}"`;
-          }
+      let response;
+      if (userRole === USER_TYPES.RECEPTIONIST) {
+        response = await createTransferData(payload);
+      } else if (
+        userRole === USER_TYPES.COORDINATOR ||
+        userRole === USER_TYPES.ADMIN
+      ) {
+        const transferId = initialTransferData?.id;
+        if (!transferId) {
+          toast.error('Transfer ID is required to approve.');
+          return;
         }
+        response = await approveTransfer(transferId);
+      }
 
-        toast.success(successMsg);
-
-        // 1) Limpia los filtros y 2) Llama al callback
-        if (onSuccess) {
-          onSuccess(doTransferCourse ? selectedCourse.value : levelId || '');
-        }
-
+      if (response.statusCode === 200 || response.statusCode === 201) {
+        toast.success(response.message || 'Transfer operation successful.');
+        onSuccess && onSuccess(response.data?.id?.toString());
         toggle();
       } else {
-        toast.error(response.message || 'Error processing transfer request');
+        toast.error(response.message || 'Error processing transfer.');
       }
-    } catch (error) {
-      toast.error('Error processing transfer request');
+    } catch (error: any) {
+      toast.error(error?.message || 'Unexpected error during transfer.');
     } finally {
       setIsLoading(false);
     }
@@ -312,78 +269,118 @@ const StudentTransferForm: React.FC<StudentTransferFormProps> = ({
       size='lg'
     >
       <ModalHeader toggle={toggle}>
-        {isGroupTransfer ? 'Group Transfer' : 'Individual Transfer'}
+        {isGroupTransfer
+          ? 'Group Transfer / Level Progression'
+          : 'Individual Transfer / Level Progression'}
       </ModalHeader>
       <ModalBody>
-        {getTransferAlertMessage()}
         <Form>
           <Row>
             <Col md='12'>
-              <h5>Students to Transfer ({students.length})</h5>
-              <ul className='list-group mb-4'>
+              <h5>Students ({students.length})</h5>
+              <ul
+                className='list-group mb-4'
+                style={{ maxHeight: '150px', overflowY: 'auto' }}
+              >
+                {' '}
                 {students.map((student) => (
                   <li
                     key={student.id}
                     className='list-group-item d-flex justify-content-between align-items-center'
                   >
                     <div>
-                      <strong>{student.user?.name}</strong>
+                      <strong>
+                        {student.user?.name || student.name || 'N/A'}
+                      </strong>{' '}
                       <div className='text-muted small'>
-                        Current Level: {student.level?.name || 'None'} | Current
-                        Course: {student.course?.[0]?.course_number || 'None'}
+                        Current Level:{' '}
+                        {student.level?.name || student.level || 'None'} |{' '}
+                        Current Course:{' '}
+                        {student.course?.[0]?.course_number || 'None'}{' '}
                       </div>
                     </div>
                     <span
-                      className={`badge ${
-                        student.status === 'active'
-                          ? 'badge-success'
-                          : 'badge-danger'
+                      className={`badge bg-${
+                        student.status === 'active' ? 'success' : 'danger'
                       }`}
                     >
-                      {student.status.charAt(0).toUpperCase() +
-                        student.status.slice(1)}
+                      {student.status && typeof student.status === 'string'
+                        ? student.status.charAt(0).toUpperCase() +
+                          student.status.slice(1)
+                        : 'Unknown'}
                     </span>
                   </li>
                 ))}
               </ul>
             </Col>
 
-            {/* Transfer Type Selection */}
+            <Col md='12'>
+              {initialTransferData?.description && (
+                <FormGroup>
+                  <Label>Description</Label>
+                  <p className='form-control-static'>
+                    {initialTransferData.description}
+                  </p>
+                </FormGroup>
+              )}
+            </Col>
+
             <Col md='12'>
               <FormGroup
                 tag='fieldset'
                 className='mb-3'
               >
-                <Label className='mb-2'>Transfer Type</Label>
-                <div className='d-flex'>
+                <Label className='mb-2'>Actions</Label>
+                <div className='d-flex flex-wrap'>
+                  {' '}
                   <FormGroup
                     check
-                    className='me-4'
+                    className='me-4 mb-2'
                   >
+                    {' '}
                     <Label check>
                       <input
                         type='checkbox'
                         checked={doTransferCourse}
-                        onChange={(e) => setDoTransferCourse(e.target.checked)}
+                        onChange={(e) => {
+                          setDoTransferCourse(e.target.checked);
+                          if (!e.target.checked) setSelectedCourse(null);
+                        }}
+                        className='form-check-input'
                       />{' '}
-                      Transfer to another course
+                      Transfer Course
                     </Label>
                   </FormGroup>
-                  <FormGroup check>
+                  <FormGroup
+                    check
+                    className='mb-2'
+                  >
+                    {' '}
                     <Label check>
                       <input
                         type='checkbox'
                         checked={doProgressLevel}
-                        onChange={(e) => setDoProgressLevel(e.target.checked)}
+                        onChange={(e) => {
+                          setDoProgressLevel(e.target.checked);
+                        }}
+                        className='form-check-input'
+                        disabled={
+                          nextLevelOptions.length === 0 &&
+                          !initialTransferData?.selected_level
+                        }
                       />{' '}
-                      Progress to next level
+                      Progress Level
                     </Label>
+                    {doProgressLevel && nextLevelOptions.length === 0 && (
+                      <small className='text-danger d-block'>
+                        No next level is available for progression.
+                      </small>
+                    )}
                   </FormGroup>
                 </div>
               </FormGroup>
             </Col>
 
-            {/* Select Course */}
             {doTransferCourse && (
               <Col md='12'>
                 <FormGroup>
@@ -393,42 +390,64 @@ const StudentTransferForm: React.FC<StudentTransferFormProps> = ({
                     name='course'
                     options={courseOptions}
                     value={selectedCourse}
-                    onChange={(option) => setSelectedCourse(option)}
-                    placeholder='Search for a course...'
+                    onChange={(opt) => setSelectedCourse(opt as LevelOption)}
+                    isOptionDisabled={(opt: LevelOption) =>
+                      currentCourseIds.includes(opt.value)
+                    }
+                    placeholder='Search or select a course...'
                     isClearable
                     isSearchable
                     className='basic-single'
                     classNamePrefix='select'
                   />
+                  {!selectedCourse && (
+                    <small className='text-danger'>
+                      Course selection is required.
+                    </small>
+                  )}
                 </FormGroup>
               </Col>
             )}
 
-            {/* Progress to Next Level */}
             {doProgressLevel && (
               <Col md='12'>
                 <FormGroup>
-                  <Label for='nextLevel'>Progress to Next Level</Label>
+                  <Label for='nextLevel'>Select Next Level</Label>
                   <Select
                     id='nextLevel'
                     name='nextLevel'
                     options={nextLevelOptions}
                     value={selectedNextLevel}
-                    onChange={(option) => setSelectedNextLevel(option)}
-                    placeholder='Select next level...'
+                    onChange={(opt) => setSelectedNextLevel(opt as LevelOption)}
+                    placeholder={
+                      nextLevelOptions.length === 0
+                        ? 'No next level available'
+                        : 'Select next level...'
+                    }
                     isDisabled={nextLevelOptions.length === 0}
+                    isClearable={false}
                     className='basic-single'
                     classNamePrefix='select'
                   />
+
                   {nextLevelOptions.length === 0 && (
-                    <small className='text-danger'>
-                      No next level available for these students
+                    <small className='text-warning d-block mt-1'>
+                      No next level is defined in the progression path for the
+                      current level.
                     </small>
                   )}
-                  <small className='text-muted d-block mt-2'>
-                    This will progress students to the next level according to
-                    the defined progression
-                  </small>
+
+                  {nextLevelOptions.length > 0 && selectedNextLevel && (
+                    <small className='text-muted d-block mt-1'>
+                      Student(s) will be progressed to {selectedNextLevel.label}
+                      .
+                    </small>
+                  )}
+                  {!selectedNextLevel && nextLevelOptions.length > 0 && (
+                    <small className='text-danger'>
+                      Next level selection is required.
+                    </small>
+                  )}
                 </FormGroup>
               </Col>
             )}
@@ -446,11 +465,15 @@ const StudentTransferForm: React.FC<StudentTransferFormProps> = ({
           color='primary'
           onClick={handleSubmit}
           loading={isLoading}
-          disabled={isProgressDisabled}
+          disabled={
+            isProgressDisabled ||
+            (doTransferCourse && !selectedCourse) ||
+            (doProgressLevel && !selectedNextLevel)
+          }
         >
-          {userRoleFromStorage === USER_TYPES.RECEPTIONIST
-            ? 'Transfer request'
-            : 'Transfer Students'}
+          {userRole === USER_TYPES.RECEPTIONIST
+            ? 'Request Transfer / Progression'
+            : 'Confirm Transfer / Progression'}
         </LoadingButton>
       </ModalFooter>
     </Modal>
@@ -458,3 +481,23 @@ const StudentTransferForm: React.FC<StudentTransferFormProps> = ({
 };
 
 export default StudentTransferForm;
+
+
+const findLevelIdByName = (
+  levelName: string,
+  adultsLevels: any[],
+  kidsLevels: any[]
+): number | null => {
+
+  const adultLevel = adultsLevels.find(
+    (level) => level.label.toLowerCase() === levelName.toLowerCase()
+  );
+  if (adultLevel) return Number(adultLevel.value);
+
+  const kidLevel = kidsLevels.find(
+    (level) => level.label.toLowerCase() === levelName.toLowerCase()
+  );
+  if (kidLevel) return Number(kidLevel.value);
+
+  return null;
+};

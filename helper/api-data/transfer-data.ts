@@ -31,6 +31,10 @@ export const getStudentsByTransferId = (transferId: number) => {
   return getFetcher(`/student-transfer/transfer/${transferId}`, false);
 };
 
+export const createTransferData = (data: any) => {
+  return postFetcher('/transfer-data/create', data);
+};
+
 export const approveTransfer = (transferId: number) => {
   return putFetcher(`/transfer-data/approve/${transferId}`, {});
 };

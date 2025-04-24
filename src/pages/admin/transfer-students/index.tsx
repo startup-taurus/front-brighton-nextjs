@@ -1,122 +1,84 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Card,
-  CardHeader,
-  Container,
-  Row,
-  Table,
-  Badge,
-  Spinner,
-} from 'reactstrap';
+import { Card, CardHeader, Container, Row } from 'reactstrap';
 import { useRouter } from 'next/router';
-import useSWR, { mutate } from 'swr';
+import useSWR from 'swr';
 import TableHeaderActions from '@/components/own/table-header-actions/table-header-actions';
 import TableFilters from '@/components/own/table-filters/table-filters';
 import { FiltersProps } from '../../../../Types/types';
-import { getFiltersString } from '../../../../utils/utils';
-import { getAllTransferData } from '../../../../helper/api-data/transfer-data';
 import { getAllLevels } from '../../../../helper/api-data/level';
 import { getActiveCourses } from '../../../../helper/api-data/course';
-import { STATUS_LEVEL_CHANGE } from '../../../../utils/constants';
+import { STATUS_LEVEL_CHANGE, USER_TYPES } from '../../../../utils/constants';
+import StudentTransferForm from '@/components/own/form/student-transfer-form';
+import TransferStudentsTable from '@/components/own/tables/transfer-students-table';
+import StudentSelectorModal, {
+  StudentOption,
+} from '@/components/own/student-slector-modal/StudentSelectorModal';
+import { getUserRoleFromLocalStorage } from 'utils/auth';
 
 const TransferStudents = () => {
   const router = useRouter();
-  const page = router.query.page ? Number(router.query.page) : 1;
-  const rowPerPage = router.query.rowPerPage
-    ? Number(router.query.rowPerPage)
-    : 10;
+  const [isSelectorModalOpen, setIsSelectorModalOpen] = useState(false);
+  const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
+  const [studentsToTransfer, setStudentsToTransfer] = useState<StudentOption[]>(
+    []
+  );
+  const [isGroupMode, setIsGroupMode] = useState(false);
+  const [transferDescription, setTransferDescription] = useState('');
+
+  const [reload, setReload] = useState(false);
 
   const limit = 10;
   const [coursePage, setCoursePage] = useState(1);
   const [levelPage, setLevelPage] = useState(1);
-  const [courseSearchTerm, setCourseSearchTerm] = useState('');
-  const [levelSearchTerm, setLevelSearchTerm] = useState('');
+  const [courseSearch, setCourseSearch] = useState('');
+  const [levelSearch, setLevelSearch] = useState('');
   const [courseOptions, setCourseOptions] = useState<any[]>([]);
   const [levelOptions, setLevelOptions] = useState<any[]>([]);
-  const [selectedTransfers, setSelectedTransfers] = useState<number[]>([]);
 
-  const filters = getFiltersString(router);
-
-  const {
-    data: transfersData,
-    error,
-    isLoading,
-  } = useSWR(
-    [
-      `/transfer-data/get-all?page=${page}&limit=${rowPerPage}${filters ? `&${filters}` : ''}`,
-    ],
-    () => getAllTransferData(page, rowPerPage, filters || '')
+  const { data: courseData } = useSWR(
+    ['/course/get-active', coursePage, limit, courseSearch],
+    () => getActiveCourses(coursePage, limit, courseSearch)
   );
-
-  const { data: course } = useSWR(
-    ['/course/get-active', coursePage, limit, courseSearchTerm],
-    () => getActiveCourses(coursePage, limit, courseSearchTerm)
+  const { data: levelData } = useSWR(
+    ['/level/get-all', levelPage, limit, levelSearch],
+    () => getAllLevels(levelPage, limit, levelSearch)
   );
-
-  const { data: levels } = useSWR(
-    ['/level/get-all', levelPage, limit, levelSearchTerm],
-    () => getAllLevels(levelPage, limit, levelSearchTerm)
-  );
-
-  const onCourseScrollToBottom = () => {
-    if (course?.data?.length !== 0) {
-      const nextPage = coursePage + 1;
-      setCoursePage(nextPage);
-    }
-  };
-
-  const onLevelScrollToBottom = () => {
-    if (levels?.data?.length !== 0) {
-      const nextPage = levelPage + 1;
-      setLevelPage(nextPage);
-    }
-  };
 
   useEffect(() => {
-    if (course?.data) {
-      const courseResults = Array.isArray(course.data)
-        ? course.data
-        : course.data.result;
-      if (courseResults) {
-        const options = courseResults.map((courseItem: any) => ({
-          value: courseItem.id,
-          label: `${courseItem.course_number} `,
-        }));
-
-        setCourseOptions((prevOptions) => {
-          const combined = [...prevOptions, ...options];
-          return combined.filter(
-            (option, index, self) =>
-              self.findIndex((o) => o.value === option.value) === index
-          );
-        });
-      }
-    }
-  }, [course]);
-
-  useEffect(() => {
-    if (levels?.data) {
-      const levelData = Array.isArray(levels.data)
-        ? levels.data
-        : levels.data?.result || [];
-
-      const options = levelData.map((item: any) => ({
-        value: typeof item === 'string' ? item : item.id || item.level || item,
-        label:
-          typeof item === 'string'
-            ? item
-            : item.full_level || item.level || item,
+    if (courseData?.data) {
+      const arr = Array.isArray(courseData.data)
+        ? courseData.data
+        : courseData.data.result;
+      const opts = arr.map((c: any) => ({
+        value: c.id,
+        label: c.course_number,
       }));
-
-      setLevelOptions((prevOptions) => {
-        const combined = [...prevOptions, ...options];
-        return combined.filter(
-          (option, index, self) =>
-            self.findIndex((o) => o.value === option.value) === index
+      setCourseOptions((prev) => {
+        const combo = [...prev, ...opts];
+        return combo.filter(
+          (o, i) => combo.findIndex((x) => x.value === o.value) === i
         );
       });
     }
-  }, [levels]);
+  }, [courseData]);
+
+  useEffect(() => {
+    if (levelData?.data) {
+      const arr = Array.isArray(levelData.data)
+        ? levelData.data
+        : levelData.data.result;
+      const opts = arr.map((l: any) => ({
+        value: l.id || l.level,
+        label: l.full_level || l.level,
+      }));
+      setLevelOptions((prev) => {
+        const combo = [...prev, ...opts];
+        return combo.filter(
+          (o, i) => combo.findIndex((x) => x.value === o.value) === i
+        );
+      });
+    }
+  }, [levelData]);
 
   const selectFilters: FiltersProps[] = [
     {
@@ -125,13 +87,9 @@ const TransferStudents = () => {
       type: 'select',
       items: STATUS_LEVEL_CHANGE,
     },
+    { labelName: 'Description', name: 'description', type: 'text' },
     {
-      labelName: 'Description',
-      name: 'description',
-      type: 'text',
-    },
-    {
-      labelName: 'Group Transfer',
+      labelName: 'Group',
       name: 'is_group',
       type: 'select',
       items: [
@@ -141,69 +99,62 @@ const TransferStudents = () => {
     },
     {
       labelName: 'Course',
-      name: 'course_name',
+      name: 'selected_course_id',
       type: 'select',
-      items: courseOptions.length > 0 ? courseOptions : [],
-      onInputChange: (inputValue: string) => setCourseSearchTerm(inputValue),
-      onMenuScrollToBottom: onCourseScrollToBottom,
+      items: courseOptions,
+      onInputChange: (v) => setCourseSearch(v),
+      onMenuScrollToBottom: () => setCoursePage((p) => p + 1),
+      isAsync: true,
     },
     {
       labelName: 'Level',
-      name: 'level_name',
+      name: 'selected_level_id',
       type: 'select',
-      items: levelOptions.length > 0 ? levelOptions : [],
-      onInputChange: (inputValue: string) => setLevelSearchTerm(inputValue),
-      onMenuScrollToBottom: onLevelScrollToBottom,
+      items: levelOptions,
+      onInputChange: (v) => setLevelSearch(v),
+      onMenuScrollToBottom: () => setLevelPage((p) => p + 1),
+      isAsync: true,
     },
-    {
-      labelName: 'Created From',
-      name: 'created_at_from',
-      type: 'date',
-    },
-    {
-      labelName: 'Created To',
-      name: 'created_at_to',
-      type: 'date',
-    },
+    { labelName: 'Created From', name: 'created_at_from', type: 'date' },
+    { labelName: 'Created To', name: 'created_at_to', type: 'date' },
   ];
 
-  const handleReload = () => {
-    mutate([
-      `/transfer-data/get-all?page=${page}&limit=${rowPerPage}${filters ? `&${filters}` : ''}`,
-    ]);
-  };
-
-  const handleCheckboxChange = (transferId: number) => {
-    setSelectedTransfers((prev) => {
-      if (prev.includes(transferId)) {
-        return prev.filter((id) => id !== transferId);
-      } else {
-        return [...prev, transferId];
-      }
-    });
-  };
-
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'pending':
-        return <Badge color='warning'>Pending</Badge>;
-      case 'approved':
-        return <Badge color='success'>Approved</Badge>;
-      case 'rejected':
-        return <Badge color='danger'>Rejected</Badge>;
-      default:
-        return <Badge color='secondary'>{status}</Badge>;
+  const toggleSelectorModal = () => {
+    if (isSelectorModalOpen) {
+      setStudentsToTransfer([]);
+      setIsGroupMode(false);
     }
+    setIsSelectorModalOpen(!isSelectorModalOpen);
   };
 
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
-    });
+  const toggleTransferModal = () => {
+    if (isTransferModalOpen) {
+      setReload((r) => !r);
+      setStudentsToTransfer([]);
+      setIsGroupMode(false);
+    }
+    setIsTransferModalOpen(!isTransferModalOpen);
   };
+
+  const handleSelectionComplete = (
+    selected: StudentOption[],
+    group: boolean,
+    description: string
+  ) => {
+    setStudentsToTransfer(selected);
+    setIsGroupMode(group);
+    setTransferDescription(description);
+    setIsSelectorModalOpen(false);
+    setIsTransferModalOpen(true);
+  };
+
+  const handleTransferSuccess = (identifier: string) => {
+    console.log('Transferencia completada para:', identifier);
+    setReload((r) => !r);
+    toggleTransferModal();
+  };
+
+  const userRole = getUserRoleFromLocalStorage();
 
   return (
     <div className='page-body'>
@@ -216,72 +167,42 @@ const TransferStudents = () => {
         </Row>
         <Row>
           <Card>
-            <CardHeader className='d-flex justify-content-between'>
-              <h5>Student Transfers</h5>
-              <TableHeaderActions onReload={handleReload} />
+            <CardHeader className='d-flex justify-content-end'>
+              <TableHeaderActions
+                onReload={() => setReload((r) => !r)}
+                addButton={
+                  userRole === USER_TYPES.RECEPTIONIST
+                    ? {
+                        title: 'Create Transfer',
+                        onClick: toggleSelectorModal,
+                      }
+                    : undefined
+                }
+              />
             </CardHeader>
-            <div className='table-responsive'>
-              {isLoading ? (
-                <div className='text-center p-5'>
-                  <Spinner color='primary' />
-                </div>
-              ) : (
-                <Table className='table-hover'>
-                  <thead>
-                    <tr>
-                      <th>ID</th>
-                      <th>Description</th>
-                      <th>Status</th>
-                      <th>Course</th>
-                      <th>Level</th>
-                      <th>Group</th>
-                      <th>Created By</th>
-                      <th>Created At</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {transfersData?.data?.length > 0 ? (
-                      transfersData.data.map((transfer: any) => (
-                        <tr key={transfer.id}>
-                          <td>{transfer.id}</td>
-                          <td>{transfer.description}</td>
-                          <td>
-                            {getStatusBadge(transfer.status_level_change)}
-                          </td>
-                          <td>
-                            {transfer.selected_course?.course_name || '-'}
-                          </td>
-                          <td>{transfer.selected_level?.full_level || '-'}</td>
-                          <td>{transfer.is_group ? 'Yes' : 'No'}</td>
-                          <td>{transfer.created_by?.name || '-'}</td>
-                          <td>{formatDate(transfer.created_at)}</td>
-                        </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td
-                          colSpan={8}
-                          className='text-center'
-                        >
-                          No transfers found
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </Table>
-              )}
+            <div className='pb-4'>
+              <TransferStudentsTable reload={reload} />
             </div>
-            {transfersData?.totalPages > 0 && (
-              <div className='d-flex justify-content-end p-3'>
-                <div>
-                  Page {page} of {transfersData.totalPages} | Total:{' '}
-                  {transfersData.totalCount} transfers
-                </div>
-              </div>
-            )}
           </Card>
         </Row>
       </Container>
+
+      <StudentSelectorModal
+        isOpen={isSelectorModalOpen}
+        toggle={toggleSelectorModal}
+        onNext={handleSelectionComplete}
+      />
+
+      {isTransferModalOpen && studentsToTransfer.length > 0 && (
+        <StudentTransferForm
+          isOpen={isTransferModalOpen}
+          toggle={toggleTransferModal}
+          students={studentsToTransfer}
+          isGroupTransfer={isGroupMode}
+          description={transferDescription}
+          onSuccess={handleTransferSuccess}
+        />
+      )}
     </div>
   );
 };

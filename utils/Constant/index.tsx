@@ -34,7 +34,6 @@ export const Deliveryprocessing: string = 'Delivery processing';
 export const OrderComplete: string = 'Order Complete';
 export const TicketsGenerated: string = 'Tickets Generated';
 export const DeliveryComplete: string = 'Delivery Complete';
-export const Checkall: string = 'Check all';
 export const AddNewBookmark: string = 'Add New Bookmark';
 export const EmayWalter: string = 'Emay Walter';
 export const Admin: string = 'Admin';

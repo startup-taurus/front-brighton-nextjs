@@ -7,4 +7,5 @@ export interface FiltersProps {
   asyncComponent?: (props: any) => JSX.Element;
   onInputChange?: (inputValue: string) => void;
   onMenuScrollToBottom?: () => void;
+  isAsync?: boolean;
 }

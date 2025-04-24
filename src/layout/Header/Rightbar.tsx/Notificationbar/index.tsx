@@ -1,45 +1,26 @@
-import SvgIcon from 'CommonElements/Icons/SvgIcon';
 import React, { useEffect, useState } from 'react';
+import SvgIcon from 'CommonElements/Icons/SvgIcon';
 import { Notifications } from 'utils/Constant';
 import NotificationList from './NotificationList';
 import useSWR from 'swr';
 import { getPendingTransferData } from 'helper/api-data/transfer-data';
-import { getAllStudentTransfers } from 'helper/api-data/transfer-data';
 
-const Notificationbar = () => {
+const Notificationbar: React.FC = () => {
   const [notificationCount, setNotificationCount] = useState(0);
 
-  // Fetch pending transfers to get the count
-  const { data: transfersData } = useSWR(
-    '/transfer-data/get-pending',
-    getPendingTransferData,
-    {
-      refreshInterval: 10000, // Refresh every minute
-      revalidateOnFocus: true,
-    }
-  );
-
-  // Fetch student transfers
-  const { data: studentTransfersData } = useSWR(
-    '/student-transfer/get-all',
-    getAllStudentTransfers,
-    {
-      refreshInterval: 10000,
-      revalidateOnFocus: true,
-    }
-  );
+  const { data: pendingResponse } = useSWR<{
+    data: any[];
+  }>('/transfer-data/get-pending', getPendingTransferData, {
+    refreshInterval: 10000,
+    revalidateOnFocus: true,
+  });
 
   useEffect(() => {
-    if (transfersData?.data) {
-      // Obtener las transferencias pendientes
-      const transfers = Array.isArray(transfersData.data)
-        ? transfersData.data
-        : [];
-
-      // Cada transferencia cuenta como una notificación
-      setNotificationCount(transfers.length);
-    }
-  }, [transfersData]);
+    const count = Array.isArray(pendingResponse?.data)
+      ? pendingResponse.data.length
+      : 0;
+    setNotificationCount(count);
+  }, [pendingResponse]);
 
   return (
     <li className='onhover-dropdown'>

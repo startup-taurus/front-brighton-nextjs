@@ -238,12 +238,21 @@ export const ReceptionistMenuList: sidebarMenuType[] = [
       },
       {
         title: 'Transfer Students',
-        id: 9,
+        id: 4,
         pathSlice: 'admin/transfer-students',
         type: 'link',
         icon: 'blog',
         badge: 'badge badge-light-primary',
         path: 'admin/transfer-students',
+      },
+      {
+        title: 'Registered Students',
+        id: 5,
+        pathSlice: 'registered-students',
+        type: 'link',
+        icon: 'blog',
+        badge: 'badge badge-light-primary',
+        path: 'admin/registered-students',
       },
       {
         title: 'Professors',
