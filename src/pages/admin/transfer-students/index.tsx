@@ -89,12 +89,12 @@ const TransferStudents = () => {
     },
     { labelName: 'Description', name: 'description', type: 'text' },
     {
-      labelName: 'Group',
+      labelName: 'Type',
       name: 'is_group',
       type: 'select',
       items: [
-        { value: 'true', label: 'Yes' },
-        { value: 'false', label: 'No' },
+        { value: 'true', label: 'Group' },
+        { value: 'false', label: 'Individual' },
       ],
     },
     {
@@ -105,6 +105,16 @@ const TransferStudents = () => {
       onInputChange: (v) => setCourseSearch(v),
       onMenuScrollToBottom: () => setCoursePage((p) => p + 1),
       isAsync: true,
+      value: router.query.selected_course_id
+        ? {
+            value: router.query.selected_course_id,
+            label:
+              courseOptions.find(
+                (opt: any) =>
+                  opt.value.toString() === router.query.selected_course_id
+              )?.label || `Course ${router.query.selected_course_id}`,
+          }
+        : null,
     },
     {
       labelName: 'Level',
@@ -114,6 +124,16 @@ const TransferStudents = () => {
       onInputChange: (v) => setLevelSearch(v),
       onMenuScrollToBottom: () => setLevelPage((p) => p + 1),
       isAsync: true,
+      value: router.query.selected_level_id
+        ? {
+            value: router.query.selected_level_id,
+            label:
+              levelOptions.find(
+                (opt: any) =>
+                  opt.value.toString() === router.query.selected_level_id
+              )?.label || `Level ${router.query.selected_level_id}`,
+          }
+        : null,
     },
     { labelName: 'Created From', name: 'created_at_from', type: 'date' },
     { labelName: 'Created To', name: 'created_at_to', type: 'date' },

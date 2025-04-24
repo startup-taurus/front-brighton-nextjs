@@ -156,9 +156,11 @@ const TableFilters = ({ selectFilters }: TableFiltersProps) => {
                                 form.setFieldValue(item.name, value);
                               }}
                               value={
+                                item.value ||
                                 item.items?.find(
                                   (option: any) => option.value === field.value
-                                ) || null
+                                ) ||
+                                null
                               }
                               placeholder={`Select ${item.labelName}`}
                               isSearchable

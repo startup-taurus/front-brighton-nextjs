@@ -19,6 +19,7 @@ const TableActionButtons = ({
   onCopy,
   onTransfer,
   disabled = false,
+  blockButtonVariant = 'cancel',
 }: any) => {
   return (
     <div
@@ -40,7 +41,7 @@ const TableActionButtons = ({
       {onBlock && (
         <button
           type='button'
-          className='btn btn-cancel'
+          className={`btn btn-${blockButtonVariant}`}
           onClick={onBlock}
           data-tooltip-id='on-block'
           disabled={disabled}

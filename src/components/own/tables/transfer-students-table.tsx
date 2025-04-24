@@ -112,7 +112,6 @@ const TransferStudentsTable = ({ reload }: { reload: boolean }) => {
       reverseButtons: true,
     }).then(async (result) => {
       if (result.isConfirmed) {
-
         try {
           const response = await rejectTransfer(transferId);
 
@@ -175,6 +174,7 @@ const TransferStudentsTable = ({ reload }: { reload: boolean }) => {
             cell: (row: any) => (
               <div className='d-flex align-items-center gap-2'>
                 <TableActionButtons
+                  blockButtonVariant='danger'
                   onBlock={() => handleRejectTransfer(row.id)}
                   onTransfer={() => handleOpenTransferDetail(row.id)}
                   status={row.status_level_change === 'n/a'}
@@ -220,7 +220,7 @@ const TransferStudentsTable = ({ reload }: { reload: boolean }) => {
       sortable: true,
     },
     {
-      name: 'Group',
+      name: 'Type',
       selector: (row: any) => (row.is_group ? 'Group' : 'Individual'),
       sortable: true,
     },
