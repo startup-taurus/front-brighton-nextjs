@@ -1,4 +1,3 @@
-// src/utils/encryption.ts
 import CryptoJS from 'crypto-js';
 
 const SECRET_KEY = '7mGFCu2Fo6BCHvSJ7UFMx49HXuTX8Y95';

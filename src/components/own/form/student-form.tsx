@@ -35,23 +35,12 @@ const validations = Yup.object().shape({
   courseId: Yup.string().required('The course is required'),
   level_id: Yup.string().required('The level is required'),
   status: Yup.string().required('The status is required'),
-  emergency_contact_name: Yup.string().required(
-    'Emergency contact name is required'
-  ),
-  emergency_contact_phone: Yup.string().required(
-    'Emergency contact phone is required'
-  ),
-  emergency_contact_relationship: Yup.string().required(
-    'Emergency contact relationship is required'
-  ),
+  age_category: Yup.string().required('Age category is required'),
   birth_date: Yup.date()
     .max(new Date(), 'Select a valid date')
     .transform((value, originalValue, schema) => {
-      if (schema.isType(value)) {
-        return value;
-      }
-      const result = parse(originalValue, 'dd-MM-yyyy', new Date());
-      return result;
+      if (schema.isType(value)) return value;
+      return parse(originalValue, 'dd-MM-yyyy', new Date());
     })
     .typeError('Select a valid date')
     .required('The birthdate is required'),
@@ -60,9 +49,31 @@ const validations = Yup.object().shape({
     .max(10, 'Phone number must be less than 10 characters long')
     .required('Phone number is required'),
   book_given: Yup.boolean().required('Book given status is required'),
-});
+  pendingPayments: Yup.boolean(),
 
-// Usar la función de utilidad importada desde utils/auth
+  // Conditional validations for emergency contacts when kids
+  emergency_contact_name: Yup.string().when('age_category', {
+    is: 'kids',
+    then: (schema: Yup.StringSchema) =>
+      schema.required('Emergency contact name is required'),
+    otherwise: (schema: Yup.StringSchema) => schema,
+  }),
+  emergency_contact_phone: Yup.string().when('age_category', {
+    is: 'kids',
+    then: (schema: Yup.StringSchema) =>
+      schema.required('Emergency contact phone is required'),
+    otherwise: (schema: Yup.StringSchema) => schema,
+  }),
+  emergency_contact_relationship: Yup.string().when('age_category', {
+    is: 'kids',
+    then: (schema: Yup.StringSchema) =>
+      schema.required('Emergency contact relationship is required'),
+    otherwise: (schema: Yup.StringSchema) => schema,
+  }),
+
+  promotion: Yup.string(),
+  observations: Yup.string(),
+});
 
 const StudentForm = ({
   data,
