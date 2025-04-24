@@ -177,17 +177,14 @@ const TransferStudents = () => {
   const userRole = getUserRoleFromLocalStorage();
 
   return (
-    <div className='page-body'>
-      <Container
-        className='basic_table'
-        fluid
-      >
+    <div className="page-body">
+      <Container className="basic_table" fluid>
         <Row>
           <TableFilters selectFilters={selectFilters} />
         </Row>
         <Row>
           <Card>
-            <CardHeader className='d-flex justify-content-end'>
+            <CardHeader className="d-flex justify-content-end">
               <TableHeaderActions
                 onReload={() => setReload((r) => !r)}
                 addButton={
@@ -200,18 +197,20 @@ const TransferStudents = () => {
                 }
               />
             </CardHeader>
-            <div className='pb-4'>
+            <div className="pb-4">
               <TransferStudentsTable reload={reload} />
             </div>
           </Card>
         </Row>
       </Container>
 
-      <StudentSelectorModal
-        isOpen={isSelectorModalOpen}
-        toggle={toggleSelectorModal}
-        onNext={handleSelectionComplete}
-      />
+      {isSelectorModalOpen && (
+        <StudentSelectorModal
+          isOpen={isSelectorModalOpen}
+          toggle={toggleSelectorModal}
+          onNext={handleSelectionComplete}
+        />
+      )}
 
       {isTransferModalOpen && studentsToTransfer.length > 0 && (
         <StudentTransferForm

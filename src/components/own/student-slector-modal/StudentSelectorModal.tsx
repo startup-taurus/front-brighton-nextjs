@@ -36,6 +36,7 @@ import {
   FiArrowRight,
   FiAlertCircle,
 } from 'react-icons/fi';
+import { getSimpleFiltersString } from 'utils/utils';
 
 export interface StudentOption {
   id: number;
@@ -143,20 +144,6 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
     );
   }, [levelData]);
 
-  useEffect(() => {
-    if (!isOpen) {
-      setAvailable([]);
-      setSelected([]);
-      setPage(1);
-      setHasMore(true);
-      setFilters({ course: '', level: '', status: '', name: '' });
-      setFiltersApplied({ course: '', level: '', status: '', name: '' });
-      setDescription('');
-      setIsGroup(false);
-      setValidationError('');
-    }
-  }, [isOpen]);
-
   const buildFilterString = () =>
     Object.entries(filtersApplied)
       .filter(([, v]) => v)
@@ -166,17 +153,19 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
       })
       .join('&');
 
-  const { data, error } = useSWR(
-    isOpen ? ['/student/get-all', page, filtersApplied] : null,
-    () => getAllStudent(page, limit, buildFilterString()),
-    { revalidateOnFocus: false }
+  const studentData = useSWR(
+    `/student/get-all?page=${page}&limit=${limit}&${filtersApplied ? `&${getSimpleFiltersString(filtersApplied)}` : ''}`,
+    () => getAllStudent(page, limit, buildFilterString())
   );
+
   useEffect(() => {
-    if (!data?.data) return;
-    const list = Array.isArray(data.data)
-      ? data.data
-      : Array.isArray(data.data.result)
-        ? data.data.result
+    console.log('Update data');
+
+    if (!studentData?.data?.data) return;
+    const list = Array.isArray(studentData.data?.data)
+      ? studentData.data?.data
+      : Array.isArray(studentData.data?.data.result)
+        ? studentData.data?.data.result
         : [];
     const mapped = list.map((s: any) => ({
       id: s.id,
@@ -187,7 +176,11 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
     }));
     setAvailable((prev) => (page === 1 ? mapped : [...prev, ...mapped]));
     setHasMore(list.length >= limit);
-  }, [data, page, limit]);
+  }, [
+    studentData?.data,
+    studentData?.data?.data,
+    studentData?.data?.data?.result,
+  ]);
 
   const loadMore = () => setPage((p) => p + 1);
 
@@ -291,75 +284,62 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
     justifyContent: 'space-between' as const,
   });
 
+  const mutateData = () => {
+    const formattedFilter = getSimpleFiltersString(filters);
+    mutate(
+      `/student/get-all?page=${page}&limit=${limit}&${filtersApplied ? `&${formattedFilter}` : ''}`
+    );
+  };
+
   return (
-    <Modal
-      isOpen={isOpen}
-      toggle={toggle}
-      size='xl'
-      centered
-    >
+    <Modal isOpen={isOpen} toggle={toggle} size="xl" centered>
       <ModalHeader toggle={toggle}>
-        <div className='d-flex align-items-center'>
-          <FiUsers
-            className='me-2'
-            size={20}
-          />
+        <div className="d-flex align-items-center">
+          <FiUsers className="me-2" size={20} />
           Student Selection
         </div>
       </ModalHeader>
-      <ModalBody className='pt-4'>
+      <ModalBody className="pt-4">
         <FormGroup>
-          <Label className='mb-1 fw-bold d-flex align-items-center'>
-            <FiInfo className='me-1' />
+          <Label className="mb-1 fw-bold d-flex align-items-center">
+            <FiInfo className="me-1" />
             Description:
           </Label>
           <Input
-            type='textarea'
+            type="textarea"
             rows={3}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
-            placeholder='Enter a description for the transfer'
+            placeholder="Enter a description for the transfer"
           />
         </FormGroup>
 
-        <FormGroup
-          tag='fieldset'
-          className='mb-4'
-        >
-          <Label className='mb-2 fw-bold d-flex align-items-center'>
-            <FiUsers className='me-1' />
+        <FormGroup tag="fieldset" className="mb-4">
+          <Label className="mb-2 fw-bold d-flex align-items-center">
+            <FiUsers className="me-1" />
             Mode:
           </Label>
-          <div className='d-flex'>
-            <FormGroup
-              check
-              className='me-4'
-            >
-              <Label
-                check
-                className='d-flex align-items-center'
-              >
+          <div className="d-flex">
+            <FormGroup check className="me-4">
+              <Label check className="d-flex align-items-center">
                 <Input
-                  type='radio'
+                  type="radio"
                   checked={!isGroup}
                   onChange={() => setIsGroup(false)}
-                  className='me-2'
+                  className="me-2"
                 />{' '}
-                <FiUser className='me-1' /> Individual
+                <FiUser className="me-1" /> Individual
               </Label>
             </FormGroup>
             <FormGroup check>
-              <Label
-                check
-                className='d-flex align-items-center'
-              >
+              <Label check className="d-flex align-items-center">
                 <Input
-                  type='radio'
+                  type="radio"
                   checked={isGroup}
                   onChange={() => setIsGroup(true)}
-                  className='me-2'
+                  className="me-2"
                 />{' '}
-                <FiUsers className='me-1' /> Group
+                <FiUsers className="me-1" /> Group
               </Label>
             </FormGroup>
           </div>
@@ -367,7 +347,7 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
 
         {/* Mode instructions alert */}
 
-        <div className=' p-3 rounded mb-4 '>
+        <div className=" p-3 rounded mb-4 ">
           <StudentFilters
             courseOptions={courseOptions}
             levelOptions={levelOptions}
@@ -392,7 +372,7 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
               setPage(1);
               setHasMore(true);
               // Forzar revalidación de datos
-              mutate(['modal-students', 1, { ...filters }]);
+              mutateData();
             }}
             onClear={() => {
               setCourseSearch('');
@@ -408,28 +388,25 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
               setPage(1);
               setHasMore(true);
               // Forzar revalidación de datos
-              mutate([
-                'modal-students',
-                1,
-                { course: '', level: '', status: '', name: '' },
-              ]);
+              mutateData();
             }}
+            isLoading={studentData?.isLoading}
           />
         </div>
 
         <DragDropContext onDragEnd={onDragEnd}>
-          <Row className='mb-4'>
-            <Col md='5'>
-              <div className='d-flex justify-content-between align-items-center mb-2'>
-                <h6 className='fw-bold d-flex align-items-center mb-0'>
-                  <FiUser className='me-2' />
+          <Row className="mb-4">
+            <Col md="5">
+              <div className="d-flex justify-content-between align-items-center mb-2">
+                <h6 className="fw-bold d-flex align-items-center mb-0">
+                  <FiUser className="me-2" />
                   Available Students
                 </h6>
-                <span className='badge bg-primary rounded-pill'>
+                <span className="badge bg-primary rounded-pill">
                   {available.length}
                 </span>
               </div>
-              <Droppable droppableId='available'>
+              <Droppable droppableId="available">
                 {(provided, snapshot) => (
                   <div
                     ref={provided.innerRef}
@@ -437,15 +414,15 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
                     style={getListStyle(snapshot.isDraggingOver, 'available')}
                     onMouseEnter={() => setHoveredDroppable('available')}
                     onMouseLeave={() => setHoveredDroppable(null)}
-                    className='student-droppable'
-                    id='scrollableDiv'
+                    className="student-droppable"
+                    id="scrollableDiv"
                   >
                     {hoveredDroppable === 'available' &&
                       !snapshot.isDraggingOver && (
-                        <div className='drop-hint'>
-                          <div className='text-center text-muted p-2'>
+                        <div className="drop-hint">
+                          <div className="text-center text-muted p-2">
                             <FiArrowRight size={20} />
-                            <p className='mb-0 mt-1'>Drop students here</p>
+                            <p className="mb-0 mt-1">Drop students here</p>
                           </div>
                         </div>
                       )}
@@ -455,22 +432,16 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
                       next={loadMore}
                       hasMore={hasMore}
                       loader={
-                        <div className='text-center my-3'>
-                          <Spinner
-                            size='sm'
-                            color='primary'
-                          />
+                        <div className="text-center my-3">
+                          <Spinner size="sm" color="primary" />
                         </div>
                       }
-                      scrollableTarget='scrollableDiv'
+                      scrollableTarget="scrollableDiv"
                     >
                       {available.length === 0 && !hasMore && (
-                        <div className='text-center text-muted p-4'>
-                          <FiAlertTriangle
-                            size={20}
-                            className='mb-2'
-                          />
-                          <p className='mb-0'>No students available</p>
+                        <div className="text-center text-muted p-4">
+                          <FiAlertTriangle size={20} className="mb-2" />
+                          <p className="mb-0">No students available</p>
                         </div>
                       )}
                       {available.map((s, idx) => (
@@ -488,15 +459,15 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
                                 ...getItemStyle(snapshot.isDragging),
                                 ...prov.draggableProps.style,
                               }}
-                              className='student-item'
+                              className="student-item"
                             >
-                              <div className='d-flex align-items-center'>
-                                <FiUser className='me-2 text-secondary' />
+                              <div className="d-flex align-items-center">
+                                <FiUser className="me-2 text-secondary" />
                                 <span>{s.user.name}</span>
                               </div>
 
                               <FiChevronRight
-                                className='text-muted drag-icon'
+                                className="text-muted drag-icon"
                                 style={{ cursor: 'pointer' }}
                                 onClick={(e) => {
                                   e.stopPropagation();
@@ -515,14 +486,14 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
             </Col>
 
             <Col
-              md='2'
-              className='d-flex flex-column justify-content-center align-items-center'
+              md="2"
+              className="d-flex flex-column justify-content-center align-items-center"
             ></Col>
 
-            <Col md='5'>
-              <div className='d-flex justify-content-between align-items-center mb-2'>
-                <h6 className='fw-bold d-flex align-items-center mb-0'>
-                  <FiUsers className='me-2' />
+            <Col md="5">
+              <div className="d-flex justify-content-between align-items-center mb-2">
+                <h6 className="fw-bold d-flex align-items-center mb-0">
+                  <FiUsers className="me-2" />
                   Selected Students
                 </h6>
                 <div>
@@ -534,7 +505,7 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
                   </span>
                 </div>
               </div>
-              <Droppable droppableId='selected'>
+              <Droppable droppableId="selected">
                 {(provided, snapshot) => (
                   <div
                     ref={provided.innerRef}
@@ -542,14 +513,14 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
                     style={getListStyle(snapshot.isDraggingOver, 'selected')}
                     onMouseEnter={() => setHoveredDroppable('selected')}
                     onMouseLeave={() => setHoveredDroppable(null)}
-                    className='student-droppable'
+                    className="student-droppable"
                   >
                     {hoveredDroppable === 'selected' &&
                       !snapshot.isDraggingOver && (
-                        <div className='drop-hint'>
-                          <div className='text-center text-muted p-2'>
+                        <div className="drop-hint">
+                          <div className="text-center text-muted p-2">
                             <FiArrowRight size={20} />
-                            <p className='mb-0 mt-1'>
+                            <p className="mb-0 mt-1">
                               {!isGroup
                                 ? 'Drop one student here'
                                 : 'Drop students here'}
@@ -559,14 +530,11 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
                       )}
 
                     {selected.length === 0 && (
-                      <div className='text-center text-muted p-4'>
-                        <FiUsers
-                          size={20}
-                          className='mb-2'
-                        />
-                        <p className='mb-0'>No students selected</p>
+                      <div className="text-center text-muted p-4">
+                        <FiUsers size={20} className="mb-2" />
+                        <p className="mb-0">No students selected</p>
                         {isGroup && (
-                          <p className='small text-muted'>
+                          <p className="small text-muted">
                             Group mode requires at least {GROUP_MINIMUM}{' '}
                             students
                           </p>
@@ -593,13 +561,13 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
                               borderLeftColor: '#28a745',
                               borderLeftWidth: 4,
                             }}
-                            className='student-item'
+                            className="student-item"
                           >
-                            <div className='d-flex align-items-center'>
-                              <FiUser className='me-2 text-success' />
+                            <div className="d-flex align-items-center">
+                              <FiUser className="me-2 text-success" />
                               <span>{s.user.name}</span>
                             </div>
-                            <FiChevronLeft className='text-muted drag-icon' />
+                            <FiChevronLeft className="text-muted drag-icon" />
                           </div>
                         )}
                       </Draggable>
@@ -609,8 +577,8 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
                 )}
               </Droppable>
               {isGroup && selected.length < GROUP_MINIMUM && (
-                <div className='text-danger d-flex align-items-center mb-3 mt-2'>
-                  <FiAlertCircle className='me-2' />
+                <div className="text-danger d-flex align-items-center mb-3 mt-2">
+                  <FiAlertCircle className="me-2" />
                   <span>
                     Group mode: You can select multiple students. Minimum{' '}
                     {GROUP_MINIMUM} students required.
@@ -619,8 +587,8 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
               )}
 
               {!isGroup && selected.length === 0 && (
-                <div className='text-danger d-flex align-items-center mb-3 mt-2'>
-                  <FiAlertCircle className='me-2' />
+                <div className="text-danger d-flex align-items-center mb-3 mt-2">
+                  <FiAlertCircle className="me-2" />
                   <span>
                     Individual mode: Only one student can be selected at a time.
                   </span>
@@ -628,8 +596,8 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
               )}
 
               {validationError && (
-                <div className='text-danger d-flex align-items-center mb-3'>
-                  <FiAlertTriangle className='me-2' />
+                <div className="text-danger d-flex align-items-center mb-3">
+                  <FiAlertTriangle className="me-2" />
                   <span>{validationError}</span>
                 </div>
               )}
@@ -638,24 +606,24 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
         </DragDropContext>
       </ModalBody>
 
-      <ModalFooter className='bg-light'>
+      <ModalFooter className="bg-light">
         <Button
-          color='secondary'
+          color="secondary"
           onClick={toggle}
-          className='d-flex align-items-center'
+          className="d-flex align-items-center"
         >
           Cancel
         </Button>
         <Button
-          color='primary'
+          color="primary"
           onClick={handleNext}
           disabled={
             selected.length === 0 ||
             (isGroup && selected.length < GROUP_MINIMUM)
           }
-          className='d-flex align-items-center'
+          className="d-flex align-items-center"
         >
-          Next <FiArrowRight className='ms-1' />
+          Next <FiArrowRight className="ms-1" />
         </Button>
       </ModalFooter>
     </Modal>

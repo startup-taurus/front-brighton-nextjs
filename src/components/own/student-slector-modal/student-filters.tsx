@@ -5,6 +5,7 @@ import Select, { Props as SelectProps } from 'react-select';
 export interface StudentFiltersProps {
   courseInputValue: string;
   levelInputValue: string;
+  isLoading: boolean;
   courseOptions: { value: string | number; label: string }[];
   levelOptions: { value: string | number; label: string }[];
   statusOptions?: { value: string; label: string }[];
@@ -37,6 +38,7 @@ const StudentFilters: React.FC<StudentFiltersProps> = ({
   levelOptions,
   statusOptions = defaultStatus,
   filters,
+  isLoading,
   onCourseInput,
   onLevelInput,
   onCourseChange,
@@ -58,12 +60,12 @@ const StudentFilters: React.FC<StudentFiltersProps> = ({
 
   return (
     <>
-      <Row className='mb-3'>
-        <Col md='3'>
+      <Row className="mb-3">
+        <Col md="3">
           <label>Filter by Course</label>
           <Select
             options={courseOptions}
-            placeholder='Filter by Course'
+            placeholder="Filter by Course"
             isClearable
             value={
               courseOptions.find((o) => o.value === filters.course) || null
@@ -76,11 +78,11 @@ const StudentFilters: React.FC<StudentFiltersProps> = ({
             styles={menuPortal}
           />
         </Col>
-        <Col md='3'>
+        <Col md="3">
           <label>Filter by Level</label>
           <Select
             options={levelOptions}
-            placeholder='Filter by Level'
+            placeholder="Filter by Level"
             isClearable
             value={levelOptions.find((o) => o.value === filters.level) || null}
             inputValue={levelInputValue}
@@ -91,11 +93,11 @@ const StudentFilters: React.FC<StudentFiltersProps> = ({
             styles={menuPortal}
           />
         </Col>
-        <Col md='3'>
+        <Col md="3">
           <label>Filter by Status</label>
           <Select
             options={statusOptions}
-            placeholder='Filter by Status'
+            placeholder="Filter by Status"
             isClearable
             value={
               statusOptions.find((o) => o.value === filters.status) || null
@@ -105,30 +107,27 @@ const StudentFilters: React.FC<StudentFiltersProps> = ({
             styles={menuPortal}
           />
         </Col>
-        <Col md='3'>
+        <Col md="3">
           <label>Search by Student Name</label>
           <Input
-            placeholder='Search by Student Name'
+            placeholder="Search by Student Name"
             value={filters.name}
             onChange={(e) => onNameChange(e.target.value)}
           />
         </Col>
       </Row>
 
-      <Row className='mb-3'>
-        <Col className='text-end d-flex justify-content-end gap-2'>
+      <Row className="mb-3">
+        <Col className="text-end d-flex justify-content-end gap-2">
           <Button
-            color='secondary'
+            color="secondary"
             onClick={onClear}
             outline
             disabled={isClearDisabled}
           >
             Clear
           </Button>
-          <Button
-            color='primary'
-            onClick={onApply}
-          >
+          <Button color="primary" onClick={onApply} disabled={isLoading}>
             Filter
           </Button>
         </Col>
