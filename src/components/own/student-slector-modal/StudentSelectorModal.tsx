@@ -65,6 +65,7 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
   const [selected, setSelected] = useState<StudentOption[]>([]);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const [isFetching, setIsFetching] = useState(false);
 
   const [filters, setFilters] = useState({
     course: '',
@@ -76,6 +77,7 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
   const [description, setDescription] = useState('');
   const [hoveredDroppable, setHoveredDroppable] = useState<string | null>(null);
   const [validationError, setValidationError] = useState('');
+  const [forceRefresh, setForceRefresh] = useState(0);
 
   const GROUP_MINIMUM = 5;
 
@@ -154,42 +156,124 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
       setDescription('');
       setIsGroup(false);
       setValidationError('');
+      setForceRefresh(0);
+      setIsFetching(false);
     }
   }, [isOpen]);
 
-  const buildFilterString = () =>
-    Object.entries(filtersApplied)
+  const buildFilterString = () => {
+    return Object.entries(filtersApplied)
       .filter(([, v]) => v)
       .map(([k, v]) => {
         const paramKey = k === 'level' ? 'level_id' : k;
         return `${paramKey}=${encodeURIComponent(v)}`;
       })
       .join('&');
+  };
 
-  const { data, error } = useSWR(
-    isOpen ? ['/student/get-all', page, filtersApplied] : null,
-    () => getAllStudent(page, limit, buildFilterString()),
-    { revalidateOnFocus: false }
-  );
+  const fetchStudents = async (currentPage: number) => {
+    setIsFetching(true);
+    try {
+      const response = await getAllStudent(
+        currentPage,
+        limit,
+        buildFilterString()
+      );
+      if (response?.data) {
+        const list = Array.isArray(response.data)
+          ? response.data
+          : Array.isArray(response.data.result)
+            ? response.data.result
+            : [];
+
+        const mapped = list.map((s: any) => ({
+          id: s.id,
+          user: s.user,
+          level: s.level ?? null,
+          course: s.course ?? null,
+          status: s.status ?? '',
+        }));
+
+        if (currentPage === 1) {
+          setAvailable(mapped);
+        } else {
+          setAvailable((prev) => [...prev, ...mapped]);
+        }
+
+        setHasMore(list.length >= limit);
+      } else {
+        if (currentPage === 1) {
+          setAvailable([]);
+        }
+        setHasMore(false);
+      }
+    } catch (error) {
+      console.error('Error fetching students:', error);
+      if (currentPage === 1) {
+        setAvailable([]);
+      }
+      setHasMore(false);
+    } finally {
+      setIsFetching(false);
+    }
+  };
+
   useEffect(() => {
-    if (!data?.data) return;
-    const list = Array.isArray(data.data)
-      ? data.data
-      : Array.isArray(data.data.result)
-        ? data.data.result
-        : [];
-    const mapped = list.map((s: any) => ({
-      id: s.id,
-      user: s.user,
-      level: s.level ?? null,
-      course: s.course ?? null,
-      status: s.status ?? '',
-    }));
-    setAvailable((prev) => (page === 1 ? mapped : [...prev, ...mapped]));
-    setHasMore(list.length >= limit);
-  }, [data, page, limit]);
+    if (isOpen) {
+      fetchStudents(page);
+    }
+  }, [isOpen, page, forceRefresh]);
 
-  const loadMore = () => setPage((p) => p + 1);
+  const { data, error, isValidating } = useSWR(
+    isOpen
+      ? ['/student/get-all', page, limit, buildFilterString(), forceRefresh]
+      : null,
+    () => getAllStudent(page, limit, buildFilterString()),
+    {
+      revalidateOnFocus: false,
+      dedupingInterval: 0,
+      refreshWhenHidden: false,
+      revalidateIfStale: false,
+      shouldRetryOnError: false,
+      onSuccess: (data) => {
+        if (data?.data) {
+          const list = Array.isArray(data.data)
+            ? data.data
+            : Array.isArray(data.data.result)
+              ? data.data.result
+              : [];
+
+          const mapped = list.map((s: any) => ({
+            id: s.id,
+            user: s.user,
+            level: s.level ?? null,
+            course: s.course ?? null,
+            status: s.status ?? '',
+          }));
+
+          if (page === 1) {
+            setAvailable(mapped);
+          } else {
+            setAvailable((prev) => [...prev, ...mapped]);
+          }
+
+          setHasMore(list.length >= limit);
+        } else {
+          if (page === 1) {
+            setAvailable([]);
+          }
+          setHasMore(false);
+        }
+        setIsFetching(false);
+      },
+    }
+  );
+
+  const loadMore = () => {
+    if (!isFetching && hasMore) {
+      setPage((p) => p + 1);
+    }
+  };
 
   const onDragEnd = (result: DropResult) => {
     const { source, destination } = result;
@@ -258,6 +342,38 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
     }
   };
 
+  const handleRemoveStudent = (student: StudentOption) => {
+    setSelected((prev) => prev.filter((s) => s.id !== student.id));
+    setAvailable((prev) => [...prev, student]);
+  };
+
+  const handleFilterApply = () => {
+    setFiltersApplied({ ...filters });
+    setAvailable([]);
+    setPage(1);
+    setHasMore(true);
+    setIsFetching(true);
+    setForceRefresh((prev) => prev + 1);
+  };
+
+  const handleFilterClear = () => {
+    setCourseSearch('');
+    setLevelSearch('');
+    const emptyFilters = {
+      course: '',
+      level: '',
+      status: '',
+      name: '',
+    };
+    setFilters(emptyFilters);
+    setFiltersApplied(emptyFilters);
+    setAvailable([]);
+    setPage(1);
+    setHasMore(true);
+    setIsFetching(true);
+    setForceRefresh((prev) => prev + 1);
+  };
+
   const getListStyle = (isDraggingOver: boolean, listId: string) => ({
     background:
       isDraggingOver || hoveredDroppable === listId ? '#e9f5fe' : '#f8f9fa',
@@ -290,6 +406,8 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
     alignItems: 'center' as const,
     justifyContent: 'space-between' as const,
   });
+
+  const isLoading = isValidating || isFetching;
 
   return (
     <Modal
@@ -365,9 +483,7 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
           </div>
         </FormGroup>
 
-        {/* Mode instructions alert */}
-
-        <div className=' p-3 rounded mb-4 '>
+        <div className='p-3 rounded mb-4'>
           <StudentFilters
             courseOptions={courseOptions}
             levelOptions={levelOptions}
@@ -386,34 +502,8 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
             onNameChange={(v) => setFilters((prev) => ({ ...prev, name: v }))}
             loadMoreCourse={() => setCoursePage((p) => p + 1)}
             loadMoreLevel={() => setLevelPage((p) => p + 1)}
-            onApply={() => {
-              setFiltersApplied({ ...filters });
-              setAvailable([]);
-              setPage(1);
-              setHasMore(true);
-              // Forzar revalidación de datos
-              mutate(['modal-students', 1, { ...filters }]);
-            }}
-            onClear={() => {
-              setCourseSearch('');
-              setLevelSearch('');
-              setFilters({ course: '', level: '', status: '', name: '' });
-              setFiltersApplied({
-                course: '',
-                level: '',
-                status: '',
-                name: '',
-              });
-              setAvailable([]);
-              setPage(1);
-              setHasMore(true);
-              // Forzar revalidación de datos
-              mutate([
-                'modal-students',
-                1,
-                { course: '', level: '', status: '', name: '' },
-              ]);
-            }}
+            onApply={handleFilterApply}
+            onClear={handleFilterClear}
           />
         </div>
 
@@ -450,10 +540,20 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
                         </div>
                       )}
 
+                    {isLoading && available.length === 0 && (
+                      <div className='text-center my-5 p-4'>
+                        <Spinner
+                          size='lg'
+                          color='secondary'
+                        />
+                        <p className='mt-3 mb-0'>Loading students...</p>
+                      </div>
+                    )}
+
                     <InfiniteScroll
                       dataLength={available.length}
                       next={loadMore}
-                      hasMore={hasMore}
+                      hasMore={hasMore && !isLoading}
                       loader={
                         <div className='text-center my-3'>
                           <Spinner
@@ -464,7 +564,7 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
                       }
                       scrollableTarget='scrollableDiv'
                     >
-                      {available.length === 0 && !hasMore && (
+                      {available.length === 0 && !hasMore && !isLoading && (
                         <div className='text-center text-muted p-4'>
                           <FiAlertTriangle
                             size={20}
@@ -494,15 +594,18 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
                                 <FiUser className='me-2 text-secondary' />
                                 <span>{s.user.name}</span>
                               </div>
-
-                              <FiChevronRight
-                                className='text-muted drag-icon'
-                                style={{ cursor: 'pointer' }}
+                              <div
+                                className='px-1'
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handleAddStudent(s);
                                 }}
-                              />
+                              >
+                                <FiChevronRight
+                                  className='text-muted drag-icon'
+                                  style={{ cursor: 'pointer' }}
+                                />
+                              </div>
                             </div>
                           )}
                         </Draggable>
@@ -599,7 +702,18 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
                               <FiUser className='me-2 text-success' />
                               <span>{s.user.name}</span>
                             </div>
-                            <FiChevronLeft className='text-muted drag-icon' />
+                            <div
+                              className='px-1'
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRemoveStudent(s);
+                              }}
+                            >
+                              <FiChevronLeft
+                                className='text-muted drag-icon'
+                                style={{ cursor: 'pointer' }}
+                              />
+                            </div>
                           </div>
                         )}
                       </Draggable>

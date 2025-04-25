@@ -43,6 +43,7 @@ const TransferStudents = () => {
     ['/level/get-all', levelPage, limit, levelSearch],
     () => getAllLevels(levelPage, limit, levelSearch)
   );
+  
 
   useEffect(() => {
     if (courseData?.data) {
@@ -206,12 +207,13 @@ const TransferStudents = () => {
           </Card>
         </Row>
       </Container>
-
-      <StudentSelectorModal
-        isOpen={isSelectorModalOpen}
-        toggle={toggleSelectorModal}
-        onNext={handleSelectionComplete}
-      />
+      {isSelectorModalOpen && (
+        <StudentSelectorModal
+          isOpen={isSelectorModalOpen}
+          toggle={toggleSelectorModal}
+          onNext={handleSelectionComplete}
+        />
+      )}
 
       {isTransferModalOpen && studentsToTransfer.length > 0 && (
         <StudentTransferForm

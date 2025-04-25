@@ -32,6 +32,7 @@ const TransferStudentsTable = ({ reload }: { reload: boolean }) => {
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [description, setDescription] = useState('');
   const [initialTransferData, setInitialTransferData] = useState<any>(null);
+  const [isViewOnly, setIsViewOnly] = useState(false);
   const userRole = getUserRoleFromLocalStorage();
   const { data: coursesData } = useSWR('/course/get-active', () =>
     getActiveCourses(1, 10)
@@ -57,13 +58,14 @@ const TransferStudentsTable = ({ reload }: { reload: boolean }) => {
     label: level.name,
   }));
 
-  const handleOpenTransferDetail = async (id: number) => {
+  const handleOpenTransferDetail = async (id: number, viewOnly = false) => {
     const res = await getStudentTransfersByTransferDataId(id);
     if (res?.data?.length > 0) {
       const transferData = res.data[0]?.transfer_data;
       setTransferStudents(res.data.map((s: any) => s.student));
       setDescription(transferData?.description || '');
       setSelectedTransferId(id);
+      setIsViewOnly(viewOnly);
 
       const selectedCourseOption = courseOptions?.find(
         (option: any) => option.value === transferData.selected_course_id
@@ -121,7 +123,7 @@ const TransferStudentsTable = ({ reload }: { reload: boolean }) => {
               'The transfer has been rejected.',
               'success'
             );
-            mutate(key); // Recarga los datos de la transferencia
+            mutate(key);
           } else {
             Swal.fire(
               'Error!',
@@ -140,13 +142,8 @@ const TransferStudentsTable = ({ reload }: { reload: boolean }) => {
     });
   };
 
-  const { data: transfersData, isLoading } = useSWR(
-    key,
-    () => getAllTransferData(page, rowPerPage, filters),
-    {
-      revalidateOnFocus: true,
-      refreshInterval: 1000,
-    }
+  const { data: transfersData, isLoading } = useSWR(key, () =>
+    getAllTransferData(page, rowPerPage, filters)
   );
 
   useEffect(() => {
@@ -176,7 +173,8 @@ const TransferStudentsTable = ({ reload }: { reload: boolean }) => {
                 <TableActionButtons
                   blockButtonVariant='danger'
                   onBlock={() => handleRejectTransfer(row.id)}
-                  onTransfer={() => handleOpenTransferDetail(row.id)}
+                  onTransfer={() => handleOpenTransferDetail(row.id, false)}
+                  onView={() => handleOpenTransferDetail(row.id, true)}
                   status={row.status_level_change === 'n/a'}
                   disabled={
                     row.status_level_change === 'approved' ||
@@ -185,12 +183,29 @@ const TransferStudentsTable = ({ reload }: { reload: boolean }) => {
                 />
               </div>
             ),
-            ignoreRowClick: true,
+            minWidth: '240px',
             allowOverflow: true,
-            button: true,
+            sortable: false,
+            center: false,
           },
         ]
-      : []),
+      : [
+          {
+            name: 'Actions',
+            cell: (row: any) => (
+              <div className='d-flex align-items-center gap-2'>
+                <TableActionButtons
+                  blockButtonVariant='danger'
+                  onView={() => handleOpenTransferDetail(row.id, true)}
+                  status={row.status_level_change === 'n/a'}
+                />
+              </div>
+            ),
+            maxWidth: '20px',
+            sortable: false,
+            center: false,
+          },
+        ]),
     {
       name: 'Description',
       selector: (row: any) => row.description,
@@ -268,7 +283,6 @@ const TransferStudentsTable = ({ reload }: { reload: boolean }) => {
         selectableRows={false}
       />
 
-      {/* Modal reutilizado para mostrar detalle */}
       {isDetailOpen && selectedTransferId && (
         <StudentTransferForm
           isOpen={isDetailOpen}
@@ -277,6 +291,7 @@ const TransferStudentsTable = ({ reload }: { reload: boolean }) => {
           isGroupTransfer={transferStudents.length > 1}
           description={description}
           initialTransferData={initialTransferData}
+          isViewOnly={isViewOnly}
           onSuccess={() => {
             mutate(key);
             setIsDetailOpen(false);

@@ -48,6 +48,7 @@ interface StudentTransferFormProps {
     selected_level?: LevelOption;
     is_group?: boolean;
   };
+  isViewOnly?: boolean;
   onSuccess?: (id: string) => void;
 }
 
@@ -58,6 +59,7 @@ const StudentTransferForm: React.FC<StudentTransferFormProps> = ({
   description,
   isGroupTransfer = false,
   initialTransferData,
+  isViewOnly = false,
   onSuccess,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -116,6 +118,7 @@ const StudentTransferForm: React.FC<StudentTransferFormProps> = ({
       const hasInitialLevel = Boolean(
         initialTransferData.selected_level?.value
       );
+      setSelectedNextLevel(initialTransferData.selected_level || null);
       setDoProgressLevel(hasInitialLevel);
     } else {
       setSelectedCourse(null);
@@ -127,7 +130,7 @@ const StudentTransferForm: React.FC<StudentTransferFormProps> = ({
 
   const isKidsGroup = () => {
     if (students.length === 0) return false;
-    // Use level name for comparison
+
     const studentLevelName =
       students[0].level?.name ||
       (typeof students[0].level === 'string' ? students[0].level : '');
@@ -150,8 +153,7 @@ const StudentTransferForm: React.FC<StudentTransferFormProps> = ({
   };
 
   useEffect(() => {
-    if (students.length === 0) {
-      setNextLevelOptions([]);
+    if (students.length === 0 || isViewOnly) {
       return;
     }
 
@@ -166,22 +168,22 @@ const StudentTransferForm: React.FC<StudentTransferFormProps> = ({
     if (nextOpt) {
       setNextLevelOptions([nextOpt]);
 
-      if (!initialTransferData) {
+      if (!initialTransferData && !isViewOnly) {
         setDoProgressLevel(true);
       }
     } else {
       setNextLevelOptions([]);
-      if (!initialTransferData) {
+      if (!initialTransferData && !isViewOnly) {
         setDoProgressLevel(false);
       }
     }
-  }, [students, initialTransferData]);
+  }, [students, initialTransferData, isViewOnly]);
 
   useEffect(() => {
-    if (doProgressLevel && nextLevelOptions.length === 1) {
+    if (doProgressLevel && nextLevelOptions.length === 1 && !isViewOnly) {
       setSelectedNextLevel(nextLevelOptions[0]);
     }
-  }, [doProgressLevel, nextLevelOptions]);
+  }, [doProgressLevel, nextLevelOptions, isViewOnly]);
 
   const userRole = getUserRoleFromLocalStorage();
   const isProgressDisabled = doProgressLevel && nextLevelOptions.length === 0;
@@ -261,6 +263,17 @@ const StudentTransferForm: React.FC<StudentTransferFormProps> = ({
     }
   };
 
+  const renderReadOnlyValue = (label: string, value: any) => {
+    return (
+      <FormGroup>
+        <Label>{label}</Label>
+        <p className='form-control-static bg-light p-2 rounded text-dark'>
+          {value || 'None'}
+        </p>
+      </FormGroup>
+    );
+  };
+
   return (
     <Modal
       isOpen={isOpen}
@@ -269,9 +282,9 @@ const StudentTransferForm: React.FC<StudentTransferFormProps> = ({
       size='lg'
     >
       <ModalHeader toggle={toggle}>
-        {isGroupTransfer
-          ? 'Group Transfer / Level Progression'
-          : 'Individual Transfer / Level Progression'}
+        {isViewOnly
+          ? `View ${isGroupTransfer ? 'Group' : 'Individual'} Transfer / Level Progression`
+          : `${isGroupTransfer ? 'Group' : 'Individual'} Transfer / Level Progression`}
       </ModalHeader>
       <ModalBody>
         <Form>
@@ -282,7 +295,6 @@ const StudentTransferForm: React.FC<StudentTransferFormProps> = ({
                 className='list-group mb-4'
                 style={{ maxHeight: '150px', overflowY: 'auto' }}
               >
-                {' '}
                 {students.map((student) => (
                   <li
                     key={student.id}
@@ -318,163 +330,211 @@ const StudentTransferForm: React.FC<StudentTransferFormProps> = ({
               {initialTransferData?.description && (
                 <FormGroup>
                   <Label>Description</Label>
-                  <p className='form-control-static'>
+                  <p className='form-control-static bg-light p-2 rounded text-dark'>
                     {initialTransferData.description}
                   </p>
                 </FormGroup>
               )}
             </Col>
 
-            <Col md='12'>
-              <FormGroup
-                tag='fieldset'
-                className='mb-3'
-              >
-                <Label className='mb-2'>Actions</Label>
-                <div className='d-flex flex-wrap'>
-                  {' '}
-                  <FormGroup
-                    check
-                    className='me-4 mb-2'
-                  >
-                    {' '}
-                    <Label check>
-                      <input
-                        type='checkbox'
-                        checked={doTransferCourse}
-                        onChange={(e) => {
-                          setDoTransferCourse(e.target.checked);
-                          if (!e.target.checked) setSelectedCourse(null);
-                        }}
-                        className='form-check-input'
-                      />{' '}
-                      Transfer Course
-                    </Label>
+            {isViewOnly ? (
+              <>
+                <Col md='12'>
+                  <FormGroup>
+                    <Label>Actions</Label>
+                    <p className='form-control-static bg-light p-2 rounded text-dark'>
+                      {doTransferCourse && doProgressLevel
+                        ? 'Transfer Course and Progress Level'
+                        : doTransferCourse
+                          ? 'Transfer Course'
+                          : doProgressLevel
+                            ? 'Progress Level'
+                            : 'No actions specified'}
+                    </p>
                   </FormGroup>
-                  <FormGroup
-                    check
-                    className='mb-2'
-                  >
-                    {' '}
-                    <Label check>
-                      <input
-                        type='checkbox'
-                        checked={doProgressLevel}
-                        onChange={(e) => {
-                          setDoProgressLevel(e.target.checked);
-                        }}
-                        className='form-check-input'
-                        disabled={
-                          nextLevelOptions.length === 0 &&
-                          !initialTransferData?.selected_level
-                        }
-                      />{' '}
-                      Progress Level
-                    </Label>
-                    {doProgressLevel && nextLevelOptions.length === 0 && (
-                      <small className='text-danger d-block'>
-                        No next level is available for progression.
-                      </small>
+                </Col>
+
+                {doTransferCourse && selectedCourse && (
+                  <Col md='12'>
+                    {renderReadOnlyValue(
+                      'Destination Course',
+                      selectedCourse.label
                     )}
+                  </Col>
+                )}
+
+                {doProgressLevel && selectedNextLevel && (
+                  <Col md='12'>
+                    {renderReadOnlyValue('Next Level', selectedNextLevel.label)}
+                  </Col>
+                )}
+              </>
+            ) : (
+              <>
+                <Col md='12'>
+                  <FormGroup
+                    tag='fieldset'
+                    className='mb-3'
+                  >
+                    <Label className='mb-2'>Actions</Label>
+                    <div className='d-flex flex-wrap'>
+                      <FormGroup
+                        check
+                        className='me-4 mb-2'
+                      >
+                        <Label check>
+                          <input
+                            type='checkbox'
+                            checked={doTransferCourse}
+                            onChange={(e) => {
+                              setDoTransferCourse(e.target.checked);
+                              if (!e.target.checked) setSelectedCourse(null);
+                            }}
+                            className='form-check-input'
+                          />{' '}
+                          Transfer Course
+                        </Label>
+                      </FormGroup>
+                      <FormGroup
+                        check
+                        className='mb-2'
+                      >
+                        <Label check>
+                          <input
+                            type='checkbox'
+                            checked={doProgressLevel}
+                            onChange={(e) => {
+                              setDoProgressLevel(e.target.checked);
+                            }}
+                            className='form-check-input'
+                            disabled={
+                              nextLevelOptions.length === 0 &&
+                              !initialTransferData?.selected_level
+                            }
+                          />{' '}
+                          Progress Level
+                        </Label>
+                        {doProgressLevel && nextLevelOptions.length === 0 && (
+                          <small className='text-danger d-block'>
+                            No next level is available for progression.
+                          </small>
+                        )}
+                      </FormGroup>
+                    </div>
                   </FormGroup>
-                </div>
-              </FormGroup>
-            </Col>
+                </Col>
 
-            {doTransferCourse && (
-              <Col md='12'>
-                <FormGroup>
-                  <Label for='course'>Select Destination Course</Label>
-                  <Select
-                    id='course'
-                    name='course'
-                    options={courseOptions}
-                    value={selectedCourse}
-                    onChange={(opt) => setSelectedCourse(opt as LevelOption)}
-                    isOptionDisabled={(opt: LevelOption) =>
-                      currentCourseIds.includes(opt.value)
-                    }
-                    placeholder='Search or select a course...'
-                    isClearable
-                    isSearchable
-                    className='basic-single'
-                    classNamePrefix='select'
-                  />
-                  {!selectedCourse && (
-                    <small className='text-danger'>
-                      Course selection is required.
-                    </small>
-                  )}
-                </FormGroup>
-              </Col>
-            )}
+                {doTransferCourse && (
+                  <Col md='12'>
+                    <FormGroup>
+                      <Label for='course'>Select Destination Course</Label>
+                      <Select
+                        id='course'
+                        name='course'
+                        options={courseOptions}
+                        value={selectedCourse}
+                        onChange={(opt) =>
+                          setSelectedCourse(opt as LevelOption)
+                        }
+                        isOptionDisabled={(opt: LevelOption) =>
+                          currentCourseIds.includes(opt.value)
+                        }
+                        placeholder='Search or select a course...'
+                        isClearable
+                        isSearchable
+                        className='basic-single'
+                        classNamePrefix='select'
+                      />
+                      {!selectedCourse && (
+                        <small className='text-danger'>
+                          Course selection is required.
+                        </small>
+                      )}
+                    </FormGroup>
+                  </Col>
+                )}
 
-            {doProgressLevel && (
-              <Col md='12'>
-                <FormGroup>
-                  <Label for='nextLevel'>Select Next Level</Label>
-                  <Select
-                    id='nextLevel'
-                    name='nextLevel'
-                    options={nextLevelOptions}
-                    value={selectedNextLevel}
-                    onChange={(opt) => setSelectedNextLevel(opt as LevelOption)}
-                    placeholder={
-                      nextLevelOptions.length === 0
-                        ? 'No next level available'
-                        : 'Select next level...'
-                    }
-                    isDisabled={nextLevelOptions.length === 0}
-                    isClearable={false}
-                    className='basic-single'
-                    classNamePrefix='select'
-                  />
+                {doProgressLevel && (
+                  <Col md='12'>
+                    <FormGroup>
+                      <Label for='nextLevel'>Select Next Level</Label>
+                      <Select
+                        id='nextLevel'
+                        name='nextLevel'
+                        options={nextLevelOptions}
+                        value={selectedNextLevel}
+                        onChange={(opt) =>
+                          setSelectedNextLevel(opt as LevelOption)
+                        }
+                        placeholder={
+                          nextLevelOptions.length === 0
+                            ? 'No next level available'
+                            : 'Select next level...'
+                        }
+                        isDisabled={nextLevelOptions.length === 0}
+                        isClearable={false}
+                        className='basic-single'
+                        classNamePrefix='select'
+                      />
 
-                  {nextLevelOptions.length === 0 && (
-                    <small className='text-warning d-block mt-1'>
-                      No next level is defined in the progression path for the
-                      current level.
-                    </small>
-                  )}
+                      {nextLevelOptions.length === 0 && (
+                        <small className='text-warning d-block mt-1'>
+                          No next level is defined in the progression path for
+                          the current level.
+                        </small>
+                      )}
 
-                  {nextLevelOptions.length > 0 && selectedNextLevel && (
-                    <small className='text-muted d-block mt-1'>
-                      Student(s) will be progressed to {selectedNextLevel.label}
-                      .
-                    </small>
-                  )}
-                  {!selectedNextLevel && nextLevelOptions.length > 0 && (
-                    <small className='text-danger'>
-                      Next level selection is required.
-                    </small>
-                  )}
-                </FormGroup>
-              </Col>
+                      {nextLevelOptions.length > 0 && selectedNextLevel && (
+                        <small className='text-muted d-block mt-1'>
+                          Student(s) will be progressed to{' '}
+                          {selectedNextLevel.label}.
+                        </small>
+                      )}
+                      {!selectedNextLevel && nextLevelOptions.length > 0 && (
+                        <small className='text-danger'>
+                          Next level selection is required.
+                        </small>
+                      )}
+                    </FormGroup>
+                  </Col>
+                )}
+              </>
             )}
           </Row>
         </Form>
       </ModalBody>
       <ModalFooter>
-        <Button
-          color='secondary'
-          onClick={toggle}
-        >
-          Cancel
-        </Button>
-        <LoadingButton
-          color='primary'
-          onClick={handleSubmit}
-          loading={isLoading}
-          disabled={
-            isProgressDisabled ||
-            (doTransferCourse && !selectedCourse) ||
-            (doProgressLevel && !selectedNextLevel)
-          }
-        >
-          {userRole === USER_TYPES.RECEPTIONIST
-            ? 'Request Transfer / Progression'
-            : 'Confirm Transfer / Progression'}
-        </LoadingButton>
+        {isViewOnly ? (
+          <Button
+            color='secondary'
+            onClick={toggle}
+          >
+            Close
+          </Button>
+        ) : (
+          <>
+            <Button
+              color='secondary'
+              onClick={toggle}
+            >
+              Cancel
+            </Button>
+            <LoadingButton
+              color='primary'
+              onClick={handleSubmit}
+              loading={isLoading}
+              disabled={
+                isProgressDisabled ||
+                (doTransferCourse && !selectedCourse) ||
+                (doProgressLevel && !selectedNextLevel)
+              }
+            >
+              {userRole === USER_TYPES.RECEPTIONIST
+                ? 'Request Transfer / Progression'
+                : 'Confirm Transfer / Progression'}
+            </LoadingButton>
+          </>
+        )}
       </ModalFooter>
     </Modal>
   );
@@ -482,13 +542,11 @@ const StudentTransferForm: React.FC<StudentTransferFormProps> = ({
 
 export default StudentTransferForm;
 
-
 const findLevelIdByName = (
   levelName: string,
   adultsLevels: any[],
   kidsLevels: any[]
 ): number | null => {
-
   const adultLevel = adultsLevels.find(
     (level) => level.label.toLowerCase() === levelName.toLowerCase()
   );

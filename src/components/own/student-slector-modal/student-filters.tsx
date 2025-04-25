@@ -48,7 +48,7 @@ const StudentFilters: React.FC<StudentFiltersProps> = ({
   onApply,
   onClear,
 }) => {
-  const isClearDisabled =
+  const isButtonDisabled =
     !filters.course &&
     !filters.level &&
     !filters.status &&
@@ -121,13 +121,16 @@ const StudentFilters: React.FC<StudentFiltersProps> = ({
             color='secondary'
             onClick={onClear}
             outline
-            disabled={isClearDisabled}
+            disabled={isButtonDisabled}
+            className='d-flex align-items-center'
           >
             Clear
           </Button>
           <Button
             color='primary'
             onClick={onApply}
+            disabled={isButtonDisabled}
+            className='d-flex align-items-center'
           >
             Filter
           </Button>
