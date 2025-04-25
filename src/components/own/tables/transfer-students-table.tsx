@@ -151,14 +151,7 @@ const TransferStudentsTable = ({ reload }: { reload: boolean }) => {
   }, [reload, key]);
 
   if (isLoading) {
-    return (
-      <TableSkeleton
-        rows={10}
-        columns={7}
-        showHeader
-        animated
-      />
-    );
+    return <TableSkeleton rows={10} columns={7} showHeader animated />;
   }
 
   const data = transfersData?.data?.result || [];
@@ -169,9 +162,9 @@ const TransferStudentsTable = ({ reload }: { reload: boolean }) => {
           {
             name: 'Actions',
             cell: (row: any) => (
-              <div className='d-flex align-items-center gap-2'>
+              <div className="d-flex align-items-center gap-2">
                 <TableActionButtons
-                  blockButtonVariant='danger'
+                  blockButtonVariant="danger"
                   onBlock={() => handleRejectTransfer(row.id)}
                   onTransfer={() => handleOpenTransferDetail(row.id, false)}
                   onView={() => handleOpenTransferDetail(row.id, true)}
@@ -215,12 +208,12 @@ const TransferStudentsTable = ({ reload }: { reload: boolean }) => {
       name: 'Status',
       cell: (row: any) => {
         if (row.status_level_change === 'pending')
-          return <Badge color='warning'>Pending</Badge>;
+          return <Badge color="warning">Pending</Badge>;
         if (row.status_level_change === 'approved')
-          return <Badge color='success'>Approved</Badge>;
+          return <Badge color="success">Approved</Badge>;
         if (row.status_level_change === 'rejected')
-          return <Badge color='danger'>Rejected</Badge>;
-        return <Badge color='secondary'>{row.status_level_change}</Badge>;
+          return <Badge color="danger">Rejected</Badge>;
+        return <Badge color="secondary">{row.status_level_change}</Badge>;
       },
       sortable: true,
     },
@@ -257,7 +250,7 @@ const TransferStudentsTable = ({ reload }: { reload: boolean }) => {
   ];
 
   return (
-    <div className='table-responsive signal-table'>
+    <div className="table-responsive signal-table">
       <DataTable
         columns={columns}
         data={data}

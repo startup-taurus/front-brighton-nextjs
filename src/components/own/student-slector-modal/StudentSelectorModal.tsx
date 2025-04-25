@@ -36,6 +36,7 @@ import {
   FiArrowRight,
   FiAlertCircle,
 } from 'react-icons/fi';
+import { getSimpleFiltersString } from 'utils/utils';
 
 export interface StudentOption {
   id: number;
@@ -504,6 +505,7 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
             loadMoreLevel={() => setLevelPage((p) => p + 1)}
             onApply={handleFilterApply}
             onClear={handleFilterClear}
+            isLoading={isLoading}
           />
         </div>
 

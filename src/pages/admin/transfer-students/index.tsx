@@ -43,7 +43,6 @@ const TransferStudents = () => {
     ['/level/get-all', levelPage, limit, levelSearch],
     () => getAllLevels(levelPage, limit, levelSearch)
   );
-  
 
   useEffect(() => {
     if (courseData?.data) {

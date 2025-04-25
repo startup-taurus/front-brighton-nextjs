@@ -5,6 +5,7 @@ import Select, { Props as SelectProps } from 'react-select';
 export interface StudentFiltersProps {
   courseInputValue: string;
   levelInputValue: string;
+  isLoading: boolean;
   courseOptions: { value: string | number; label: string }[];
   levelOptions: { value: string | number; label: string }[];
   statusOptions?: { value: string; label: string }[];
@@ -37,6 +38,7 @@ const StudentFilters: React.FC<StudentFiltersProps> = ({
   levelOptions,
   statusOptions = defaultStatus,
   filters,
+  isLoading,
   onCourseInput,
   onLevelInput,
   onCourseChange,
@@ -126,6 +128,7 @@ const StudentFilters: React.FC<StudentFiltersProps> = ({
           >
             Clear
           </Button>
+
           <Button
             color='primary'
             onClick={onApply}

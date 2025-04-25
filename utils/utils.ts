@@ -67,6 +67,16 @@ export const getFiltersString = (router: NextRouter) => {
     .join('&');
 };
 
+export const getSimpleFiltersString = (filters: Object) => {
+  return Object.entries(filters)
+    .filter(([, value]) => value && value !== 'all')
+    .map(
+      ([key, value]) =>
+        `${encodeURIComponent(key)}=${encodeURIComponent(value as string)}`
+    )
+    .join('&');
+};
+
 export const cleanAndFormatQuery = (values: any) => {
   return Object.fromEntries(
     Object.entries(values)
