@@ -17,21 +17,21 @@ const Notificationbar: React.FC = () => {
 
   useEffect(() => {
     const count = Array.isArray(pendingResponse?.data)
-      ? pendingResponse.data.length
+      ? pendingResponse?.data?.length
       : 0;
-    setNotificationCount(count);
+    setNotificationCount(!!count ? count : 0);
   }, [pendingResponse]);
 
   return (
-    <li className='onhover-dropdown'>
-      <div className='notification-box'>
-        <SvgIcon iconId='notification' />
-        <span className='badge rounded-pill badge-secondary'>
+    <li className="onhover-dropdown">
+      <div className="notification-box">
+        <SvgIcon iconId="notification" />
+        <span className="badge rounded-pill badge-secondary">
           {notificationCount}
         </span>
       </div>
-      <div className='onhover-show-div notification-dropdown'>
-        <h6 className='f-18 mb-0 dropdown-title'>{Notifications}</h6>
+      <div className="onhover-show-div notification-dropdown">
+        <h6 className="f-18 mb-0 dropdown-title">{Notifications}</h6>
         <NotificationList />
       </div>
     </li>
