@@ -29,7 +29,10 @@ const TeacherCard = ({ teacher }: TeacherCardProps) => {
       : teacher.courses;
 
   const handleViewDashboard = () => {
-    if (user?.role === USER_TYPES.COORDINATOR && teacher.user?.id) {
+    if (
+      (user?.role === USER_TYPES.COORDINATOR && teacher.user?.id) ||
+      (USER_TYPES.RECEPTIONIST && teacher.user?.id)
+    ) {
       router.push({
         pathname: '/teachers',
         query: {
@@ -40,21 +43,21 @@ const TeacherCard = ({ teacher }: TeacherCardProps) => {
   };
 
   return (
-    <Card className="overflow-hidden mb-4 shadow-sm border-0 h-100 ">
-      <CardBody className="p-4 d-flex flex-column ">
-        <div className="d-flex flex-column flex-sm-row align-items-center gap-3 ">
-          <div className="flex-shrink-0">
+    <Card className='overflow-hidden mb-4 shadow-sm border-0 h-100 '>
+      <CardBody className='p-4 d-flex flex-column '>
+        <div className='d-flex flex-column flex-sm-row align-items-center gap-3 '>
+          <div className='flex-shrink-0'>
             {teacher.image ? (
               <Image
                 src={`${UrlImage}/${teacher.image}`}
                 alt={teacher.name}
                 width={80}
                 height={80}
-                className="rounded-circle object-fit-cover"
+                className='rounded-circle object-fit-cover'
               />
             ) : (
               <div
-                className="rounded-circle bg-light d-flex align-items-center justify-content-center text-uppercase fw-bold text-secondary"
+                className='rounded-circle bg-light d-flex align-items-center justify-content-center text-uppercase fw-bold text-secondary'
                 style={{ width: 80, height: 80 }}
               >
                 {teacher.name
@@ -64,43 +67,47 @@ const TeacherCard = ({ teacher }: TeacherCardProps) => {
               </div>
             )}
           </div>
-          <div className="text-center text-sm-start">
-            <h5 className="fw-bold mb-1">{teacher.name}</h5>
-            <p className="text-muted ">{teacher.role}</p>
-            <div className="d-flex flex-wrap gap-3 justify-content-center justify-content-sm-start">
-              <div className="d-flex align-items-center gap-2">
+          <div className='text-center text-sm-start'>
+            <h5 className='fw-bold mb-1'>{teacher.name}</h5>
+            <p className='text-muted '>{teacher.role}</p>
+            <div className='d-flex flex-wrap gap-3 justify-content-center justify-content-sm-start'>
+              <div className='d-flex align-items-center gap-2'>
                 <Image
                   src={`${ImgPath}/own/bag-icon.png`}
-                  alt="students icon"
+                  alt='students icon'
                   width={20}
                   height={20}
                 />
                 <div>
-                  <div className="fw-bold">
+                  <div className='fw-bold'>
                     {professorData?.data?.total_students || studentsCount}
                   </div>
-                  <small className="text-muted">Students</small>
+                  <small className='text-muted'>Students</small>
                 </div>
               </div>
-              <div className="d-flex align-items-center gap-2">
+              <div className='d-flex align-items-center gap-2'>
                 <Image
                   src={`${ImgPath}/own/hat-icon.png`}
-                  alt="courses icon"
+                  alt='courses icon'
                   width={20}
                   height={20}
                 />
                 <div>
-                  <div className="fw-bold">
+                  <div className='fw-bold'>
                     {professorData?.data?.total_courses || coursesCount}
                   </div>
-                  <small className="text-muted">Courses</small>
+                  <small className='text-muted'>Courses</small>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <div className="mt-auto d-flex justify-content-end pt-3 border-top">
-          <Button color="warning" size="sm" onClick={handleViewDashboard}>
+        <div className='mt-auto d-flex justify-content-end pt-3 border-top'>
+          <Button
+            color='warning'
+            size='sm'
+            onClick={handleViewDashboard}
+          >
             View Dashboard
           </Button>
         </div>

@@ -18,6 +18,8 @@ const TableActionButtons = ({
   status,
   onCopy,
   onTransfer,
+  disabled = false,
+  blockButtonVariant = 'cancel',
 }: any) => {
   return (
     <div
@@ -31,6 +33,7 @@ const TableActionButtons = ({
           className='btn btn-light'
           onClick={onView}
           data-tooltip-id='on-view'
+          disabled={disabled}
         >
           <FaMagnifyingGlass />
         </button>
@@ -38,9 +41,10 @@ const TableActionButtons = ({
       {onBlock && (
         <button
           type='button'
-          className='btn btn-cancel'
+          className={`btn btn-${blockButtonVariant}`}
           onClick={onBlock}
           data-tooltip-id='on-block'
+          disabled={disabled}
         >
           {!status ? <FaBan /> : <FaCheck />}
         </button>
@@ -51,6 +55,7 @@ const TableActionButtons = ({
           className='btn btn-save'
           onClick={onEdit}
           data-tooltip-id='on-edit'
+          disabled={disabled}
         >
           <FaPenToSquare />
         </button>
@@ -61,6 +66,7 @@ const TableActionButtons = ({
           className='btn btn-cancel'
           onClick={onCopy}
           data-tooltip-id='on-copy'
+          disabled={disabled}
         >
           <FaCopy />
         </button>
@@ -71,6 +77,7 @@ const TableActionButtons = ({
           className='btn btn-cancel'
           onClick={onTransfer}
           data-tooltip-id='on-transfer'
+          disabled={disabled}
         >
           <FaArrowRightArrowLeft />
         </button>
@@ -81,6 +88,7 @@ const TableActionButtons = ({
           className='btn btn-danger'
           onClick={onDelete}
           data-tooltip-id='on-delete'
+          disabled={disabled}
         >
           <FaTrash />
         </button>

@@ -1,6 +1,7 @@
 import React, { use, useEffect, useState } from 'react';
 import Select from 'react-select';
 import { ErrorMessage, Field, Formik } from 'formik';
+import Cookies from 'js-cookie';
 import {
   Button,
   Col,
@@ -11,20 +12,18 @@ import {
   ModalBody,
   ModalHeader,
   ModalFooter,
-  InputGroup,
-  InputGroupText,
+  UncontrolledTooltip,
 } from 'reactstrap';
 import LoadingButton from '../common/loading-button/LoadingButton';
 import useSWR from 'swr';
 import { getActiveCourses } from 'helper/api-data/course';
-import {
-  createStudent,
-  updateStudent,
-  getDistinctLevel,
-} from 'helper/api-data/student';
+import { getAllLevels } from 'helper/api-data/level';
+import { createStudent, updateStudent } from 'helper/api-data/student';
 import { toast } from 'react-toastify';
 import * as Yup from 'yup';
 import { parse } from 'date-fns';
+import { USER_TYPES } from 'utils/constants';
+import { getUserRoleFromLocalStorage } from '../../../../utils/auth';
 
 const validations = Yup.object().shape({
   name: Yup.string().required('The name is required'),
@@ -34,25 +33,14 @@ const validations = Yup.object().shape({
     .max(10, 'Cédula must be less than 10 characters long')
     .required('Cédula is required'),
   courseId: Yup.string().required('The course is required'),
-  level: Yup.string().required('The level is required'),
+  level_id: Yup.string().required('The level is required'),
   status: Yup.string().required('The status is required'),
-  emergency_contact_name: Yup.string().required(
-    'Emergency contact name is required'
-  ),
-  emergency_contact_phone: Yup.string().required(
-    'Emergency contact phone is required'
-  ),
-  emergency_contact_relationship: Yup.string().required(
-    'Emergency contact relationship is required'
-  ),
+  age_category: Yup.string().required('Age category is required'),
   birth_date: Yup.date()
     .max(new Date(), 'Select a valid date')
     .transform((value, originalValue, schema) => {
-      if (schema.isType(value)) {
-        return value;
-      }
-      const result = parse(originalValue, 'dd-MM-yyyy', new Date());
-      return result;
+      if (schema.isType(value)) return value;
+      return parse(originalValue, 'dd-MM-yyyy', new Date());
     })
     .typeError('Select a valid date')
     .required('The birthdate is required'),
@@ -60,6 +48,31 @@ const validations = Yup.object().shape({
     .min(10, 'Phone number must be at least 10 characters long')
     .max(10, 'Phone number must be less than 10 characters long')
     .required('Phone number is required'),
+  book_given: Yup.boolean().required('Book given status is required'),
+  pendingPayments: Yup.boolean(),
+
+  // Conditional validations for emergency contacts when kids
+  emergency_contact_name: Yup.string().when('age_category', {
+    is: 'kids',
+    then: (schema: Yup.StringSchema) =>
+      schema.required('Emergency contact name is required'),
+    otherwise: (schema: Yup.StringSchema) => schema,
+  }),
+  emergency_contact_phone: Yup.string().when('age_category', {
+    is: 'kids',
+    then: (schema: Yup.StringSchema) =>
+      schema.required('Emergency contact phone is required'),
+    otherwise: (schema: Yup.StringSchema) => schema,
+  }),
+  emergency_contact_relationship: Yup.string().when('age_category', {
+    is: 'kids',
+    then: (schema: Yup.StringSchema) =>
+      schema.required('Emergency contact relationship is required'),
+    otherwise: (schema: Yup.StringSchema) => schema,
+  }),
+
+  promotion: Yup.string(),
+  observations: Yup.string(),
 });
 
 const StudentForm = ({
@@ -83,14 +96,20 @@ const StudentForm = ({
   const [levelOptions, setLevelOptions] = useState<any[]>([]);
   const [levelSearchTerm, setLevelSearchTerm] = useState('');
 
+  const userRole = getUserRoleFromLocalStorage();
+  console.log('role:', userRole);
+
+  const isFieldsDisabled =
+    userRole == USER_TYPES.COORDINATOR || userRole == USER_TYPES.RECEPTIONIST;
+
   const { data: course } = useSWR(
     ['/course/get-active', page, limit, searchTerm],
     () => getActiveCourses(page, limit, searchTerm)
   );
 
   const { data: levels } = useSWR(
-    ['/student/get-distinct-levels', page, limit],
-    () => getDistinctLevel(page, limit)
+    ['/level/get-all', page, limit, levelSearchTerm],
+    () => getAllLevels(page, limit, levelSearchTerm)
   );
 
   useEffect(() => {
@@ -105,7 +124,15 @@ const StudentForm = ({
   const save = async (row: any) => {
     try {
       setIsLoading(true);
-      const response = await createStudent(row);
+
+      const processedData = {
+        ...row,
+        book_given:
+          typeof row.book_given === 'string'
+            ? row.book_given === 'true'
+            : Boolean(row.book_given),
+      };
+      const response = await createStudent(processedData);
       if (response.statusCode === 200) {
         toast.success('Student created successfull!');
         toggle();
@@ -115,8 +142,6 @@ const StudentForm = ({
         }
         onSuccessCreate && onSuccessCreate(data?.user?.id);
       }
-    } catch (error) {
-      console.error('Error al crear estudiante:', error);
     } finally {
       setIsLoading(false);
     }
@@ -125,7 +150,15 @@ const StudentForm = ({
   const update = async (data: any) => {
     try {
       setIsLoading(true);
-      const response = await updateStudent(data.id, data);
+
+      const processedData = {
+        ...data,
+        book_given:
+          typeof data.book_given === 'string'
+            ? data.book_given === 'true'
+            : Boolean(data.book_given),
+      };
+      const response = await updateStudent(processedData.id, processedData);
       if (response.statusCode === 200) {
         toggle();
         toast.success('Student updated successfull!');
@@ -135,7 +168,7 @@ const StudentForm = ({
         }
       }
     } catch (error) {
-      console.error('Error al actualizar usuario:', error);
+      toast.error('Error updating student', error);
     } finally {
       setIsLoading(false);
     }
@@ -149,7 +182,13 @@ const StudentForm = ({
   };
 
   const onLevelScrollToBottom = () => {
-    if (levels?.data?.length != 0) {
+    const levelData = levels?.data;
+    if (
+      levelData &&
+      (Array.isArray(levelData)
+        ? levelData.length > 0
+        : levelData?.result?.length > 0)
+    ) {
       const nextPage = page + 1;
       setPage(nextPage);
     }
@@ -212,21 +251,72 @@ const StudentForm = ({
   }, [course, course?.data]);
 
   useEffect(() => {
-    if (levels?.data?.result) {
-      const levelOpts = levels.data.result.map((item: any) => ({
-        value: item,
-        label: item,
-      }));
+    if (levels?.data) {
+      const levelData = Array.isArray(levels.data)
+        ? levels.data
+        : levels.data?.result || [];
+
+      const levelOpts = levelData.map((item: any) => {
+        if (typeof item === 'string') {
+          return {
+            value: item,
+            label: item,
+          };
+        } else if (item && typeof item === 'object') {
+          const id = item.id || '';
+          const label = item.full_level || item.name || item.level || '';
+          return {
+            value: { id },
+            label,
+          };
+        } else {
+          return {
+            value: '',
+            label: '',
+          };
+        }
+      });
 
       setLevelOptions((prevOptions) => {
         const combined = [...prevOptions, ...levelOpts];
-        return combined.filter(
-          (option, index, self) =>
-            self.findIndex((o) => o.value === option.value) === index
-        );
+
+        const res = combined
+          .filter((option, index, self) => {
+            const optionId =
+              option.value && typeof option.value === 'object'
+                ? option.value.id
+                : option.value;
+
+            return (
+              self.findIndex((o) => {
+                const oId =
+                  o.value && typeof o.value === 'object' ? o.value.id : o.value;
+                return oId === optionId;
+              }) === index
+            );
+          })
+          .map((option) => {
+            const value =
+              option.value && typeof option.value === 'object'
+                ? option.value.id
+                : option.value;
+            const label =
+              typeof option.label === 'object'
+                ? option.label.full_level || option.label.name || ''
+                : option.label;
+
+            return {
+              label,
+              value,
+            };
+          });
+
+        console.log(res);
+
+        return res;
       });
     }
-  }, [levels]);
+  }, [levels, levels?.data, levels?.data?.result]);
 
   return (
     <>
@@ -266,7 +356,7 @@ const StudentForm = ({
                     cedula: '',
                     lastName: '',
                     courseId: '',
-                    level: '',
+                    level_id: '',
                     status: 'active',
                     book_given: false,
                     pendingPayments: false,
@@ -363,6 +453,25 @@ const StudentForm = ({
                   {courseOptions && courseOptions?.length > 0 && (
                     <Col xs={6}>
                       <Label for='courseId'>Course</Label>
+                      {!isFieldsDisabled &&
+                        data?.status_level_change === 'pending' && (
+                          <>
+                            <span
+                              id='tooltip-course'
+                              style={{ marginLeft: '5px', cursor: 'pointer' }}
+                            >
+                              <i className='fa fa-info-circle text-warning' />
+                            </span>
+                            <UncontrolledTooltip
+                              placement='top'
+                              target='tooltip-course'
+                            >
+                              <span className='text-dark'>
+                                This student has pending processes.
+                              </span>
+                            </UncontrolledTooltip>
+                          </>
+                        )}
                       <Field name='courseId'>
                         {({ field, form }: any) => (
                           <Select
@@ -399,6 +508,10 @@ const StudentForm = ({
                             }
                             placeholder='Select course'
                             isSearchable
+                            isDisabled={
+                              isFieldsDisabled ||
+                              data?.status_level_change === 'pending'
+                            }
                             onInputChange={(inputValue) => {
                               setSearchTerm(inputValue);
                             }}
@@ -421,7 +534,26 @@ const StudentForm = ({
                   )}
                   <Col xs={6}>
                     <Label for='level'>Level</Label>
-                    <Field name='level'>
+                    {!isFieldsDisabled &&
+                      data?.status_level_change === 'pending' && (
+                        <>
+                          <span
+                            id='tooltip-course'
+                            style={{ marginLeft: '5px', cursor: 'pointer' }}
+                          >
+                            <i className='fa fa-info-circle text-warning' />
+                          </span>
+                          <UncontrolledTooltip
+                            placement='top'
+                            target='tooltip-course'
+                          >
+                            <span className='text-dark'>
+                              This student has pending processes.
+                            </span>
+                          </UncontrolledTooltip>
+                        </>
+                      )}
+                    <Field name='level_id'>
                       {({ field, form }: any) => (
                         <Select
                           {...field}
@@ -429,18 +561,28 @@ const StudentForm = ({
                           options={levelOptions}
                           onChange={(selectedOption: any) => {
                             const level = selectedOption
-                              ? selectedOption.value
+                              ? selectedOption.value &&
+                                typeof selectedOption.value === 'object'
+                                ? selectedOption.value.id
+                                : selectedOption.value
                               : '';
-                            setFieldValue('level', level);
+                            setFieldValue('level_id', level);
                           }}
                           value={
-                            levelOptions.find(
-                              (option: any) =>
-                                option.value === props.values.level
-                            ) || null
+                            levelOptions.find((option: any) => {
+                              const optionValue =
+                                option.value && typeof option.value === 'object'
+                                  ? option.value.id
+                                  : option.value;
+                              return optionValue == props.values.level_id;
+                            }) || null
                           }
                           placeholder='Select level'
                           isSearchable
+                          isDisabled={
+                            isFieldsDisabled ||
+                            data?.status_level_change === 'pending'
+                          }
                           onInputChange={(inputValue) => {
                             setLevelSearchTerm(inputValue);
                           }}
@@ -448,7 +590,7 @@ const StudentForm = ({
                         />
                       )}
                     </Field>
-                    {touched.level && !!errors.level && (
+                    {touched.level_id && !!errors.level_id && (
                       <div className='invalid-input'>
                         <>{errors!.level}</>
                       </div>
@@ -520,6 +662,10 @@ const StudentForm = ({
                       type='select'
                       id='book_given'
                       invalid={touched.book_given && !!errors.book_given}
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        const boolValue = e.target.value === 'true';
+                        setFieldValue('book_given', boolValue);
+                      }}
                     >
                       <option value='true'>Yes</option>
                       <option value='false'>No</option>

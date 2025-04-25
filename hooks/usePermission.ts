@@ -17,10 +17,11 @@ const usePermission = () => {
       if (!userStr) return;
 
       const user = JSON.parse(userStr);
-      setUserRole(user.role);
-    } catch (error) {
-      console.error('Error getting user role:', error);
-    }
+
+      if (user && user.role) {
+        setUserRole(user.role);
+      }
+    } catch (error) {}
   }, []);
 
   const can = (permission: string): boolean => {

@@ -12,6 +12,7 @@ import {
   TeacherMenuList,
   CoordinatorMenuList,
   AdminMenuList,
+  ReceptionistMenuList,
 } from './Sidebar/menu';
 import Taptop from './Taptop';
 import { UserContext } from '../../helper/User';
@@ -62,6 +63,8 @@ const Layout = ({ children }: layoutProps) => {
         return CoordinatorMenuList;
       case USER_TYPES.ADMIN:
         return AdminMenuList;
+      case USER_TYPES.RECEPTIONIST:
+        return ReceptionistMenuList;
       case USER_TYPES.PROFESSOR:
       default:
         return TeacherMenuList;
@@ -113,9 +116,14 @@ const Layout = ({ children }: layoutProps) => {
       <Head>
         <title>Brighton School</title>
       </Head>
-      {/* <Loader /> */}
       <div
-        className={`page-wrapper  ${user?.role === USER_TYPES.ADMIN || user?.role === USER_TYPES.COORDINATOR ? 'compact-wrapper' : 'horizontal-wrapper'}`}
+        className={`page-wrapper  ${
+          user?.role === USER_TYPES.ADMIN ||
+          user?.role === USER_TYPES.COORDINATOR ||
+          user?.role === USER_TYPES.RECEPTIONIST
+            ? 'compact-wrapper'
+            : 'horizontal-wrapper'
+        }`}
       >
         <Header />
         <div className='page-body-wrapper'>

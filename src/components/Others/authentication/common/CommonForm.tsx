@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { ChangeEvent, FormEvent, useContext, useState } from 'react';
 import { Button, FormGroup, Input, Label } from 'reactstrap';
 import {
@@ -20,6 +19,7 @@ import { useRouter } from 'next/router';
 import { postLogin } from 'helper/api-data/user';
 import { UserContext } from 'helper/User';
 import { USER_ROLES, USER_TYPES } from '../../../../../utils/constants';
+import { encrypt } from 'utils/encryption';
 export interface commonFormPropsType {
   alignLogo?: string;
 }
@@ -45,6 +45,9 @@ const CommonForm = ({ alignLogo }: commonFormPropsType) => {
 
     if (response?.status === 'success') {
       Cookies.set('token', JSON.stringify(response?.data));
+      const encryptedId = encrypt(String(response?.data?.id));
+      Cookies.set('user_id', encryptedId);
+      localStorage.setItem('user_id', encryptedId);
       login(response.data);
 
       const roleRedirectMap = {
@@ -53,6 +56,7 @@ const CommonForm = ({ alignLogo }: commonFormPropsType) => {
         [USER_TYPES.STUDENT]: '/dashboard/student',
         [USER_TYPES.FINANCIAL]: '/dashboard/financial',
         [USER_TYPES.COORDINATOR]: '/dashboard',
+        [USER_TYPES.RECEPTIONIST]: '/dashboard',
       };
 
       const redirectPath = roleRedirectMap[response.data.role] || '/login';

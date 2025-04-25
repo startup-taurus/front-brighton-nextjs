@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import {
   Card,
   CardBody,
@@ -14,7 +14,6 @@ import { FaChevronDown, FaFilter } from 'react-icons/fa6';
 import { FiltersProps } from '../../../../Types/types';
 import { clearQueryString } from '../../../../utils/utils';
 import { useRouter } from 'next/router';
-import { debounce } from 'lodash';
 import { Field, Formik } from 'formik';
 
 interface TableFiltersProps {
@@ -24,6 +23,7 @@ interface TableFiltersProps {
 const TableFilters = ({ selectFilters }: TableFiltersProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const router = useRouter();
+  const formikRef = useRef<any>(null);
 
   const initialValues = selectFilters.reduce(
     (acc, field) => {
@@ -33,13 +33,61 @@ const TableFilters = ({ selectFilters }: TableFiltersProps) => {
     {} as Record<string, string>
   );
 
+  useEffect(() => {
+    const queryKeys = Object.keys(router.query);
+
+    if (queryKeys.length === 1 && queryKeys.includes('id')) {
+      return;
+    }
+
+    const hasFilters = queryKeys.some(
+      (key) =>
+        key !== 'page' &&
+        key !== 'rowPerPage' &&
+        key !== 'id' &&
+        router.query[key] !== ''
+    );
+
+    if (hasFilters) {
+      setIsOpen(true);
+    }
+
+    if (formikRef.current) {
+      const currentValues = formikRef.current.values;
+      let hasChanged = false;
+
+      const newValues = { ...currentValues };
+
+      selectFilters.forEach((field) => {
+        const urlValue = (router.query[field.name] as string) || '';
+        if (currentValues[field.name] !== urlValue) {
+          newValues[field.name] = urlValue;
+          hasChanged = true;
+        }
+      });
+
+      if (hasChanged) {
+        formikRef.current.setValues(newValues);
+      }
+    }
+  }, [router.query, selectFilters]);
+
   const handleCollapse = () => {
     setIsOpen(!isOpen);
   };
 
-  const clearForm = (resetForm: () => void) => {
+  const clearForm = (
+    resetForm: ReturnType<typeof Formik>['props']['resetForm']
+  ) => {
     clearQueryString(router);
-    resetForm();
+    const emptyValues = selectFilters.reduce(
+      (acc, field) => {
+        acc[field.name] = '';
+        return acc;
+      },
+      {} as Record<string, string>
+    );
+    resetForm({ values: emptyValues });
   };
 
   const onSubmit = (data: any) => {
@@ -55,7 +103,7 @@ const TableFilters = ({ selectFilters }: TableFiltersProps) => {
   return (
     <Card>
       <CardHeader
-        className='d-flex justify-content-between'
+        className='d-flex justify-content-between rounded-4 p-3'
         onClick={handleCollapse}
       >
         <h5>Search Filters</h5>
@@ -71,6 +119,7 @@ const TableFilters = ({ selectFilters }: TableFiltersProps) => {
           <Formik
             initialValues={initialValues}
             onSubmit={onSubmit}
+            innerRef={formikRef}
           >
             {({ handleSubmit, resetForm }) => (
               <form onSubmit={handleSubmit}>
@@ -107,9 +156,11 @@ const TableFilters = ({ selectFilters }: TableFiltersProps) => {
                                 form.setFieldValue(item.name, value);
                               }}
                               value={
+                                item.value ||
                                 item.items?.find(
                                   (option: any) => option.value === field.value
-                                ) || null
+                                ) ||
+                                null
                               }
                               placeholder={`Select ${item.labelName}`}
                               isSearchable

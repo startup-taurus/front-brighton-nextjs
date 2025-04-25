@@ -291,8 +291,7 @@ const GradebookTable = ({
             {componentsGradebook?.assignments?.map(
               (item: any, index: number) => (
                 <td
-                  className='col-vertical border-bottom text-center'
-                  style={{ cursor: 'not-allowed' }}
+                  className='col-vertical border-bottom text-center cursor-no-allowed'
                   key={`assignments-title-${item.item_id}`}
                 >
                   <Input

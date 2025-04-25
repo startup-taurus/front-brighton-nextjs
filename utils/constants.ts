@@ -7,6 +7,7 @@ export const USER_TYPES = {
   STUDENT: 'student',
   FINANCIAL: 'financial',
   COORDINATOR: 'coordinator',
+  RECEPTIONIST: 'receptionist',
 };
 
 export const STATUS_FILTER = [
@@ -30,12 +31,20 @@ export const COURSE_TYPE_FILTER = [
   { label: 'ONLINE', value: 'online' },
 ];
 
+export const STATUS_LEVEL_CHANGE = [
+  { label: 'Pending', value: 'pending' },
+  { label: 'Approved', value: 'approved' },
+  { label: 'Rejected', value: 'rejected' },
+  { label: 'n/a', value: 'n/a' },
+];
+
 export const USER_ROLES = [
   { value: 'admin_staff', label: 'Admin' },
   { value: 'professor', label: 'Professor' },
   { value: 'student', label: 'Student' },
   { value: 'financial', label: 'Financial' },
   { value: 'coordinator', label: 'Coordinator' },
+  { value: 'receptionist', label: 'Receptionist' },
 ];
 
 export const COMPONENTS_GRADEBOOK = {
@@ -58,25 +67,25 @@ export const DEFAULT_BAR_CHART_DATA = {
 };
 
 export const LEVELS_FOR_KIDS = [
-  { label: 'Pre-A1 Starter', value: 'Pre-A1 Starter' },
-  { label: 'A1.1 Movers', value: 'A1.1 Movers' },
-  { label: 'A1.2 Movers', value: 'A1.2 Movers' },
-  { label: 'A2.1 Flyers', value: 'A2.1 Flyers' },
-  { label: 'A2.2 Flyers', value: 'A2.2 Flyers' },
-  { label: 'B1.1 Pre-Intermediate', value: 'B1.1 Pre-Intermediate' },
-  { label: 'B1.2 Pre-Intermediate', value: 'B1.2 Pre-Intermediate' },
-  { label: 'Private Classes', value: 'Private Classes' },
+  { label: 'Pre-A1 Starter', value: '7' },
+  { label: 'A1.1 Movers', value: '8' },
+  { label: 'A1.2 Movers', value: '12' },
+  { label: 'A2.1 Flyers', value: '13' },
+  { label: 'A2.2 Flyers', value: '9' },
+  { label: 'B1.1 PreIntermediate', value: '10' },
+  { label: 'B1.2 Pre-Intermediate', value: '11' },
+  { label: 'Private Classes', value: '14' },
 ];
 
 export const LEVELS_FOR_ADULTS = [
-  { label: 'Pre-A1 Starter', value: 'Pre-A1 Starter' },
-  { label: 'A1 Beginner', value: 'A1 Beginner' },
-  { label: 'A2 Elementary', value: 'A2 Elementary' },
-  { label: 'B1 Pre-Intermediate', value: 'B1 Pre-Intermediate' },
-  { label: 'B1+ Intermediate', value: 'B1+ Intermediate' },
-  { label: 'B2 Upper Intermediate', value: 'B2 Upper Intermediate' },
-  { label: 'B2 First Preparation', value: 'B2 First Preparation' },
-  { label: 'Private Classes', value: 'Private Classes' },
+  { label: 'Pre-A1 Starter', value: '7' },
+  { label: 'A1 Beginner', value: '1' },
+  { label: 'A2 Elementary', value: '2' },
+  { label: 'B1 Pre-Intermediate', value: '3' },
+  { label: 'B1+ Intermediate', value: '4' },
+  { label: 'B2 Upper Intermediate', value: '5' },
+  { label: 'B2 First Preparation', value: '6' },
+  { label: 'Private Classes', value: '14' },
 ];
 
 export const SCHEDULE_DATES = [

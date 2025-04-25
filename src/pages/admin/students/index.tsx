@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardHeader, Container, Row } from 'reactstrap';
 import StudentsTable from '@/components/own/tables/students-table';
 import TableHeaderActions from '@/components/own/table-header-actions/table-header-actions';
@@ -8,19 +8,23 @@ import { FiltersProps } from '../../../../Types/types';
 import TableFilters from '@/components/own/table-filters/table-filters';
 import { getFiltersString } from '../../../../utils/utils';
 import useSWR, { mutate } from 'swr';
-import {
-  getAllStudent,
-  getDistinctLevel,
-} from '../../../../helper/api-data/student';
+import { getAllStudent } from '../../../../helper/api-data/student';
+import { getAllLevels } from '../../../../helper/api-data/level';
 import {
   getAllCourses,
   getActiveCourses,
 } from '../../../../helper/api-data/course';
-import { PROMOTION_FILTER, STATUS_FILTER } from '../../../../utils/constants';
+import {
+  PROMOTION_FILTER,
+  STATUS_FILTER,
+  STATUS_LEVEL_CHANGE,
+} from '../../../../utils/constants';
 
 const Students = () => {
   const router = useRouter();
   const [isOpenModal, setIsOpenModal] = useState(false);
+  const [selectedStudentsCount, setSelectedStudentsCount] = useState(0);
+  const transferButtonRef = useRef(null);
   const page = router.query.page ? Number(router.query.page) : 1;
   const rowPerPage = router.query.rowPerPage
     ? Number(router.query.rowPerPage)
@@ -56,8 +60,8 @@ const Students = () => {
   );
 
   const { data: levels } = useSWR(
-    ['/student/get-distinct-levels', levelPage, limit, levelSearchTerm],
-    () => getDistinctLevel(levelPage, limit)
+    ['/level/get-all', levelPage, limit, levelSearchTerm],
+    () => getAllLevels(levelPage, limit, levelSearchTerm)
   );
 
   const onCourseScrollToBottom = () => {
@@ -98,19 +102,20 @@ const Students = () => {
 
   useEffect(() => {
     if (levels?.data) {
-      const levelsArray = Array.isArray(levels.data)
+      const levelData = Array.isArray(levels.data)
         ? levels.data
-        : levels.data.result
-          ? levels.data.result
-          : [];
+        : levels.data?.result || [];
 
-      const levelOpts = levelsArray.map((item: any) => ({
-        value: item,
-        label: item,
+      const options = levelData.map((item: any) => ({
+        value: typeof item === 'string' ? item : item.id || item.level || item,
+        label:
+          typeof item === 'string'
+            ? item
+            : item.full_level || item.level || item,
       }));
 
       setLevelOptions((prevOptions) => {
-        const combined = [...prevOptions, ...levelOpts];
+        const combined = [...prevOptions, ...options];
         return combined.filter(
           (option, index, self) =>
             self.findIndex((o) => o.value === option.value) === index
@@ -146,7 +151,7 @@ const Students = () => {
     },
     {
       labelName: 'Level',
-      name: 'level',
+      name: 'level_id',
       type: 'select',
       items: levelOptions.length > 0 ? levelOptions : [],
       onInputChange: (inputValue: string) => setLevelSearchTerm(inputValue),
@@ -181,13 +186,19 @@ const Students = () => {
         <Row>
           <Card>
             <CardHeader className='d-flex justify-content-end'>
-              <TableHeaderActions
-                onReload={handleReload}
-                addButton={{
-                  title: 'Create Student',
-                  onClick: () => toggle(),
-                }}
-              />
+              <div className='d-flex align-items-center'>
+                <div
+                  className='mr-3'
+                  id='transferTooltip'
+                ></div>
+                <TableHeaderActions
+                  onReload={handleReload}
+                  addButton={{
+                    title: 'Create Student',
+                    onClick: () => toggle(),
+                  }}
+                />
+              </div>
             </CardHeader>
             <div className='pb-4'>
               <StudentsTable
@@ -196,19 +207,18 @@ const Students = () => {
                 students={students?.data}
                 filters={filters}
                 loading={students.isLoading}
+                onSelectedStudentsChange={setSelectedStudentsCount}
               />
             </div>
           </Card>
         </Row>
       </Container>
-      {isOpenModal && (
-        <StudentForm
-          isOpen={isOpenModal}
-          toggle={toggle}
-          data={null}
-          onReload={handleReload}
-        />
-      )}
+      <StudentForm
+        isOpen={isOpenModal}
+        toggle={toggle}
+        data={null}
+        onReload={handleReload}
+      />
     </div>
   );
 };
