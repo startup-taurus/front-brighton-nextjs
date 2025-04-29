@@ -479,7 +479,7 @@ const RegistrationFormContent = () => {
                               className='form-check-label'
                               htmlFor={`level-kids-${index}`}
                             >
-                              {level.label}{level.value}
+                              {level.label}
                             </Label>
                           </FormGroup>
                         ))
