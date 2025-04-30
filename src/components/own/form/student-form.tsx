@@ -1,7 +1,6 @@
 import React, { use, useEffect, useState } from 'react';
 import Select from 'react-select';
 import { ErrorMessage, Field, Formik } from 'formik';
-import Cookies from 'js-cookie';
 import {
   Button,
   Col,
@@ -12,7 +11,6 @@ import {
   ModalBody,
   ModalHeader,
   ModalFooter,
-  UncontrolledTooltip,
 } from 'reactstrap';
 import LoadingButton from '../common/loading-button/LoadingButton';
 import useSWR from 'swr';
@@ -22,8 +20,6 @@ import { createStudent, updateStudent } from 'helper/api-data/student';
 import { toast } from 'react-toastify';
 import * as Yup from 'yup';
 import { parse } from 'date-fns';
-import { USER_TYPES } from 'utils/constants';
-import { getUserRoleFromLocalStorage } from '../../../../utils/auth';
 
 const validations = Yup.object().shape({
   name: Yup.string().required('The name is required'),
@@ -51,7 +47,6 @@ const validations = Yup.object().shape({
   book_given: Yup.boolean().required('Book given status is required'),
   pendingPayments: Yup.boolean(),
 
-  // Conditional validations for emergency contacts when kids
   emergency_contact_name: Yup.string().when('age_category', {
     is: 'kids',
     then: (schema: Yup.StringSchema) =>
@@ -95,12 +90,6 @@ const StudentForm = ({
   const [courseOptions, setCourseOptions] = useState<any[]>([]);
   const [levelOptions, setLevelOptions] = useState<any[]>([]);
   const [levelSearchTerm, setLevelSearchTerm] = useState('');
-
-  const userRole = getUserRoleFromLocalStorage();
-  console.log('role:', userRole);
-
-  const isFieldsDisabled =
-    userRole == USER_TYPES.COORDINATOR || userRole == USER_TYPES.RECEPTIONIST;
 
   const { data: course } = useSWR(
     ['/course/get-active', page, limit, searchTerm],
@@ -453,25 +442,7 @@ const StudentForm = ({
                   {courseOptions && courseOptions?.length > 0 && (
                     <Col xs={6}>
                       <Label for='courseId'>Course</Label>
-                      {!isFieldsDisabled &&
-                        data?.status_level_change === 'pending' && (
-                          <>
-                            <span
-                              id='tooltip-course'
-                              style={{ marginLeft: '5px', cursor: 'pointer' }}
-                            >
-                              <i className='fa fa-info-circle text-warning' />
-                            </span>
-                            <UncontrolledTooltip
-                              placement='top'
-                              target='tooltip-course'
-                            >
-                              <span className='text-dark'>
-                                This student has pending processes.
-                              </span>
-                            </UncontrolledTooltip>
-                          </>
-                        )}
+
                       <Field name='courseId'>
                         {({ field, form }: any) => (
                           <Select
@@ -508,10 +479,7 @@ const StudentForm = ({
                             }
                             placeholder='Select course'
                             isSearchable
-                            isDisabled={
-                              isFieldsDisabled ||
-                              data?.status_level_change === 'pending'
-                            }
+                            isDisabled={data?.status_level_change === 'pending'}
                             onInputChange={(inputValue) => {
                               setSearchTerm(inputValue);
                             }}
@@ -534,25 +502,7 @@ const StudentForm = ({
                   )}
                   <Col xs={6}>
                     <Label for='level'>Level</Label>
-                    {!isFieldsDisabled &&
-                      data?.status_level_change === 'pending' && (
-                        <>
-                          <span
-                            id='tooltip-course'
-                            style={{ marginLeft: '5px', cursor: 'pointer' }}
-                          >
-                            <i className='fa fa-info-circle text-warning' />
-                          </span>
-                          <UncontrolledTooltip
-                            placement='top'
-                            target='tooltip-course'
-                          >
-                            <span className='text-dark'>
-                              This student has pending processes.
-                            </span>
-                          </UncontrolledTooltip>
-                        </>
-                      )}
+
                     <Field name='level_id'>
                       {({ field, form }: any) => (
                         <Select
@@ -579,10 +529,7 @@ const StudentForm = ({
                           }
                           placeholder='Select level'
                           isSearchable
-                          isDisabled={
-                            isFieldsDisabled ||
-                            data?.status_level_change === 'pending'
-                          }
+                          isDisabled={data?.status_level_change === 'pending'}
                           onInputChange={(inputValue) => {
                             setLevelSearchTerm(inputValue);
                           }}
