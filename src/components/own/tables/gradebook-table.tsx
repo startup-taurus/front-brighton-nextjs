@@ -6,7 +6,7 @@ import React, {
   useState,
   useContext,
 } from 'react';
-import { Button, Input, Table, Alert } from 'reactstrap';
+import { Button, Input, Table, Alert, Badge } from 'reactstrap';
 import { COMPONENTS_GRADEBOOK, USER_TYPES } from '../../../../utils/constants';
 import {
   buildGradebookStructure,
@@ -74,10 +74,16 @@ const GradebookTable = ({
   const onChangeGrades = async (
     event: any,
     gradingItemId: any,
-    studentId: any
+    studentId: any,
+    isRetied: boolean
   ) => {
     if (isCoordinator) {
       toast.error('Coordinators do not have permission to add or edit grades');
+      return;
+    }
+
+    if (isRetied) {
+      toast.error('Cannot mark grades for retired students');
       return;
     }
 
@@ -359,18 +365,37 @@ const GradebookTable = ({
             students.length > 0 &&
             grades &&
             students.map((student: any, i: number) => (
-              <tr key={`grade-student-${i}`}>
-                <td>{student.name}</td>
+              <tr
+                key={`grade-student-${i}`}
+                className={student?.is_retired ? 'retired_color' : ''}
+              >
+                <td className={student?.is_retired ? 'd-flex' : ''}>
+                  {student.name}
+                  {student?.is_retired && (
+                    <Badge
+                      color='primary'
+                      pill
+                      size='sm'
+                      className=' mt-2 mb-3'
+                    >
+                      RETIRED
+                    </Badge>
+                  )}
+                </td>
                 {componentsGradebook?.assignments?.map((item: any, j) => (
                   <td
                     className='td-container'
                     key={`grade-note-${j}`}
                   >
                     <Input
-                      className='td-input input-percentage bg-white text-black'
-                      style={{ cursor: 'not-allowed' }}
+                      className={`td-input input-percentage bg-transparent text-black ${isCoordinator || student?.is_retired ? 'cursor-no-allowed' : ''}`}
                       onChange={(event) =>
-                        onChangeGrades(event, item.item_id, student?.id)
+                        onChangeGrades(
+                          event,
+                          item.item_id,
+                          student?.id,
+                          student?.is_retired
+                        )
                       }
                       onKeyDown={(event) =>
                         handleBackSpace(event, item.item_id, student?.id)
@@ -394,10 +419,14 @@ const GradebookTable = ({
                     key={`grade-note-progressTest-${j}`}
                   >
                     <Input
-                      className='td-input input-percentage bg-white text-black'
-                      style={{ cursor: 'not-allowed' }}
+                      className={`td-input input-percentage bg-transparent text-black ${isCoordinator || student?.is_retired ? 'cursor-no-allowed' : ''}`}
                       onChange={(event) =>
-                        onChangeGrades(event, item.item_id, student?.id)
+                        onChangeGrades(
+                          event,
+                          item.item_id,
+                          student?.id,
+                          student?.is_retired
+                        )
                       }
                       onKeyDown={(event) =>
                         handleBackSpace(event, item.item_id, student?.id)
@@ -421,10 +450,14 @@ const GradebookTable = ({
                     key={`grade-note-progressTest-${j}`}
                   >
                     <Input
-                      className='td-input input-percentage bg-white text-black'
-                      style={{ cursor: 'not-allowed' }}
+                      className={`td-input input-percentage bg-transparent text-black ${isCoordinator || student?.is_retired ? 'cursor-no-allowed' : ''}`}
                       onChange={(event) =>
-                        onChangeGrades(event, item.item_id, student?.id)
+                        onChangeGrades(
+                          event,
+                          item.item_id,
+                          student?.id,
+                          student?.is_retired
+                        )
                       }
                       onKeyDown={(event) =>
                         handleBackSpace(event, item.item_id, student?.id)

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { ErrorMessage, Field, Formik, FieldArray } from 'formik';
 import {
   Button,
@@ -16,13 +16,26 @@ import * as Yup from 'yup';
 
 import LoadingButton from '../common/loading-button/LoadingButton';
 import { createSyllabus, updateSyllabus } from 'helper/api-data/syllabus';
+import Select from 'react-select';
+import useSWR from 'swr';
+import { getAllLevels } from 'helper/api-data/level';
 
 const validations = Yup.object().shape({
   syllabus_name: Yup.string().required('The syllabus name is required'),
+  level_id: Yup.number().required('The level is required'),
 });
 
 const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
   const [isLoading, setIsLoading] = useState(false);
+  const limit = 10;
+  const [page, setPage] = useState(1);
+  const [levelSearchTerm, setLevelSearchTerm] = useState('');
+  const [levelOptions, setLevelOptions] = useState<any[]>([]);
+
+  const { data: levels } = useSWR(
+    ['/level/get-all', page, limit, levelSearchTerm],
+    () => getAllLevels(page, limit, levelSearchTerm)
+  );
 
   const save = async (syllabus: any, { setSubmitting }: any) => {
     setSubmitting(true);
@@ -64,6 +77,86 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
     }
   };
 
+  useEffect(() => {
+    if (levels?.data) {
+      const levelData = Array.isArray(levels.data)
+        ? levels.data
+        : levels.data?.result || [];
+
+      const levelOpts = levelData.map((item: any) => {
+        if (typeof item === 'string') {
+          return {
+            value: item,
+            label: item,
+          };
+        } else if (item && typeof item === 'object') {
+          const id = item.id || '';
+          const label = item.full_level || item.name || item.level || '';
+          return {
+            value: { id },
+            label,
+          };
+        } else {
+          return {
+            value: '',
+            label: '',
+          };
+        }
+      });
+
+      setLevelOptions((prevOptions) => {
+        const combined = [...prevOptions, ...levelOpts];
+
+        const res = combined
+          .filter((option, index, self) => {
+            const optionId =
+              option.value && typeof option.value === 'object'
+                ? option.value.id
+                : option.value;
+
+            return (
+              self.findIndex((o) => {
+                const oId =
+                  o.value && typeof o.value === 'object' ? o.value.id : o.value;
+                return oId === optionId;
+              }) === index
+            );
+          })
+          .map((option) => {
+            const value =
+              option.value && typeof option.value === 'object'
+                ? option.value.id
+                : option.value;
+            const label =
+              typeof option.label === 'object'
+                ? option.label.full_level || option.label.name || ''
+                : option.label;
+
+            return {
+              label,
+              value,
+            };
+          });
+
+        console.log(res);
+
+        return res;
+      });
+    }
+  }, [levels, levels?.data, levels?.data?.result]);
+  const onLevelScrollToBottom = () => {
+    const levelData = levels?.data;
+    if (
+      levelData &&
+      (Array.isArray(levelData)
+        ? levelData.length > 0
+        : levelData?.result?.length > 0)
+    ) {
+      const nextPage = page + 1;
+      setPage(nextPage);
+    }
+  };
+
   return (
     <Modal
       isOpen={isOpen}
@@ -79,11 +172,13 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
       </ModalHeader>
       <ModalBody>
         <Formik
+          enableReinitialize
           initialValues={
             data
               ? {
                   id: isCopy ? '' : data.id,
                   syllabus_name: data.syllabus_name,
+                  level_id: data?.level?.id || 0,
                   items: data?.items?.map((item: any) => item.item_name) || [],
                   test_percentage: data?.percentages?.test_percentage || 0,
                   exam_percentage: data?.percentages?.exam_percentage || 0,
@@ -98,6 +193,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
               : {
                   id: '',
                   syllabus_name: '',
+                  level_id: 0,
                   items: [''],
                   test_percentage: 0,
                   exam_percentage: 0,
@@ -285,7 +381,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                 onSubmit={handleSubmit}
                 className='row g-3'
               >
-                <Col xs={12}>
+                <Col xs={8}>
                   <Label for='syllabus_name'>Syllabus Name</Label>
                   <Field
                     name='syllabus_name'
@@ -295,6 +391,51 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                   />
                   <ErrorMessage
                     name='syllabus_name'
+                    component={FormFeedback}
+                  />
+                </Col>
+                <Col xs={4}>
+                  <Label for='level'>Level</Label>
+
+                  <Field name='level_id'>
+                    {({ field, form }: any) => (
+                      <Select
+                        {...field}
+                        id='level'
+                        options={levelOptions}
+                        onChange={(selectedOption: any) => {
+                          const level = selectedOption
+                            ? selectedOption.value &&
+                              typeof selectedOption.value === 'object'
+                              ? selectedOption.value.id
+                              : selectedOption.value
+                            : '';
+                          setFieldValue('level_id', level);
+                        }}
+                        value={
+                          levelOptions.find((option: any) => {
+                            // Convertir ambos valores a número para comparación consistente
+                            const optionValue = Number(
+                              option.value && typeof option.value === 'object'
+                                ? option.value.id
+                                : option.value
+                            );
+                            const formValue = Number(props.values.level_id);
+                            return optionValue === formValue;
+                          }) || null
+                        }
+                        placeholder='Select level'
+                        isSearchable
+                        onInputChange={(inputValue) => {
+                          setLevelSearchTerm(inputValue);
+                        }}
+                        onMenuScrollToBottom={onLevelScrollToBottom}
+                      />
+                    )}
+                  </Field>
+
+                  <ErrorMessage
+                    name='level_id'
                     component={FormFeedback}
                   />
                 </Col>

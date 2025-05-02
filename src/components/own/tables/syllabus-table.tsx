@@ -40,6 +40,7 @@ const SyllabusTable = ({ reload }: any) => {
 
   const toggleDetail = (data: any) => {
     setSelectedData(data);
+    console.log(data);
     setIsCopyMode(false);
     setIsOpenDetail(!isOpenDetail);
     if (isOpenDetail) {
@@ -101,6 +102,12 @@ const SyllabusTable = ({ reload }: any) => {
     {
       name: 'Syllabus Name',
       selector: (row: any) => `${row.syllabus_name}`,
+      sortable: true,
+      center: false,
+    },
+    {
+      name: 'Level',
+      selector: (row: any) => `${row.level.full_level}`,
       sortable: true,
       center: false,
     },

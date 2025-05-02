@@ -37,11 +37,12 @@ import {
   FiAlertCircle,
 } from 'react-icons/fi';
 import { getSimpleFiltersString } from 'utils/utils';
+import Swal from 'sweetalert2';
 
 export interface StudentOption {
   id: number;
   user: { name: string };
-  level?: { name: string } | null;
+  level?: { id: number; name: string } | null;
   course?: { course_number: string }[] | null;
   status?: string;
 }
@@ -80,7 +81,7 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
   const [validationError, setValidationError] = useState('');
   const [forceRefresh, setForceRefresh] = useState(0);
 
-  const GROUP_MINIMUM = 5;
+  const GROUP_MINIMUM = 2;
 
   const limit = 10;
   const [coursePage, setCoursePage] = useState(1);
@@ -285,6 +286,25 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
       source.droppableId === 'available' ? available : selected;
     const destList =
       destination.droppableId === 'available' ? available : selected;
+
+    if (
+      destination.droppableId === 'selected' &&
+      source.droppableId === 'available'
+    ) {
+      const moved = available[source.index];
+      if (isGroup && selected.length > 0) {
+        const firstLevelId = selected[0].level?.id;
+        if (moved.level?.id !== firstLevelId) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'You can only select students from the same level.',
+          });
+          return;
+        }
+      }
+      setValidationError('');
+    }
     if (source.droppableId === destination.droppableId) {
       const items = Array.from(sourceList);
       const [moved] = items.splice(source.index, 1);
@@ -328,20 +348,31 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
     onNext(selected, isGroup, description);
   };
 
-  const handleAddStudent = (student: StudentOption) => {
-    setAvailable((prev) => prev.filter((s) => s.id !== student.id));
+  const handleAddStudent = (student: StudentOption) =>
+    // 1) Validación en modo grupo: aborta y setea error si no coincide el nivel
+    isGroup &&
+    selected.length > 0 &&
+    student.level?.id !== selected[0].level?.id
+      ? setValidationError(
+          'Group mode: you can only select students from the same level.'
+        )
+      : // 2) Si pasa la validación, limpiamos error y movemos el estudiante
+        (() => {
+          setValidationError('');
 
-    if (!isGroup) {
-      setSelected((prev) => {
-        if (prev.length > 0) {
-          setAvailable((a) => [prev[0], ...a]);
-        }
-        return [student];
-      });
-    } else {
-      setSelected((prev) => [...prev, student]);
-    }
-  };
+          // Siempre quitamos el student de available
+          setAvailable((prev) => prev.filter((s) => s.id !== student.id));
+
+          // Dependiendo del modo, actualizamos selected (y devolvemos el anterior en individual)
+          isGroup
+            ? // → Grupo: acumulamos
+              setSelected((prev) => [...prev, student])
+            : // → Individual: devolvemos el anterior (si existía) y reemplazamos
+              setSelected((prev) => {
+                prev.length > 0 && setAvailable((a) => [prev[0], ...a]);
+                return [student];
+              });
+        })();
 
   const handleRemoveStudent = (student: StudentOption) => {
     setSelected((prev) => prev.filter((s) => s.id !== student.id));
@@ -510,8 +541,11 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
         </div>
 
         <DragDropContext onDragEnd={onDragEnd}>
-          <Row className='mb-4'>
-            <Col md='5'>
+          <Row className='mb-4 d-flex justify-content-center'>
+            <Col
+              md='5'
+              className='mx-4'
+            >
               <div className='d-flex justify-content-between align-items-center mb-2'>
                 <h6 className='fw-bold d-flex align-items-center mb-0'>
                   <FiUser className='me-2' />
@@ -620,11 +654,9 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
             </Col>
 
             <Col
-              md='2'
-              className='d-flex flex-column justify-content-center align-items-center'
-            ></Col>
-
-            <Col md='5'>
+              md='5'
+              className='mx-4'
+            >
               <div className='d-flex justify-content-between align-items-center mb-2'>
                 <h6 className='fw-bold d-flex align-items-center mb-0'>
                   <FiUsers className='me-2' />

@@ -6,7 +6,7 @@ import React, {
   useCallback,
   useContext,
 } from 'react';
-import { Input, Table, Alert } from 'reactstrap';
+import { Input, Table, Alert, Badge } from 'reactstrap';
 import {
   buildAttendanceStructure,
   countAbsences,
@@ -58,10 +58,16 @@ const TableAttendance = ({
   const changeAttendance = async (
     event: any,
     syllabusItemId: any,
-    studentId: any
+    studentId: any,
+    isRetired: boolean
   ) => {
     if (isCoordinator) {
       toast.error('Coordinators do not have permission to mark attendance');
+      return;
+    }
+
+    if (isRetired) {
+      toast.error('Cannot mark attendance for retired students');
       return;
     }
 
@@ -180,8 +186,23 @@ const TableAttendance = ({
         <tbody>
           {students && students.length > 0 ? (
             students?.map((student: any, index) => (
-              <tr key={`date-student-${index}`}>
-                <td>{student?.name}</td>
+              <tr
+                key={`date-student-${index}`}
+                className={student?.is_retired ? 'retired_color' : ''}
+              >
+                <td className={student?.is_retired ? ' d-flex ' : ''}>
+                  {student?.name}
+                  {student?.is_retired && (
+                    <Badge
+                      color='primary'
+                      pill
+                      size='sm'
+                      className=' mt-2 mb-3'
+                    >
+                      RETIRED
+                    </Badge>
+                  )}
+                </td>
                 {Object.keys(dates).map((courseScheduleId: any, index2) => (
                   <td
                     key={`attendance-${index2}`}
@@ -189,12 +210,19 @@ const TableAttendance = ({
                   >
                     <Input
                       type='select'
-                      className={`attendance-input bg-white text-black ${isCoordinator || isReceptionist ? 'cursor-no-allowed' : ''}`}
+                      className={`td-input attendance-input bg-transparent text-white ${isCoordinator || isReceptionist || student?.is_retired ? 'cursor-no-allowed' : ''}`}
                       value={dates[courseScheduleId][student?.id]}
                       onChange={(event) =>
-                        changeAttendance(event, courseScheduleId, student?.id)
+                        changeAttendance(
+                          event,
+                          courseScheduleId,
+                          student?.id,
+                          student?.is_retired
+                        )
                       }
-                      disabled={isCoordinator || isReceptionist}
+                      disabled={
+                        isCoordinator || isReceptionist || student?.is_retired
+                      }
                     >
                       <option value=''>&nbsp;</option>
                       <option value='present'>P</option>
