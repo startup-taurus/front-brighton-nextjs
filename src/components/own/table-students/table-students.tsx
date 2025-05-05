@@ -28,7 +28,14 @@ const columns = [
             ? 'Retired'
             : 'Active'
           : 'Inactive';
-      return <div className='status-cell text-uppercase'>{text}</div>;
+
+      const colorClass =
+        row.status === 'active'
+          ? row.is_retired
+            ? 'failed'
+            : 'success'
+          : 'danger';
+      return <div className={` status-cell ${colorClass}`}>{text}</div>;
     },
   },
 ];

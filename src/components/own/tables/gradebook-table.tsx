@@ -369,14 +369,20 @@ const GradebookTable = ({
                 key={`grade-student-${i}`}
                 className={student?.is_retired ? 'retired_color' : ''}
               >
-                <td className={student?.is_retired ? 'd-flex' : ''}>
+                <td
+                  className={
+                    student?.is_retired
+                      ? 'd-flex flex-md-row align-items-start align-md-center justify-center-start'
+                      : ''
+                  }
+                >
                   {student.name}
                   {student?.is_retired && (
                     <Badge
                       color='primary'
                       pill
                       size='sm'
-                      className=' mt-2 mb-3'
+                      className=' mt-2 mt-md-0 ms-md-2'
                     >
                       RETIRED
                     </Badge>
