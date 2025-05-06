@@ -182,9 +182,12 @@ const GradebookTable = ({
       reverseButtons: true,
     }).then((result) => {
       if (result.isConfirmed) {
+        const assignmentNumber= componentsGradebook?.assignments.length + 1;
+        const assignmentName = `Assignment ${assignmentNumber}`;
         createAssignmentGradingItem({
           syllabus_id: syllabusId,
           course_id: courseId,
+          name: assignmentName,
         }).then(() => {
           mutate(`/course/get-grading-items/${courseId}`);
         });
@@ -297,7 +300,7 @@ const GradebookTable = ({
             {componentsGradebook?.assignments?.map(
               (item: any, index: number) => (
                 <td
-                  className='col-vertical border-bottom text-center cursor-no-allowed'
+                  className={`col-vertical border-bottom text-center text-dark ${isCoordinator ? 'cursor-no-allowed' : ''}`}
                   key={`assignments-title-${item.item_id}`}
                 >
                   <Input

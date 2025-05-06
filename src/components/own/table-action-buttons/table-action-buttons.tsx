@@ -19,6 +19,7 @@ const TableActionButtons = ({
   onCopy,
   onTransfer,
   disabled = false,
+  viewDisabled,
   blockButtonVariant = 'cancel',
 }: any) => {
   return (
@@ -33,7 +34,7 @@ const TableActionButtons = ({
           className='btn btn-light'
           onClick={onView}
           data-tooltip-id='on-view'
-          disabled={disabled}
+          disabled={viewDisabled ?? disabled}
         >
           <FaMagnifyingGlass />
         </button>

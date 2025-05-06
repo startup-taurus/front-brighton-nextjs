@@ -216,7 +216,7 @@ const TableAttendance = ({
                   >
                     <Input
                       type='select'
-                      className={`td-input attendance-input bg-transparent text-white ${isCoordinator || isReceptionist || student?.is_retired ? 'cursor-no-allowed' : ''}`}
+                      className={`td-input attendance-input bg-transparent text-dark ${isCoordinator || isReceptionist || student?.is_retired ? 'cursor-no-allowed text-white' : ''}`}
                       value={dates[courseScheduleId][student?.id]}
                       onChange={(event) =>
                         changeAttendance(

@@ -20,6 +20,7 @@ import { getActiveCourses } from 'helper/api-data/course';
 import {
   createTransferData,
   approveTransfer,
+  updateTransferData,
 } from 'helper/api-data/transfer-data';
 import { USER_TYPES } from 'utils/constants';
 import { getUserRoleFromLocalStorage } from 'utils/auth';
@@ -66,18 +67,15 @@ const StudentTransferForm: React.FC<Props> = ({
     getActiveCourses(1, limit)
   );
 
-  const currentCourseIds = useMemo(() => {
-    // Extraer todos los IDs de cursos de los estudiantes
+  const currentCourseId = useMemo(() => {
+    // Extraer todos los IDs de cursos de los estudiantes...
     const ids = students.flatMap((s) => {
-      // Verificar si el estudiante tiene cursos asignados en formato array
       if (s.course && Array.isArray(s.course) && s.course.length > 0) {
-        return s.course.map((course: any) => course.id || course.course_id);
+        return s.course.map((c: any) => c.id ?? c.course_id);
       }
-      // Si el estudiante tiene un solo curso no en array
       if (s.course && s.course.id) {
         return [s.course.id];
       }
-
       if (
         s.coursesStudent &&
         Array.isArray(s.coursesStudent) &&
@@ -88,7 +86,8 @@ const StudentTransferForm: React.FC<Props> = ({
       return [];
     });
     console.log('Current course IDs:', ids);
-    return ids;
+    // 🔥 Solo el primero (o null si no hay ninguno)
+    return ids.length > 0 ? ids[0] : null;
   }, [students]);
 
   useEffect(() => {
@@ -166,6 +165,12 @@ const StudentTransferForm: React.FC<Props> = ({
           toast.error('Transfer ID is required to approve.');
           return;
         }
+
+        await updateTransferData(id, {
+          selected_course_id: selectedCourse!.value,
+          selected_level_id: selectedLevel!.value,
+        });
+        
         response = await approveTransfer(id);
       }
 
@@ -254,13 +259,9 @@ const StudentTransferForm: React.FC<Props> = ({
                       placeholder='Search or select a course...'
                       isClearable
                       isSearchable
-                      isOptionDisabled={(opt: Option) => {
-                        // Verificar si el ID del curso está en la lista de cursos actuales
-                        // Convertir a números para asegurar una comparación correcta
-                        return currentCourseIds.some(
-                          (id) => Number(id) === Number(opt.value)
-                        );
-                      }}
+                      isOptionDisabled={(opt: Option) =>
+                        Number(opt.value) === Number(currentCourseId)
+                      }
                     />
                     {!selectedCourse && (
                       <small className='text-danger'>Required</small>
