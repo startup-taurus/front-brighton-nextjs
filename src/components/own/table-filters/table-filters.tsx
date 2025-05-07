@@ -27,7 +27,14 @@ const TableFilters = ({ selectFilters }: TableFiltersProps) => {
 
   const initialValues = selectFilters.reduce(
     (acc, field) => {
-      acc[field.name] = (router.query[field.name] as string) || '';
+      // Si field.value viene como objeto { value, label }, extraigo el value
+      const propVal =
+        typeof field.value === 'object' && field.value !== null
+          ? String((field.value as { value: any }).value)
+          : (field.value ?? '');
+
+      // Si no hay propVal, miro la query, y si tampoco, dejo string vacío
+      acc[field.name] = propVal || (router.query[field.name] as string) || '';
       return acc;
     },
     {} as Record<string, string>
@@ -88,13 +95,31 @@ const TableFilters = ({ selectFilters }: TableFiltersProps) => {
       {} as Record<string, string>
     );
     resetForm({ values: emptyValues });
+    selectFilters.forEach((field) => {
+      field.onChange?.(null);
+      field.onInputChange?.('');
+    });
   };
 
-  const onSubmit = (data: any) => {
-    const query = {
-      ...router.query,
-      ...data,
-    };
+  const onSubmit = (_: any) => {
+    const query: Record<string, string> = {};
+
+    selectFilters.forEach((field) => {
+      if (
+        field.type === 'select' &&
+        field.value &&
+        typeof field.value === 'object'
+      ) {
+        query[field.name] = String((field.value as { value: any }).value);
+        return;
+      }
+
+      const val = formikRef.current?.values[field.name];
+      if (val) {
+        query[field.name] = String(val);
+      }
+    });
+
     router.push({ pathname: router.pathname, query }, undefined, {
       shallow: true,
     });
@@ -118,6 +143,7 @@ const TableFilters = ({ selectFilters }: TableFiltersProps) => {
         <CardBody>
           <Formik
             initialValues={initialValues}
+            enableReinitialize={true}
             onSubmit={onSubmit}
             innerRef={formikRef}
           >
@@ -149,24 +175,36 @@ const TableFilters = ({ selectFilters }: TableFiltersProps) => {
                               {...field}
                               id={item.name}
                               options={item.items}
+                              inputValue={item.inputValue}
+                              value={
+                                item.value
+                                  ? item.value
+                                  : // 2. Si no, busca en item.items la opción que coincida con Formik
+                                    field.value && item.items
+                                    ? item.items.find(
+                                        (opt: any) =>
+                                          String(opt.value) ===
+                                          String(field.value)
+                                      )
+                                    : null
+                              }
                               onChange={(selectedOption: any) => {
                                 const value = selectedOption
                                   ? selectedOption.value
                                   : '';
                                 form.setFieldValue(item.name, value);
+                                if (item.onChange) {
+                                  item.onChange(selectedOption);
+                                }
                               }}
-                              value={
-                                item.value ||
-                                item.items?.find(
-                                  (option: any) => option.value === field.value
-                                ) ||
-                                null
-                              }
                               placeholder={`Select ${item.labelName}`}
                               isSearchable
                               onInputChange={item.onInputChange}
                               onMenuScrollToBottom={item.onMenuScrollToBottom}
                               menuPortalTarget={document.body}
+                              menuPosition='fixed'
+                              menuPlacement='auto'
+                              classNamePrefix='select'
                             />
                           )}
                         </Field>

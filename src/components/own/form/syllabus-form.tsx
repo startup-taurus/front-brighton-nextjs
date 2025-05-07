@@ -78,72 +78,47 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
   };
 
   useEffect(() => {
-    if (levels?.data) {
-      const levelData = Array.isArray(levels.data)
-        ? levels.data
-        : levels.data?.result || [];
+    if (!levels?.data) return;
 
-      const levelOpts = levelData.map((item: any) => {
-        if (typeof item === 'string') {
-          return {
-            value: item,
-            label: item,
-          };
-        } else if (item && typeof item === 'object') {
-          const id = item.id || '';
-          const label = item.full_level || item.name || item.level || '';
-          return {
-            value: { id },
-            label,
-          };
-        } else {
-          return {
-            value: '',
-            label: '',
-          };
-        }
+    const rawLevels: any[] = Array.isArray(levels.data)
+      ? levels.data
+      : levels.data.result || [];
+
+    const normalizeToOption = (item: any) => {
+      if (typeof item === 'string') {
+        return { value: item, label: item };
+      }
+      const id = item.id || '';
+      const label = item.full_level || item.name || item.level || '';
+      return { value: { id }, label };
+    };
+
+    const newOptions = rawLevels.map(normalizeToOption);
+
+    setLevelOptions((prev) => {
+      const all = [...prev, ...newOptions];
+
+      const unique = all.filter((opt, i, arr) => {
+        const optId = typeof opt.value === 'object' ? opt.value.id : opt.value;
+        return (
+          arr.findIndex((o) => {
+            const oId = typeof o.value === 'object' ? o.value.id : o.value;
+            return oId === optId;
+          }) === i
+        );
       });
 
-      setLevelOptions((prevOptions) => {
-        const combined = [...prevOptions, ...levelOpts];
-
-        const res = combined
-          .filter((option, index, self) => {
-            const optionId =
-              option.value && typeof option.value === 'object'
-                ? option.value.id
-                : option.value;
-
-            return (
-              self.findIndex((o) => {
-                const oId =
-                  o.value && typeof o.value === 'object' ? o.value.id : o.value;
-                return oId === optionId;
-              }) === index
-            );
-          })
-          .map((option) => {
-            const value =
-              option.value && typeof option.value === 'object'
-                ? option.value.id
-                : option.value;
-            const label =
-              typeof option.label === 'object'
-                ? option.label.full_level || option.label.name || ''
-                : option.label;
-
-            return {
-              label,
-              value,
-            };
-          });
-
-        console.log(res);
-
-        return res;
+      return unique.map((opt) => {
+        const value = typeof opt.value === 'object' ? opt.value.id : opt.value;
+        const label =
+          typeof opt.label === 'object'
+            ? opt.label.full_level || opt.label.name || ''
+            : opt.label;
+        return { value, label };
       });
-    }
-  }, [levels, levels?.data, levels?.data?.result]);
+    });
+  }, [levels]);
+
   const onLevelScrollToBottom = () => {
     const levelData = levels?.data;
     if (
@@ -414,7 +389,6 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                         }}
                         value={
                           levelOptions.find((option: any) => {
-                            // Convertir ambos valores a número para comparación consistente
                             const optionValue = Number(
                               option.value && typeof option.value === 'object'
                                 ? option.value.id

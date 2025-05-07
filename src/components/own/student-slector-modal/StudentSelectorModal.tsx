@@ -188,12 +188,12 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
             ? response.data.result
             : [];
 
-        const mapped = list.map((s: any) => ({
-          id: s.id,
-          user: s.user,
-          level: s.level ?? null,
-          course: s.course ?? null,
-          status: s.status ?? '',
+        const mapped = list.map((student: any) => ({
+          id: student.id,
+          user: student.user,
+          level: student.level ?? null,
+          course: student.course ?? null,
+          status: student.status ?? '',
         }));
 
         if (currentPage === 1) {
@@ -245,12 +245,12 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
               ? data.data.result
               : [];
 
-          const mapped = list.map((s: any) => ({
-            id: s.id,
-            user: s.user,
-            level: s.level ?? null,
-            course: s.course ?? null,
-            status: s.status ?? '',
+          const mapped = list.map((student: any) => ({
+            id: student.id,
+            user: student.user,
+            level: student.level ?? null,
+            course: student.course ?? null,
+            status: student.status ?? '',
           }));
 
           if (page === 1) {
@@ -349,33 +349,29 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
   };
 
   const handleAddStudent = (student: StudentOption) =>
-    // 1) Validación en modo grupo: aborta y setea error si no coincide el nivel
     isGroup &&
     selected.length > 0 &&
     student.level?.id !== selected[0].level?.id
       ? setValidationError(
           'Group mode: you can only select students from the same level.'
         )
-      : // 2) Si pasa la validación, limpiamos error y movemos el estudiante
-        (() => {
+      : (() => {
           setValidationError('');
 
-          // Siempre quitamos el student de available
-          setAvailable((prev) => prev.filter((s) => s.id !== student.id));
+          setAvailable((prev) =>
+            prev.filter((student) => student.id !== student.id)
+          );
 
-          // Dependiendo del modo, actualizamos selected (y devolvemos el anterior en individual)
           isGroup
-            ? // → Grupo: acumulamos
-              setSelected((prev) => [...prev, student])
-            : // → Individual: devolvemos el anterior (si existía) y reemplazamos
-              setSelected((prev) => {
+            ? setSelected((prev) => [...prev, student])
+            : setSelected((prev) => {
                 prev.length > 0 && setAvailable((a) => [prev[0], ...a]);
                 return [student];
               });
         })();
 
   const handleRemoveStudent = (student: StudentOption) => {
-    setSelected((prev) => prev.filter((s) => s.id !== student.id));
+    setSelected((prev) => prev.filter((student) => student.id !== student.id));
     setAvailable((prev) => [...prev, student]);
   };
 
@@ -609,10 +605,10 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
                           <p className='mb-0'>No students available</p>
                         </div>
                       )}
-                      {available.map((s, idx) => (
+                      {available.map((student, idx) => (
                         <Draggable
-                          key={s.id}
-                          draggableId={`avail-${s.id}`}
+                          key={student.id}
+                          draggableId={`avail-${student.id}`}
                           index={idx}
                         >
                           {(prov, snapshot) => (
@@ -628,13 +624,13 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
                             >
                               <div className='d-flex align-items-center'>
                                 <FiUser className='me-2 text-secondary' />
-                                <span>{s.user.name}</span>
+                                <span>{student.user.name}</span>
                               </div>
                               <div
                                 className='px-1'
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleAddStudent(s);
+                                  handleAddStudent(student);
                                 }}
                               >
                                 <FiChevronRight
@@ -710,10 +706,10 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
                         )}
                       </div>
                     )}
-                    {selected.map((s, idx) => (
+                    {selected.map((student, idx) => (
                       <Draggable
-                        key={s.id}
-                        draggableId={`sel-${s.id}`}
+                        key={student.id}
+                        draggableId={`sel-${student.id}`}
                         index={idx}
                       >
                         {(prov, snapshot) => (
@@ -734,13 +730,13 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
                           >
                             <div className='d-flex align-items-center'>
                               <FiUser className='me-2 text-success' />
-                              <span>{s.user.name}</span>
+                              <span>{student.user.name}</span>
                             </div>
                             <div
                               className='px-1'
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleRemoveStudent(s);
+                                handleRemoveStudent(student);
                               }}
                             >
                               <FiChevronLeft

@@ -169,7 +169,6 @@ const TransferStudents = () => {
   };
 
   const handleTransferSuccess = (identifier: string) => {
-    console.log('Transferencia completada para:', identifier);
     setReload((r) => !r);
     toggleTransferModal();
   };

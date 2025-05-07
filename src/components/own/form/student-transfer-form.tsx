@@ -68,7 +68,6 @@ const StudentTransferForm: React.FC<Props> = ({
   );
 
   const currentCourseId = useMemo(() => {
-    // Extraer todos los IDs de cursos de los estudiantes...
     const ids = students.flatMap((s) => {
       if (s.course && Array.isArray(s.course) && s.course.length > 0) {
         return s.course.map((c: any) => c.id ?? c.course_id);
@@ -85,8 +84,6 @@ const StudentTransferForm: React.FC<Props> = ({
       }
       return [];
     });
-    console.log('Current course IDs:', ids);
-    // 🔥 Solo el primero (o null si no hay ninguno)
     return ids.length > 0 ? ids[0] : null;
   }, [students]);
 
@@ -103,14 +100,13 @@ const StudentTransferForm: React.FC<Props> = ({
       );
       setCourseOptions(opts as Option[]);
 
-      // initial selections
       if (initialTransferData?.selected_course) {
         const foundCourse = opts.find(
           (o: any) => o.value === initialTransferData.selected_course!.value
         );
         const courseOpt = foundCourse || initialTransferData.selected_course!;
         setSelectedCourse(courseOpt as Option);
-        // set level from initial or from found
+
         const lvl = initialTransferData.selected_level
           ? initialTransferData.selected_level
           : {
@@ -170,7 +166,7 @@ const StudentTransferForm: React.FC<Props> = ({
           selected_course_id: selectedCourse!.value,
           selected_level_id: selectedLevel!.value,
         });
-        
+
         response = await approveTransfer(id);
       }
 
@@ -306,5 +302,3 @@ const StudentTransferForm: React.FC<Props> = ({
 };
 
 export default StudentTransferForm;
-
-// no progression logic any more

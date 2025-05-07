@@ -21,6 +21,10 @@ const Users = () => {
     Array<{ label: string; value: string }>
   >([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [nameFilter, setNameFilter] = useState<{
+    value: string;
+    label: string;
+  } | null>(null);
 
   const { data: usersData } = useSWR(
     ['/user/get-all', page, limit, searchTerm],
@@ -96,10 +100,16 @@ const Users = () => {
       type: 'select',
       items: userOptions,
       placeholder: 'Select user name',
-      onInputChange: (inputValue: string) => {
-        setSearchTerm(inputValue);
+
+      value: nameFilter,
+      inputValue: searchTerm,
+      onChange: (opt) => {
+        setNameFilter(opt);
+      },
+
+      onInputChange: (input) => {
+        setSearchTerm(input);
         setPage(1);
-        setUserOptions([]);
       },
       onMenuScrollToBottom: onUserScrollBottom,
     },
