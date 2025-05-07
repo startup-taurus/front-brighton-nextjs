@@ -300,7 +300,6 @@ const StudentForm = ({
             };
           });
 
-        console.log(res);
 
         return res;
       });

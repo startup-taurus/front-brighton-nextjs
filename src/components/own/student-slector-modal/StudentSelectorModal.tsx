@@ -37,11 +37,13 @@ import {
   FiAlertCircle,
 } from 'react-icons/fi';
 import { getSimpleFiltersString } from 'utils/utils';
+import Swal from 'sweetalert2';
+import { GROUP_MINIMUM } from 'utils/constants';
 
 export interface StudentOption {
   id: number;
   user: { name: string };
-  level?: { name: string } | null;
+  level?: { id: number; name: string } | null;
   course?: { course_number: string }[] | null;
   status?: string;
 }
@@ -79,9 +81,6 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
   const [hoveredDroppable, setHoveredDroppable] = useState<string | null>(null);
   const [validationError, setValidationError] = useState('');
   const [forceRefresh, setForceRefresh] = useState(0);
-
-  const GROUP_MINIMUM = 5;
-
   const limit = 10;
   const [coursePage, setCoursePage] = useState(1);
   const [levelPage, setLevelPage] = useState(1);
@@ -187,12 +186,12 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
             ? response.data.result
             : [];
 
-        const mapped = list.map((s: any) => ({
-          id: s.id,
-          user: s.user,
-          level: s.level ?? null,
-          course: s.course ?? null,
-          status: s.status ?? '',
+        const mapped = list.map((student: any) => ({
+          id: student.id,
+          user: student.user,
+          level: student.level ?? null,
+          course: student.course ?? null,
+          status: student.status ?? '',
         }));
 
         if (currentPage === 1) {
@@ -244,12 +243,12 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
               ? data.data.result
               : [];
 
-          const mapped = list.map((s: any) => ({
-            id: s.id,
-            user: s.user,
-            level: s.level ?? null,
-            course: s.course ?? null,
-            status: s.status ?? '',
+          const mapped = list.map((student: any) => ({
+            id: student.id,
+            user: student.user,
+            level: student.level ?? null,
+            course: student.course ?? null,
+            status: student.status ?? '',
           }));
 
           if (page === 1) {
@@ -285,6 +284,25 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
       source.droppableId === 'available' ? available : selected;
     const destList =
       destination.droppableId === 'available' ? available : selected;
+
+    if (
+      destination.droppableId === 'selected' &&
+      source.droppableId === 'available'
+    ) {
+      const moved = available[source.index];
+      if (isGroup && selected.length > 0) {
+        const firstLevelId = selected[0].level?.id;
+        if (moved.level?.id !== firstLevelId) {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'You can only select students from the same level.',
+          });
+          return;
+        }
+      }
+      setValidationError('');
+    }
     if (source.droppableId === destination.droppableId) {
       const items = Array.from(sourceList);
       const [moved] = items.splice(source.index, 1);
@@ -329,22 +347,43 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
   };
 
   const handleAddStudent = (student: StudentOption) => {
-    setAvailable((prev) => prev.filter((s) => s.id !== student.id));
+    if (
+      isGroup &&
+      selected.length > 0 &&
+      student.level?.id !== selected[0].level?.id
+    ) {
+      setValidationError(
+        'Group mode: you can only select students from the same level.'
+      );
+      return;
+    }
 
-    if (!isGroup) {
-      setSelected((prev) => {
-        if (prev.length > 0) {
-          setAvailable((a) => [prev[0], ...a]);
+    setValidationError('');
+
+    setAvailable((previousAvailableList) =>
+      previousAvailableList.filter(
+        (availableStudent) => availableStudent.id !== student.id
+      )
+    );
+
+    if (isGroup) {
+      setSelected((previousSelectedList) => [...previousSelectedList, student]);
+    } else {
+      setSelected((previousSelectedList) => {
+        if (previousSelectedList.length > 0) {
+          const previouslySelectedStudent = previousSelectedList[0];
+          setAvailable((innerAvailableList) => [
+            previouslySelectedStudent,
+            ...innerAvailableList,
+          ]);
         }
         return [student];
       });
-    } else {
-      setSelected((prev) => [...prev, student]);
     }
   };
 
   const handleRemoveStudent = (student: StudentOption) => {
-    setSelected((prev) => prev.filter((s) => s.id !== student.id));
+    setSelected((prev) => prev.filter((student) => student.id !== student.id));
     setAvailable((prev) => [...prev, student]);
   };
 
@@ -510,8 +549,11 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
         </div>
 
         <DragDropContext onDragEnd={onDragEnd}>
-          <Row className='mb-4'>
-            <Col md='5'>
+          <Row className='mb-4 d-flex justify-content-center'>
+            <Col
+              md='5'
+              className='mx-4'
+            >
               <div className='d-flex justify-content-between align-items-center mb-2'>
                 <h6 className='fw-bold d-flex align-items-center mb-0'>
                   <FiUser className='me-2' />
@@ -575,10 +617,10 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
                           <p className='mb-0'>No students available</p>
                         </div>
                       )}
-                      {available.map((s, idx) => (
+                      {available.map((student, idx) => (
                         <Draggable
-                          key={s.id}
-                          draggableId={`avail-${s.id}`}
+                          key={student.id}
+                          draggableId={`avail-${student.id}`}
                           index={idx}
                         >
                           {(prov, snapshot) => (
@@ -594,13 +636,13 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
                             >
                               <div className='d-flex align-items-center'>
                                 <FiUser className='me-2 text-secondary' />
-                                <span>{s.user.name}</span>
+                                <span>{student.user.name}</span>
                               </div>
                               <div
                                 className='px-1'
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  handleAddStudent(s);
+                                  handleAddStudent(student);
                                 }}
                               >
                                 <FiChevronRight
@@ -620,11 +662,9 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
             </Col>
 
             <Col
-              md='2'
-              className='d-flex flex-column justify-content-center align-items-center'
-            ></Col>
-
-            <Col md='5'>
+              md='5'
+              className='mx-4'
+            >
               <div className='d-flex justify-content-between align-items-center mb-2'>
                 <h6 className='fw-bold d-flex align-items-center mb-0'>
                   <FiUsers className='me-2' />
@@ -678,10 +718,10 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
                         )}
                       </div>
                     )}
-                    {selected.map((s, idx) => (
+                    {selected.map((student, idx) => (
                       <Draggable
-                        key={s.id}
-                        draggableId={`sel-${s.id}`}
+                        key={student.id}
+                        draggableId={`sel-${student.id}`}
                         index={idx}
                       >
                         {(prov, snapshot) => (
@@ -702,13 +742,13 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
                           >
                             <div className='d-flex align-items-center'>
                               <FiUser className='me-2 text-success' />
-                              <span>{s.user.name}</span>
+                              <span>{student.user.name}</span>
                             </div>
                             <div
                               className='px-1'
                               onClick={(e) => {
                                 e.stopPropagation();
-                                handleRemoveStudent(s);
+                                handleRemoveStudent(student);
                               }}
                             >
                               <FiChevronLeft

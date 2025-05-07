@@ -43,16 +43,18 @@ const QUICK_LINKS = [
 interface TeacherDashboardProps {
   professorId: number;
   isCoordinator?: boolean;
+  isReceptionist?: boolean;
 }
 
 const TeacherDashboard = ({
   professorId,
   isCoordinator = false,
+  isReceptionist = false,
 }: TeacherDashboardProps) => {
   const { user } = useContext(UserContext);
 
   const userData = useSWR(
-    isCoordinator ? `/user/get-one/${professorId}` : null,
+    isCoordinator || isReceptionist ? `/user/get-one/${professorId}` : null,
     () => getFetcher(`/user/get-one/${professorId}`, false)
   );
 
@@ -63,7 +65,8 @@ const TeacherDashboard = ({
 
   if (!courses?.data?.data?.courses) return null;
 
-  const displayUser = isCoordinator ? userData?.data?.data || {} : user;
+  const displayUser =
+    isCoordinator || isReceptionist ? userData?.data?.data || {} : user;
 
   return (
     <div className='page-body pt-2'>

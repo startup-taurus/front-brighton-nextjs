@@ -70,7 +70,6 @@ const Teachers = () => {
       name: 'name',
       type: 'select',
       items: professorOptions,
-      placeholder: 'Select teacher name',
       onInputChange: (inputValue: string) => {
         setSearchTerm(inputValue);
       },

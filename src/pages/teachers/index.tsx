@@ -16,10 +16,14 @@ const Dashboard = () => {
   const isCoordinator =
     user?.role === USER_TYPES.COORDINATOR && !!router.query.professorId;
 
+    const isReceptionist =
+      user?.role === USER_TYPES.RECEPTIONIST &&!!router.query.professorId;
+
   return (
     <TeacherDashboard
       professorId={professorId}
       isCoordinator={isCoordinator}
+      isReceptionist={isReceptionist}
     />
   );
 };

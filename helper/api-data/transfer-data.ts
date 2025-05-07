@@ -42,3 +42,11 @@ export const approveTransfer = (transferId: number) => {
 export const rejectTransfer = (transferId: number) => {
   return putFetcher(`/transfer-data/reject/${transferId}`, {});
 };
+
+export const updateTransferData = (
+  id: number,
+  payload: {
+    selected_course_id: number;
+    selected_level_id: number;
+  }
+) => putFetcher(`/transfer-data/update/${id}`, payload);

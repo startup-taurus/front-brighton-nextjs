@@ -1,12 +1,12 @@
-import CourseLayout from "@/components/own/course-layout/course-layout";
-import TeachersHeader from "@/components/own/header-teachers/teachers-header";
-import TableStudents from "@/components/own/table-students/table-students";
-import { ReactElement } from "react";
-import { Card } from "reactstrap";
-import { NextPageWithLayout } from "@/pages/_app";
-import { getCourseWithStudents } from "../../../../helper/api-data/course";
-import { useRouter } from "next/router";
-import useSWR from "swr";
+import CourseLayout from '@/components/own/course-layout/course-layout';
+import TeachersHeader from '@/components/own/header-teachers/teachers-header';
+import TableStudents from '@/components/own/table-students/table-students';
+import { ReactElement } from 'react';
+import { Card } from 'reactstrap';
+import { NextPageWithLayout } from '@/pages/_app';
+import { getCourseWithStudents } from '../../../../helper/api-data/course';
+import { useRouter } from 'next/router';
+import useSWR from 'swr';
 
 const CourseHome: NextPageWithLayout = () => {
   const router = useRouter();
@@ -14,22 +14,20 @@ const CourseHome: NextPageWithLayout = () => {
 
   const courseDetail = useSWR(
     courseId ? `/course/get-students/${courseId}` : null,
-    () => getCourseWithStudents(courseId!.toString()),
+    () => getCourseWithStudents(courseId!.toString())
   );
 
   if (!courseDetail?.data?.data) return null;
   const { course_name, course_number, professor, students, total_students } =
     courseDetail?.data?.data;
-
   return (
-    <Card className="mt-2">
+    <Card className='mt-2'>
       <TeachersHeader
         numberOfClass={course_number}
         nameCourse={course_name}
         nameTeacher={professor?.name}
         numberOfStudents={total_students}
       />
-
       <TableStudents students={students}></TableStudents>
     </Card>
   );

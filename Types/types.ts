@@ -13,4 +13,6 @@ export interface FiltersProps {
     | string[]
     | { value: string | number | string[]; label: string }
     | null;
+  inputValue?: string;
+  onChange?: (selectedOption: { value: string; label: string } | null) => void;
 }

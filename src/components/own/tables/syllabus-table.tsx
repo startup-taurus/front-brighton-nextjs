@@ -105,6 +105,12 @@ const SyllabusTable = ({ reload }: any) => {
       center: false,
     },
     {
+      name: 'Level',
+      selector: (row: any) => `${row.level.full_level}`,
+      sortable: true,
+      center: false,
+    },
+    {
       name: 'Assig Percentage',
       selector: (row: any) => `${row.percentages?.assig_percentage}%`,
       sortable: true,

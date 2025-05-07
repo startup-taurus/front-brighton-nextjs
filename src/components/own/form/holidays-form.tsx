@@ -25,10 +25,6 @@ const HolidayForm = ({ data, isOpen, toggle }: any) => {
   const canCreateHoliday = can(PERMISSIONS.CREATE_HOLIDAY);
   const canEditHoliday = can(PERMISSIONS.EDIT_HOLIDAY);
   const save = async (data: any) => {
-    if (isCoordinator && !canCreateHoliday) {
-      toast.error('Coordinators do not have permission to create holidays');
-      return;
-    }
     try {
       const response = await createHoliday(data);
       if (response.statusCode === 200) {
