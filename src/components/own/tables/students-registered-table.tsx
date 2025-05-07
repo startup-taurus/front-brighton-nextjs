@@ -93,12 +93,7 @@ const StudentsRegisteredTable = ({
 
   if (loading) {
     return (
-      <TableSkeleton
-        rows={10}
-        columns={8}
-        showHeader={true}
-        animated={true}
-      />
+      <TableSkeleton rows={10} columns={8} showHeader={true} animated={true} />
     );
   }
 
@@ -145,7 +140,7 @@ const StudentsRegisteredTable = ({
     },
     {
       name: 'Level',
-      selector: (row: any) => `${row.level.name ?? ''}`,
+      selector: (row: any) => `${row.level?.name ?? ''}`,
       sortable: true,
       center: false,
     },
@@ -170,7 +165,7 @@ const StudentsRegisteredTable = ({
   ];
 
   return (
-    <div className='table-responsive signal-table'>
+    <div className="table-responsive signal-table">
       <DataTable
         columns={columns}
         data={students?.data.result}
