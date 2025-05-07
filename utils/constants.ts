@@ -120,3 +120,5 @@ export const EXAMS_TYPE = {
   MOVERS: 'MOVERS',
   PRELIM: 'PRELIM.',
 };
+
+export const GROUP_MINIMUM = 2;

@@ -27,13 +27,11 @@ const TableFilters = ({ selectFilters }: TableFiltersProps) => {
 
   const initialValues = selectFilters.reduce(
     (acc, field) => {
-      // Si field.value viene como objeto { value, label }, extraigo el value
       const propVal =
         typeof field.value === 'object' && field.value !== null
           ? String((field.value as { value: any }).value)
           : (field.value ?? '');
 
-      // Si no hay propVal, miro la query, y si tampoco, dejo string vacío
       acc[field.name] = propVal || (router.query[field.name] as string) || '';
       return acc;
     },
@@ -179,8 +177,7 @@ const TableFilters = ({ selectFilters }: TableFiltersProps) => {
                               value={
                                 item.value
                                   ? item.value
-                                  : // 2. Si no, busca en item.items la opción que coincida con Formik
-                                    field.value && item.items
+                                  : field.value && item.items
                                     ? item.items.find(
                                         (opt: any) =>
                                           String(opt.value) ===

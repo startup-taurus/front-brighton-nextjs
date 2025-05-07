@@ -38,6 +38,7 @@ import {
 } from 'react-icons/fi';
 import { getSimpleFiltersString } from 'utils/utils';
 import Swal from 'sweetalert2';
+import { GROUP_MINIMUM } from 'utils/constants';
 
 export interface StudentOption {
   id: number;
@@ -80,9 +81,6 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
   const [hoveredDroppable, setHoveredDroppable] = useState<string | null>(null);
   const [validationError, setValidationError] = useState('');
   const [forceRefresh, setForceRefresh] = useState(0);
-
-  const GROUP_MINIMUM = 2;
-
   const limit = 10;
   const [coursePage, setCoursePage] = useState(1);
   const [levelPage, setLevelPage] = useState(1);
@@ -348,27 +346,41 @@ const StudentSelectorModal: React.FC<StudentSelectorModalProps> = ({
     onNext(selected, isGroup, description);
   };
 
-  const handleAddStudent = (student: StudentOption) =>
-    isGroup &&
-    selected.length > 0 &&
-    student.level?.id !== selected[0].level?.id
-      ? setValidationError(
-          'Group mode: you can only select students from the same level.'
-        )
-      : (() => {
-          setValidationError('');
+  const handleAddStudent = (student: StudentOption) => {
+    if (
+      isGroup &&
+      selected.length > 0 &&
+      student.level?.id !== selected[0].level?.id
+    ) {
+      setValidationError(
+        'Group mode: you can only select students from the same level.'
+      );
+      return;
+    }
 
-          setAvailable((prev) =>
-            prev.filter((student) => student.id !== student.id)
-          );
+    setValidationError('');
 
-          isGroup
-            ? setSelected((prev) => [...prev, student])
-            : setSelected((prev) => {
-                prev.length > 0 && setAvailable((a) => [prev[0], ...a]);
-                return [student];
-              });
-        })();
+    setAvailable((previousAvailableList) =>
+      previousAvailableList.filter(
+        (availableStudent) => availableStudent.id !== student.id
+      )
+    );
+
+    if (isGroup) {
+      setSelected((previousSelectedList) => [...previousSelectedList, student]);
+    } else {
+      setSelected((previousSelectedList) => {
+        if (previousSelectedList.length > 0) {
+          const previouslySelectedStudent = previousSelectedList[0];
+          setAvailable((innerAvailableList) => [
+            previouslySelectedStudent,
+            ...innerAvailableList,
+          ]);
+        }
+        return [student];
+      });
+    }
+  };
 
   const handleRemoveStudent = (student: StudentOption) => {
     setSelected((prev) => prev.filter((student) => student.id !== student.id));

@@ -68,19 +68,23 @@ const StudentTransferForm: React.FC<Props> = ({
   );
 
   const currentCourseId = useMemo(() => {
-    const ids = students.flatMap((s) => {
-      if (s.course && Array.isArray(s.course) && s.course.length > 0) {
-        return s.course.map((c: any) => c.id ?? c.course_id);
+    const ids = students.flatMap((student) => {
+      if (
+        student.course &&
+        Array.isArray(student.course) &&
+        student.course.length > 0
+      ) {
+        return student.course.map((c: any) => c.id ?? c.course_id);
       }
-      if (s.course && s.course.id) {
-        return [s.course.id];
+      if (student.course && student.course.id) {
+        return [student.course.id];
       }
       if (
-        s.coursesStudent &&
-        Array.isArray(s.coursesStudent) &&
-        s.coursesStudent.length > 0
+        student.coursesStudent &&
+        Array.isArray(student.coursesStudent) &&
+        student.coursesStudent.length > 0
       ) {
-        return s.coursesStudent.map((cs: any) => cs.course_id);
+        return student.coursesStudent.map((cs: any) => cs.course_id);
       }
       return [];
     });
@@ -139,7 +143,7 @@ const StudentTransferForm: React.FC<Props> = ({
     }
 
     setIsLoading(true);
-    const studentIds = students.map((s) => s.id);
+    const studentIds = students.map((student) => student.id);
     const encrypted = Cookies.get('user_id') || localStorage.getItem('user_id');
     const createdBy = encrypted ? Number(decrypt(encrypted)) : 0;
 
@@ -212,22 +216,26 @@ const StudentTransferForm: React.FC<Props> = ({
                 className='list-group mb-4'
                 style={{ maxHeight: '150px', overflowY: 'auto' }}
               >
-                {students.map((s) => (
+                {students.map((student) => (
                   <li
-                    key={s.id}
+                    key={student.id}
                     className='list-group-item d-flex justify-content-between align-items-center'
                   >
                     <div>
-                      <strong>{s.user?.name || s.name || 'N/A'}</strong>
+                      <strong>
+                        {student.user?.name || student.name || 'N/A'}
+                      </strong>
                       <div className='text-muted small'>
-                        Current Level: {s.level?.name || s.level || 'None'} |{' '}
-                        Current Course: {s.course?.[0]?.course_number || 'None'}
+                        Current Level:{' '}
+                        {student.level?.name || student.level || 'None'} |{' '}
+                        Current Course:{' '}
+                        {student.course?.[0]?.course_number || 'None'}
                       </div>
                     </div>
                     <span
-                      className={`badge bg-${s.status === 'active' ? 'success' : 'danger'}`}
+                      className={`badge bg-${student.status === 'active' ? 'success' : 'danger'}`}
                     >
-                      {s.status}
+                      {student.status}
                     </span>
                   </li>
                 ))}
