@@ -182,7 +182,7 @@ const GradebookTable = ({
       reverseButtons: true,
     }).then((result) => {
       if (result.isConfirmed) {
-        const assignmentNumber= componentsGradebook?.assignments.length + 1;
+        const assignmentNumber = componentsGradebook?.assignments.length + 1;
         const assignmentName = `Assignment ${assignmentNumber}`;
         createAssignmentGradingItem({
           syllabus_id: syllabusId,
@@ -397,7 +397,7 @@ const GradebookTable = ({
                     key={`grade-note-${j}`}
                   >
                     <Input
-                      className={`td-input input-percentage bg-transparent text-black ${isCoordinator || student?.is_retired ? 'cursor-no-allowed' : ''}`}
+                      className={`td-input input-percentage bg-transparent text-black ${isCoordinator ? 'cursor-no-allowed' : ''} ${student?.is_retired && 'text-white'}`}
                       onChange={(event) =>
                         onChangeGrades(
                           event,
@@ -414,7 +414,9 @@ const GradebookTable = ({
                     />
                   </td>
                 ))}
-                <td>
+                <td
+                  className={`text-black ${isCoordinator || student?.is_retired ? 'cursor-no-allowed' : ''} ${student?.is_retired && 'text-white'}`}
+                >
                   {calculateAverage(
                     grades,
                     componentsGradebook?.assignments,
@@ -428,7 +430,7 @@ const GradebookTable = ({
                     key={`grade-note-progressTest-${j}`}
                   >
                     <Input
-                      className={`td-input input-percentage bg-transparent text-black ${isCoordinator || student?.is_retired ? 'cursor-no-allowed' : ''}`}
+                      className={`td-input input-percentage bg-transparent text-black ${isCoordinator ? 'cursor-no-allowed' : ''} ${student?.is_retired && 'text-white'}`}
                       onChange={(event) =>
                         onChangeGrades(
                           event,
@@ -445,7 +447,9 @@ const GradebookTable = ({
                     />
                   </td>
                 ))}
-                <td>
+                <td
+                  className={`text-black ${isCoordinator || student?.is_retired ? 'cursor-no-allowed' : ''} ${student?.is_retired && 'text-white'}`}
+                >
                   {calculateAverage(
                     grades,
                     componentsGradebook?.progressTest,
@@ -459,7 +463,7 @@ const GradebookTable = ({
                     key={`grade-note-progressTest-${j}`}
                   >
                     <Input
-                      className={`td-input input-percentage bg-transparent text-black ${isCoordinator || student?.is_retired ? 'cursor-no-allowed' : ''}`}
+                      className={`td-input input-percentage bg-transparent text-black ${isCoordinator || student?.is_retired ? 'cursor-no-allowed' : ''} ${student?.is_retired && 'text-white'}`}
                       onChange={(event) =>
                         onChangeGrades(
                           event,
@@ -476,7 +480,9 @@ const GradebookTable = ({
                     />
                   </td>
                 ))}
-                <td>
+                <td
+                  className={`text-black ${isCoordinator || student?.is_retired ? 'cursor-no-allowed' : ''} ${student?.is_retired && 'text-white'}`}
+                >
                   {calculateAverage(
                     grades,
                     componentsGradebook?.moversExam,
