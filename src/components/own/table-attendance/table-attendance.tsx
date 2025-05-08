@@ -146,39 +146,23 @@ const TableAttendance = ({
   return (
     <div>
       {isCoordinator && (
-        <Alert
-          color='warning'
-          className='mb-3'
-        >
+        <Alert color="warning" className="mb-3">
           As a coordinator, you can only view attendance but cannot modify it.
         </Alert>
       )}
-      <Table
-        responsive
-        bordered
-        className='main-table w-100'
-      >
+      <Table responsive bordered className="main-table w-100">
         <thead>
           <tr>
-            <th className='main-col-title student-col'>STUDENT</th>
+            <th className="main-col-title student-col">STUDENT</th>
             {scheduleItems?.map((date: any, index: number) => (
-              <th
-                className='col-vertical'
-                key={`date-attendance-${index}`}
-              >
+              <th className="col-vertical" key={`date-attendance-${index}`}>
                 {formatDate(date?.scheduled_date)}
               </th>
             ))}
-            <th
-              className='main-col-title'
-              colSpan={2}
-            >
+            <th className="main-col-title" colSpan={2}>
               ATTENDANCE
             </th>
-            <th
-              className='main-col-title'
-              colSpan={2}
-            >
+            <th className="main-col-title" colSpan={2}>
               ABSENCES
             </th>
           </tr>
@@ -200,23 +184,20 @@ const TableAttendance = ({
                   {student?.name}
                   {student?.is_retired && (
                     <Badge
-                      color='primary'
+                      color="primary"
                       pill
-                      size='sm'
-                      className=' mt-2 mt-md-0 ms-md-2'
+                      size="sm"
+                      className=" mt-2 mt-md-0 ms-md-2"
                     >
                       RETIRED
                     </Badge>
                   )}
                 </td>
                 {Object.keys(dates).map((courseScheduleId: any, index2) => (
-                  <td
-                    key={`attendance-${index2}`}
-                    className={`td-attendance`}
-                  >
+                  <td key={`attendance-${index2}`} className={`td-attendance`}>
                     <Input
-                      type='select'
-                      className={`td-input attendance-input bg-transparent text-dark ${isCoordinator || isReceptionist || student?.is_retired ? 'cursor-no-allowed text-white' : ''}`}
+                      type="select"
+                      className={`td-input attendance-input bg-transparent text-dark ${isCoordinator || isReceptionist ? 'cursor-no-allowed' : ''} ${student?.is_retired && 'text-white'}`}
                       value={dates[courseScheduleId][student?.id]}
                       onChange={(event) =>
                         changeAttendance(
@@ -230,11 +211,11 @@ const TableAttendance = ({
                         isCoordinator || isReceptionist || student?.is_retired
                       }
                     >
-                      <option value=''>&nbsp;</option>
-                      <option value='present'>P</option>
-                      <option value='absent'>F</option>
-                      <option value='late'>A</option>
-                      <option value='recovered'>R</option>
+                      <option value="">&nbsp;</option>
+                      <option value="present">P</option>
+                      <option value="absent">F</option>
+                      <option value="late">A</option>
+                      <option value="recovered">R</option>
                     </Input>
                   </td>
                 ))}
@@ -245,7 +226,7 @@ const TableAttendance = ({
             <tr>
               <td
                 colSpan={Object.keys(dates).length + 4}
-                className='text-center'
+                className="text-center"
               >
                 This course doesn't have student
               </td>
@@ -254,18 +235,18 @@ const TableAttendance = ({
 
           {students && students.length > 0 && (
             <>
-              <tr className='py-2'>
-                <td className='border-none'></td>
+              <tr className="py-2">
+                <td className="border-none"></td>
               </tr>
               <tr>
-                <td className='main-col-description student-col'>LESSON:</td>
+                <td className="main-col-description student-col">LESSON:</td>
                 {scheduleItems.map((item: any, index: number) => (
                   <td
-                    className='col-vertical'
+                    className="col-vertical"
                     key={`current-lesson-col-${index}`}
                   >
                     <Input
-                      type='text'
+                      type="text"
                       className={`attendance-input bg-white text-black ${isCoordinator || isReceptionist ? 'cursor-no-allowed' : ''}`}
                       onChange={(e) => updateScheduleItem(e, item.id, index)}
                       value={scheduleItems[index].lesson_taught ?? ''}
@@ -273,27 +254,21 @@ const TableAttendance = ({
                     />
                   </td>
                 ))}
-                <td
-                  className='main-col-description'
-                  colSpan={4}
-                ></td>
+                <td className="main-col-description" colSpan={4}></td>
               </tr>
               <tr>
-                <td className='main-col-description student-col'>
+                <td className="main-col-description student-col">
                   CURRICULUM:
                 </td>
                 {scheduleItems?.map((item: any, index: number) => (
                   <td
-                    className='col-vertical highlighted-col text-center'
+                    className="col-vertical highlighted-col text-center"
                     key={`curriculum-lesson-col-${index}`}
                   >
                     {item.syllabusItem.item_name}
                   </td>
                 ))}
-                <td
-                  className='main-col-description'
-                  colSpan={4}
-                ></td>
+                <td className="main-col-description" colSpan={4}></td>
               </tr>
             </>
           )}
