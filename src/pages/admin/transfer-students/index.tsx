@@ -34,6 +34,14 @@ const TransferStudents = () => {
   const [levelSearch, setLevelSearch] = useState('');
   const [courseOptions, setCourseOptions] = useState<any[]>([]);
   const [levelOptions, setLevelOptions] = useState<any[]>([]);
+  const [courseFilter, setCourseFilter] = useState<{
+    value: string;
+    label: string;
+  } | null>(null);
+  const [levelFilter, setLevelFilter] = useState<{
+    value: string;
+    label: string;
+  } | null>(null);
 
   const { data: courseData } = useSWR(
     ['/course/get-active', coursePage, limit, courseSearch],
@@ -101,20 +109,15 @@ const TransferStudents = () => {
       labelName: 'Course',
       name: 'selected_course_id',
       type: 'select',
-      items: courseOptions,
+      items: courseOptions.length > 0 ? courseOptions : [],
+      value: courseFilter,
+      inputValue: courseSearch,
+      onChange: (opt) => {
+        setCourseFilter(opt);
+      },
       onInputChange: (v) => setCourseSearch(v),
       onMenuScrollToBottom: () => setCoursePage((p) => p + 1),
       isAsync: true,
-      value: router.query.selected_course_id
-        ? {
-            value: router.query.selected_course_id,
-            label:
-              courseOptions.find(
-                (opt: any) =>
-                  opt.value.toString() === router.query.selected_course_id
-              )?.label || `Course ${router.query.selected_course_id}`,
-          }
-        : null,
     },
     {
       labelName: 'Level',
@@ -124,16 +127,11 @@ const TransferStudents = () => {
       onInputChange: (v) => setLevelSearch(v),
       onMenuScrollToBottom: () => setLevelPage((p) => p + 1),
       isAsync: true,
-      value: router.query.selected_level_id
-        ? {
-            value: router.query.selected_level_id,
-            label:
-              levelOptions.find(
-                (opt: any) =>
-                  opt.value.toString() === router.query.selected_level_id
-              )?.label || `Level ${router.query.selected_level_id}`,
-          }
-        : null,
+      value: levelFilter,
+      inputValue: levelSearch,
+      onChange: (opt) => {
+        setLevelFilter(opt);
+      },
     },
     { labelName: 'Created From', name: 'created_at_from', type: 'date' },
     { labelName: 'Created To', name: 'created_at_to', type: 'date' },

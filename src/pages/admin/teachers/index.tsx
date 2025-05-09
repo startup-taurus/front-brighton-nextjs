@@ -21,6 +21,10 @@ const Teachers = () => {
   >([]);
   const [searchTerm, setSearchTerm] = useState('');
 
+  const [professorFilter, setProfessorFilter] = useState<{
+    value: string;
+    label: string;
+  } | null>(null);
   const { data: professorsData } = useSWR(
     ['/professor/get-all', page, limit, searchTerm],
     () => getAllProfessors(page, limit, searchTerm),
@@ -70,6 +74,11 @@ const Teachers = () => {
       name: 'name',
       type: 'select',
       items: professorOptions,
+      value: professorFilter,
+      inputValue: searchTerm,
+      onChange: (opt) => {
+        setProfessorFilter(opt);
+      },
       onInputChange: (inputValue: string) => {
         setSearchTerm(inputValue);
       },

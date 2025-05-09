@@ -37,7 +37,14 @@ const Students = () => {
   const [levelSearchTerm, setLevelSearchTerm] = useState('');
   const [courseOptions, setCourseOptions] = useState<any[]>([]);
   const [levelOptions, setLevelOptions] = useState<any[]>([]);
-
+  const [courseNoFilter, setCourseNoFilter] = useState<{
+    value: string;
+    label: string;
+  } | null>(null);
+  const [levelFilter, setLevelFilter] = useState<{
+    value: string;
+    label: string;
+  } | null>(null);
   const filters = getFiltersString(router);
 
   const students = useSWR(
@@ -146,6 +153,12 @@ const Students = () => {
       name: 'course',
       type: 'select',
       items: courseOptions.length > 0 ? courseOptions : [],
+      value: courseNoFilter,
+      inputValue: courseSearchTerm,
+      onChange: (opt) => {
+        setCourseNoFilter(opt);
+      },
+
       onInputChange: (inputValue: string) => setCourseSearchTerm(inputValue),
       onMenuScrollToBottom: onCourseScrollToBottom,
     },
@@ -154,6 +167,11 @@ const Students = () => {
       name: 'level_id',
       type: 'select',
       items: levelOptions.length > 0 ? levelOptions : [],
+      value: levelFilter,
+      inputValue: levelSearchTerm,
+      onChange: (opt) => {
+        setLevelFilter(opt);
+      },
       onInputChange: (inputValue: string) => setLevelSearchTerm(inputValue),
       onMenuScrollToBottom: onLevelScrollToBottom,
     },

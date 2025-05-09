@@ -24,6 +24,10 @@ const Students = () => {
   const [levelPage, setLevelPage] = useState(1);
   const [levelSearchTerm, setLevelSearchTerm] = useState('');
   const [levelOptions, setLevelOptions] = useState<any[]>([]);
+  const [levelFilter, setLevelFilter] = useState<{
+    value: string;
+    label: string;
+  } | null>(null);
 
   const filters = getFiltersString(router);
 
@@ -82,6 +86,11 @@ const Students = () => {
       name: 'level_id',
       type: 'select',
       items: levelOptions.length > 0 ? levelOptions : [],
+      value: levelFilter,
+      inputValue: levelSearchTerm,
+      onChange: (opt: any) => {
+        setLevelFilter(opt);
+      },
       onInputChange: (inputValue: string) => setLevelSearchTerm(inputValue),
       onMenuScrollToBottom: onLevelScrollToBottom,
     },
