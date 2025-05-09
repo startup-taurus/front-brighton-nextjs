@@ -24,6 +24,18 @@ const Students = () => {
     value: string;
     label: string;
   } | null>(null);
+  const [statusFilter, setStatusFilter] = useState<{
+    value: string;
+    label: string;
+  } | null>(null);
+  const [course, setCourse] = useState<{
+    value: string;
+    label: string;
+  } | null>(null);
+  const [nameCourse, setNameCourse] = useState<{
+    value: string;
+    label: string;
+  } | null>(null);
 
   const { data: professorsData } = useSWR(
     ['/professor/get-active', page, limit, searchTerm],
@@ -37,6 +49,15 @@ const Students = () => {
     if (
       professorsData?.data?.result?.length != 0 ||
       professorsData?.data?.length != 0
+    ) {
+      const nextPage = page + 1;
+      setPage(nextPage);
+    }
+  };
+  const onCourseScrollBottom = () => {
+    if (
+      coursesData?.data?.result?.length != 0 ||
+      coursesData?.data?.length != 0
     ) {
       const nextPage = page + 1;
       setPage(nextPage);
@@ -90,24 +111,51 @@ const Students = () => {
     }));
   }, [coursesData]);
 
+  const courseNameOptions = React.useMemo(() => {
+    if (!coursesData?.data?.result) return [];
+
+    const uniqueCourseName = Array.from(
+      new Set(coursesData.data.result.map((course: any) => course.course_name))
+    );
+
+    return uniqueCourseName.map((courseName) => ({
+      label: courseName as string,
+      value: courseName as string,
+    }));
+  }, [coursesData]);
+
   const selectFilters: FiltersProps[] = [
     {
       labelName: 'Status',
       name: 'status',
       type: 'select',
       items: STATUS_FILTER,
+      value: statusFilter,
+      onChange: (selectedOption: any) => {
+        setStatusFilter(selectedOption);
+      },
     },
     {
       labelName: 'Course No',
       name: 'course_number',
       type: 'select',
       items: courseNumberOptions,
-      placeholder: 'Select course number',
+      value: course,
+      onChange: (selectedOption: any) => {
+        setCourse(selectedOption);
+      },
+      onMenuScrollToBottom: onCourseScrollBottom,
     },
     {
       labelName: 'Name of course',
       name: 'course_name',
-      type: 'text',
+      type: 'select',
+      items: courseNameOptions,
+      value: nameCourse,
+      onChange: (selectedOption: any) => {
+        setNameCourse(selectedOption);
+      },
+      onMenuScrollToBottom: onCourseScrollBottom,
     },
     {
       labelName: 'Teacher',
@@ -117,9 +165,6 @@ const Students = () => {
       value: teacherFilter,
       onChange: (selectedOption: any) => {
         setTeacherFilter(selectedOption);
-      },
-      onInputChange: (inputValue: string) => {
-        setSearchTerm(inputValue);
       },
       onMenuScrollToBottom: onProfessorScrollBottom,
     },

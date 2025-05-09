@@ -45,6 +45,11 @@ const Students = () => {
     value: string;
     label: string;
   } | null>(null);
+  const [statusFilter, setStatusFilter] = useState<{
+    value: string;
+    label: string;
+  } | null>(null);
+
   const filters = getFiltersString(router);
 
   const students = useSWR(
@@ -147,6 +152,10 @@ const Students = () => {
       name: 'status',
       type: 'select',
       items: STATUS_FILTER,
+      value: statusFilter,
+      onChange: (selectedOption: any) => {
+        setStatusFilter(selectedOption);
+      },
     },
     {
       labelName: 'Course No',
@@ -154,12 +163,9 @@ const Students = () => {
       type: 'select',
       items: courseOptions.length > 0 ? courseOptions : [],
       value: courseNoFilter,
-      inputValue: courseSearchTerm,
       onChange: (opt) => {
         setCourseNoFilter(opt);
       },
-
-      onInputChange: (inputValue: string) => setCourseSearchTerm(inputValue),
       onMenuScrollToBottom: onCourseScrollToBottom,
     },
     {
@@ -168,11 +174,9 @@ const Students = () => {
       type: 'select',
       items: levelOptions.length > 0 ? levelOptions : [],
       value: levelFilter,
-      inputValue: levelSearchTerm,
       onChange: (opt) => {
         setLevelFilter(opt);
       },
-      onInputChange: (inputValue: string) => setLevelSearchTerm(inputValue),
       onMenuScrollToBottom: onLevelScrollToBottom,
     },
     {

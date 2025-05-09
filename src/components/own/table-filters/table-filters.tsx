@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useMemo } from 'react';
 import {
   Card,
   CardBody,
@@ -25,22 +25,23 @@ const TableFilters = ({ selectFilters }: TableFiltersProps) => {
   const router = useRouter();
   const formikRef = useRef<any>(null);
 
-  const initialValues = selectFilters.reduce(
-    (acc, field) => {
-      const propVal =
-        typeof field.value === 'object' && field.value !== null
-          ? String((field.value as { value: any }).value)
-          : (field.value ?? '');
-
-      acc[field.name] = propVal || (router.query[field.name] as string) || '';
-      return acc;
-    },
-    {} as Record<string, string>
-  );
+  // Memoiza los valores iniciales para no resetear al cambiar selects
+  const initialValues = useMemo(() => {
+    return selectFilters.reduce(
+      (acc, field) => {
+        const propVal =
+          typeof field.value === 'object' && field.value !== null
+            ? String((field.value as { value: any }).value)
+            : (field.value ?? '');
+        acc[field.name] = propVal || (router.query[field.name] as string) || '';
+        return acc;
+      },
+      {} as Record<string, string>
+    );
+  }, [router.query]);
 
   useEffect(() => {
     const queryKeys = Object.keys(router.query);
-
     if (queryKeys.length === 1 && queryKeys.includes('id')) {
       return;
     }
@@ -60,7 +61,6 @@ const TableFilters = ({ selectFilters }: TableFiltersProps) => {
     if (formikRef.current) {
       const currentValues = formikRef.current.values;
       let hasChanged = false;
-
       const newValues = { ...currentValues };
 
       selectFilters.forEach((field) => {
@@ -75,7 +75,7 @@ const TableFilters = ({ selectFilters }: TableFiltersProps) => {
         formikRef.current.setValues(newValues);
       }
     }
-  }, [router.query, selectFilters]);
+  }, [router.query]);
 
   const handleCollapse = () => {
     setIsOpen(!isOpen);
@@ -101,6 +101,15 @@ const TableFilters = ({ selectFilters }: TableFiltersProps) => {
 
   const onSubmit = (_: any) => {
     const query: Record<string, string> = {};
+    Object.keys(router.query).forEach((key) => {
+      if (
+        key !== 'page' &&
+        key !== 'rowPerPage' &&
+        !selectFilters.some((filter) => filter.name === key)
+      ) {
+        query[key] = router.query[key] as string;
+      }
+    });
 
     selectFilters.forEach((field) => {
       if (
@@ -111,7 +120,6 @@ const TableFilters = ({ selectFilters }: TableFiltersProps) => {
         query[field.name] = String((field.value as { value: any }).value);
         return;
       }
-
       const val = formikRef.current?.values[field.name];
       if (val) {
         query[field.name] = String(val);
@@ -141,7 +149,7 @@ const TableFilters = ({ selectFilters }: TableFiltersProps) => {
         <CardBody>
           <Formik
             initialValues={initialValues}
-            enableReinitialize={true}
+            enableReinitialize
             onSubmit={onSubmit}
             innerRef={formikRef}
           >
@@ -189,14 +197,18 @@ const TableFilters = ({ selectFilters }: TableFiltersProps) => {
                                 const value = selectedOption
                                   ? selectedOption.value
                                   : '';
-                                form.setFieldValue(item.name, value);
+                                form.setFieldValue(item.name, value, false);
                                 if (item.onChange) {
                                   item.onChange(selectedOption);
                                 }
                               }}
                               placeholder={`Select ${item.labelName}`}
                               isSearchable
-                              onInputChange={item.onInputChange}
+                              onInputChange={(inputValue) => {
+                                if (item.onInputChange) {
+                                  item.onInputChange(inputValue);
+                                }
+                              }}
                               onMenuScrollToBottom={item.onMenuScrollToBottom}
                               menuPortalTarget={document.body}
                               menuPosition='fixed'
