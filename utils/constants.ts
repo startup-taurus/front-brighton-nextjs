@@ -121,4 +121,10 @@ export const EXAMS_TYPE = {
   PRELIM: 'PRELIM.',
 };
 
+export const STATUS = {
+  ACTIVE: 'active',
+  INACTIVE: 'inactive',
+};
 export const GROUP_MINIMUM = 2;
+
+
