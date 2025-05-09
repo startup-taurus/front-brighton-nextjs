@@ -22,7 +22,6 @@ import { UserContext } from '../../../../helper/User';
 import usePermission from '../../../../hooks/usePermission';
 import { PERMISSIONS } from '../../../../utils/permissions';
 import { STATUS, USER_TYPES } from 'utils/constants';
-import { stat } from 'fs';
 
 type TableAttendance = {
   courseSchedule: any;
@@ -195,73 +194,67 @@ const TableAttendance = ({
         </thead>
         <tbody>
           {students && students.length > 0 ? (
-            students?.map(
-              (student: any, index) => (
-                console.log(student),
-                (
-                  <tr
-                    key={`date-student-${index}`}
-                    className={
-                      student?.is_retired || student?.status === STATUS.INACTIVE
-                        ? 'retired_color'
-                        : ''
-                    }
-                  >
-                    <td
-                      className={
-                        student?.is_retired ||
-                        student?.status === STATUS.INACTIVE
-                          ? ' d-flex flex-column flex-md-row  align-items-start align-items-md-center justify-content-start '
-                          : ''
-                      }
+            students?.map((student: any, index) => (
+              <tr
+                key={`date-student-${index}`}
+                className={
+                  student?.is_retired || student?.status === STATUS.INACTIVE
+                    ? 'retired_color'
+                    : ''
+                }
+              >
+                <td
+                  className={
+                    student?.is_retired || student?.status === STATUS.INACTIVE
+                      ? ' d-flex flex-column flex-md-row  align-items-start align-items-md-center justify-content-start '
+                      : ''
+                  }
+                >
+                  {student?.name}
+                  {(student?.status === STATUS.INACTIVE ||
+                    student?.is_retired) && (
+                    <Badge
+                      color='primary'
+                      pill
+                      size='sm'
+                      className='mt-2 mt-md-0 ms-md-2'
                     >
-                      {student?.name}
-                      {(student?.status === STATUS.INACTIVE ||
-                        student?.is_retired) && (
-                        <Badge
-                          color='primary'
-                          pill
-                          size='sm'
-                          className='mt-2 mt-md-0 ms-md-2'
-                        >
-                          {student.status === STATUS.INACTIVE
-                            ? 'INACTIVE'
-                            : 'RETIRED'}
-                        </Badge>
-                      )}
-                    </td>
-                    {Object.keys(dates).map((courseScheduleId: any, index2) => (
-                      <td
-                        key={`attendance-${index2}`}
-                        className={`td-attendance`}
-                      >
-                        <Input
-                          type='select'
-                          className={`td-input attendance-input bg-transparent text-dark ${isCoordinator || isReceptionist ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-white cursor-no-allowed'}`}
-                          value={dates[courseScheduleId][student?.id]}
-                          onChange={(event) =>
-                            changeAttendance(
-                              event,
-                              courseScheduleId,
-                              student?.id,
-                              student?.is_retired
-                            )
-                          }
-                          disabled={isInputDisabled(student)}
-                        >
-                          <option value=''>&nbsp;</option>
-                          <option value='present'>P</option>
-                          <option value='absent'>F</option>
-                          <option value='late'>A</option>
-                          <option value='recovered'>R</option>
-                        </Input>
-                      </td>
-                    ))}
-                    {renderStatisticsCol(student?.id)}
-                  </tr>
-                )
-              )
-            )
+                      {student.status === STATUS.INACTIVE
+                        ? 'INACTIVE'
+                        : 'RETIRED'}
+                    </Badge>
+                  )}
+                </td>
+                {Object.keys(dates).map((courseScheduleId: any, index2) => (
+                  <td
+                    key={`attendance-${index2}`}
+                    className={`td-attendance`}
+                  >
+                    <Input
+                      type='select'
+                      className={`td-input attendance-input bg-transparent text-dark ${isCoordinator || isReceptionist ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-white cursor-no-allowed'}`}
+                      value={dates[courseScheduleId][student?.id]}
+                      onChange={(event) =>
+                        changeAttendance(
+                          event,
+                          courseScheduleId,
+                          student?.id,
+                          student?.is_retired
+                        )
+                      }
+                      disabled={isInputDisabled(student)}
+                    >
+                      <option value=''>&nbsp;</option>
+                      <option value='present'>P</option>
+                      <option value='absent'>F</option>
+                      <option value='late'>A</option>
+                      <option value='recovered'>R</option>
+                    </Input>
+                  </td>
+                ))}
+                {renderStatisticsCol(student?.id)}
+              </tr>
+            ))
           ) : (
             <tr>
               <td
