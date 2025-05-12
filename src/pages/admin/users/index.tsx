@@ -21,10 +21,7 @@ const Users = () => {
     Array<{ label: string; value: string }>
   >([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [nameFilter, setNameFilter] = useState<{
-    value: string;
-    label: string;
-  } | null>(null);
+  const [nameFilter, setNameFilter] = useState<SelectOption | null>(null);
 
   useEffect(() => {
     setUserOptions([]);
@@ -86,8 +83,8 @@ const Users = () => {
           const combined = [...baseOptions, ...newOptions];
 
           return combined.filter(
-            (opt, idx, arr) =>
-              arr.findIndex((o) => o.value === opt.value) === idx
+            (option, idx, arr) =>
+              arr.findIndex((options) => options.value === option.value) === idx
           );
         });
       }
@@ -122,8 +119,8 @@ const Users = () => {
       items: userOptions,
       value: nameFilter,
       inputValue: searchTerm,
-      onInputChange: (val: string) => setSearchTerm(val),
-      onChange: (opt) => setNameFilter(opt),
+      onInputChange: (value: string) => setSearchTerm(value),
+      onChange: (option) => setNameFilter(option),
       onMenuScrollToBottom: onUserScrollToBottom,
       isLoading: loadingMoreUsers,
     },

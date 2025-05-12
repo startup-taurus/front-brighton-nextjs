@@ -25,7 +25,6 @@ const TableFilters = ({ selectFilters }: TableFiltersProps) => {
   const router = useRouter();
   const formikRef = useRef<any>(null);
 
-  // Memoiza los valores iniciales para no resetear al cambiar selects
   const initialValues = useMemo(() => {
     return selectFilters.reduce(
       (acc, field) => {

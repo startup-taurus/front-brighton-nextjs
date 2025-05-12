@@ -21,10 +21,9 @@ const Teachers = () => {
   >([]);
   const [searchTerm, setSearchTerm] = useState('');
 
-  const [professorFilter, setProfessorFilter] = useState<{
-    value: string;
-    label: string;
-  } | null>(null);
+  const [professorFilter, setProfessorFilter] = useState<SelectOption | null>(
+    null
+  );
   const { data: professorsData } = useSWR(
     ['/professor/get-all', page, limit, searchTerm],
     () => getAllProfessors(page, limit, searchTerm),
@@ -54,7 +53,8 @@ const Teachers = () => {
         const combined = [...prevOptions, ...options];
         return combined.filter(
           (option, index, self) =>
-            self.findIndex((o) => o.value === option.value) === index
+            self.findIndex((options) => options.value === option.value) ===
+            index
         );
       });
     }
@@ -76,8 +76,8 @@ const Teachers = () => {
       items: professorOptions,
       value: professorFilter,
       inputValue: searchTerm,
-      onChange: (opt) => {
-        setProfessorFilter(opt);
+      onChange: (option) => {
+        setProfessorFilter(option);
       },
       onInputChange: (inputValue: string) => {
         setSearchTerm(inputValue);
