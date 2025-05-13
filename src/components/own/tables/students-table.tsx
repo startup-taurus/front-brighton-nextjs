@@ -120,13 +120,13 @@ const StudentsTable = ({
     },
     {
       name: 'Student name',
-      selector: (row: any) => row.user.name,
+      selector: (row: any) => row.user?.name,
       sortable: true,
       center: false,
     },
     {
       name: 'Email',
-      selector: (row: any) => row.user.email,
+      selector: (row: any) => row.user?.email,
       sortable: true,
       center: false,
     },

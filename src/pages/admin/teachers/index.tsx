@@ -26,7 +26,7 @@ const Teachers = () => {
   );
   const { data: professorsData } = useSWR(
     ['/professor/get-all', page, limit, searchTerm],
-    () => getAllProfessors(page, limit, searchTerm),
+    () => getAllProfessors(page, limit, searchTerm ? `name=${searchTerm}` : ''),
     {
       revalidateOnFocus: false,
     }

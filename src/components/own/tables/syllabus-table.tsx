@@ -106,7 +106,7 @@ const SyllabusTable = ({ reload }: any) => {
     },
     {
       name: 'Level',
-      selector: (row: any) => `${row.level.full_level}`,
+      selector: (row: any) => `${row.level?.full_level}`,
       sortable: true,
       center: false,
     },
