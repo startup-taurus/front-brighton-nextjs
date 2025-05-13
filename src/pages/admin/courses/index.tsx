@@ -6,7 +6,10 @@ import CourseForm from '@/components/own/form/course-form';
 import { FiltersProps } from '../../../../Types/types';
 import { COURSE_TYPE_FILTER, STATUS_FILTER } from '../../../../utils/constants';
 import TableFilters from '@/components/own/table-filters/table-filters';
-import { getActiveProfessors } from '../../../../helper/api-data/professor';
+import {
+  getActiveProfessors,
+  getAllProfessors,
+} from '../../../../helper/api-data/professor';
 import { getAllCourses } from '../../../../helper/api-data/course';
 import useSWR from 'swr';
 
@@ -26,8 +29,8 @@ const Students = () => {
   const [nameCourse, setNameCourse] = useState<SelectOption | null>(null);
 
   const { data: professorsData } = useSWR(
-    ['/professor/get-active', page, limit, searchTerm],
-    () => getActiveProfessors(page, limit, searchTerm),
+    ['/professor/get-all', page, limit, searchTerm],
+    () => getAllProfessors(page, limit, searchTerm ? `name=${searchTerm}` : ''),
     {
       revalidateOnFocus: false,
     }
@@ -53,16 +56,18 @@ const Students = () => {
   };
 
   useEffect(() => {
-    if (professorsData?.data) {
-      const options = professorsData.data.map((professor: any) => ({
+    if (professorsData?.data?.result) {
+      const options = professorsData.data.result.map((professor: any) => ({
         label: professor.user.name,
         value: professor.user.name,
       }));
+
       setProfessorOptions((prevOptions) => {
         const combined = [...prevOptions, ...options];
         return combined.filter(
           (option, index, self) =>
-            self.findIndex((o) => o.value === option.value) === index
+            self.findIndex((options) => options.value === option.value) ===
+            index
         );
       });
     }
@@ -154,6 +159,7 @@ const Students = () => {
       onChange: (selectedOption: any) => {
         setTeacherFilter(selectedOption);
       },
+      onInputChange: (value) => setSearchTerm(value),
       onMenuScrollToBottom: onProfessorScrollBottom,
     },
     {
