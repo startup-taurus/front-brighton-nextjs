@@ -6,7 +6,10 @@ import CourseForm from '@/components/own/form/course-form';
 import { FiltersProps } from '../../../../Types/types';
 import { COURSE_TYPE_FILTER, STATUS_FILTER } from '../../../../utils/constants';
 import TableFilters from '@/components/own/table-filters/table-filters';
-import { getActiveProfessors } from '../../../../helper/api-data/professor';
+import {
+  getActiveProfessors,
+  getAllProfessors,
+} from '../../../../helper/api-data/professor';
 import { getAllCourses } from '../../../../helper/api-data/course';
 import useSWR from 'swr';
 
@@ -20,14 +23,14 @@ const Students = () => {
     Array<{ label: string; value: string }>
   >([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [teacherFilter, setTeacherFilter] = useState<{
-    value: string;
-    label: string;
-  } | null>(null);
+  const [teacherFilter, setTeacherFilter] = useState<SelectOption | null>(null);
+  const [statusFilter, setStatusFilter] = useState<SelectOption | null>(null);
+  const [course, setCourse] = useState<SelectOption | null>(null);
+  const [nameCourse, setNameCourse] = useState<SelectOption | null>(null);
 
   const { data: professorsData } = useSWR(
-    ['/professor/get-active', page, limit, searchTerm],
-    () => getActiveProfessors(page, limit, searchTerm),
+    ['/professor/get-all', page, limit, searchTerm],
+    () => getAllProfessors(page, limit, searchTerm ? `name=${searchTerm}` : ''),
     {
       revalidateOnFocus: false,
     }
@@ -42,18 +45,29 @@ const Students = () => {
       setPage(nextPage);
     }
   };
+  const onCourseScrollBottom = () => {
+    if (
+      coursesData?.data?.result?.length != 0 ||
+      coursesData?.data?.length != 0
+    ) {
+      const nextPage = page + 1;
+      setPage(nextPage);
+    }
+  };
 
   useEffect(() => {
-    if (professorsData?.data) {
-      const options = professorsData.data.map((professor: any) => ({
+    if (professorsData?.data?.result) {
+      const options = professorsData.data.result.map((professor: any) => ({
         label: professor.user.name,
         value: professor.user.name,
       }));
+
       setProfessorOptions((prevOptions) => {
         const combined = [...prevOptions, ...options];
         return combined.filter(
           (option, index, self) =>
-            self.findIndex((o) => o.value === option.value) === index
+            self.findIndex((options) => options.value === option.value) ===
+            index
         );
       });
     }
@@ -90,24 +104,51 @@ const Students = () => {
     }));
   }, [coursesData]);
 
+  const courseNameOptions = React.useMemo(() => {
+    if (!coursesData?.data?.result) return [];
+
+    const uniqueCourseName = Array.from(
+      new Set(coursesData.data.result.map((course: any) => course.course_name))
+    );
+
+    return uniqueCourseName.map((courseName) => ({
+      label: courseName as string,
+      value: courseName as string,
+    }));
+  }, [coursesData]);
+
   const selectFilters: FiltersProps[] = [
     {
       labelName: 'Status',
       name: 'status',
       type: 'select',
       items: STATUS_FILTER,
+      value: statusFilter,
+      onChange: (selectedOption: any) => {
+        setStatusFilter(selectedOption);
+      },
     },
     {
       labelName: 'Course No',
       name: 'course_number',
       type: 'select',
       items: courseNumberOptions,
-      placeholder: 'Select course number',
+      value: course,
+      onChange: (selectedOption: any) => {
+        setCourse(selectedOption);
+      },
+      onMenuScrollToBottom: onCourseScrollBottom,
     },
     {
       labelName: 'Name of course',
       name: 'course_name',
-      type: 'text',
+      type: 'select',
+      items: courseNameOptions,
+      value: nameCourse,
+      onChange: (selectedOption: any) => {
+        setNameCourse(selectedOption);
+      },
+      onMenuScrollToBottom: onCourseScrollBottom,
     },
     {
       labelName: 'Teacher',
@@ -118,9 +159,7 @@ const Students = () => {
       onChange: (selectedOption: any) => {
         setTeacherFilter(selectedOption);
       },
-      onInputChange: (inputValue: string) => {
-        setSearchTerm(inputValue);
-      },
+      onInputChange: (value) => setSearchTerm(value),
       onMenuScrollToBottom: onProfessorScrollBottom,
     },
     {

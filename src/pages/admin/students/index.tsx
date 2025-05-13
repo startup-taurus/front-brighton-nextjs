@@ -37,6 +37,11 @@ const Students = () => {
   const [levelSearchTerm, setLevelSearchTerm] = useState('');
   const [courseOptions, setCourseOptions] = useState<any[]>([]);
   const [levelOptions, setLevelOptions] = useState<any[]>([]);
+  const [courseNoFilter, setCourseNoFilter] = useState<SelectOption | null>(
+    null
+  );
+  const [levelFilter, setLevelFilter] = useState<SelectOption | null>(null);
+  const [statusFilter, setStatusFilter] = useState<SelectOption | null>(null);
 
   const filters = getFiltersString(router);
 
@@ -93,7 +98,8 @@ const Students = () => {
           const combined = [...prevOptions, ...options];
           return combined.filter(
             (option, index, self) =>
-              self.findIndex((o) => o.value === option.value) === index
+              self.findIndex((options) => options.value === option.value) ===
+              index
           );
         });
       }
@@ -118,7 +124,8 @@ const Students = () => {
         const combined = [...prevOptions, ...options];
         return combined.filter(
           (option, index, self) =>
-            self.findIndex((o) => o.value === option.value) === index
+            self.findIndex((options) => options.value === option.value) ===
+            index
         );
       });
     }
@@ -140,13 +147,20 @@ const Students = () => {
       name: 'status',
       type: 'select',
       items: STATUS_FILTER,
+      value: statusFilter,
+      onChange: (selectedOption: any) => {
+        setStatusFilter(selectedOption);
+      },
     },
     {
       labelName: 'Course No',
       name: 'course',
       type: 'select',
       items: courseOptions.length > 0 ? courseOptions : [],
-      onInputChange: (inputValue: string) => setCourseSearchTerm(inputValue),
+      value: courseNoFilter,
+      onChange: (option) => {
+        setCourseNoFilter(option);
+      },
       onMenuScrollToBottom: onCourseScrollToBottom,
     },
     {
@@ -154,7 +168,10 @@ const Students = () => {
       name: 'level_id',
       type: 'select',
       items: levelOptions.length > 0 ? levelOptions : [],
-      onInputChange: (inputValue: string) => setLevelSearchTerm(inputValue),
+      value: levelFilter,
+      onChange: (option) => {
+        setLevelFilter(option);
+      },
       onMenuScrollToBottom: onLevelScrollToBottom,
     },
     {

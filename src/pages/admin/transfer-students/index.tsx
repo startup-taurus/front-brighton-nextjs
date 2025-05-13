@@ -34,6 +34,8 @@ const TransferStudents = () => {
   const [levelSearch, setLevelSearch] = useState('');
   const [courseOptions, setCourseOptions] = useState<any[]>([]);
   const [levelOptions, setLevelOptions] = useState<any[]>([]);
+  const [courseFilter, setCourseFilter] = useState<SelectOption | null>(null);
+  const [levelFilter, setLevelFilter] = useState<SelectOption | null>(null);
 
   const { data: courseData } = useSWR(
     ['/course/get-active', coursePage, limit, courseSearch],
@@ -46,17 +48,22 @@ const TransferStudents = () => {
 
   useEffect(() => {
     if (courseData?.data) {
-      const arr = Array.isArray(courseData.data)
+      const coursesArray = Array.isArray(courseData.data)
         ? courseData.data
         : courseData.data.result;
-      const opts = arr.map((c: any) => ({
-        value: c.id,
-        label: c.course_number,
+
+      const newOptions = coursesArray.map((course: any) => ({
+        value: course.id,
+        label: course.course_number,
       }));
-      setCourseOptions((prev) => {
-        const combo = [...prev, ...opts];
-        return combo.filter(
-          (o, i) => combo.findIndex((x) => x.value === o.value) === i
+
+      setCourseOptions((prevOptions) => {
+        const combinedOptions = [...prevOptions, ...newOptions];
+        return combinedOptions.filter(
+          (currentOption, currentIndex) =>
+            combinedOptions.findIndex(
+              (option) => option.value === currentOption.value
+            ) === currentIndex
         );
       });
     }
@@ -64,17 +71,20 @@ const TransferStudents = () => {
 
   useEffect(() => {
     if (levelData?.data) {
-      const arr = Array.isArray(levelData.data)
+      const levelArray = Array.isArray(levelData.data)
         ? levelData.data
         : levelData.data.result;
-      const opts = arr.map((l: any) => ({
-        value: l.id || l.level,
-        label: l.full_level || l.level,
+      const newOptions = levelArray.map((level: any) => ({
+        value: level.id || level.level,
+        label: level.full_level || level.level,
       }));
-      setLevelOptions((prev) => {
-        const combo = [...prev, ...opts];
-        return combo.filter(
-          (o, i) => combo.findIndex((x) => x.value === o.value) === i
+      setLevelOptions((prevOptions) => {
+        const combinedOptions = [...prevOptions, ...newOptions];
+        return combinedOptions.filter(
+          (currentOption, currentIndex) =>
+            combinedOptions.findIndex(
+              (option) => option.value === currentOption.value
+            ) === currentIndex
         );
       });
     }
@@ -101,39 +111,29 @@ const TransferStudents = () => {
       labelName: 'Course',
       name: 'selected_course_id',
       type: 'select',
-      items: courseOptions,
-      onInputChange: (v) => setCourseSearch(v),
-      onMenuScrollToBottom: () => setCoursePage((p) => p + 1),
+      items: courseOptions.length > 0 ? courseOptions : [],
+      value: courseFilter,
+      inputValue: courseSearch,
+      onChange: (option) => {
+        setCourseFilter(option);
+      },
+      onInputChange: (value) => setCourseSearch(value),
+      onMenuScrollToBottom: () => setCoursePage((page) => page + 1),
       isAsync: true,
-      value: router.query.selected_course_id
-        ? {
-            value: router.query.selected_course_id,
-            label:
-              courseOptions.find(
-                (opt: any) =>
-                  opt.value.toString() === router.query.selected_course_id
-              )?.label || `Course ${router.query.selected_course_id}`,
-          }
-        : null,
     },
     {
       labelName: 'Level',
       name: 'selected_level_id',
       type: 'select',
       items: levelOptions,
-      onInputChange: (v) => setLevelSearch(v),
-      onMenuScrollToBottom: () => setLevelPage((p) => p + 1),
+      onInputChange: (value) => setLevelSearch(value),
+      onMenuScrollToBottom: () => setLevelPage((page) => page + 1),
       isAsync: true,
-      value: router.query.selected_level_id
-        ? {
-            value: router.query.selected_level_id,
-            label:
-              levelOptions.find(
-                (opt: any) =>
-                  opt.value.toString() === router.query.selected_level_id
-              )?.label || `Level ${router.query.selected_level_id}`,
-          }
-        : null,
+      value: levelFilter,
+      inputValue: levelSearch,
+      onChange: (option) => {
+        setLevelFilter(option);
+      },
     },
     { labelName: 'Created From', name: 'created_at_from', type: 'date' },
     { labelName: 'Created To', name: 'created_at_to', type: 'date' },

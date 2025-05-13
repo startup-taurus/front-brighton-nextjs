@@ -15,4 +15,5 @@ export interface FiltersProps {
     | null;
   inputValue?: string;
   onChange?: (selectedOption: { value: string; label: string } | null) => void;
+  isLoading?: boolean;
 }
