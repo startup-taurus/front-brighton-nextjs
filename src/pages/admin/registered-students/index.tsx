@@ -24,10 +24,7 @@ const Students = () => {
   const [levelPage, setLevelPage] = useState(1);
   const [levelSearchTerm, setLevelSearchTerm] = useState('');
   const [levelOptions, setLevelOptions] = useState<any[]>([]);
-  const [levelFilter, setLevelFilter] = useState<{
-    value: string;
-    label: string;
-  } | null>(null);
+  const [levelFilter, setLevelFilter] = useState<SelectOption | null>(null);
 
   const filters = getFiltersString(router);
 

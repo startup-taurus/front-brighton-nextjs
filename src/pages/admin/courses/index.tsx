@@ -20,22 +20,10 @@ const Students = () => {
     Array<{ label: string; value: string }>
   >([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [teacherFilter, setTeacherFilter] = useState<{
-    value: string;
-    label: string;
-  } | null>(null);
-  const [statusFilter, setStatusFilter] = useState<{
-    value: string;
-    label: string;
-  } | null>(null);
-  const [course, setCourse] = useState<{
-    value: string;
-    label: string;
-  } | null>(null);
-  const [nameCourse, setNameCourse] = useState<{
-    value: string;
-    label: string;
-  } | null>(null);
+  const [teacherFilter, setTeacherFilter] = useState<SelectOption | null>(null);
+  const [statusFilter, setStatusFilter] = useState<SelectOption | null>(null);
+  const [course, setCourse] = useState<SelectOption | null>(null);
+  const [nameCourse, setNameCourse] = useState<SelectOption | null>(null);
 
   const { data: professorsData } = useSWR(
     ['/professor/get-active', page, limit, searchTerm],
