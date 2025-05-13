@@ -85,8 +85,8 @@ const Students = () => {
       items: levelOptions.length > 0 ? levelOptions : [],
       value: levelFilter,
       inputValue: levelSearchTerm,
-      onChange: (opt: any) => {
-        setLevelFilter(opt);
+      onChange: (option: any) => {
+        setLevelFilter(option);
       },
       onInputChange: (inputValue: string) => setLevelSearchTerm(inputValue),
       onMenuScrollToBottom: onLevelScrollToBottom,
