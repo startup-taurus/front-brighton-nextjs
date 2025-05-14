@@ -6,9 +6,8 @@ import React, {
   useCallback,
   useContext,
 } from 'react';
-import { Input, Table, Alert, Badge } from 'reactstrap';
+import { Input, Table, Alert, Badge, Button, Collapse } from 'reactstrap';
 import {
-  buildAttendanceStructure,
   countAbsences,
   countAttendance,
   formatDate,
@@ -22,10 +21,11 @@ import { UserContext } from '../../../../helper/User';
 import usePermission from '../../../../hooks/usePermission';
 import { PERMISSIONS } from '../../../../utils/permissions';
 import { STATUS, USER_TYPES } from 'utils/constants';
+import { FaChevronUp, FaChevronDown } from 'react-icons/fa';
 
-type TableAttendance = {
+type TableAttendanceProps = {
   courseSchedule: any;
-  studentsAttendance: Array<any>;
+  studentsAttendance: Record<number, Record<number, string>>;
   students: Array<any>;
 };
 
@@ -34,123 +34,182 @@ type AttendanceStatistics = {
   attendancePercentage: number;
 };
 
-const TableAttendance = ({
+const TableAttendance: React.FC<TableAttendanceProps> = ({
   courseSchedule = [],
   studentsAttendance,
   students = [],
-}: TableAttendance) => {
-  const [dates, setDates] = useState<any>([]);
+}) => {
+  const [dates, setDates] = useState(studentsAttendance);
   const [scheduleItems, setScheduleItems] = useState(courseSchedule);
+  const [showInactive, setShowInactive] = useState(false);
   const { user } = useContext(UserContext);
-  const { can } = usePermission();
   const isCoordinator = user?.role === USER_TYPES.COORDINATOR;
   const isReceptionist = user?.role === USER_TYPES.RECEPTIONIST;
-  const canMarkAttendance = can(PERMISSIONS.MARK_ATTENDANCE);
 
-  const isInputDisabled = (student: any) => {
-    return (
-      isCoordinator ||
-      isReceptionist ||
-      student?.is_retired ||
-      student?.status === STATUS.INACTIVE
-    );
-  };
-
-  useEffect(() => {
-    setDates(studentsAttendance);
-  }, [studentsAttendance]);
-
-  useEffect(() => {
-    setScheduleItems(courseSchedule);
-  }, [courseSchedule]);
+  useEffect(() => setDates(studentsAttendance), [studentsAttendance]);
+  useEffect(() => setScheduleItems(courseSchedule), [courseSchedule]);
 
   const changeAttendance = async (
-    event: any,
-    syllabusItemId: any,
-    studentId: any,
+    e: ChangeEvent<HTMLSelectElement>,
+    scheduleId: number,
+    studentId: number,
     isRetired: boolean
   ) => {
     if (isCoordinator) {
       toast.error('Coordinators do not have permission to mark attendance');
       return;
     }
-
     if (isRetired) {
       toast.error('Cannot mark attendance for retired students');
       return;
     }
-
-    const status = event.target.value;
-    setDates((date: any) => ({
-      ...date,
-      [syllabusItemId]: {
-        ...date[syllabusItemId],
+    const status = e.target.value;
+    setDates((prev) => ({
+      ...prev,
+      [scheduleId]: {
+        ...prev[scheduleId],
         [studentId]: status,
       },
     }));
-
     await createAttendance({
-      course_schedule_id: syllabusItemId,
+      course_schedule_id: scheduleId,
       student_id: studentId,
       status,
     });
   };
 
-  const calculateAttendance = (studentId: number): AttendanceStatistics => {
-    return countAttendance(dates, studentId);
-  };
-
-  const calculateAbsence = (studentId: number): AttendanceStatistics => {
-    return countAbsences(dates, studentId);
-  };
+  const calculateAttendance = (id: number): AttendanceStatistics =>
+    countAttendance(dates, id);
+  const calculateAbsence = (id: number): AttendanceStatistics =>
+    countAbsences(dates, id);
 
   const updateScheduleItem = (
-    e: ChangeEvent,
+    e: ChangeEvent<HTMLInputElement | HTMLSelectElement>,
     lessonId: number,
-    index: number
+    scheduleIndex: number
   ) => {
     if (isCoordinator) {
       toast.error('Coordinators do not have permission to update lessons');
       return;
     }
-
-    const value = (e.target as HTMLInputElement).value;
-
-    const updatedScheduleItems = scheduleItems.map((item: any, i: number) => {
-      if (index === i) return { ...item, lesson_taught: value };
-      return item;
-    });
-    setScheduleItems(updatedScheduleItems);
-
-    onSaveLesson(value, lessonId);
+    const value = e.target.value;
+    setScheduleItems((prevScheduleItems: any) =>
+      prevScheduleItems.map((scheduleItem: any, itemIndex: any) =>
+        itemIndex === scheduleIndex
+          ? { ...scheduleItem, lesson_taught: value }
+          : scheduleItem
+      )
+    );
+    debouncedSave(value, lessonId);
   };
 
-  const onSaveLesson = useCallback(
-    debounce(async (lesson: string, lessonId: number) => {
-      await updateLessonTaught(lessonId, { lesson_taught: lesson });
-    }, 600),
+  const debouncedSave = useCallback(
+    debounce(
+      (lesson: string, id: number) =>
+        updateLessonTaught(id, { lesson_taught: lesson }),
+      600
+    ),
     []
   );
 
-  const renderStatisticsCol = (studentId: number) => {
-    const assistanceStatistics = calculateAttendance(studentId);
-    const absentStatistics = calculateAbsence(studentId);
-
+  const renderStats = (id: number) => {
+    const {
+      attendanceCount: attendanceCount,
+      attendancePercentage: attendancePercentage,
+    } = calculateAttendance(id);
+    const {
+      attendanceCount: absenceCount,
+      attendancePercentage: absencePercentage,
+    } = calculateAbsence(id);
     return (
       <>
-        <td>{assistanceStatistics.attendanceCount}</td>
-        <td>{assistanceStatistics.attendancePercentage}%</td>
-        <td>{absentStatistics.attendanceCount}</td>
-        <td
-          className={getColorOfAssistance(
-            absentStatistics.attendancePercentage
-          )}
-        >
-          {absentStatistics.attendancePercentage}%
+        <td>{attendanceCount}</td>
+        <td>{attendancePercentage}%</td>
+        <td>{absenceCount}</td>
+        <td className={getColorOfAssistance(absencePercentage)}>
+          {absencePercentage}%
         </td>
       </>
     );
   };
+
+  const active = useMemo(
+    () =>
+      students.filter(
+        (student) => !student.is_retired && student.status !== STATUS.INACTIVE
+      ),
+    [students]
+  );
+  const inactive = useMemo(
+    () =>
+      students.filter(
+        (student) => student.is_retired || student.status === STATUS.INACTIVE
+      ),
+    [students]
+  );
+  const toggleInactive = () => setShowInactive((p) => !p);
+
+  const totalCols = scheduleItems.length + 4;
+
+  const StudentRow = (student: any, index: number) => (
+    <tr
+      key={index}
+      className={
+        student.is_retired || student.status === STATUS.INACTIVE
+          ? 'bg-light'
+          : ''
+      }
+    >
+      <td
+        className={`student-col ${student.is_retired || student.status === STATUS.INACTIVE ? 'd-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-start' : ''}`}
+      >
+        {student.name}
+        {(student.is_retired || student.status === STATUS.INACTIVE) && (
+          <Badge
+            color='primary'
+            pill
+            size='sm'
+            className='mt-2 mt-md-0 ms-md-2'
+          >
+            {student.status === STATUS.INACTIVE ? 'INACTIVE' : 'RETIRED'}
+          </Badge>
+        )}
+      </td>
+      {scheduleItems.map((scheduleItem: any, scheduleItemIndex: number) => (
+        <td
+          key={scheduleItemIndex}
+          className='td-attendance'
+        >
+          <Input
+            type='select'
+            className={`td-input attendance-input bg-transparent text-dark ${isCoordinator || isReceptionist ? 'cursor-no-allowed' : ''}`}
+            value={dates[scheduleItem.id]?.[student.id] || ''}
+            onChange={(e: any) =>
+              changeAttendance(
+                e,
+                scheduleItem.id,
+                student.id,
+                student.is_retired
+              )
+            }
+            disabled={
+              isCoordinator ||
+              isReceptionist ||
+              student.is_retired ||
+              student.status === STATUS.INACTIVE
+            }
+          >
+            <option value=''> </option>
+            <option value='present'>P</option>
+            <option value='absent'>F</option>
+            <option value='late'>A</option>
+            <option value='recovered'>R</option>
+          </Input>
+        </td>
+      ))}
+      {renderStats(student.id)}
+    </tr>
+  );
 
   return (
     <div>
@@ -170,12 +229,12 @@ const TableAttendance = ({
         <thead>
           <tr>
             <th className='main-col-title student-col'>STUDENT</th>
-            {scheduleItems?.map((date: any, index: number) => (
+            {scheduleItems.map((scheduleItem: any, scheduleIndex: number) => (
               <th
+                key={scheduleIndex}
                 className='col-vertical'
-                key={`date-attendance-${index}`}
               >
-                {formatDate(date?.scheduled_date)}
+                {formatDate(scheduleItem.scheduled_date)}
               </th>
             ))}
             <th
@@ -193,124 +252,89 @@ const TableAttendance = ({
           </tr>
         </thead>
         <tbody>
-          {students && students.length > 0 ? (
-            students?.map((student: any, index) => (
-              <tr
-                key={`date-student-${index}`}
-                className={
-                  student?.is_retired || student?.status === STATUS.INACTIVE
-                    ? 'retired_color'
-                    : ''
-                }
-              >
-                <td
-                  className={
-                    student?.is_retired || student?.status === STATUS.INACTIVE
-                      ? ' d-flex flex-column flex-md-row  align-items-start align-items-md-center justify-content-start '
-                      : ''
-                  }
-                >
-                  {student?.name}
-                  {(student?.status === STATUS.INACTIVE ||
-                    student?.is_retired) && (
-                    <Badge
-                      color='primary'
-                      pill
-                      size='sm'
-                      className='mt-2 mt-md-0 ms-md-2'
-                    >
-                      {student.status === STATUS.INACTIVE
-                        ? 'INACTIVE'
-                        : 'RETIRED'}
-                    </Badge>
-                  )}
-                </td>
-                {Object.keys(dates).map((courseScheduleId: any, index2) => (
-                  <td
-                    key={`attendance-${index2}`}
-                    className={`td-attendance`}
-                  >
-                    <Input
-                      type='select'
-                      className={`td-input attendance-input bg-transparent text-dark ${isCoordinator || isReceptionist ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-white cursor-no-allowed'}`}
-                      value={dates[courseScheduleId][student?.id]}
-                      onChange={(event) =>
-                        changeAttendance(
-                          event,
-                          courseScheduleId,
-                          student?.id,
-                          student?.is_retired
-                        )
-                      }
-                      disabled={isInputDisabled(student)}
-                    >
-                      <option value=''>&nbsp;</option>
-                      <option value='present'>P</option>
-                      <option value='absent'>F</option>
-                      <option value='late'>A</option>
-                      <option value='recovered'>R</option>
-                    </Input>
-                  </td>
-                ))}
-                {renderStatisticsCol(student?.id)}
-              </tr>
-            ))
+          {active.length ? (
+            active.map(StudentRow)
           ) : (
             <tr>
               <td
-                colSpan={Object.keys(dates).length + 4}
+                colSpan={totalCols}
                 className='text-center'
               >
                 This course doesn't have student
               </td>
             </tr>
           )}
-
-          {students && students.length > 0 && (
-            <>
-              <tr className='py-2'>
-                <td className='border-none'></td>
-              </tr>
-              <tr>
-                <td className='main-col-description student-col'>LESSON:</td>
-                {scheduleItems.map((item: any, index: number) => (
-                  <td
-                    className='col-vertical'
-                    key={`current-lesson-col-${index}`}
-                  >
-                    <Input
-                      type='text'
-                      className={`attendance-input bg-white text-black ${isCoordinator || isReceptionist ? 'cursor-no-allowed' : ''}`}
-                      onChange={(e) => updateScheduleItem(e, item.id, index)}
-                      value={scheduleItems[index].lesson_taught ?? ''}
-                      disabled={isCoordinator || isReceptionist}
-                    />
-                  </td>
-                ))}
-                <td
-                  className='main-col-description'
-                  colSpan={4}
-                ></td>
-              </tr>
-              <tr>
-                <td className='main-col-description student-col'>
-                  CURRICULUM:
-                </td>
-                {scheduleItems?.map((item: any, index: number) => (
-                  <td
-                    className='col-vertical highlighted-col text-center'
-                    key={`curriculum-lesson-col-${index}`}
-                  >
-                    {item.syllabusItem.item_name}
-                  </td>
-                ))}
-                <td
-                  className='main-col-description'
-                  colSpan={4}
-                ></td>
-              </tr>
-            </>
+          {inactive.length > 0 && (
+            <tr>
+              <td
+                colSpan={totalCols + 1}
+                className=' py-3 bg-light cursor-pointer position-relative'
+                onClick={toggleInactive}
+              >
+                <span className='text-dark'>
+                  {showInactive ? 'Hide' : 'Show'} inactive/retired students (
+                  {inactive.length})
+                </span>
+                <span
+                  className={`toggle-icon  ${isCoordinator || isReceptionist ? 'toggle-icon no-professor ' : ''}  `}
+                >
+                  {showInactive ? <FaChevronUp /> : <FaChevronDown />}
+                </span>
+              </td>
+            </tr>
           )}
+        </tbody>
+        <Collapse
+          tag='tbody'
+          isOpen={showInactive}
+          timeout={0}
+        >
+          {inactive.map(StudentRow)}
+        </Collapse>
+        <tbody>
+          <tr className='py-2'>
+            <td className='border-none' />
+          </tr>
+          <tr>
+            <td className='main-col-description student-col'>LESSON:</td>
+            {scheduleItems.map((scheduleItem: any, scheduleIndex: number) => (
+              <td
+                key={scheduleIndex}
+                className='col-vertical'
+              >
+                <Input
+                  type='text'
+                  className={`attendance-input bg-white text-black ${isCoordinator || isReceptionist ? 'cursor-no-allowed' : ''}`}
+                  onChange={(e) =>
+                    updateScheduleItem(e, scheduleItem.id, scheduleIndex)
+                  }
+                  value={scheduleItem.lesson_taught ?? ''}
+                  disabled={isCoordinator || isReceptionist}
+                />
+              </td>
+            ))}
+            <td
+              className='main-col-description'
+              colSpan={4}
+            />
+          </tr>
+        </tbody>
+        <tbody>
+          <tr>
+            <td className='main-col-description student-col'>CURRICULUM:</td>
+            {scheduleItems.map((scheduleItem: any, scheduleIndex: number) => (
+              <td
+                key={scheduleIndex}
+                className='col-vertical highlighted-col text-center'
+              >
+                {scheduleItem.syllabusItem.item_name}
+              </td>
+            ))}
+            <td
+              className='main-col-description'
+              colSpan={4}
+            />
+          </tr>
         </tbody>
       </Table>
     </div>

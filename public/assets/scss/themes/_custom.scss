@@ -36,6 +36,9 @@
 .cursor-no-allowed {
   cursor: not-allowed;
 }
+.cursor-pointer {
+  cursor: pointer;
+}
 
 .rdthead input[type='checkbox'],
 .rdt_TableBody input[type='checkbox'] {
@@ -87,4 +90,13 @@
 
 .retired_color {
   background-color: #ea9999;
+}
+
+.toggle-icon {
+  position: sticky;
+  left: 93vw;
+  cursor: pointer;
+  &.no-professor {
+    left: 79vw;
+  }
 }
