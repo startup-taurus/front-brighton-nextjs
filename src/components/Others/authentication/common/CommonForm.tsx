@@ -96,10 +96,10 @@ const CommonForm = ({ alignLogo }: commonFormPropsType) => {
               <Input
                 type='text'
                 required
+                onChange={handleUserValue}
                 placeholder='Email or Username'
                 value={username}
-                name='username '
-                onChange={handleUserValue}
+                name='username'
               />
             </FormGroup>
             <FormGroup>

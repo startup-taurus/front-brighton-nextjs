@@ -409,7 +409,7 @@ export const CustomScrolltext3: string | JSX.Element = (
   <>
     One crucial point to remember is that, depending on the design, a scrollbar
     may operate either{' '}
-    <em className="txt-danger">horizontally or vertically</em> . Additionally,
+    <em className='txt-danger'>horizontally or vertically</em> . Additionally,
     it might alter when you work on a website that is global and operates in
     both left-to-right and right-to-left orientations.
   </>
@@ -417,7 +417,7 @@ export const CustomScrolltext3: string | JSX.Element = (
 export const CustomScrolltext4: string | JSX.Element = (
   <>
     {"I'm quite interested in learning more about"}{' '}
-    <em className="txt-danger">custom scrollbars</em> because they are becoming
+    <em className='txt-danger'>custom scrollbars</em> because they are becoming
     more and more common.
   </>
 );
@@ -426,7 +426,7 @@ export const SmallScrollText: string = 'Solution for Business Transformation';
 export const SmallScrollText2: string | JSX.Element = (
   <>
     The Business Transformation Solution programme is a{' '}
-    <em className="txt-danger">multi-level engagement program</em> is designed
+    <em className='txt-danger'>multi-level engagement program</em> is designed
     to help Small and Medium-Sized Businesses and Startups create a strong,
     well-functioning business organization that produces the best results
     quickly and effectively.
@@ -435,7 +435,7 @@ export const SmallScrollText2: string | JSX.Element = (
 export const SmallScrollText3: string | JSX.Element = (
   <>
     The core of the programme is our internally developed{' '}
-    <em className="txt-danger">Business Management model</em>{' '}
+    <em className='txt-danger'>Business Management model</em>{' '}
     {', "Business Foundation & Management",'} which was tried and true for
     Indian business conditions while drawing inspiration from other successful
     global SME Business Management techniques.
@@ -507,7 +507,7 @@ export const ProfileHead2: string =
 export const ProfileHead2Text: string | JSX.Element = (
   <>
     English Romantic painter, printer, and watercolourist{' '}
-    <em className="txt-danger">William C. Jennings</em>{' '}
+    <em className='txt-danger'>William C. Jennings</em>{' '}
     {
       "Is most renowned for his expressive colorization, creative landscapes, and stormy, sometimes violent maritime works. However, this moody image of the Devil's Bridge in Switzerland, close to the Gotthard Pass, feels incredibly authentic and accurately depicts historical occasions when Russian general Suvorov crossed the Alps and fought not only far larger enemy troops!"
     }
@@ -518,7 +518,11 @@ export const ProfileText2: string | JSX.Element = (
     {
       "The curved canvas is enclosed in a complex frame that the artist created but that his buddy Gottlieb Christian Kuhn carved. A variety of Christian symbols are depicted on the frame, including the faces of five infant angels, a star, grapes, vines, corn, and God's eye.Many of the Romantic elements and subjects that he would explore throughout his career are present in this work, one of his earliest, most notable of which is the landscape's significant significance. In spite of the altarpiece's inclusion of a crucifix, the emphasis is"
     }
-    <a className="txt-danger" href="user-profile.html" target="_blank">
+    <a
+      className='txt-danger'
+      href='user-profile.html'
+      target='_blank'
+    >
       {' '}
       Read More
     </a>
@@ -548,7 +552,7 @@ export const Copytext: string = 'Copy text';
 export const SimpleAccordionText: string | JSX.Element | JSX.Element[] = (
   <p>
     {' '}
-    Web design<em className="txt-danger"> identifies the goals</em> of a website
+    Web design<em className='txt-danger'> identifies the goals</em> of a website
     or webpage and promotes accessibility for all potential users. This process
     involves organizing content and images across a series of pages and
     integrating applications and other interactive elements{' '}
@@ -633,7 +637,7 @@ export const BasicCardText: string | JSX.Element = (
   <>
     Tabs have long been used to show alternative views of the same group of
     information tabs in software. Known as
-    <em className="txt-danger">“module tabs”</em> , these are still used today
+    <em className='txt-danger'>“module tabs”</em> , these are still used today
     in web sites. For instance, airline companies such as Ryanair, easyJet and
     AirMalta use module tabs to enable the user to switch between bookings for
     flights, hotels and car hire.
@@ -643,7 +647,7 @@ export const FlatCardText: string | JSX.Element = (
   <>
     A navigation bar is a particularly important feature because it allows
     visitors to quickly and easily find
-    <em className="txt-danger"> important pages on your website</em> , like your
+    <em className='txt-danger'> important pages on your website</em> , like your
     blog, product pages, pricing, contact info, and documentation. This improves
     the chances of visitors browsing your site longer, which can boost your page
     views and reduce your bounce rate.
@@ -668,7 +672,7 @@ export const IconHeadtext: string | JSX.Element = (
 );
 export const IconHeadtext2: string | JSX.Element = (
   <>
-    <p className="mb-xl-0 mb-sm-4">
+    <p className='mb-xl-0 mb-sm-4'>
       We provide end to end digital solutions, right from designing your
       website/application development: Domain, Web Hosting, Email Hosting
       Registration, Search Engine Optimization and other Internet Marketing,
@@ -686,7 +690,7 @@ export const DarkBodytext: string | JSX.Element = (
   <>
     <p>
       {' '}
-      <em className="txt-danger fw-bold">Smart headphones</em> — also called
+      <em className='txt-danger fw-bold'>Smart headphones</em> — also called
       smart earbuds or hearable — are high-tech in-ear devices that do more than
       transmit audio. These headphones are usually wireless, and they can sync
       up with your phone, tablet, computer or other Bluetooth-enabled device.
@@ -729,7 +733,7 @@ export const BorderTopText: string | JSX.Element = (
   <>
     Tabs have long been used to show alternative views of the same group of
     information tabs in software. Known as
-    <em className="txt-danger">“module tabs”</em> , these are still used today
+    <em className='txt-danger'>“module tabs”</em> , these are still used today
     in web sites. For instance, airline companies such as Ryanair, easyJet and
     AirMalta use module tabs to enable the user to switch between bookings for
     flights, hotels and car hire.
@@ -739,7 +743,7 @@ export const BorderBottomText: string | JSX.Element = (
   <>
     A navigation bar is a particularly important feature because it allows
     visitors to quickly and easily find
-    <em className="txt-danger"> important pages on your website</em> , like your
+    <em className='txt-danger'> important pages on your website</em> , like your
     blog, product pages, pricing, contact info, and documentation. This improves
     the chances of visitors browsing your site longer, which can boost your page
     views and reduce your bounce rate.
@@ -1666,7 +1670,7 @@ export const UserName: string = 'Username';
 export const UserNameError: string =
   'Please choose a unique and valid username.';
 export const BrowserDefaultsHeading: string = 'Browser defaults';
-export const EmailAddress: string = 'Email Address or Username ';
+export const EmailAddress: string = 'Username ';
 export const ChooseFile: string = 'Choose file';
 // export const SelectYourPaymentMethod: string = "Select your payment method";
 export const Visa: string = 'Visa';
