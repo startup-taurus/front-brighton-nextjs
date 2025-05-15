@@ -161,7 +161,7 @@ const TableAttendance: React.FC<TableAttendanceProps> = ({
       }
     >
       <td
-        className={`student-col ${student.is_retired || student.status === STATUS.INACTIVE ? 'd-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-start' : ''}`}
+        className={`student-col ${student.is_retired || student.status === STATUS.INACTIVE ? 'd-flex  align-items-start align-md-center justify-center-start ' : ''}`}
       >
         {student.name}
         {(student.is_retired || student.status === STATUS.INACTIVE) && (
@@ -228,7 +228,7 @@ const TableAttendance: React.FC<TableAttendanceProps> = ({
       >
         <thead>
           <tr>
-            <th className='main-col-title student-col'>STUDENT</th>
+            <th className='main-col-title'>STUDENT</th>
             {scheduleItems.map((scheduleItem: any, scheduleIndex: number) => (
               <th
                 key={scheduleIndex}
@@ -296,7 +296,7 @@ const TableAttendance: React.FC<TableAttendanceProps> = ({
             <td className='border-none' />
           </tr>
           <tr>
-            <td className='main-col-description student-col'>LESSON:</td>
+            <td className='main-col-description'>LESSON:</td>
             {scheduleItems.map((scheduleItem: any, scheduleIndex: number) => (
               <td
                 key={scheduleIndex}
@@ -321,7 +321,7 @@ const TableAttendance: React.FC<TableAttendanceProps> = ({
         </tbody>
         <tbody>
           <tr>
-            <td className='main-col-description student-col'>CURRICULUM:</td>
+            <td className='main-col-description'>CURRICULUM:</td>
             {scheduleItems.map((scheduleItem: any, scheduleIndex: number) => (
               <td
                 key={scheduleIndex}
