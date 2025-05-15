@@ -34,9 +34,8 @@ export const createProfessor = (data: any) => {
   return postFetcher(`/professor/create`, data);
 };
 
-export const updateProfessor = (professorId: number, data: any) => {
-  return putFetcher(`/professor/update/${professorId}`, data);
-};
+export const updateProfessor = (professorId: number, data: any) =>
+  putFetcher(`/professor/update/${professorId}`, data);
 
 export const updateStatusProfessor = (professorId: number, status: string) => {
   return putFetcher(`/professor/update-status/${professorId}`, { status });

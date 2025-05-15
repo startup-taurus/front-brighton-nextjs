@@ -14,6 +14,7 @@ import {
 
 import Cookies from 'js-cookie';
 import { toast } from 'react-toastify';
+import Swal from 'sweetalert2';
 import CommonLogo from './CommonLogo';
 import { useRouter } from 'next/router';
 import { postLogin } from 'helper/api-data/user';
@@ -44,6 +45,17 @@ const CommonForm = ({ alignLogo }: commonFormPropsType) => {
     const response = await postLogin({ username, password });
 
     if (response?.status === 'success') {
+      if (response.data?.status === 'inactive') {
+        Swal.fire({
+          title: 'User Deactivated',
+          text: 'Your account has been deactivated. Please contact the administrator for more information.',
+          icon: 'error',
+          confirmButtonText: 'Ok',
+        });
+        setIsLoading(false);
+        return;
+      }
+
       Cookies.set('token', JSON.stringify(response?.data));
       const encryptedId = encrypt(String(response?.data?.id));
       Cookies.set('user_id', encryptedId);
@@ -84,9 +96,9 @@ const CommonForm = ({ alignLogo }: commonFormPropsType) => {
               <Input
                 type='text'
                 required
-                placeholder='Username'
+                placeholder='Email or Username'
                 value={username}
-                name='username'
+                name='username '
                 onChange={handleUserValue}
               />
             </FormGroup>

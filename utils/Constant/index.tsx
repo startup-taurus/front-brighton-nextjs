@@ -1666,7 +1666,7 @@ export const UserName: string = 'Username';
 export const UserNameError: string =
   'Please choose a unique and valid username.';
 export const BrowserDefaultsHeading: string = 'Browser defaults';
-export const EmailAddress: string = 'Email Address';
+export const EmailAddress: string = 'Email Address or Username ';
 export const ChooseFile: string = 'Choose file';
 // export const SelectYourPaymentMethod: string = "Select your payment method";
 export const Visa: string = 'Visa';
