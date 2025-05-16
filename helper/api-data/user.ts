@@ -4,6 +4,7 @@ export const postLogin = (data: any) => {
   return postFetcher('/user/login', data, '', false, true);
 };
 
+
 export const createUser = (data: any) => {
   return postFetcher('/user/register', data);
 };

@@ -6,6 +6,8 @@ import {
   Col,
   FormFeedback,
   Input,
+  InputGroup,
+  InputGroupText,
   Label,
   Modal,
   ModalBody,
@@ -37,20 +39,55 @@ const TeacherForm = ({ data, isOpen, toggle }: any) => {
       if (response.statusCode === 200) {
         toggle();
       }
-    } catch (error) {
-      console.error('Error al crear profesor:', error);
-    }
+    } catch (error) {}
   };
 
-  const update = async (data: any) => {
+  const update = async (values: any) => {
     try {
-      const response = await updateProfessor(data.id, data);
-      if (response.statusCode === 200) {
-        toggle();
+      const { id, image, ...rest } = values;
+
+      let payload: any = rest;
+
+      if (
+        image &&
+        typeof image === 'object' &&
+        !(image instanceof File) &&
+        Object.keys(image).length === 0
+      ) {
+        rest.image = '';
       }
-    } catch (error) {
-      console.error('Error al actualizar usuario:', error);
+
+      if (image instanceof File) {
+        const fd = new FormData();
+        Object.entries(rest).forEach(([k, v]) => fd.append(k, v as any));
+        fd.append('image', image);
+        payload = fd;
+      }
+
+      const res = await updateProfessor(id, payload);
+      if (res.statusCode === 200) toggle();
+    } catch (err) {}
+  };
+  const NameField = ({ field, form, ...props }: any) => {
+    const suffix = 'Brighton';
+    let baseValue = field.value || '';
+    if (baseValue.endsWith(suffix)) {
+      baseValue = baseValue.slice(0, -suffix.length);
     }
+    return (
+      <InputGroup>
+        <Input
+          {...field}
+          {...props}
+          value={baseValue}
+          onChange={(e) => {
+            const newValue = e.target.value;
+            form.setFieldValue(field.name, newValue + suffix);
+          }}
+        />
+        <InputGroupText>{suffix.trim()}</InputGroupText>
+      </InputGroup>
+    );
   };
 
   return (
@@ -60,7 +97,7 @@ const TeacherForm = ({ data, isOpen, toggle }: any) => {
       size='lg'
     >
       <ModalHeader toggle={toggle}>
-        {data ? 'Editar Profesor' : 'Add New Professor'}
+        {data ? 'Edit Profesor' : 'Add New Professor'}
       </ModalHeader>
       <ModalBody>
         <Formik
@@ -167,6 +204,7 @@ const TeacherForm = ({ data, isOpen, toggle }: any) => {
                   <Field
                     name='username'
                     as={Input}
+                    component={NameField}
                   />
                   <ErrorMessage
                     name='username'

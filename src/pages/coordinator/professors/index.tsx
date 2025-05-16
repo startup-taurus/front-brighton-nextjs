@@ -22,7 +22,7 @@ import { STATUS_FILTER } from '../../../../utils/constants';
 
 const CoordinatorDashboard = () => {
   const router = useRouter();
-  const limit = 8;
+  const limit = 12;
   const [page, setPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
@@ -206,7 +206,7 @@ const CoordinatorDashboard = () => {
 
         <Row>
           {loading && page === 1 ? (
-            Array.from({ length: 8 }).map((_, index) => (
+            Array.from({ length: 12 }).map((_, index) => (
               <Col
                 key={index}
                 md={6}
