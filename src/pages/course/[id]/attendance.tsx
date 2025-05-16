@@ -1,43 +1,53 @@
-import React, { ReactElement } from "react";
-import { Card, CardBody } from "reactstrap";
-import { NextPageWithLayout } from "@/pages/_app";
-import { useRouter } from "next/router";
-import useSWR from "swr";
+import React, { ReactElement, useEffect, useState } from 'react';
+import { Card, CardBody } from 'reactstrap';
+import { NextPageWithLayout } from '@/pages/_app';
+import { useRouter } from 'next/router';
+import NavigationBackButton from '@/components/own/navigation-back-button/navigation-back-button';
+import useSWR from 'swr';
 
-import CourseLayout from "@/components/own/course-layout/course-layout";
-import AttendanceTable from "@/components/own/table-attendance/table-attendance";
-import TabsTeachers from "@/components/own/tabs-teachers/tabs-teachers";
+import CourseLayout from '@/components/own/course-layout/course-layout';
+import AttendanceTable from '@/components/own/table-attendance/table-attendance';
+import TabsTeachers from '@/components/own/tabs-teachers/tabs-teachers';
 import {
   getCourseById,
   getCourseWithStudents,
-} from "../../../../helper/api-data/course";
-import { getAttendance } from "../../../../helper/api-data/attendance";
-import AttendanceHelpBox from "@/components/own/attendance-help-box/attendance-help-box";
-import { getCourseScheduleDates } from "../../../../helper/api-data/course-schedule";
+} from '../../../../helper/api-data/course';
+import { getAttendance } from '../../../../helper/api-data/attendance';
+import AttendanceHelpBox from '@/components/own/attendance-help-box/attendance-help-box';
+import { getCourseScheduleDates } from '../../../../helper/api-data/course-schedule';
 
-const tabsName = "ATTENDANCE";
+const tabsName = 'ATTENDANCE';
 
 const TeachersAttendance: NextPageWithLayout = () => {
   const router = useRouter();
   const courseId = router.query.id as string;
+  const [studentId, setStudentId] = useState<string | null>(null);
+
+  // Verificar si hay un ID de estudiante guardado en localStorage
+  useEffect(() => {
+    const savedStudentId = localStorage.getItem('studentDetailId');
+    if (savedStudentId) {
+      setStudentId(savedStudentId);
+    }
+  }, []);
 
   const courseDetail = useSWR(
     courseId ? `/course/get-one/${courseId}` : null,
-    () => getCourseById(courseId),
+    () => getCourseById(courseId)
   );
   const courseAttendance = useSWR(
     courseId ? `/attendance/get-by-course/${courseId}` : null,
-    () => getAttendance(courseId),
+    () => getAttendance(courseId)
   );
 
   const courseStudents = useSWR(
     courseId ? `/course/get-students/${courseId}` : null,
-    () => getCourseWithStudents(courseId!.toString()),
+    () => getCourseWithStudents(courseId!.toString())
   );
 
   const schedule = useSWR(
     courseId ? `/course-schedule/get-syllabus-by-course/${courseId}` : null,
-    () => getCourseScheduleDates(courseId!.toString()),
+    () => getCourseScheduleDates(courseId!.toString())
   );
 
   if (!courseDetail?.data?.data) return null;
@@ -50,10 +60,19 @@ const TeachersAttendance: NextPageWithLayout = () => {
   const shouldRenderStudentAttendance =
     studentsAttendance && students && courseSchedule;
 
+  // Ya no necesitamos esta función porque la lógica está en el componente NavigationBackButton
+
   return (
-    <Card tag="section" className="attendance">
+    <Card
+      tag='section'
+      className='attendance'
+    >
       <CardBody>
-        <TabsTeachers numberOfClass={course_number} tabsName={tabsName} />
+        <NavigationBackButton professorId={router.query.professorId} />
+        <TabsTeachers
+          numberOfClass={course_number}
+          tabsName={tabsName}
+        />
         {shouldRenderStudentAttendance && (
           <AttendanceTable
             courseSchedule={courseSchedule}

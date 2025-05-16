@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Card, Nav, NavItem, NavLink, Button } from 'reactstrap';
+import { Card, Nav, NavItem, NavLink } from 'reactstrap';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
-import { FaArrowLeft } from 'react-icons/fa';
+import NavigationBackButton from '@/components/own/navigation-back-button/navigation-back-button';
 import { left } from '@popperjs/core';
 
 const NAV_ITEMS = [
@@ -26,35 +26,34 @@ const TeacherNavMenu = ({ fromProfessorId }: TeacherNavMenuProps) => {
   const router = useRouter();
   const courseId = router.query.id ?? 0;
   const professorId = router.query.professorId || fromProfessorId;
-  const lastSegment = router.asPath.split('/').pop() ?? '';
+  // Extraer el segmento de la ruta para determinar la pestaña activa
+  const pathSegments = router.asPath.split('/');
+  const lastSegment = pathSegments.pop() ?? '';
   const [baseSegment] = lastSegment.split('?');
 
   const [active, setActive] = useState('');
 
-  const handleBackToTeacher = () => {
-    router.push({
-      pathname: '/teachers',
-      query: { professorId },
-    });
-  };
+  // Ya no necesitamos esta función porque la lógica está en el componente NavigationBackButton
 
   useEffect(() => {
-    setActive(baseSegment);
-  }, [baseSegment]);
+    // Identificar la pestaña activa basada en el segmento de la URL
+    const currentPath = router.asPath;
+    const activeItem = NAV_ITEMS.find((item) => {
+      const itemPath = item.link.replace('${id}', courseId.toString());
+      return currentPath.includes(itemPath.split('/').pop() || '');
+    });
+
+    if (activeItem) {
+      setActive(activeItem.id);
+    } else {
+      setActive(baseSegment);
+    }
+  }, [baseSegment, courseId, router.asPath]);
 
   return (
     <>
       {professorId && (
-        <Button
-          color='primary'
-          size='sm'
-          onClick={handleBackToTeacher}
-          className='position-fixed  d-flex align-items-center'
-          style={{ zIndex: 9999, top: '2.3%', left: '15%' }}
-        >
-          <FaArrowLeft className='me-1' />
-          Return to teacher
-        </Button>
+        <NavigationBackButton professorId={professorId} />
       )}
 
       <Card className='px-4 py-2 mt-2'>
@@ -67,7 +66,7 @@ const TeacherNavMenu = ({ fromProfessorId }: TeacherNavMenuProps) => {
               <Link
                 href={{
                   pathname: link.replace('${id}', courseId.toString()),
-                  query: { professorId },
+                  query: professorId ? { professorId } : undefined,
                 }}
               >
                 <NavLink

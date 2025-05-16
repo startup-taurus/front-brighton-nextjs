@@ -10,9 +10,31 @@ import {
 } from 'reactstrap';
 import Image from 'next/image';
 import { ImgPath } from 'utils/Constant';
+import { useRouter } from 'next/router';
 
 const StudentDetail = ({ data, isOpen, toggle }: any) => {
+  const router = useRouter();
   if (!data) return null;
+
+  const navigateToAttendance = () => {
+    if (data?.course?.length > 0 && data.course[0]?.id) {
+      // Guardar el ID del estudiante en localStorage para poder volver a sus detalles
+      localStorage.setItem('studentDetailId', data.id.toString());
+      router.push(
+        `/course/${data.course[0].id}/attendance?professorId=${data.id}`
+      );
+    }
+  };
+
+  const navigateToGradebook = () => {
+    if (data?.course?.length > 0 && data.course[0]?.id) {
+      // Guardar el ID del estudiante en localStorage para poder volver a sus detalles
+      localStorage.setItem('studentDetailId', data.id.toString());
+      router.push(
+        `/course/${data.course[0].id}/gradebook?professorId=${data.id}`
+      );
+    }
+  };
   return (
     <Modal
       isOpen={isOpen}
@@ -126,6 +148,25 @@ const StudentDetail = ({ data, isOpen, toggle }: any) => {
                   </tbody>
                 ))}
             </Table>
+          </Col>
+          <Col
+            xs={12}
+            className='mt-4 d-flex justify-content-end gap-2'
+          >
+            <Button
+              color='primary'
+              onClick={navigateToAttendance}
+              disabled={!data?.course?.length || !data.course[0]?.id}
+            >
+              Ver Asistencia
+            </Button>
+            <Button
+              color='info'
+              onClick={navigateToGradebook}
+              disabled={!data?.course?.length || !data.course[0]?.id}
+            >
+              Ver Calificaciones
+            </Button>
           </Col>
         </div>
       </ModalBody>

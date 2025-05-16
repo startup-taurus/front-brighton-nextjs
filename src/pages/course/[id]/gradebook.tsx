@@ -2,8 +2,9 @@ import useSWR from 'swr';
 
 import CourseLayout from '@/components/own/course-layout/course-layout';
 import TabsTeachers from '@/components/own/tabs-teachers/tabs-teachers';
-import React, { ReactElement } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { Card, CardBody } from 'reactstrap';
+import NavigationBackButton from '@/components/own/navigation-back-button/navigation-back-button';
 import { NextPageWithLayout } from '@/pages/_app';
 import { useRouter } from 'next/router';
 import {
@@ -22,6 +23,14 @@ const tabsName = 'GRADEBOOK';
 const Gradebook: NextPageWithLayout = () => {
   const router = useRouter();
   const courseId = router.query.id as string;
+  const [studentId, setStudentId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const savedStudentId = localStorage.getItem('studentDetailId');
+    if (savedStudentId) {
+      setStudentId(savedStudentId);
+    }
+  }, []);
 
   const courseDetail = useSWR(
     courseId ? `/course/get-one/${courseId}` : null,
@@ -73,6 +82,7 @@ const Gradebook: NextPageWithLayout = () => {
       className='gradebook'
     >
       <CardBody>
+        <NavigationBackButton professorId={router.query.professorId} />
         <TabsTeachers
           numberOfClass={courseDetail?.data?.data?.course_number ?? ''}
           tabsName={tabsName}
