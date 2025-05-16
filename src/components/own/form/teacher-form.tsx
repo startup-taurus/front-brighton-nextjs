@@ -22,11 +22,13 @@ const TeacherForm = ({ data, isOpen, toggle }: any) => {
 
   useEffect(() => {
     if (data && data.user?.image) {
-      setImagePreview(`${UrlImage}/${data.user.image}`);
+      setImagePreview(
+        `${UrlImage}/${data.user.image}?t=${new Date().getTime()}`
+      );
     } else if (!isOpen) {
       setImagePreview(null);
     }
-  }, [isOpen]);
+  }, [isOpen, data]);
 
   const save = async (data: any) => {
     try {
@@ -37,7 +39,7 @@ const TeacherForm = ({ data, isOpen, toggle }: any) => {
 
       const response = await createProfessor(formData);
       if (response.statusCode === 200) {
-        toggle();
+        toggle(null, true);
       }
     } catch (error) {}
   };
@@ -65,7 +67,10 @@ const TeacherForm = ({ data, isOpen, toggle }: any) => {
       }
 
       const res = await updateProfessor(id, payload);
-      if (res.statusCode === 200) toggle();
+      if (res.statusCode === 200) {
+        setImagePreview(null);
+        toggle(null, true);
+      }
     } catch (err) {}
   };
   const NameField = ({ field, form, ...props }: any) => {

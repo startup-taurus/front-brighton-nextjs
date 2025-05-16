@@ -9,6 +9,7 @@ import { STATUS_FILTER } from '../../../../utils/constants';
 import { useRouter } from 'next/router';
 import useSWR from 'swr';
 import { getAllProfessors } from '../../../../helper/api-data/professor';
+import { SelectOption } from 'Types/SelectType';
 
 const Teachers = () => {
   const limit = 10;

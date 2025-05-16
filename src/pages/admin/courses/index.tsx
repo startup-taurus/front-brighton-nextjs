@@ -12,6 +12,7 @@ import {
 } from '../../../../helper/api-data/professor';
 import { getAllCourses } from '../../../../helper/api-data/course';
 import useSWR from 'swr';
+import { SelectOption } from 'Types/SelectType';
 
 const Students = () => {
   const limit = 10;

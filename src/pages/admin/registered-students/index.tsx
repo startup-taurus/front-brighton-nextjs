@@ -11,6 +11,7 @@ import { getAllRegisteredStudents } from '../../../../helper/api-data/registered
 import { getAllLevels } from '../../../../helper/api-data/level';
 import { PROMOTION_FILTER, STATUS_FILTER } from '../../../../utils/constants';
 import StudentsRegisteredTable from '@/components/own/tables/students-registered-table';
+import { SelectOption } from 'Types/SelectType';
 
 const Students = () => {
   const router = useRouter();

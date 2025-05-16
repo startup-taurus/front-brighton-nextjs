@@ -22,19 +22,25 @@ const TeachersTable = ({ reload }: any) => {
     : 10;
   const filters = getFiltersString(router);
 
-  const toggle = (data: any) => {
+  const toggle = (data: any, forceUpdate = false) => {
     setSelectedData(data);
     setIsOpen(!isOpen);
 
-    if (isOpen) {
+    if (isOpen && forceUpdate) {
       mutateData();
     }
   };
 
   const mutateData = () => {
     mutate([
-      `/professor/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}`,
+      `/professor/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters} ` : ''}`,
     ]);
+
+    mutate(
+      (key) => typeof key === 'string' && key.startsWith('/professor/'),
+      undefined,
+      { revalidate: true }
+    );
   };
 
   const handleAlert = (row: any) => {

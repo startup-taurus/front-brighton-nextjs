@@ -14,6 +14,7 @@ import StudentSelectorModal, {
   StudentOption,
 } from '@/components/own/student-slector-modal/StudentSelectorModal';
 import { getUserRoleFromLocalStorage } from 'utils/auth';
+import { SelectOption } from 'Types/SelectType';
 
 const TransferStudents = () => {
   const router = useRouter();
