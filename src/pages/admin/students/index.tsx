@@ -19,6 +19,7 @@ import {
   STATUS_FILTER,
   STATUS_LEVEL_CHANGE,
 } from '../../../../utils/constants';
+import { SelectOption } from 'Types/SelectType';
 
 const Students = () => {
   const router = useRouter();

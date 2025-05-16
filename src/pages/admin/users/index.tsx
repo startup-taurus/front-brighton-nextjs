@@ -8,6 +8,7 @@ import { STATUS_FILTER, USER_ROLES } from '../../../../utils/constants';
 import TableFilters from '@/components/own/table-filters/table-filters';
 import { getAllUsers } from '../../../../helper/api-data/user';
 import useSWR from 'swr';
+import { SelectOption } from 'Types/SelectType';
 
 const Users = () => {
   const [isOpenModal, setIsOpenModal] = useState(false);
