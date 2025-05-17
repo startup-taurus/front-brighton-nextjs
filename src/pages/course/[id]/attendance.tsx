@@ -15,17 +15,18 @@ import {
 import { getAttendance } from '../../../../helper/api-data/attendance';
 import AttendanceHelpBox from '@/components/own/attendance-help-box/attendance-help-box';
 import { getCourseScheduleDates } from '../../../../helper/api-data/course-schedule';
+import { decrypt } from 'utils/encryption';
 
 const tabsName = 'ATTENDANCE';
 
 const TeachersAttendance: NextPageWithLayout = () => {
   const router = useRouter();
   const courseId = router.query.id as string;
-  const [studentId, setStudentId] = useState<string | null>(null);
+  const [studentId, setStudentId] = useState<string | number | null>(null);
 
-  // Verificar si hay un ID de estudiante guardado en localStorage
   useEffect(() => {
-    const savedStudentId = localStorage.getItem('studentDetailId');
+    const encrypted = localStorage.getItem('studentDetailId');
+    const savedStudentId = encrypted ? Number(decrypt(encrypted)) : 0;
     if (savedStudentId) {
       setStudentId(savedStudentId);
     }
@@ -59,8 +60,6 @@ const TeachersAttendance: NextPageWithLayout = () => {
 
   const shouldRenderStudentAttendance =
     studentsAttendance && students && courseSchedule;
-
-  // Ya no necesitamos esta función porque la lógica está en el componente NavigationBackButton
 
   return (
     <Card

@@ -26,17 +26,13 @@ const TeacherNavMenu = ({ fromProfessorId }: TeacherNavMenuProps) => {
   const router = useRouter();
   const courseId = router.query.id ?? 0;
   const professorId = router.query.professorId || fromProfessorId;
-  // Extraer el segmento de la ruta para determinar la pestaña activa
   const pathSegments = router.asPath.split('/');
   const lastSegment = pathSegments.pop() ?? '';
   const [baseSegment] = lastSegment.split('?');
 
   const [active, setActive] = useState('');
 
-  // Ya no necesitamos esta función porque la lógica está en el componente NavigationBackButton
-
   useEffect(() => {
-    // Identificar la pestaña activa basada en el segmento de la URL
     const currentPath = router.asPath;
     const activeItem = NAV_ITEMS.find((item) => {
       const itemPath = item.link.replace('${id}', courseId.toString());
@@ -52,9 +48,7 @@ const TeacherNavMenu = ({ fromProfessorId }: TeacherNavMenuProps) => {
 
   return (
     <>
-      {professorId && (
-        <NavigationBackButton professorId={professorId} />
-      )}
+      {professorId && <NavigationBackButton professorId={professorId} />}
 
       <Card className='px-4 py-2 mt-2'>
         <Nav

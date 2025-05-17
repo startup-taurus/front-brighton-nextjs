@@ -11,6 +11,7 @@ import {
 import Image from 'next/image';
 import { ImgPath } from 'utils/Constant';
 import { useRouter } from 'next/router';
+import { encrypt } from 'utils/encryption';
 
 const StudentDetail = ({ data, isOpen, toggle }: any) => {
   const router = useRouter();
@@ -18,8 +19,9 @@ const StudentDetail = ({ data, isOpen, toggle }: any) => {
 
   const navigateToAttendance = () => {
     if (data?.course?.length > 0 && data.course[0]?.id) {
+      const encryptedId = encrypt(data.id.toString());
       // Guardar el ID del estudiante en localStorage para poder volver a sus detalles
-      localStorage.setItem('studentDetailId', data.id.toString());
+      localStorage.setItem('studentDetailId', encryptedId);
       router.push(
         `/course/${data.course[0].id}/attendance?professorId=${data.id}`
       );
@@ -28,8 +30,9 @@ const StudentDetail = ({ data, isOpen, toggle }: any) => {
 
   const navigateToGradebook = () => {
     if (data?.course?.length > 0 && data.course[0]?.id) {
+      const encryptedId = encrypt(data.id.toString());
       // Guardar el ID del estudiante en localStorage para poder volver a sus detalles
-      localStorage.setItem('studentDetailId', data.id.toString());
+      localStorage.setItem('studentDetailId', encryptedId);
       router.push(
         `/course/${data.course[0].id}/gradebook?professorId=${data.id}`
       );

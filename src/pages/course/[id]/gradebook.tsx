@@ -17,16 +17,18 @@ import GradebookTable from '@/components/own/tables/gradebook-table';
 import { getGradesByCourse } from '../../../../helper/api-data/student-grades';
 import { getFinalPercentageBySyllabusId } from '../../../../helper/api-data/syllabus';
 import useFilteredGradingItems from '../../../../hooks/useFilteredGradingItems';
+import { decrypt } from 'utils/encryption';
 
 const tabsName = 'GRADEBOOK';
 
 const Gradebook: NextPageWithLayout = () => {
   const router = useRouter();
   const courseId = router.query.id as string;
-  const [studentId, setStudentId] = useState<string | null>(null);
+  const [studentId, setStudentId] = useState<string | number | null>(null);
 
   useEffect(() => {
-    const savedStudentId = localStorage.getItem('studentDetailId');
+    const encrypted = localStorage.getItem('studentDetailId');
+    const savedStudentId = encrypted ? Number(decrypt(encrypted)) : 0;
     if (savedStudentId) {
       setStudentId(savedStudentId);
     }

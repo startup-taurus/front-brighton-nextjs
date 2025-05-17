@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Button } from 'reactstrap';
 import { useRouter } from 'next/router';
 import { FaArrowLeft } from 'react-icons/fa';
+import { decrypt } from 'utils/encryption';
 
 interface NavigationBackButtonProps {
   professorId?: string | string[];
@@ -9,11 +10,11 @@ interface NavigationBackButtonProps {
 
 const NavigationBackButton = ({ professorId }: NavigationBackButtonProps) => {
   const router = useRouter();
-  const [studentId, setStudentId] = useState<string | null>(null);
+  const [studentId, setStudentId] = useState<string | number | null>(null);
 
   useEffect(() => {
-    // Verificar si hay un ID de estudiante guardado en localStorage
-    const savedStudentId = localStorage.getItem('studentDetailId');
+    const encrypted = localStorage.getItem('studentDetailId');
+    const savedStudentId = encrypted ? Number(decrypt(encrypted)) : 0;
     if (savedStudentId) {
       setStudentId(savedStudentId);
     }
@@ -21,18 +22,15 @@ const NavigationBackButton = ({ professorId }: NavigationBackButtonProps) => {
 
   const handleBackNavigation = () => {
     if (studentId) {
-      // Navegar de vuelta a la página donde se muestra el detalle del estudiante
       router.back();
-      // Limpiar el ID del estudiante del localStorage después de usarlo
+
       localStorage.removeItem('studentDetailId');
     } else if (professorId) {
-      // Navegar de vuelta a la página del profesor
       router.push({
         pathname: '/teachers',
         query: { professorId },
       });
     } else {
-      // Caso por defecto: volver a la página del profesor
       router.push('/teacher');
     }
   };
@@ -42,8 +40,7 @@ const NavigationBackButton = ({ professorId }: NavigationBackButtonProps) => {
       color='primary'
       size='sm'
       onClick={handleBackNavigation}
-      className='position-fixed d-flex align-items-center'
-      style={{ zIndex: 9999, top: '2.3%', left: '15%' }}
+      className='position-fixed d-flex align-items-center back-button'
     >
       <FaArrowLeft className='me-1' />
       {studentId ? 'Volver a Detalles del Estudiante' : 'Return to teacher'}
