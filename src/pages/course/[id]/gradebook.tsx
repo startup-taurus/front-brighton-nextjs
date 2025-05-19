@@ -2,8 +2,9 @@ import useSWR from 'swr';
 
 import CourseLayout from '@/components/own/course-layout/course-layout';
 import TabsTeachers from '@/components/own/tabs-teachers/tabs-teachers';
-import React, { ReactElement } from 'react';
+import React, { ReactElement, useEffect, useState } from 'react';
 import { Card, CardBody } from 'reactstrap';
+import NavigationBackButton from '@/components/own/navigation-back-button/navigation-back-button';
 import { NextPageWithLayout } from '@/pages/_app';
 import { useRouter } from 'next/router';
 import {
@@ -16,12 +17,22 @@ import GradebookTable from '@/components/own/tables/gradebook-table';
 import { getGradesByCourse } from '../../../../helper/api-data/student-grades';
 import { getFinalPercentageBySyllabusId } from '../../../../helper/api-data/syllabus';
 import useFilteredGradingItems from '../../../../hooks/useFilteredGradingItems';
+import { decrypt } from 'utils/encryption';
 
 const tabsName = 'GRADEBOOK';
 
 const Gradebook: NextPageWithLayout = () => {
   const router = useRouter();
   const courseId = router.query.id as string;
+  const [studentId, setStudentId] = useState<string | number | null>(null);
+
+  useEffect(() => {
+    const encrypted = localStorage.getItem('studentDetailId');
+    const savedStudentId = encrypted ? Number(decrypt(encrypted)) : 0;
+    if (savedStudentId) {
+      setStudentId(savedStudentId);
+    }
+  }, []);
 
   const courseDetail = useSWR(
     courseId ? `/course/get-one/${courseId}` : null,
@@ -73,6 +84,7 @@ const Gradebook: NextPageWithLayout = () => {
       className='gradebook'
     >
       <CardBody>
+        <NavigationBackButton professorId={router.query.professorId} />
         <TabsTeachers
           numberOfClass={courseDetail?.data?.data?.course_number ?? ''}
           tabsName={tabsName}
