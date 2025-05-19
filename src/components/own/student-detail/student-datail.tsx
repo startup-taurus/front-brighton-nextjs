@@ -161,14 +161,14 @@ const StudentDetail = ({ data, isOpen, toggle }: any) => {
               onClick={navigateToAttendance}
               disabled={!data?.course?.length || !data.course[0]?.id}
             >
-              Ver Asistencia
+              View attendance
             </Button>
             <Button
               color='info'
               onClick={navigateToGradebook}
               disabled={!data?.course?.length || !data.course[0]?.id}
             >
-              Ver Calificaciones
+              View gradebook
             </Button>
           </Col>
         </div>

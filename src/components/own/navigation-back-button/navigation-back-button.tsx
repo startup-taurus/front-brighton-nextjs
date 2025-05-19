@@ -43,7 +43,7 @@ const NavigationBackButton = ({ professorId }: NavigationBackButtonProps) => {
       className='position-fixed d-flex align-items-center back-button'
     >
       <FaArrowLeft className='me-1' />
-      {studentId ? 'Volver a Detalles del Estudiante' : 'Return to teacher'}
+      {studentId ? 'Back to Students Table' : 'Return to teacher'}
     </Button>
   );
 };
