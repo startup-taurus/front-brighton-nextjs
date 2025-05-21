@@ -49,7 +49,7 @@ const StudentPerformanceChart: React.FC<StudentPerformanceChartProps> = ({
   const [studentData, setStudentData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const limit = 20;
+  const limit = 100;
   const { data: coursesData } = useSWR(['/course/get-active', limit], () =>
     getActiveCourses(1, limit)
   );
