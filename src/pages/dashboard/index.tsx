@@ -10,6 +10,8 @@ import { Col, Container, Row } from 'reactstrap';
 import { SchoolManage, SchoolManagementHeading } from 'utils/Constant';
 import CardSkeleton from '@/components/own/common/card-skeleton';
 import TableSkeleton from '@/components/own/common/table-skeleton/TableSkeleton';
+import StudentTransferTable from '@/components/Dashboard/SchoolManagenement/StudentsTransferTable';
+import StudentPerformanceChart from '@/components/own/charts/student-performance-chart';
 
 const SchoolManagement = () => {
   const [loading, setLoading] = useState(true);
@@ -52,54 +54,67 @@ const SchoolManagement = () => {
             <Row>
               {loading ? (
                 <>
-                  <CardSkeleton
-                    colProps={{ xxl: 6, md: 5 }}
-                    height={350}
-                  />
-                  <CardSkeleton
-                    colProps={{ xxl: 6, md: 7 }}
-                    height={350}
-                  />
                   <Col md={12}>
                     <Row>
-                      {[1, 2, 3].map((item) => (
+                      {[1, 2, 3, 4].map((item) => (
                         <CardSkeleton
                           key={item}
-                          colProps={{ md: 4 }}
-                          height={180}
+                          colProps={{ md: 3 }}
+                          height={190}
                           headerHeight={40}
                         />
                       ))}
                     </Row>
                   </Col>
+                  <CardSkeleton
+                    colProps={{ xxl: 12, md: 5 }}
+                    height={380}
+                  />
                 </>
               ) : (
                 <>
-                  <AcademicPerformance />
-                  <SchoolPerformance />
                   <SchoolData />
+                  {/* <AcademicPerformance />
+                  <SchoolPerformance /> */}
+
+                  <StudentPerformanceChart />
                 </>
               )}
             </Row>
           </Col>
           <Col
             xs={12}
-            className='box-col-12'
+            className='box-col-6'
           >
             <Row>
               {loading ? (
-                <Col xl={12}>
-                  <TableSkeleton
-                    rows={5}
-                    columns={4}
-                    showHeader={true}
-                    headerHeight={50}
-                    rowHeight={40}
-                    animated={true}
-                  />
-                </Col>
+                <>
+                  <Col xl={6}>
+                    <TableSkeleton
+                      rows={5}
+                      columns={4}
+                      showHeader={true}
+                      headerHeight={50}
+                      rowHeight={40}
+                      animated={true}
+                    />
+                  </Col>
+                  <Col xl={6}>
+                    <TableSkeleton
+                      rows={5}
+                      columns={4}
+                      showHeader={true}
+                      headerHeight={50}
+                      rowHeight={40}
+                      animated={true}
+                    />
+                  </Col>
+                </>
               ) : (
-                <ProfessorsTable />
+                <>
+                  <ProfessorsTable />
+                  <StudentTransferTable />
+                </>
               )}
             </Row>
           </Col>

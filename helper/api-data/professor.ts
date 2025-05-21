@@ -26,8 +26,14 @@ export const getActiveProfessors = (
   );
 };
 
-export const getProfessorsCoursesAndStudents = () => {
-  return getFetcher(`/professor/get-courses-and-students`, false);
+export const getProfessorsCoursesAndStudents = (
+  page: number,
+  limit: number
+) => {
+  return getFetcher(
+    `/professor/get-courses-and-students?page=${page}&limit=${limit}`,
+    false
+  );
 };
 
 export const createProfessor = (data: any) => {
@@ -39,4 +45,8 @@ export const updateProfessor = (professorId: number, data: any) =>
 
 export const updateStatusProfessor = (professorId: number, status: string) => {
   return putFetcher(`/professor/update-status/${professorId}`, { status });
+};
+
+export const getProfessorsCourses = () => {
+  return getFetcher('/professor/get-all-courses', false);
 };

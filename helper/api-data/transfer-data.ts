@@ -50,3 +50,13 @@ export const updateTransferData = (
     selected_level_id: number;
   }
 ) => putFetcher(`/transfer-data/update/${id}`, payload);
+
+export const getApprovedTransfers = ({
+  page = 1,
+  limit = 10,
+}: { page?: number; limit?: number } = {}) => {
+  return getFetcher(
+    `/transfer-data/get-approved?page=${page}&limit=${limit}`,
+    false
+  );
+};

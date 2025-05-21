@@ -62,7 +62,7 @@ const StudentTransferForm: React.FC<Props> = ({
   const [selectedCourse, setSelectedCourse] = useState<Option | null>(null);
   const [selectedLevel, setSelectedLevel] = useState<Option | null>(null);
 
-  const limit = 10;
+  const limit = 20;
   const { data: coursesData } = useSWR(['/course/get-active', limit], () =>
     getActiveCourses(1, limit)
   );

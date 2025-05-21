@@ -37,7 +37,6 @@ export const requestTransferAndProgress = (
   levelId: string | null,
   isGroup: boolean | false
 ) => {
-  // Validar que al menos uno de los parámetros sea proporcionado
   if (!courseId && !levelId) {
     return Promise.reject({
       statusCode: 400,
@@ -69,7 +68,6 @@ export const transferAndProgressStudents = (
   courseId: string | null,
   levelId: string | null
 ) => {
-  // Validar que al menos uno de los parámetros sea proporcionado
   if (!courseId && !levelId) {
     return Promise.reject({
       statusCode: 400,
@@ -84,7 +82,7 @@ export const transferAndProgressStudents = (
     levelId,
   })
     .then((response) => {
-      return response; // Devuelve la respuesta exitosa
+      return response;
     })
     .catch((error) => {
       console.error('Error transferring or progressing students:', error);
@@ -109,4 +107,15 @@ export const getStudentTransfers = (studentId: number) => {
 
 export const getPendingStudentTransfers = () => {
   return getFetcher(`/transfer-data/get-pending`, false);
+};
+
+export const getBestStudentsByCourse = (
+  courseId?: number,
+  levelId?: number,
+  limit: number = 10
+) => {
+  let url = `/student/best-students?limit=${limit}`;
+  if (courseId) url += `&course_id=${courseId}`;
+  if (levelId) url += `&level_id=${levelId}`;
+  return getFetcher(url, false);
 };
