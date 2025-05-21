@@ -49,7 +49,7 @@ const StudentPerformanceChart: React.FC<StudentPerformanceChartProps> = ({
   const [studentData, setStudentData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const limit = 100;
+  const limit = 20;
   const { data: coursesData } = useSWR(['/course/get-active', limit], () =>
     getActiveCourses(1, limit)
   );
@@ -91,32 +91,40 @@ const StudentPerformanceChart: React.FC<StudentPerformanceChartProps> = ({
   }, [selectedCourse]);
 
   const fullValues = {
-    Exam: studentData.map((s) => parseFloat(s.exam_percent)),
-    Test: studentData.map((s) => parseFloat(s.test_percent)),
-    Assignment: studentData.map((s) => parseFloat(s.assignment_percent)),
+    Exam: studentData.map((student) => parseFloat(student.exam_percent)),
+    Test: studentData.map((student) => parseFloat(student.test_percent)),
+    Assignment: studentData.map((student) =>
+      parseFloat(student.assignment_percent)
+    ),
   };
 
   const chartData = {
-    labels: studentData.map((s) => {
-      const name = s.name || 'Sin nombre';
+    labels: studentData.map((student) => {
+      const name = student.name || 'Unnamed';
       return name.length > 15 ? `${name.substring(0, 15)}...` : name;
     }),
     datasets: [
       {
         label: 'Exam (70%)',
-        data: studentData.map((s) => parseFloat(s.exam_percent) * 0.7),
+        data: studentData.map((student) =>
+          Number((parseFloat(student.exam_percent) * 0.7).toFixed(2))
+        ),
         backgroundColor: 'rgba(75, 192, 192, 0.6)',
         stack: 'Stack 0',
       },
       {
         label: 'Test (20%)',
-        data: studentData.map((s) => parseFloat(s.test_percent) * 0.2),
+        data: studentData.map((student) =>
+          Number((parseFloat(student.test_percent) * 0.2).toFixed(2))
+        ),
         backgroundColor: 'rgba(255, 206, 86, 0.6)',
         stack: 'Stack 0',
       },
       {
         label: 'Assignment (10%)',
-        data: studentData.map((s) => parseFloat(s.assignment_percent) * 0.1),
+        data: studentData.map((student) =>
+          Number((parseFloat(student.assignment_percent) * 0.1).toFixed(2))
+        ),
         backgroundColor: 'rgba(54, 162, 235, 0.6)',
         stack: 'Stack 0',
       },
@@ -137,7 +145,7 @@ const StudentPerformanceChart: React.FC<StudentPerformanceChartProps> = ({
             const weighted = context.formattedValue;
             const type = dataset.label.split(' ')[0] as keyof typeof fullValues;
             const full = fullValues[type][idx];
-            return `${dataset.label}: ${weighted}% (${type}: ${full}%)`;
+            return [`${dataset.label}: ${weighted}%  `, `${type}: ${full}%`];
           },
         },
       },
