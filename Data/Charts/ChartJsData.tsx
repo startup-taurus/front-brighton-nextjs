@@ -13,7 +13,7 @@ import {
   ArcElement,
   RadialLinearScale,
   Colors,
-} from "chart.js";
+} from 'chart.js';
 import ConfigDB from "config/ThemeConfig";
 import { isBrowser } from "../../utils/utils";
 
@@ -34,6 +34,7 @@ ChartJS.register(
   BarElement,
   ArcElement,
   RadialLinearScale,
+
 );
 export const barChartData = {
   labels: ["January", "February", "March", "April", "May", "June", "July"],

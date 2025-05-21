@@ -1,7 +1,7 @@
-import { ApexOptions } from "apexcharts";
+import { ApexOptions } from 'apexcharts';
 
 export type ChartOptionType = {
-  series: ApexOptions["series"];
+  series: ApexOptions['series'];
   options: ApexOptions;
 };
 
@@ -12,14 +12,14 @@ export type cryptoLeftType = {
   color: string;
   subTitle: string;
   chart: {
-    series: ApexOptions["series"];
+    series: ApexOptions['series'];
     color: string;
   };
 };
 export type mainChartDatatype = {
   color: string[];
   label: string[];
-  series: ApexOptions["series"];
+  series: ApexOptions['series'];
 };
 
 export type mainGridtype = {
@@ -42,7 +42,7 @@ export type socialChartType = {
   sm?: number;
   chart: {
     color: string[];
-    series: ApexOptions["series"];
+    series: ApexOptions['series'];
   };
 };
 
@@ -97,4 +97,32 @@ interface dataInterFace {
 }
 export interface productContentData {
   data: dataInterFace;
+}
+
+export interface Course {
+  course_id: number;
+  course_name: string;
+  course_number: string;
+  professor_name: string;
+  student_count: number;
+  classSchedule: string;
+  schedule: {
+    day: string;
+    startTime: string;
+    endTime: string;
+  }[];
+  options: {
+    hasClassToday: boolean;
+    hasBeenTakenAttendance: boolean;
+    endThisMonth: boolean;
+    endsInTwoWeeks: boolean;
+    isAlreadyEnd: boolean;
+  };
+}
+export interface Professor {
+  professor_id: number;
+  professor_name: string;
+  total_courses: number;
+  total_students: number;
+  courses: Course[];
 }
