@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Card, CardBody, CardHeader, Col, Row } from 'reactstrap';
 import Select from 'react-select';
 import { getBestStudentsByCourse } from 'helper/api-data/student';
@@ -48,15 +48,21 @@ const StudentPerformanceChart: React.FC<StudentPerformanceChartProps> = ({
   const [courseOptions, setCourseOptions] = useState<Option[]>([]);
   const [studentData, setStudentData] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [coursePage, setCoursePage] = useState(1);
+  const [courseSearchTerm, setCourseSearchTerm] = useState('');
+  const [hasMoreCourses, setHasMoreCourses] = useState(true);
 
-  const limit = 100;
-  const { data: coursesData } = useSWR(['/course/get-active', limit], () =>
-    getActiveCourses(1, limit)
+  const limit = 10;
+
+  const { data: coursesData, isLoading: isLoadingCourses } = useSWR(
+    [`/course/get-active`, coursePage, limit, courseSearchTerm],
+    () => getActiveCourses(coursePage, limit, courseSearchTerm),
+    { revalidateOnFocus: false }
   );
 
   useEffect(() => {
     if (coursesData?.data) {
-      const opts = coursesData.data.map(
+      const newOptions = coursesData.data.map(
         (course: any) =>
           ({
             value: course.id,
@@ -65,11 +71,38 @@ const StudentPerformanceChart: React.FC<StudentPerformanceChartProps> = ({
             levelLabel: course.syllabus.level.full_level,
           }) as Option
       );
-      setCourseOptions(opts);
+
+      if (coursePage === 1) {
+        setCourseOptions(newOptions);
+      } else {
+        setCourseOptions((prevOpts) => {
+          const existingValues = new Set(
+            prevOpts.map((option) => option.value)
+          );
+          const filteredNewOpts = newOptions.filter(
+            (opt: any) => !existingValues.has(opt.value)
+          );
+          return [...prevOpts, ...filteredNewOpts];
+        });
+      }
+      setHasMoreCourses(newOptions.length === limit);
     }
-  }, [coursesData]);
+  }, [coursesData, coursePage, limit]);
 
   const handleCourseChange = (opt: Option | null) => setSelectedCourse(opt);
+
+  const handleCourseScrollToBottom = useCallback(() => {
+    if (hasMoreCourses && !isLoadingCourses) {
+      setCoursePage((prevPage) => prevPage + 1);
+    }
+  }, [hasMoreCourses, isLoadingCourses]);
+
+  const handleCourseInputChange = (inputValue: string) => {
+    setCourseSearchTerm(inputValue);
+    setCoursePage(1);
+    setCourseOptions([]);
+    setHasMoreCourses(true);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -187,6 +220,10 @@ const StudentPerformanceChart: React.FC<StudentPerformanceChartProps> = ({
               placeholder='Select course...'
               isClearable
               isSearchable
+              onMenuScrollToBottom={handleCourseScrollToBottom}
+              onInputChange={handleCourseInputChange}
+              isLoading={isLoadingCourses}
+              filterOption={null}
             />
           </Col>
         </Row>
