@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import Select from 'react-select';
 import Cookies from 'js-cookie';
 import {
@@ -61,10 +61,16 @@ const StudentTransferForm: React.FC<Props> = ({
   const [courseOptions, setCourseOptions] = useState<Option[]>([]);
   const [selectedCourse, setSelectedCourse] = useState<Option | null>(null);
   const [selectedLevel, setSelectedLevel] = useState<Option | null>(null);
+  const [coursePage, setCoursePage] = useState(1);
+  const [courseSearchTerm, setCourseSearchTerm] = useState('');
+  const [hasMoreCourses, setHasMoreCourses] = useState(true);
 
-  const limit = 100;
-  const { data: coursesData } = useSWR(['/course/get-active', limit], () =>
-    getActiveCourses(1, limit)
+  const limit = 10;
+
+  const { data: coursesData, isLoading: isLoadingCourses } = useSWR(
+    [`/course/get-active`, coursePage, limit, courseSearchTerm],
+    () => getActiveCourses(coursePage, limit, courseSearchTerm),
+    { revalidateOnFocus: false }
   );
 
   const currentCourseId = useMemo(() => {
@@ -102,9 +108,21 @@ const StudentTransferForm: React.FC<Props> = ({
             levelLabel: course.syllabus.level.full_level,
           }) as any
       );
-      setCourseOptions(opts as Option[]);
 
-      if (initialTransferData?.selected_course) {
+      if (coursePage === 1) {
+        setCourseOptions(opts as Option[]);
+      } else {
+        setCourseOptions((prevOpts) => {
+          const existingValues = new Set(prevOpts.map((opt) => opt.value));
+          const filteredNewOpts = opts.filter(
+            (opt: any) => !existingValues.has(opt.value)
+          );
+          return [...prevOpts, ...filteredNewOpts];
+        });
+      }
+      setHasMoreCourses(opts.length === limit);
+
+      if (initialTransferData?.selected_course && coursePage === 1) {
         const foundCourse = opts.find(
           (o: any) => o.value === initialTransferData.selected_course!.value
         );
@@ -118,12 +136,12 @@ const StudentTransferForm: React.FC<Props> = ({
               value: (foundCourse as any)?.levelId,
             };
         setSelectedLevel(lvl as Option);
-      } else {
+      } else if (!initialTransferData?.selected_course && coursePage === 1) {
         setSelectedCourse(null);
         setSelectedLevel(null);
       }
     }
-  }, [coursesData, initialTransferData]);
+  }, [coursesData, initialTransferData, coursePage, limit]);
 
   const userRole = getUserRoleFromLocalStorage();
 
@@ -134,6 +152,19 @@ const StudentTransferForm: React.FC<Props> = ({
     } else {
       setSelectedLevel(null);
     }
+  };
+
+  const handleCourseScrollToBottom = useCallback(() => {
+    if (hasMoreCourses && !isLoadingCourses) {
+      setCoursePage((prevPage) => prevPage + 1);
+    }
+  }, [hasMoreCourses, isLoadingCourses]);
+
+  const handleCourseInputChange = (inputValue: string) => {
+    setCourseSearchTerm(inputValue);
+    setCoursePage(1);
+    setCourseOptions([]);
+    setHasMoreCourses(true);
   };
 
   const handleSubmit = async () => {
@@ -266,6 +297,10 @@ const StudentTransferForm: React.FC<Props> = ({
                       isOptionDisabled={(opt: Option) =>
                         Number(opt.value) === Number(currentCourseId)
                       }
+                      onMenuScrollToBottom={handleCourseScrollToBottom}
+                      onInputChange={handleCourseInputChange}
+                      isLoading={isLoadingCourses}
+                      filterOption={null}
                     />
                     {!selectedCourse && (
                       <small className='text-danger'>Required</small>
