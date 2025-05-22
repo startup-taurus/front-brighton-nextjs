@@ -1,4 +1,4 @@
-import React, { ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useContext, useEffect, useState } from 'react';
 import { Card, CardBody } from 'reactstrap';
 import { NextPageWithLayout } from '@/pages/_app';
 import { useRouter } from 'next/router';
@@ -16,6 +16,8 @@ import { getAttendance } from '../../../../helper/api-data/attendance';
 import AttendanceHelpBox from '@/components/own/attendance-help-box/attendance-help-box';
 import { getCourseScheduleDates } from '../../../../helper/api-data/course-schedule';
 import { decrypt } from 'utils/encryption';
+import { UserContext } from 'helper/User';
+import { USER_TYPES } from 'utils/constants';
 
 const tabsName = 'ATTENDANCE';
 
@@ -23,6 +25,8 @@ const TeachersAttendance: NextPageWithLayout = () => {
   const router = useRouter();
   const courseId = router.query.id as string;
   const [studentId, setStudentId] = useState<string | number | null>(null);
+  const { user } = useContext(UserContext);
+  const isProfessor = user?.role === USER_TYPES.PROFESSOR;
 
   useEffect(() => {
     const encrypted = localStorage.getItem('studentDetailId');
@@ -67,7 +71,9 @@ const TeachersAttendance: NextPageWithLayout = () => {
       className='attendance'
     >
       <CardBody>
-        <NavigationBackButton professorId={router.query.professorId} />
+        {!isProfessor && (
+          <NavigationBackButton professorId={router.query.professorId} />
+        )}
         <TabsTeachers
           numberOfClass={course_number}
           tabsName={tabsName}

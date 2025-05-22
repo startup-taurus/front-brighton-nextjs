@@ -2,7 +2,7 @@ import useSWR from 'swr';
 
 import CourseLayout from '@/components/own/course-layout/course-layout';
 import TabsTeachers from '@/components/own/tabs-teachers/tabs-teachers';
-import React, { ReactElement, useEffect, useState } from 'react';
+import React, { ReactElement, useContext, useEffect, useState } from 'react';
 import { Card, CardBody } from 'reactstrap';
 import NavigationBackButton from '@/components/own/navigation-back-button/navigation-back-button';
 import { NextPageWithLayout } from '@/pages/_app';
@@ -18,6 +18,8 @@ import { getGradesByCourse } from '../../../../helper/api-data/student-grades';
 import { getFinalPercentageBySyllabusId } from '../../../../helper/api-data/syllabus';
 import useFilteredGradingItems from '../../../../hooks/useFilteredGradingItems';
 import { decrypt } from 'utils/encryption';
+import { UserContext } from 'helper/User';
+import { USER_TYPES } from 'utils/constants';
 
 const tabsName = 'GRADEBOOK';
 
@@ -25,6 +27,8 @@ const Gradebook: NextPageWithLayout = () => {
   const router = useRouter();
   const courseId = router.query.id as string;
   const [studentId, setStudentId] = useState<string | number | null>(null);
+  const { user } = useContext(UserContext);
+  const isProfessor = user?.role === USER_TYPES.PROFESSOR;
 
   useEffect(() => {
     const encrypted = localStorage.getItem('studentDetailId');
@@ -84,11 +88,14 @@ const Gradebook: NextPageWithLayout = () => {
       className='gradebook'
     >
       <CardBody>
-        <NavigationBackButton professorId={router.query.professorId} />
+        {!isProfessor && (
+          <NavigationBackButton professorId={router.query.professorId} />
+        )}
         <TabsTeachers
           numberOfClass={courseDetail?.data?.data?.course_number ?? ''}
           tabsName={tabsName}
         />
+
         {filteredGradingItems.length > 0 &&
           courseStudents?.data?.data?.students &&
           gradingPercentage?.data?.data &&
