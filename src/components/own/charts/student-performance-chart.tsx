@@ -62,7 +62,7 @@ const StudentPerformanceChart: React.FC<StudentPerformanceChartProps> = ({
 
   useEffect(() => {
     if (coursesData?.data) {
-      const newOpts = coursesData.data.map(
+      const newOptions = coursesData.data.map(
         (course: any) =>
           ({
             value: course.id,
@@ -73,17 +73,19 @@ const StudentPerformanceChart: React.FC<StudentPerformanceChartProps> = ({
       );
 
       if (coursePage === 1) {
-        setCourseOptions(newOpts);
+        setCourseOptions(newOptions);
       } else {
         setCourseOptions((prevOpts) => {
-          const existingValues = new Set(prevOpts.map((opt) => opt.value));
-          const filteredNewOpts = newOpts.filter(
+          const existingValues = new Set(
+            prevOpts.map((option) => option.value)
+          );
+          const filteredNewOpts = newOptions.filter(
             (opt: any) => !existingValues.has(opt.value)
           );
           return [...prevOpts, ...filteredNewOpts];
         });
       }
-      setHasMoreCourses(newOpts.length === limit);
+      setHasMoreCourses(newOptions.length === limit);
     }
   }, [coursesData, coursePage, limit]);
 
