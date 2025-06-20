@@ -56,8 +56,7 @@ const StudentPerformanceChart: React.FC<StudentPerformanceChartProps> = ({
 
   const { data: coursesData, isLoading: isLoadingCourses } = useSWR(
     [`/course/get-active`, coursePage, limit, courseSearchTerm],
-    () => getActiveCourses(coursePage, limit, courseSearchTerm),
-    { revalidateOnFocus: false }
+    () => getActiveCourses(coursePage, limit, courseSearchTerm)
   );
 
   useEffect(() => {
@@ -140,7 +139,9 @@ const StudentPerformanceChart: React.FC<StudentPerformanceChartProps> = ({
       {
         label: 'Exam (70%)',
         data: studentData.map((student) =>
-          Number((parseFloat(student.exam_percent) * 0.7).toFixed(2))
+          Number(
+            ((parseFloat(student.exam_percent) / 100) * 0.7 * 10).toFixed(2)
+          )
         ),
         backgroundColor: 'rgba(75, 192, 192, 0.6)',
         stack: 'Stack 0',
@@ -148,7 +149,9 @@ const StudentPerformanceChart: React.FC<StudentPerformanceChartProps> = ({
       {
         label: 'Test (20%)',
         data: studentData.map((student) =>
-          Number((parseFloat(student.test_percent) * 0.2).toFixed(2))
+          Number(
+            ((parseFloat(student.test_percent) / 100) * 0.2 * 10).toFixed(2)
+          )
         ),
         backgroundColor: 'rgba(255, 206, 86, 0.6)',
         stack: 'Stack 0',
@@ -156,7 +159,11 @@ const StudentPerformanceChart: React.FC<StudentPerformanceChartProps> = ({
       {
         label: 'Assignment (10%)',
         data: studentData.map((student) =>
-          Number((parseFloat(student.assignment_percent) * 0.1).toFixed(2))
+          Number(
+            ((parseFloat(student.assignment_percent) / 100) * 0.1 * 10).toFixed(
+              2
+            )
+          )
         ),
         backgroundColor: 'rgba(54, 162, 235, 0.6)',
         stack: 'Stack 0',
@@ -177,8 +184,11 @@ const StudentPerformanceChart: React.FC<StudentPerformanceChartProps> = ({
             const dataset = context.dataset;
             const weighted = context.formattedValue;
             const type = dataset.label.split(' ')[0] as keyof typeof fullValues;
-            const full = fullValues[type][idx];
-            return [`${dataset.label}: ${weighted}%  `, `${type}: ${full}%`];
+            const full = fullValues[type][idx] / 10;
+            return [
+              `${dataset.label}: ${weighted}%  `,
+              `${type}: ${full.toFixed(2)}%`,
+            ];
           },
         },
       },
@@ -188,7 +198,9 @@ const StudentPerformanceChart: React.FC<StudentPerformanceChartProps> = ({
         anchor: 'end',
         align: 'end',
         formatter: (_: any, ctx: any) =>
-          studentData[ctx.dataIndex].total_percent,
+          (parseFloat(studentData[ctx.dataIndex].total_percent) / 10).toFixed(
+            2
+          ) + '%',
         font: { weight: 'bold' },
         color: '#000',
       },
