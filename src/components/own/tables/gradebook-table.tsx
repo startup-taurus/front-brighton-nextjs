@@ -93,42 +93,52 @@ const GradebookTable = ({
     studentId: any,
     isRetied: boolean
   ) => {
-    if (isCoordinator) {
+    if (isCoordinator || isRetied) {
       return;
     }
 
-    if (isRetied) {
-      return;
-    }
+    const newRawDigits = event.target.value.replace(/\D/g, '');
 
-    let grade = (grades[gradingItemId]?.[studentId] ?? '0.00').replace('.', '');
-    const newDigit = event.target.value.replace(/\D/g, '');
-    if (!newDigit || Number(newDigit) > 1000) return;
-
-    grade = grade + newDigit;
-    grade = grade.padStart(3, '0');
-    grade = grade.slice(-4);
-
-    const formattedGrade = Number(
-      grade.slice(0, grade.length - 2) + '.' + grade.slice(-2)
-    );
-
-    if (formattedGrade >= 0 && formattedGrade <= 10) {
+    if (!newRawDigits) {
       setGrades((grades: any) => ({
         ...grades,
         [gradingItemId]: {
           ...grades[gradingItemId],
-          [studentId]: formattedGrade.toFixed(2),
+          [studentId]: '000.00',
         },
       }));
-
       onSaveGrade({
         course_id: courseId,
         student_id: studentId,
         grading_item_id: gradingItemId,
-        grade: formattedGrade,
+        grade: 0,
       });
+      return;
     }
+
+    const last5digits = newRawDigits.slice(-5);
+    const paddedDigits = last5digits.padStart(5, '0');
+    const finalGrade = paddedDigits.slice(0, -2) + '.' + paddedDigits.slice(-2);
+    const numericGrade = Number(finalGrade);
+
+    if (numericGrade > 100) {
+      return;
+    }
+
+    setGrades((grades: any) => ({
+      ...grades,
+      [gradingItemId]: {
+        ...grades[gradingItemId],
+        [studentId]: finalGrade,
+      },
+    }));
+
+    onSaveGrade({
+      course_id: courseId,
+      student_id: studentId,
+      grading_item_id: gradingItemId,
+      grade: numericGrade,
+    });
   };
 
   const handleBackSpace = async (
@@ -143,24 +153,26 @@ const GradebookTable = ({
 
     if (event.key === 'Backspace') {
       event.preventDefault();
-      let grade = (grades[gradingItemId]?.[studentId] ?? '0.00').replace(
+      let rawGrade = (grades[gradingItemId]?.[studentId] ?? '000.00').replace(
         '.',
         ''
       );
 
-      grade = grade.slice(0, -1);
-      if (grade.length === 0) grade = '000';
+      rawGrade = rawGrade.slice(0, -1);
 
-      if (Number(grade) < 1000) {
-        grade = grade.padStart(3, '0');
+      let finalGrade;
+      if (rawGrade.length === 0 || Number(rawGrade) === 0) {
+        finalGrade = '000.00';
+      } else {
+        const padded = rawGrade.padStart(5, '0');
+        finalGrade = padded.slice(0, -2) + '.' + padded.slice(-2);
       }
-      grade = grade.slice(0, -2) + '.' + grade.slice(-2);
 
       setGrades((grades: any) => ({
         ...grades,
         [gradingItemId]: {
           ...grades[gradingItemId],
-          [studentId]: grade,
+          [studentId]: finalGrade,
         },
       }));
 
@@ -168,7 +180,7 @@ const GradebookTable = ({
         course_id: courseId,
         student_id: studentId,
         grading_item_id: gradingItemId,
-        grade,
+        grade: Number(finalGrade),
       });
     }
   };
