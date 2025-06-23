@@ -15,6 +15,8 @@ import {
   Legend,
 } from 'chart.js';
 import ChartDataLabels from 'chartjs-plugin-datalabels';
+import type { TooltipItem } from 'chart.js';
+import { ChartDataLabelContext } from 'Types/ChartType';
 
 ChartJS.register(
   CategoryScale,
@@ -99,7 +101,9 @@ const StudentPerformanceChart: React.FC<StudentPerformanceChartProps> = ({
   const handleCourseInputChange = (inputValue: string) => {
     setCourseSearchTerm(inputValue);
     setCoursePage(1);
-    setCourseOptions([]);
+    if (inputValue.trim() !== '') {
+      setCourseOptions([]);
+    }
     setHasMoreCourses(true);
   };
 
@@ -179,28 +183,29 @@ const StudentPerformanceChart: React.FC<StudentPerformanceChartProps> = ({
       title: { display: true, text: title },
       tooltip: {
         callbacks: {
-          label: function (context: any) {
-            const idx = context.dataIndex;
-            const dataset = context.dataset;
-            const weighted = context.formattedValue;
-            const type = dataset.label.split(' ')[0] as keyof typeof fullValues;
+          label: (item: TooltipItem<'bar'>) => {
+            const idx = item.dataIndex;
+            const weighted = item.formattedValue;
+            const type = item.dataset.label?.split(
+              ' '
+            )[0] as keyof typeof fullValues;
             const full = fullValues[type][idx] / 10;
             return [
-              `${dataset.label}: ${weighted}%  `,
+              `${item.dataset.label}: ${weighted}%`,
               `${type}: ${full.toFixed(2)}%`,
             ];
           },
         },
       },
       datalabels: {
-        display: (ctx: any) =>
-          ctx.datasetIndex === ctx.chart.data.datasets.length - 1,
+        display: (context: ChartDataLabelContext) =>
+          context.datasetIndex === context.chart.data.datasets.length - 1,
         anchor: 'end',
         align: 'end',
-        formatter: (_: any, ctx: any) =>
-          (parseFloat(studentData[ctx.dataIndex].total_percent) / 10).toFixed(
-            2
-          ) + '%',
+        formatter: (_: any, context: ChartDataLabelContext) =>
+          (
+            parseFloat(studentData[context.dataIndex].total_percent) / 10
+          ).toFixed(2) + '%',
         font: { weight: 'bold' },
         color: '#000',
       },
