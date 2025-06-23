@@ -283,7 +283,7 @@ export const calculateAverage = (
   studentId: string
 ) => {
   let sumResult = 0;
-  let totalExpected = notes.length * 10;
+  let totalExpected = notes.length * 100;
   let averageResult = '0';
 
   notes.map((note) => {
@@ -403,7 +403,7 @@ export const formatStudentScoreExamGrades = (
   return moversExamScore?.map((moverExamScore, index) => {
     const scorePercentage = (
       (grades[moverExamScore.item_id][studentId] * 100) /
-      10
+      100
     ).toFixed(2);
 
     const gradeResult = calculateFinalGradingStatus(
@@ -477,7 +477,7 @@ export const calculateReportExamAverage = (
     return acc + Number(grades[moverExamScore.item_id][studentId]);
   }, 0);
 
-  moversExamProm = (moverExamSum / moversExamScore.length) * 10;
+  moversExamProm = (moverExamSum / moversExamScore.length) * 1;
 
   return Number(moversExamProm).toFixed(2);
 };
@@ -519,29 +519,23 @@ export const getNextLevelFromProgression = (
   currentLevel: string,
   isKid: boolean = false
 ) => {
-  // Importar las progresiones desde levelProgression.ts
   const {
     ADULT_LEVEL_PROGRESSION,
     KIDS_LEVEL_PROGRESSION,
   } = require('./levelProgression');
 
-  // Determinar qué progresión usar
   const progression = isKid ? KIDS_LEVEL_PROGRESSION : ADULT_LEVEL_PROGRESSION;
 
-  // Normalizar el nivel actual a mayúsculas para comparación
   const upperCurrentLevel = currentLevel.toUpperCase();
 
-  // Buscar el nivel actual en la progresión
   let currentIndex = -1;
 
-  // Primero buscar coincidencia exacta
   currentIndex = progression.findIndex(
     (level: { full_level: string; short_level: string }) =>
       level.full_level.toUpperCase() === upperCurrentLevel ||
       level.short_level.toUpperCase() === upperCurrentLevel
   );
 
-  // Si no se encuentra, buscar coincidencia parcial
   if (currentIndex === -1) {
     currentIndex = progression.findIndex(
       (level: { full_level: string; short_level: string }) =>
@@ -550,12 +544,10 @@ export const getNextLevelFromProgression = (
     );
   }
 
-  // Si no se encuentra o es el último nivel, devolver null
   if (currentIndex === -1 || currentIndex === progression.length - 1) {
     return null;
   }
 
-  // Devolver el siguiente nivel en la secuencia
   return progression[currentIndex + 1];
 };
 
