@@ -160,7 +160,7 @@ const GradebookTable = ({
 
       rawGrade = rawGrade.slice(0, -1);
 
-      let finalGrade;
+      let finalGrade: string | number;
       if (rawGrade.length === 0 || Number(rawGrade) === 0) {
         finalGrade = '000.00';
       } else {
