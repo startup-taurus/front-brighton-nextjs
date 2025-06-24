@@ -52,7 +52,7 @@ export function middleware(request: NextRequest) {
     user &&
     user?.role === USER_TYPES.STUDENT
   ) {
-    return NextResponse.redirect(new URL(`/teachers`, request.url)); 
+    return NextResponse.redirect(new URL(`/teachers`, request.url));
   }
 
   if (
@@ -72,7 +72,8 @@ export function middleware(request: NextRequest) {
   if (
     pathTeacherRegex.test(path) &&
     user &&
-    user?.role !== USER_TYPES.PROFESSOR
+    user?.role !== USER_TYPES.PROFESSOR &&
+    user?.role !== USER_TYPES.COORDINATOR
   ) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
@@ -80,7 +81,7 @@ export function middleware(request: NextRequest) {
   if (
     new RegExp(`^(/dashboard|/admin(\\/.*)?)$`).test(path) &&
     user &&
-    (user?.role === USER_TYPES.PROFESSOR || user?.role === USER_TYPES.STUDENT)
+    user?.role === USER_TYPES.PROFESSOR
   ) {
     return NextResponse.redirect(new URL("/teachers", request.url));
   }
@@ -89,7 +90,8 @@ export function middleware(request: NextRequest) {
     new RegExp(`^(/dashboard|/admin(\\/.*)?)$`).test(path) &&
     user &&
     user?.role !== USER_TYPES.ADMIN &&
-    user?.role !== USER_TYPES.COORDINATOR
+    user?.role !== USER_TYPES.COORDINATOR &&
+    user?.role !== USER_TYPES.FINANCIAL
   ) {
     return NextResponse.redirect(new URL("/teachers", request.url));
   }
