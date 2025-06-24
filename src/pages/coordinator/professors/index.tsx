@@ -49,7 +49,8 @@ const CoordinatorDashboard = () => {
     if (
       (response?.data?.result?.length !== 0 || response?.data?.length !== 0) &&
       hasMore &&
-      !isLoadingMore
+      !isLoadingMore &&
+      !loading
     ) {
       setIsLoadingMore(true);
       const nextPage = page + 1;
@@ -124,6 +125,19 @@ const CoordinatorDashboard = () => {
 
     return () => clearTimeout(handler);
   }, [searchTerm]);
+
+  useEffect(() => {
+    if (!router.query.status && router.isReady) {
+      router.push(
+        {
+          pathname: router.pathname,
+          query: { ...router.query, status: 'active' },
+        },
+        undefined,
+        { shallow: true }
+      );
+    }
+  }, [router.isReady]);
 
   const filteredTeachers = teachers.filter((teacher) => {
     const nameMatch = teacher.name
@@ -237,28 +251,28 @@ const CoordinatorDashboard = () => {
                 </Col>
               ))}
 
+              {/* Skeletons para carga de más profesores */}
+              {isLoadingMore && (
+                <>
+                  {Array.from({ length: 4 }).map((_, index) => (
+                    <Col
+                      key={`loading-more-${index}`}
+                      md={6}
+                      lg={4}
+                      xl={3}
+                      className='mb-4'
+                    >
+                      <CardSkeleton height={250} />
+                    </Col>
+                  ))}
+                </>
+              )}
+
               <div
                 ref={loadMoreRef}
                 className='load-more-trigger'
-              >
-                {isLoadingMore && (
-                  <Row
-                    className='mt-2 mb-4'
-                    style={{ width: '100%' }}
-                  >
-                    {Array.from({ length: 4 }).map((_, index) => (
-                      <Col
-                        key={`loading-more-${index}`}
-                        md={6}
-                        lg={4}
-                        xl={3}
-                      >
-                        <CardSkeleton height={250} />
-                      </Col>
-                    ))}
-                  </Row>
-                )}
-              </div>
+                style={{ height: '20px' }}
+              />
             </>
           ) : (
             <Col xs={12}>
