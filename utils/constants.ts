@@ -117,14 +117,41 @@ export const TEACHER_PATHS = [
 ];
 
 export const EXAMS_TYPE = {
+  STARTERS: 'STARTERS',
   MOVERS: 'MOVERS',
+  FLYERS: 'FLYERS',
+  KEY: 'KEY',
   PRELIM: 'PRELIM.',
+  FIRST: 'FIRST',
 };
+
+export const EXAM_TYPE_OPTIONS = [
+  { value: EXAMS_TYPE.STARTERS, label: 'STARTERS (PRE-A1 KIDS) - 3 Modules' },
+  { value: EXAMS_TYPE.MOVERS, label: 'MOVERS (A1 KIDS/ADULTS) - 3 Modules' },
+  { value: EXAMS_TYPE.FLYERS, label: 'FLYERS (A2 KIDS) - 3 Modules' },
+  { value: EXAMS_TYPE.KEY, label: 'KEY (A2 KIDS/ADULTS) - 3 Modules' },
+  { value: EXAMS_TYPE.PRELIM, label: 'PRELIMINARY (B1 KIDS/ADULTS) - 4 Modules' },
+  { value: EXAMS_TYPE.FIRST, label: 'FIRST (B2 ADULTS) - 4 Modules' },
+];
 
 export const STATUS = {
   ACTIVE: 'active',
   INACTIVE: 'inactive',
 };
 export const GROUP_MINIMUM = 2;
+
+export const EXAM_MODULES = {
+  THREE_MODULES: {
+    READING_WRITING: 'reading-and-writing',
+    LISTENING: 'listening-yle',
+    SPEAKING: 'speaking-yle'
+  },
+  FOUR_MODULES: {
+    READING: 'reading',
+    LISTENING: 'listening',
+    WRITING: 'writing',
+    SPEAKING: 'speaking'
+  }
+};
 
 

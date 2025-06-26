@@ -401,10 +401,8 @@ export const formatStudentScoreExamGrades = (
   notesPercentages: any
 ) => {
   return moversExamScore?.map((moverExamScore, index) => {
-    const scorePercentage = (
-      (grades[moverExamScore.item_id][studentId] * 100) /
-      100
-    ).toFixed(2);
+    const rawScore = grades[moverExamScore.item_id][studentId];
+    const scorePercentage = (rawScore !== undefined && rawScore !== null && rawScore !== '') ? Number(rawScore).toFixed(2) : '0.00';
 
     const gradeResult = calculateFinalGradingStatus(
       notesPercentages,
@@ -492,7 +490,8 @@ export const formatReportBarChartData = (
 
   moversExamScore.forEach((item) => {
     labels.push(item.item_name);
-    data.push(Number(grades[item.item_id][studentId]) * 0.1);
+    const value = Number(grades[item.item_id][studentId]) * 1;
+    data.push(Number(value.toFixed(2))); 
   }, 0);
 
   return {
@@ -631,22 +630,56 @@ export const getColorOfAssistance = (value: any) => {
   return '';
 };
 
-export const formatExamParams = (result: any[]) => {
-  const values = result?.map((exam) => {
-    const name = exam.criterion?.toLowerCase().replace(' and ', '-');
-    const formatName = name
-      .split('-')
-      .map((word: string, index: number) => {
-        return index === 0
-          ? word
-          : word.charAt(0).toUpperCase() + word.slice(1);
-      })
-      .join('');
+export const formatExamParams = (result: any[], examType: string) => {
+  const normalizedExamType = examType.replace('.', '');
+  const fourModuleExams = ['PRELIM', 'FIRST'];
+  const threeModuleExams = ['STARTERS', 'MOVERS', 'FLYERS', 'KEY'];
 
-    return {
-      [formatName]: `${exam?.score ? exam?.score : 0}%`,
-      [`${formatName}Status`]: `${exam.grade}`,
-    };
+  const values = result?.map((exam) => {
+    const criterion = exam.criterion?.toLowerCase();
+    
+    if (threeModuleExams.includes(normalizedExamType)) {
+      if (criterion.includes('reading') && criterion.includes('writing')) {
+        return {
+          readingWriting: `${exam?.score ? exam?.score : 0.00}%`,
+          readingWritingStatus: `${exam.grade}`,
+        };
+      } else if (criterion.includes('listening')) {
+        return {
+          listeningYLE: `${exam?.score ? exam?.score : 0.00}%`,
+          listeningYLEStatus: `${exam.grade}`,
+        };
+      } else if (criterion.includes('speaking')) {
+        return {
+          speakingYLE: `${exam?.score ? exam?.score : 0.00}%`,
+          speakingYLEStatus: `${exam.grade}`,
+        };
+      }
+    } else if (fourModuleExams.includes(normalizedExamType)) {
+      if (criterion.includes('reading') && !criterion.includes('writing')) {
+        return {
+          reading: `${exam?.score ? exam?.score : 0.00}%`,
+          readingStatus: `${exam.grade}`,
+        };
+      } else if (criterion.includes('writing') && !criterion.includes('reading')) {
+        return {
+          writing: `${exam?.score ? exam?.score : 0.00}%`,
+          writingStatus: `${exam.grade}`,
+        };
+      } else if (criterion.includes('listening')) {
+        return {
+          listening: `${exam?.score ? exam?.score : 0.00}%`,
+          listeningStatus: `${exam.grade}`,
+        };
+      } else if (criterion.includes('speaking')) {
+        return {
+          speaking: `${exam?.score ? exam?.score : 0.00}%`,
+          speakingStatus: `${exam.grade}`,
+        };
+      }
+    }
+    
+    return {};
   });
 
   return Object.assign({}, ...values);
@@ -662,21 +695,20 @@ export const formatReportUrl = ({
   tests,
   testsStatus,
   exam,
-  reading = '0.0%',
+  reading = '0.00%',
   readingStatus = 'NOT REPORTED',
-  listening = '0.0%',
+  listening = '0.00%',
   listeningStatus = 'NOT REPORTED',
-  writing = '0.0%',
+  writing = '0.00%',
   writingStatus = 'NOT REPORTED',
-  speaking = '0.0%',
+  speaking = '0.00%',
   speakingStatus = 'NOT REPORTED',
   generalExamsTotal,
-  //Young learners
-  readingWriting = '0.0%',
+  readingWriting = '0.00%',
   readingWritingStatus = 'NOT REPORTED',
-  listeningYLE = '0.0%',
+  listeningYLE = '0.00%',
   listeningYLEStatus = 'NOT REPORTED',
-  speakingYLE = '0.0%',
+  speakingYLE = '0.00%',
   speakingYLEStatus = 'NOT REPORTED',
   yleTotal,
   gpa,
@@ -685,6 +717,7 @@ export const formatReportUrl = ({
   const baseUrl = new URL(
     'https://chiispiitas.github.io/Brighton/Certificate%20Generator/index.html'
   );
+  
   baseUrl.searchParams.append('student', student.toUpperCase());
   baseUrl.searchParams.append(
     'program',
@@ -698,12 +731,15 @@ export const formatReportUrl = ({
   baseUrl.searchParams.append('tests', tests);
   baseUrl.searchParams.append('tests-status', testsStatus);
   baseUrl.searchParams.append('exam', exam);
-
   baseUrl.searchParams.append('gpa', gpa);
   baseUrl.searchParams.append('final', final);
   baseUrl.searchParams.append('password', 'Brighton1234@');
 
-  if (exam === EXAMS_TYPE.PRELIM) {
+  const normalizedExam = exam.replace('.', '');
+  const fourModuleExams = ['PRELIM', 'FIRST'];
+  const threeModuleExams = ['STARTERS', 'MOVERS', 'FLYERS', 'KEY'];
+
+  if (fourModuleExams.includes(normalizedExam)) {
     baseUrl.searchParams.append('reading', reading);
     baseUrl.searchParams.append('reading-status', readingStatus);
     baseUrl.searchParams.append('listening', listening);
@@ -713,12 +749,9 @@ export const formatReportUrl = ({
     baseUrl.searchParams.append('speaking', speaking);
     baseUrl.searchParams.append('speaking-status', speakingStatus);
     baseUrl.searchParams.append('general-exams-total', generalExamsTotal);
-  } else {
+  } else if (threeModuleExams.includes(normalizedExam)) {
     baseUrl.searchParams.append('reading-and-writing', readingWriting);
-    baseUrl.searchParams.append(
-      'reading-and-writing-status',
-      readingWritingStatus
-    );
+    baseUrl.searchParams.append('reading-and-writing-status', readingWritingStatus);
     baseUrl.searchParams.append('listening-yle', listeningYLE);
     baseUrl.searchParams.append('listening-yle-status', listeningYLEStatus);
     baseUrl.searchParams.append('speaking-yle', speakingYLE);
@@ -727,12 +760,49 @@ export const formatReportUrl = ({
   }
 
   return baseUrl;
-  // return `https://chiispiitas.github.io/Brighton/Certificate%20Generator/index.html?student=JEAN%20PA
-  //         UL%20SANTOS%20CUADROS&program=General%20English&level=B1%20PRE-
-  //         INTERMEDIATE&short-level=B1&assignments=90%&assignments-total=97.5%&assignments-
-  //         status=PASS&tests=100&tests-status=PASS&exam=PRELIM.&reading=20%&reading-
-  //         status=NOT%20REPORTED&listening=30%&listening-
-  //         status=NOT%20REPORTED&writing=40%&writing-
-  //         status=FAILED%20(A2)&speaking=50%&speaking-status=FAILED%20(A2)&general-exams-
-  //         total=35%&gpa=47.5%%20(FAILED%20(A2))&final=FAILED%20&password=Brighton1234@`;
+};
+
+export const getExamType = (level: string, ageGroup: string) => {
+  const levelUpper = level.toUpperCase();
+  
+  if (levelUpper.includes('PRE-A1') || levelUpper.includes('STARTER')) {
+    return EXAMS_TYPE.STARTERS;
+  }
+  if (levelUpper.includes('A1') && !levelUpper.includes('A2')) {
+    return EXAMS_TYPE.MOVERS;
+  }
+  if (levelUpper.includes('A2')) {
+    const isAdult = ageGroup && ageGroup.toLowerCase().includes('adult');
+    return isAdult ? EXAMS_TYPE.KEY : EXAMS_TYPE.FLYERS;
+  }
+  if (levelUpper.includes('B1')) {
+    return EXAMS_TYPE.PRELIM;
+  }
+  if (levelUpper.includes('B2')) {
+    return EXAMS_TYPE.FIRST;
+  }
+  
+  console.warn(`No exam type match found for level: ${level}, ageGroup: ${ageGroup}`);
+  const isAdult = ageGroup && ageGroup.toLowerCase().includes('adult');
+  return isAdult ? EXAMS_TYPE.KEY : EXAMS_TYPE.FLYERS; 
+};
+export const getExamTypeByLevelId = (levelId: number): string => {
+  const LEVEL_TO_EXAM_TYPE: Record<number, string> = {
+    1: EXAMS_TYPE.MOVERS,     
+    2: EXAMS_TYPE.KEY,       
+    3: EXAMS_TYPE.PRELIM,     
+    4: EXAMS_TYPE.PRELIM,    
+    5: EXAMS_TYPE.FIRST,    
+    6: EXAMS_TYPE.FIRST,     
+    7: EXAMS_TYPE.STARTERS,  
+    8: EXAMS_TYPE.MOVERS, 
+    9: EXAMS_TYPE.FLYERS, 
+    10: EXAMS_TYPE.PRELIM, 
+    11: EXAMS_TYPE.PRELIM,   
+    12: EXAMS_TYPE.MOVERS, 
+    13: EXAMS_TYPE.FLYERS,
+    14: EXAMS_TYPE.PRELIM,
+  };
+  
+  return LEVEL_TO_EXAM_TYPE[levelId] || EXAMS_TYPE.PRELIM;
 };
