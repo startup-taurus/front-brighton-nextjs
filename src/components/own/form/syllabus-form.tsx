@@ -20,7 +20,7 @@ import Select from 'react-select';
 import useSWR from 'swr';
 import { getAllLevels } from 'helper/api-data/level';
 import { EXAMS_TYPE, EXAM_TYPE_OPTIONS } from 'utils/constants';
-import { getExamTypeByLevelId } from 'utils/utils';
+import { getExamTypeByLevelId, getModulesByExamType } from 'utils/utils';
 
 const getAvailableExamTypeOptions = (levelId: number | string) => {
   if (!levelId) return [];
@@ -184,13 +184,13 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                     assig_percentage: data?.percentages?.assig_percentage || 0,
                     assignments: data?.assignments || [''],
                     progress_tests: data?.progress_tests || [''],
-                    exam_modules: data?.exam_modules || data?.movers_exam || [''],
+                    exam_modules: data?.exam_modules || data?.movers_exam || getModulesByExamType(data?.exam_type || EXAMS_TYPE.PRELIM),
                     percentages: data?.percentages_syllabus || [
                       { name: '', min: 0, max: 0 },
                     ],
                     exam_type: data?.exam_type || EXAMS_TYPE.PRELIM,
-                  }:
-                  {
+                  }
+                : {
                     id: '',
                     syllabus_name: '',
                     level_id: 0,
@@ -202,7 +202,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                     progress_tests: [''],
                     exam_modules: [''],
                     percentages: [{ name: '', min: 0, max: 0 }],
-                    exam_type: []
+                    exam_type: ''
                   }
           }
           validationSchema={validations}
@@ -223,62 +223,62 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
               dirty,
             } = props;
 
-            const renderArrayField = (name: string, label: string) => (
-              <Col
-                xs={12}
-                className='mt-3'
-              >
-                <Label>{label}</Label>
-                <FieldArray
-                  name={name}
-                  render={(arrayHelpers) => (
-                    <>
-                      <div className='d-flex justify-content-start my-2'>
-                        <Button
-                          type='button'
-                          color='primary'
-                          onClick={() => arrayHelpers.push('')}
-                        >
-                          Add Item
-                        </Button>
-                      </div>
-                      <div className='syllabus-container'>
-                        <Row className='mb-2'>
-                          {(
-                            values[name as keyof typeof values] as string[]
-                          ).map((item, index) => (
-                            <Col
-                              key={index}
-                              xs={6}
-                              className='d-flex align-items-center mb-2'
-                            >
-                              <Input
-                                value={item}
-                                onChange={(e) =>
-                                  setFieldValue(
-                                    `${name}[${index}]`,
-                                    e.target.value
-                                  )
-                                }
-                                placeholder={`Item ${index + 1}`}
-                                className='me-2 syllabus-input'
-                              />
-                              <Button
-                                type='button'
-                                color='danger'
-                                onClick={() => arrayHelpers.remove(index)}
+            const renderArrayField = (name: string, label: string) => {
+              const fieldValue = values[name as keyof typeof values] as string[];
+              const safeArray = Array.isArray(fieldValue) ? fieldValue : [''];
+              
+              return (
+                <Col xs={12} className='mt-3'>
+                  <Label>{label}</Label>
+                  <FieldArray
+                    name={name}
+                    render={(arrayHelpers) => (
+                      <>
+                        <div className='d-flex justify-content-start my-2'>
+                          <Button
+                            type='button'
+                            color='primary'
+                            onClick={() => arrayHelpers.push('')}
+                          >
+                            Add Item
+                          </Button>
+                        </div>
+                        <div className='syllabus-container'>
+                          <Row className='mb-2'>
+                            {safeArray.map((item, index) => (
+                              <Col
+                                key={index}
+                                xs={6}
+                                className='d-flex align-items-center mb-2'
                               >
-                                <FaTrash />
-                              </Button>
-                            </Col>
-                          ))}
-                        </Row>
-                      </div>
-                    </>
-                  )}
-                />
-              </Col>
-            );
+                                <Input
+                                  value={item}
+                                  onChange={(e) =>
+                                    setFieldValue(
+                                      `${name}[${index}]`,
+                                      e.target.value
+                                    )
+                                  }
+                                  placeholder={`Item ${index + 1}`}
+                                  className='me-2 syllabus-input'
+                                />
+                                <Button
+                                  type='button'
+                                  color='danger'
+                                  onClick={() => arrayHelpers.remove(index)}
+                                >
+                                  <FaTrash />
+                                </Button>
+                              </Col>
+                            ))}
+                          </Row>
+                        </div>
+                      </>
+                    )}
+                  />
+                </Col>
+              );
+            };
 
             const renderPercentagesField = (
               name: string,
@@ -422,9 +422,12 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                             
                             if (!isCurrentExamTypeValid) {
                               setFieldValue('exam_type', autoExamType);
+                              const autoModules = getModulesByExamType(autoExamType);
+                              setFieldValue('exam_modules', autoModules);
                             }
                           } else {
                             setFieldValue('exam_type', '');
+                            setFieldValue('exam_modules', ['']);
                           }
                         }}
                         value={
@@ -466,7 +469,15 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                           id='exam_type'
                           options={availableOptions}
                           onChange={(selectedOption: any) => {
-                            setFieldValue('exam_type', selectedOption ? selectedOption.value : '');
+                            const newExamType = selectedOption ? selectedOption.value : '';
+                            setFieldValue('exam_type', newExamType);
+                            
+                            if (newExamType) {
+                              const autoModules = getModulesByExamType(newExamType);
+                              setFieldValue('exam_modules', autoModules);
+                            } else {
+                              setFieldValue('exam_modules', ['']);
+                            }
                           }}
                           value={
                             availableOptions.find((option: any) => option.value === values.exam_type) || null
@@ -532,12 +543,13 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                 <hr className='my-4' />
                 {renderArrayField('progress_tests', 'Progress Tests')}
                 <hr className='my-4' />
-               {renderArrayField('movers_exam', 'Movers Exam')}
+                {/* Eliminar esta línea duplicada */}
+                {/* {renderArrayField('movers_exam', 'Movers Exam')} */}
                 
                 {values.exam_type && (
                   <>
                     <hr className='my-4' />
-                    {renderArrayField('exam_modules', (values.exam_type))}
+                    {renderArrayField('exam_modules', `Exam Modules - ${values.exam_type}`)}
                   </>
                 )}
                 <hr className='my-4' />
@@ -548,14 +560,14 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                   setFieldValue
                 )}
 
-
-                <hr className='my-4' />
+                {/* Eliminar esta duplicación */}
+                {/* <hr className='my-4' />
                 {renderPercentagesField(
                   'percentages',
                   'Custom Percentages',
                   values,
                   setFieldValue
-                )}
+                )} */}
 
                 <Col
                   xs={12}

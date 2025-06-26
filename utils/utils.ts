@@ -791,18 +791,31 @@ export const getExamTypeByLevelId = (levelId: number): string => {
     1: EXAMS_TYPE.MOVERS,     
     2: EXAMS_TYPE.KEY,       
     3: EXAMS_TYPE.PRELIM,     
-    4: EXAMS_TYPE.PRELIM,    
-    5: EXAMS_TYPE.FIRST,    
-    6: EXAMS_TYPE.FIRST,     
-    7: EXAMS_TYPE.STARTERS,  
-    8: EXAMS_TYPE.MOVERS, 
-    9: EXAMS_TYPE.FLYERS, 
-    10: EXAMS_TYPE.PRELIM, 
+    4: EXAMS_TYPE.PRELIM,   
+    5: EXAMS_TYPE.FIRST,      
+    6: EXAMS_TYPE.FIRST,  
+    7: EXAMS_TYPE.STARTERS,   
+    8: EXAMS_TYPE.MOVERS,   
+    9: EXAMS_TYPE.FLYERS,    
+    10: EXAMS_TYPE.PRELIM,  
     11: EXAMS_TYPE.PRELIM,   
-    12: EXAMS_TYPE.MOVERS, 
-    13: EXAMS_TYPE.FLYERS,
-    14: EXAMS_TYPE.PRELIM,
+    12: EXAMS_TYPE.MOVERS,    
+    13: EXAMS_TYPE.FLYERS,    
+    14: EXAMS_TYPE.PRELIM,   
   };
   
   return LEVEL_TO_EXAM_TYPE[levelId] || EXAMS_TYPE.PRELIM;
+};
+
+export const getModulesByExamType = (examType: string): string[] => {
+  const EXAM_TYPE_TO_MODULES: Record<string, string[]> = {
+    [EXAMS_TYPE.STARTERS]: ['READING & WRITING', 'LISTENING', 'SPEAKING'],
+    [EXAMS_TYPE.MOVERS]: ['READING & WRITING', 'LISTENING', 'SPEAKING'],
+    [EXAMS_TYPE.FLYERS]: ['READING & WRITING', 'LISTENING', 'SPEAKING'],
+    [EXAMS_TYPE.KEY]: ['READING & WRITING', 'LISTENING', 'SPEAKING'],
+    [EXAMS_TYPE.PRELIM]: ['READING', 'LISTENING', 'WRITING', 'SPEAKING'],
+    [EXAMS_TYPE.FIRST]: ['READING', 'LISTENING', 'WRITING', 'SPEAKING'],
+  };
+  
+  return EXAM_TYPE_TO_MODULES[examType] || [];
 };
