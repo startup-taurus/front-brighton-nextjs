@@ -339,11 +339,8 @@ export const calculateClassTotalAverage = (
   return !!totalClassAverage ? Number(totalClassAverage).toFixed(2) : '0';
 };
 
-export const calculateFinalGradingStatus = (
-  notesPercentages: any[] = [],
-  note: any
-) => {
-  const percentage = Number(note);
+export const calculateGrade = (score: number, notesPercentages: any[] = []) => {
+  const percentage = Number(score) || 0;
 
   const gradingStatus = notesPercentages?.find((notePercentage: any) => {
     return (
@@ -352,8 +349,17 @@ export const calculateFinalGradingStatus = (
     );
   });
 
-  return !!gradingStatus ? gradingStatus?.name : 'NOT REPORTED';
+  return gradingStatus?.name || 'NOT REPORTED';
 };
+
+export const calculateFinalGradingStatus = (
+  notesPercentages: any[],
+  studentAverage: string | number
+) => {
+  const average = Number(studentAverage) || 0;
+  return calculateGrade(average, notesPercentages);
+};
+
 export const determineResult = (totalAverage: number) => {
   if (totalAverage > 70) {
     return {
@@ -398,24 +404,23 @@ export const formatStudentScoreExamGrades = (
   courseLevel: string,
   studentId: string,
   grades: any,
-  notesPercentages: any
+  notesPercentages: any,
+  examType?: string
 ) => {
   return moversExamScore?.map((moverExamScore, index) => {
     const rawScore = grades[moverExamScore.item_id][studentId];
-    const scorePercentage = (rawScore !== undefined && rawScore !== null && rawScore !== '') ? Number(rawScore).toFixed(2) : '0.00';
-
-    const gradeResult = calculateFinalGradingStatus(
-      notesPercentages,
-      scorePercentage
-    );
+    const score = rawScore
+      ? `${Number(rawScore).toFixed(2)}%`
+      : "0.00%";
+    const grade = calculateGrade(Number(rawScore), notesPercentages);
 
     return {
       id: index,
       criterion: moverExamScore.item_name,
-      level: moverExamScore?.category,
-      score: scorePercentage,
-      grade: gradeResult,
-      class: `result-${gradeResult?.split(' ')[0].toLowerCase()}`,
+      level: examType || moverExamScore?.category,
+      examType: examType, 
+      score,
+      grade,
     };
   });
 };

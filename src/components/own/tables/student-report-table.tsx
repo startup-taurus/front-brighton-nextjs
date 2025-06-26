@@ -10,9 +10,9 @@ import {
   buildGradebookStructure,
   calculateAssignmentAverage,
   calculateAverage,
-  calculateFinalGradingStatus,
   calculateReportExamAverage,
   calculateStudentAverage,
+  calculateFinalGradingStatus, 
   formatExamParams,
   formatGradebookComponents,
   formatReportBarChartData,
@@ -64,7 +64,7 @@ const examPageCols = [
   },
   {
     name: "EXAM",
-    selector: (row: any) => row.level,
+    selector: (row: any) => row.examType || row.level,
   },
   {
     name: "SCORE",
@@ -97,15 +97,14 @@ const StudentReportTable = ({
 
   const [assignmentsData, setAssignmentsData] = useState<any[]>([]);
   const [examData, setExamData] = useState<any[]>([]);
-
   const [assignmentsAverage, setAssignmentsAverage] = useState("0");
   const [examAverage, setExamAverage] = useState("0");
   const [studentTotalAverage, setStudentTotalAverage] = useState("0");
+  const [examType, setExamType] = useState<string>(""); 
   const [reportChartData, setReportChartData] = useState<any>(
     DEFAULT_BAR_CHART_DATA,
   );
   const [resultGPA, setResultGPA] = useState<string>("NOT RESULTED");
-
   const [reportURL, setReportURL] = useState<string>("");
 
   const gradingGrade = useMemo(
@@ -139,18 +138,22 @@ const StudentReportTable = ({
       componentsGradebook.moversExam,
       selectedStudentId,
     );
-
+  
     const assignmentsFormatedData = formatStudentScoreAssignmentsGrades(
       { assignments, progressTest, moversExam },
       courseDetail?.course_name,
     );
-
+  
+    const currentExamType = courseDetail?.syllabus?.exam_type || getExamType(courseDetail?.course_name, courseDetail?.age_group);
+    setExamType(currentExamType); 
+    
     const examFormatedData = formatStudentScoreExamGrades(
       componentsGradebook.moversExam,
       courseDetail?.course_name,
       selectedStudentId,
       gradingGrade,
       notesPercentages,
+      currentExamType 
     );
 
     const assignmentAverage = calculateAssignmentAverage(
@@ -182,8 +185,7 @@ const StudentReportTable = ({
       gradingPercentage,
     );
 
-    const examType = courseDetail?.syllabus?.exam_type || getExamType(courseDetail?.course_name, courseDetail?.age_group);
-    const examProps = formatExamParams(examFormatedData, examType);
+    const examProps = formatExamParams(examFormatedData, currentExamType);
     const gpaResult = calculateFinalGradingStatus(
       notesPercentages,
       studentAverage,
@@ -243,7 +245,7 @@ const StudentReportTable = ({
           <ReportTable
             data={examData}
             columns={examPageCols}
-            resumeRowTitle={`EXAM (${gradingPercentage?.exam_percentage}%)`}
+            resumeRowTitle={`${examType} EXAM (${gradingPercentage?.exam_percentage}%)`}
             finalPercentage={examAverage}
           />
         )}

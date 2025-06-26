@@ -182,8 +182,8 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                     test_percentage: data?.percentages?.test_percentage || 0,
                     exam_percentage: data?.percentages?.exam_percentage || 0,
                     assig_percentage: data?.percentages?.assig_percentage || 0,
-                    assignments: data?.assignments || [''],
-                    progress_tests: data?.progress_tests || [''],
+                    assignments: data?.assignments?.length > 0 ? data.assignments : [],
+                    progress_tests: data?.progress_tests?.length > 0 ? data.progress_tests : [],
                     exam_modules: data?.exam_modules || data?.movers_exam || getModulesByExamType(data?.exam_type || EXAMS_TYPE.PRELIM),
                     percentages: data?.percentages_syllabus || [
                       { name: '', min: 0, max: 0 },
@@ -194,13 +194,13 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                     id: '',
                     syllabus_name: '',
                     level_id: 0,
-                    items: [''],
+                    items: [],
                     test_percentage: 0,
                     exam_percentage: 0,
                     assig_percentage: 0,
-                    assignments: [''],
-                    progress_tests: [''],
-                    exam_modules: [''],
+                    assignments: [],
+                    progress_tests: [],
+                    exam_modules: [],
                     percentages: [{ name: '', min: 0, max: 0 }],
                     exam_type: ''
                   }
@@ -225,7 +225,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
 
             const renderArrayField = (name: string, label: string) => {
               const fieldValue = values[name as keyof typeof values] as string[];
-              const safeArray = Array.isArray(fieldValue) ? fieldValue : [''];
+              const safeArray = Array.isArray(fieldValue) && fieldValue.length > 0 ? fieldValue : [''];
               
               return (
                 <Col xs={12} className='mt-3'>
@@ -265,7 +265,13 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                                 <Button
                                   type='button'
                                   color='danger'
-                                  onClick={() => arrayHelpers.remove(index)}
+                                  onClick={() => {
+                                    if (safeArray.length === 1) {
+                                      setFieldValue(`${name}[0]`, '');
+                                    } else {
+                                      arrayHelpers.remove(index);
+                                    }
+                                  }}
                                 >
                                   <FaTrash />
                                 </Button>
