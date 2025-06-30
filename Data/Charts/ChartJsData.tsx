@@ -74,6 +74,13 @@ export const generateBarChartOptions = (): any => {
           },
         },
       },
+      tooltip: {
+        callbacks: {
+          label: function(context: any) {
+            return `${context.dataset.label}: ${context.parsed.y}%`;
+          }
+        }
+      }
     },
     scales: {
       x: {
@@ -91,6 +98,9 @@ export const generateBarChartOptions = (): any => {
           font: {
             size: 10,
           },
+          callback: function(value: any) {
+            return value + '%';
+          }
         },
       },
     },

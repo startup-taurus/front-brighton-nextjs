@@ -410,8 +410,8 @@ export const formatStudentScoreExamGrades = (
   return moversExamScore?.map((moverExamScore, index) => {
     const rawScore = grades[moverExamScore.item_id][studentId];
     const score = rawScore
-      ? `${Number(rawScore).toFixed(2)}%`
-      : "0.00%";
+      ? Number(rawScore).toFixed(2) 
+      : "0.00";
     const grade = calculateGrade(Number(rawScore), notesPercentages);
 
     return {
@@ -792,35 +792,41 @@ export const getExamType = (level: string, ageGroup: string) => {
   return isAdult ? EXAMS_TYPE.KEY : EXAMS_TYPE.FLYERS; 
 };
 export const getExamTypeByLevelId = (levelId: number): string => {
-  const LEVEL_TO_EXAM_TYPE: Record<number, string> = {
-    1: EXAMS_TYPE.MOVERS,     
-    2: EXAMS_TYPE.KEY,       
-    3: EXAMS_TYPE.PRELIM,     
-    4: EXAMS_TYPE.PRELIM,   
-    5: EXAMS_TYPE.FIRST,      
-    6: EXAMS_TYPE.FIRST,  
-    7: EXAMS_TYPE.STARTERS,   
-    8: EXAMS_TYPE.MOVERS,   
-    9: EXAMS_TYPE.FLYERS,    
-    10: EXAMS_TYPE.PRELIM,  
-    11: EXAMS_TYPE.PRELIM,   
-    12: EXAMS_TYPE.MOVERS,    
-    13: EXAMS_TYPE.FLYERS,    
-    14: EXAMS_TYPE.PRELIM,   
+  const LEVEL_TO_EXAM_TYPE: Record<string, string> = {
+    'level_1': EXAMS_TYPE.MOVERS,     
+    'level_2': EXAMS_TYPE.KEY,       
+    'level_3': EXAMS_TYPE.PRELIM,     
+    'level_4': EXAMS_TYPE.PRELIM,   
+    'level_5': EXAMS_TYPE.FIRST,      
+    'level_6': EXAMS_TYPE.FIRST,  
+    'level_7': EXAMS_TYPE.STARTERS,   
+    'level_8': EXAMS_TYPE.MOVERS,   
+    'level_9': EXAMS_TYPE.FLYERS,    
+    'level_10': EXAMS_TYPE.PRELIM,  
+    'level_11': EXAMS_TYPE.PRELIM,   
+    'level_12': EXAMS_TYPE.MOVERS,    
+    'level_13': EXAMS_TYPE.FLYERS,    
+    'level_14': EXAMS_TYPE.PRELIM,   
   };
   
-  return LEVEL_TO_EXAM_TYPE[levelId] || EXAMS_TYPE.PRELIM;
+  return LEVEL_TO_EXAM_TYPE[`level_${levelId}`] || EXAMS_TYPE.PRELIM;
+};
+
+export const getExamConfiguration = () => {
+  const threeModuleExams = ['READING & WRITING', 'LISTENING', 'SPEAKING'];
+  const fourModuleExams = ['READING', 'LISTENING', 'WRITING', 'SPEAKING'];
+  
+  return {
+    [EXAMS_TYPE.STARTERS]: { examType: EXAMS_TYPE.STARTERS, modules: threeModuleExams },
+    [EXAMS_TYPE.MOVERS]: { examType: EXAMS_TYPE.MOVERS, modules: threeModuleExams },
+    [EXAMS_TYPE.FLYERS]: { examType: EXAMS_TYPE.FLYERS, modules: threeModuleExams },
+    [EXAMS_TYPE.KEY]: { examType: EXAMS_TYPE.KEY, modules: threeModuleExams },
+    [EXAMS_TYPE.PRELIM]: { examType: EXAMS_TYPE.PRELIM, modules: fourModuleExams },
+    [EXAMS_TYPE.FIRST]: { examType: EXAMS_TYPE.FIRST, modules: fourModuleExams }
+  };
 };
 
 export const getModulesByExamType = (examType: string): string[] => {
-  const EXAM_TYPE_TO_MODULES: Record<string, string[]> = {
-    [EXAMS_TYPE.STARTERS]: ['READING & WRITING', 'LISTENING', 'SPEAKING'],
-    [EXAMS_TYPE.MOVERS]: ['READING & WRITING', 'LISTENING', 'SPEAKING'],
-    [EXAMS_TYPE.FLYERS]: ['READING & WRITING', 'LISTENING', 'SPEAKING'],
-    [EXAMS_TYPE.KEY]: ['READING & WRITING', 'LISTENING', 'SPEAKING'],
-    [EXAMS_TYPE.PRELIM]: ['READING', 'LISTENING', 'WRITING', 'SPEAKING'],
-    [EXAMS_TYPE.FIRST]: ['READING', 'LISTENING', 'WRITING', 'SPEAKING'],
-  };
-  
-  return EXAM_TYPE_TO_MODULES[examType] || [];
+  const examConfig = getExamConfiguration();
+  return examConfig[examType]?.modules || [];
 };

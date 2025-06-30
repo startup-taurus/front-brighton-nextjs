@@ -44,7 +44,7 @@ const assignmentsTestCols = [
   },
   {
     name: "SCORE",
-    selector: (row: any) => row.score,
+    selector: (row: any) => `${row.score}%`,  
   },
   {
     name: "GRADE",
@@ -68,7 +68,7 @@ const examPageCols = [
   },
   {
     name: "SCORE",
-    selector: (row: any) => row.score,
+    selector: (row: any) => `${row.score}%`,  
   },
   {
     name: "GRADE",
@@ -197,12 +197,12 @@ const StudentReportTable = ({
       level: courseDetail?.course_name,
       assignments: `${assignmentsFormatedData[0]?.score}%`,
       assignmentsStatus: assignmentsFormatedData[0]?.grade,
-      assignmentsTotal: assignmentAverage,
+      assignmentsTotal: `${assignmentAverage}%`,  
       tests: `${assignmentsFormatedData[1]?.score}%`,
       testsStatus: assignmentsFormatedData[1]?.grade,
       exam: examType,
-      generalExamsTotal: reportExamAverage,
-      yleTotal: reportExamAverage,
+      generalExamsTotal: `${reportExamAverage}%`, 
+      yleTotal: `${reportExamAverage}%`, 
       gpa: `${studentAverage}% (${gpaResult})`,
       final: `${gpaResult}`,
       ...examProps,

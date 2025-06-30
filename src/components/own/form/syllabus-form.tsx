@@ -462,7 +462,6 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                   />
                 </Col>
 
-                {/* Campo exam_type con lógica condicional */}
                 <Col xs={12}>
                   <Label for='exam_type'>Exam Type</Label>
                   <Field name='exam_type'>
@@ -549,8 +548,6 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                 <hr className='my-4' />
                 {renderArrayField('progress_tests', 'Progress Tests')}
                 <hr className='my-4' />
-                {/* Eliminar esta línea duplicada */}
-                {/* {renderArrayField('movers_exam', 'Movers Exam')} */}
                 
                 {values.exam_type && (
                   <>
@@ -565,16 +562,6 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                   values,
                   setFieldValue
                 )}
-
-                {/* Eliminar esta duplicación */}
-                {/* <hr className='my-4' />
-                {renderPercentagesField(
-                  'percentages',
-                  'Custom Percentages',
-                  values,
-                  setFieldValue
-                )} */}
-
                 <Col
                   xs={12}
                   className='d-flex justify-content-end mt-5'
