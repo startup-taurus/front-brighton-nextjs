@@ -46,7 +46,7 @@ const getAvailableExamTypeOptions = (levelId: number | string) => {
 
 const validations = Yup.object().shape({
   syllabus_name: Yup.string().required('The syllabus name is required'),
-  level_id: Yup.number().required('The level is required'),
+  level_id: Yup.number().nullable().required('The level is required'),  
 });
 
 const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
@@ -177,7 +177,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
               ? {
                     id: isCopy ? '' : data.id,
                     syllabus_name: data.syllabus_name,
-                    level_id: data?.level?.id || 0,
+                    level_id: data?.level?.id || null, 
                     items: data?.items?.map((item: any) => item.item_name) || [],
                     test_percentage: data?.percentages?.test_percentage || 0,
                     exam_percentage: data?.percentages?.exam_percentage || 0,
@@ -193,7 +193,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                 : {
                     id: '',
                     syllabus_name: '',
-                    level_id: 0,
+                    level_id: null, 
                     items: [],
                     test_percentage: 0,
                     exam_percentage: 0,
