@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 const USER_TYPES = {
   ADMIN: "admin_staff",
-  PROFESSOR: "professor",
+  PROFESSOR: "professor", 
   STUDENT: "student",
   COORDINATOR: "coordinator",
   FINANCIAL: "financial",
@@ -20,6 +20,15 @@ const teacherPaths = [
   "/course/:id/faq",
 ];
 
+const adminOnlyPaths = [
+  "/admin/transfer-students",
+  "/admin/users",
+  "/admin/dashboard",
+  "/admin/students",
+  "/admin/syllabus",
+  "/admin/teachers",
+];
+
 export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const userCookie = request.cookies.get("token")?.value;
@@ -31,37 +40,35 @@ export function middleware(request: NextRequest) {
     user = null;
   }
 
-  if (!user && path.split("/")[1] === "authentication") {
-    return NextResponse.next();
-  }
-
   if (!user && path.split("/")[1] !== "authentication") {
     return NextResponse.redirect(new URL("/authentication/login", request.url));
   }
 
-  if (
-    path.split("/")[1] === "authentication" &&
-    user &&
-    user?.role === USER_TYPES.PROFESSOR
-  ) {
-    return NextResponse.redirect(new URL(`/teachers`, request.url));
+  if (user && path.split("/")[1] === "authentication") {
+    if (user?.role === USER_TYPES.PROFESSOR) {
+      return NextResponse.redirect(new URL(`/teachers`, request.url));
+    }
+    if (user?.role === USER_TYPES.STUDENT) {
+      return NextResponse.redirect(new URL(`/teachers`, request.url));
+    }
+    if (user?.role === USER_TYPES.ADMIN || user?.role === USER_TYPES.COORDINATOR || user?.role === USER_TYPES.FINANCIAL) {
+      return NextResponse.redirect(new URL(`/dashboard`, request.url));
+    }
   }
 
-  if (
-    path.split("/")[1] === "authentication" &&
-    user &&
-    user?.role === USER_TYPES.STUDENT
-  ) {
-    return NextResponse.redirect(new URL(`/teachers`, request.url));
+  if (user?.role === USER_TYPES.PROFESSOR && adminOnlyPaths.some(adminPath => path.startsWith(adminPath))) {
+    const response = NextResponse.redirect(new URL("/authentication/login", request.url));
+    response.cookies.delete("token");
+    return response;
   }
 
-  if (
-    path.split("/")[1] === "authentication" &&
-    user &&
-    (user?.role === USER_TYPES.ADMIN || user?.role === USER_TYPES.COORDINATOR)
-  ) {
-    return NextResponse.redirect(new URL(`/dashboard`, request.url));
+  if (user?.role === USER_TYPES.PROFESSOR) {
+    const professorIdFromQuery = request.nextUrl.searchParams.get('professorId');
+    
+    if (professorIdFromQuery && parseInt(professorIdFromQuery) !== user.professor_id) {
+    return NextResponse.redirect(new URL("/teachers", request.url));
   }
+}
 
   const pathTeacherRegex = new RegExp(
     `^(${teacherPaths
@@ -76,14 +83,6 @@ export function middleware(request: NextRequest) {
     user?.role !== USER_TYPES.COORDINATOR
   ) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
-  }
-
-  if (
-    new RegExp(`^(/dashboard|/admin(\\/.*)?)$`).test(path) &&
-    user &&
-    user?.role === USER_TYPES.PROFESSOR
-  ) {
-    return NextResponse.redirect(new URL("/teachers", request.url));
   }
 
   if (
@@ -119,5 +118,6 @@ export const config = {
     "/admin/syllabus",
     "/admin/teachers",
     "/admin/users",
+    "/admin/transfer-students",
   ],
 };
