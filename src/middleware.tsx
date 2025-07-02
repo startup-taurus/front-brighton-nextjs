@@ -29,6 +29,11 @@ const adminOnlyPaths = [
   "/admin/teachers",
 ];
 
+const coordinatorPaths = [
+  "/coordinator/faq",
+  "/coordinator/professors",
+];
+
 export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const userCookie = request.cookies.get("token")?.value;
@@ -57,16 +62,24 @@ export function middleware(request: NextRequest) {
   }
 
   if (user?.role === USER_TYPES.PROFESSOR && adminOnlyPaths.some(adminPath => path.startsWith(adminPath))) {
-    const response = NextResponse.redirect(new URL("/authentication/login", request.url));
-    response.cookies.delete("token");
-    return response;
+    const redirectUrl = new URL("/teachers", request.url);
+    redirectUrl.searchParams.set('access_denied', 'admin');
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  if (user?.role === USER_TYPES.PROFESSOR && coordinatorPaths.some(coordinatorPath => path.startsWith(coordinatorPath))) {
+    const redirectUrl = new URL("/teachers", request.url);
+    redirectUrl.searchParams.set('access_denied', 'coordinator');
+    return NextResponse.redirect(redirectUrl);
   }
 
   if (user?.role === USER_TYPES.PROFESSOR) {
     const professorIdFromQuery = request.nextUrl.searchParams.get('professorId');
     
     if (professorIdFromQuery && parseInt(professorIdFromQuery) !== user.professor_id) {
-    return NextResponse.redirect(new URL("/teachers", request.url));
+    const redirectUrl = new URL("/teachers", request.url);
+    redirectUrl.searchParams.set('access_denied', 'professor');
+    return NextResponse.redirect(redirectUrl);
   }
 }
 
@@ -119,5 +132,7 @@ export const config = {
     "/admin/teachers",
     "/admin/users",
     "/admin/transfer-students",
+    "/coordinator/faq",
+    "/coordinator/professors",
   ],
 };
