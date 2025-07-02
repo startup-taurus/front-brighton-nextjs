@@ -78,7 +78,8 @@ export const getFetcher = (
     })
     .then((res) => (addLevel ? res.data?.data : res.data))
     .catch((e) => {
-      return handleError(e, true, stopRedirect);
+      const hideError = e?.response?.status === 403 ? false : true;
+      return handleError(e, hideError, stopRedirect);
     });
 };
 

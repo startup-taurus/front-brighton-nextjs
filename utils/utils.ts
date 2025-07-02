@@ -15,6 +15,7 @@ import {
   GradingItem,
   GradingPercentage,
 } from '../Types/GradingItem';
+import Swal from 'sweetalert2';
 
 export const isBrowser = () => typeof window !== 'undefined';
 
@@ -23,6 +24,18 @@ export const handleError = (
   hideError?: boolean,
   stopRedirect?: boolean
 ) => {
+  if (e?.response?.status === 403 && isBrowser()) {
+    Swal.fire({
+      title: 'Access Denied',
+      text: 'You don\'t have access to this section.',
+      icon: 'error',
+      confirmButtonText: 'OK'
+    }).then(() => {
+      window.location.href = '/teachers';
+    });
+    return e;
+  }
+
   if (
     (e?.response?.data?.message == 'Not authorized, token not sent' ||
       e?.response?.status == 401) &&
