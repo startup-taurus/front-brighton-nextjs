@@ -43,6 +43,7 @@ const TeachersHolidays: NextPageWithLayout = () => {
   const { user } = useContext(UserContext);
   const { can } = usePermission();
   const isCoordinator = user?.role === USER_TYPES.COORDINATOR;
+  const isReceptionist = user?.role === USER_TYPES.RECEPTIONIST;
   const canCreateHoliday = can(PERMISSIONS.CREATE_HOLIDAY);
   const canEditHoliday = can(PERMISSIONS.EDIT_HOLIDAY);
   const canDeleteHoliday = can(PERMISSIONS.DELETE_HOLIDAY);
@@ -100,9 +101,9 @@ const TeachersHolidays: NextPageWithLayout = () => {
   ];
 
   const toggleModal = () => {
-    if (isCoordinator && !canCreateHoliday) {
+    if ((isCoordinator || isReceptionist) && !canCreateHoliday) {
       toast.error(
-        'Coordinators do not have permission to create cancelled lessons'
+        'You do not have permission to create cancelled lessons'
       );
       return;
     }
@@ -115,9 +116,9 @@ const TeachersHolidays: NextPageWithLayout = () => {
   // };
 
   const deleteRow = (row: any) => {
-    if (isCoordinator && !canDeleteHoliday) {
+    if ((isCoordinator || isReceptionist) && !canDeleteHoliday) {
       toast.error(
-        'Coordinators do not have permission to delete cancelled lessons'
+        'You do not have permission to delete cancelled lessons'
       );
       return;
     }
@@ -173,18 +174,17 @@ const TeachersHolidays: NextPageWithLayout = () => {
                 <h3>CANCELED LESSONS</h3>
                 <Button
                   onClick={toggleModal}
-                  disabled={isCoordinator && !canCreateHoliday}
+                  disabled={(isCoordinator || isReceptionist) && !canCreateHoliday}
                 >
                   <FaPlus />
                 </Button>
               </div>
-              {isCoordinator && (
+              {(isCoordinator || isReceptionist) && (
                 <Alert
                   color='warning'
                   className='mb-3'
                 >
-                  As a coordinator, you can only view canceled lessons. You
-                  cannot modify them or add new ones.
+                  You can only view canceled lessons. You cannot modify them or add new ones.
                 </Alert>
               )}
               <CustomTable

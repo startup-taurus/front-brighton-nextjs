@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import {
   Button,
   Col,
@@ -12,10 +12,16 @@ import Image from 'next/image';
 import { ImgPath } from 'utils/Constant';
 import { useRouter } from 'next/router';
 import { encrypt } from 'utils/encryption';
+import { UserContext } from '../../../../helper/User';
+import { USER_TYPES } from 'utils/constants';
 
 const StudentDetail = ({ data, isOpen, toggle }: any) => {
   const router = useRouter();
+  const { user } = useContext(UserContext);
+  
   if (!data) return null;
+
+  const isReceptionist = user?.role === USER_TYPES.RECEPTIONIST;
 
   const navigateToAttendance = () => {
     if (data?.course?.length > 0 && data.course[0]?.id) {
@@ -154,20 +160,24 @@ const StudentDetail = ({ data, isOpen, toggle }: any) => {
             xs={12}
             className='mt-4 d-flex justify-content-end gap-2'
           >
-            <Button
-              color='primary'
-              onClick={navigateToAttendance}
-              disabled={!data?.course?.length || !data.course[0]?.id}
-            >
-              View attendance
-            </Button>
-            <Button
-              color='info'
-              onClick={navigateToGradebook}
-              disabled={!data?.course?.length || !data.course[0]?.id}
-            >
-              View gradebook
-            </Button>
+            {isReceptionist && (
+              <>
+                <Button
+                  color='primary'
+                  onClick={navigateToAttendance}
+                  disabled={!data?.course?.length || !data.course[0]?.id}
+                >
+                  View attendance
+                </Button>
+                <Button
+                  color='info'
+                  onClick={navigateToGradebook}
+                  disabled={!data?.course?.length || !data.course[0]?.id}
+                >
+                  View gradebook
+                </Button>
+              </>
+            )}
           </Col>
         </div>
       </ModalBody>

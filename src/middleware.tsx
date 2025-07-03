@@ -7,6 +7,7 @@ const USER_TYPES = {
   STUDENT: "student",
   COORDINATOR: "coordinator",
   FINANCIAL: "financial",
+  RECEPTIONIST: "receptionist"
 };
 
 const teacherPaths = [
@@ -34,6 +35,16 @@ const coordinatorPaths = [
   "/coordinator/professors",
 ];
 
+const receptionistRestrictedPaths = [
+  "/admin/syllabus",
+  "/admin/holidays",
+  "/admin/users", 
+];
+
+const coordinatorRestrictedPaths = [
+  "/admin/users", 
+];
+
 export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const userCookie = request.cookies.get("token")?.value;
@@ -56,7 +67,7 @@ export function middleware(request: NextRequest) {
     if (user?.role === USER_TYPES.STUDENT) {
       return NextResponse.redirect(new URL(`/teachers`, request.url));
     }
-    if (user?.role === USER_TYPES.ADMIN || user?.role === USER_TYPES.COORDINATOR || user?.role === USER_TYPES.FINANCIAL) {
+    if (user?.role === USER_TYPES.ADMIN || user?.role === USER_TYPES.COORDINATOR || user?.role === USER_TYPES.FINANCIAL || user?.role === USER_TYPES.RECEPTIONIST) {
       return NextResponse.redirect(new URL(`/dashboard`, request.url));
     }
   }
@@ -77,11 +88,23 @@ export function middleware(request: NextRequest) {
     const professorIdFromQuery = request.nextUrl.searchParams.get('professorId');
     
     if (professorIdFromQuery && parseInt(professorIdFromQuery) !== user.professor_id) {
-    const redirectUrl = new URL("/teachers", request.url);
-    redirectUrl.searchParams.set('access_denied', 'professor');
+      const redirectUrl = new URL("/teachers", request.url);
+      redirectUrl.searchParams.set('access_denied', 'professor');
+      return NextResponse.redirect(redirectUrl);
+    }
+  }
+
+  if (user?.role === USER_TYPES.COORDINATOR && coordinatorRestrictedPaths.some(restrictedPath => path.startsWith(restrictedPath))) {
+    const redirectUrl = new URL("/dashboard", request.url);
+    redirectUrl.searchParams.set('access_denied', 'admin');
     return NextResponse.redirect(redirectUrl);
   }
-}
+
+  if (user?.role === USER_TYPES.RECEPTIONIST && receptionistRestrictedPaths.some(restrictedPath => path.startsWith(restrictedPath))) {
+    const redirectUrl = new URL("/dashboard", request.url);
+    redirectUrl.searchParams.set('access_denied', 'receptionist');
+    return NextResponse.redirect(redirectUrl);
+  }
 
   const pathTeacherRegex = new RegExp(
     `^(${teacherPaths
@@ -93,7 +116,8 @@ export function middleware(request: NextRequest) {
     pathTeacherRegex.test(path) &&
     user &&
     user?.role !== USER_TYPES.PROFESSOR &&
-    user?.role !== USER_TYPES.COORDINATOR
+    user?.role !== USER_TYPES.COORDINATOR &&
+    user?.role !== USER_TYPES.RECEPTIONIST
   ) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
@@ -103,7 +127,8 @@ export function middleware(request: NextRequest) {
     user &&
     user?.role !== USER_TYPES.ADMIN &&
     user?.role !== USER_TYPES.COORDINATOR &&
-    user?.role !== USER_TYPES.FINANCIAL
+    user?.role !== USER_TYPES.FINANCIAL &&
+    user?.role !== USER_TYPES.RECEPTIONIST
   ) {
     return NextResponse.redirect(new URL("/teachers", request.url));
   }

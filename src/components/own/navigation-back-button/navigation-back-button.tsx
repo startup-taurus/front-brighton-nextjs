@@ -22,8 +22,7 @@ const NavigationBackButton = ({ professorId }: NavigationBackButtonProps) => {
 
   const handleBackNavigation = () => {
     if (studentId) {
-      router.back();
-
+      router.push('/admin/students');
       localStorage.removeItem('studentDetailId');
     } else if (professorId) {
       router.push({
