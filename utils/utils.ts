@@ -1,7 +1,12 @@
-import Cookies from 'js-cookie';
-import { toast } from 'react-toastify';
-import { COMPONENTS_GRADEBOOK, ERROR_MESSAGE, EXAMS_TYPE } from './constants';
-import { NextRouter } from 'next/router';
+import Cookies from "js-cookie";
+import { toast } from "react-toastify";
+import {
+  COMPONENTS_GRADEBOOK,
+  ERROR_MESSAGE,
+  EXAMS_TYPE,
+  USER_TYPES,
+} from "./constants";
+import { NextRouter } from "next/router";
 import {
   addDays,
   addWeeks,
@@ -9,15 +14,16 @@ import {
   isBefore,
   parseISO,
   startOfWeek,
-} from 'date-fns';
+} from "date-fns";
 import {
   ComponentsGradebook,
   GradingItem,
   GradingPercentage,
-} from '../Types/GradingItem';
-import Swal from 'sweetalert2';
+} from "../Types/GradingItem";
+import Swal from "sweetalert2";
+import { Role } from "./Constant";
 
-export const isBrowser = () => typeof window !== 'undefined';
+export const isBrowser = () => typeof window !== "undefined";
 
 export const handleError = (
   e: any,
@@ -26,24 +32,24 @@ export const handleError = (
 ) => {
   if (e?.response?.status === 403 && isBrowser()) {
     Swal.fire({
-      title: 'Access Denied',
-      text: 'You don\'t have access to this section.',
-      icon: 'error',
-      confirmButtonText: 'OK'
+      title: "Access Denied",
+      text: "You don't have access to this section.",
+      icon: "error",
+      confirmButtonText: "OK",
     }).then(() => {
-      window.location.href = '/teachers';
+      window.location.href = "/teachers";
     });
     return e;
   }
 
   if (
-    (e?.response?.data?.message == 'Not authorized, token not sent' ||
+    (e?.response?.data?.message == "Not authorized, token not sent" ||
       e?.response?.status == 401) &&
     isBrowser() &&
     !stopRedirect
   ) {
-    Cookies.remove('token');
-    window.location.replace('/authentication/login');
+    Cookies.remove("token");
+    window.location.replace("/authentication/login");
   }
   if (!hideError) {
     toast.error(e?.response?.data?.message ?? ERROR_MESSAGE);
@@ -51,7 +57,7 @@ export const handleError = (
   return e;
 };
 
-export const getToken = () => Cookies.get('token');
+export const getToken = () => Cookies.get("token");
 
 export const setQueryStringValue = (
   key: string,
@@ -72,28 +78,28 @@ export const setQueryStringValue = (
 
 export const getFiltersString = (router: NextRouter) => {
   return Object.entries(router.query)
-    .filter(([, value]) => value && value !== 'all')
+    .filter(([, value]) => value && value !== "all")
     .map(
       ([key, value]) =>
         `${encodeURIComponent(key)}=${encodeURIComponent(value as string)}`
     )
-    .join('&');
+    .join("&");
 };
 
 export const getSimpleFiltersString = (filters: Object) => {
   return Object.entries(filters)
-    .filter(([, value]) => value && value !== 'all')
+    .filter(([, value]) => value && value !== "all")
     .map(
       ([key, value]) =>
         `${encodeURIComponent(key)}=${encodeURIComponent(value as string)}`
     )
-    .join('&');
+    .join("&");
 };
 
 export const cleanAndFormatQuery = (values: any) => {
   return Object.fromEntries(
     Object.entries(values)
-      .filter(([, value]) => value && value !== 'all')
+      .filter(([, value]) => value && value !== "all")
       .map((item) => item)
   );
 };
@@ -119,13 +125,13 @@ export const handleChangeFilter = (
 export const textEllipsis = (
   str: string,
   maxLength: number,
-  { side = 'end', ellipsis = '...' } = {}
+  { side = "end", ellipsis = "..." } = {}
 ) => {
   if (str?.length > maxLength) {
     switch (side) {
-      case 'start':
+      case "start":
         return ellipsis + str.slice(-(maxLength - ellipsis.length));
-      case 'end':
+      case "end":
       default:
         return str.slice(0, maxLength - ellipsis.length) + ellipsis;
     }
@@ -135,13 +141,13 @@ export const textEllipsis = (
 
 const getDayNumber = (dayName: string) => {
   const days = [
-    'Sunday',
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-    'Saturday',
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
   ];
   return days.indexOf(dayName);
 };
@@ -153,8 +159,8 @@ export const getDayOfClassesOfWeek = (courses: any): any[] => {
     return course?.schedule?.map((item: any, index: number) => {
       const dayNumber = getDayNumber(item.day);
       const date = addDays(weekStart, dayNumber);
-      const startDateTime = `${format(date, 'yyyy-MM-dd')}T${item.startTime}:00`;
-      const endDateTime = `${format(date, 'yyyy-MM-dd')}T${item.endTime}:00`;
+      const startDateTime = `${format(date, "yyyy-MM-dd")}T${item.startTime}:00`;
+      const endDateTime = `${format(date, "yyyy-MM-dd")}T${item.endTime}:00`;
 
       return {
         id: index,
@@ -184,13 +190,13 @@ export const getAllCourseDays = (
       daysOfClasses.push(
         format(
           getDateByDateAndDayName(currentDate, weekDay.day),
-          'EEE, MMM d, yy'
+          "EEE, MMM d, yy"
         )
       )
     );
     currentDate = addWeeks(currentDate, 1);
   }
-  daysOfClasses.push(format(new Date(endDate), 'EEE, MMM d, yy'));
+  daysOfClasses.push(format(new Date(endDate), "EEE, MMM d, yy"));
   return daysOfClasses;
 };
 
@@ -201,7 +207,7 @@ const getDateByDateAndDayName = (date: any, day: string) => {
 };
 
 export const formatDate = (date: string): string =>
-  format(parseISO(date), 'EEE, MMM d');
+  format(parseISO(date), "EEE, MMM d");
 
 export const initializeAttendanceStructure = (
   courseSchedule: any,
@@ -211,7 +217,7 @@ export const initializeAttendanceStructure = (
   courseSchedule?.forEach((courseScheduleItem: any) => {
     attendanceDate[courseScheduleItem.id] = {};
     students?.forEach((student: any) => {
-      attendanceDate[courseScheduleItem.id][student.id] = '';
+      attendanceDate[courseScheduleItem.id][student.id] = "";
     });
   });
 };
@@ -263,7 +269,7 @@ export const initializeGradebookStructure = (
   courseGrading?.forEach((courseGradingItem: any) => {
     studentsGrades[courseGradingItem.item_id] = {};
     students?.forEach((student: any) => {
-      studentsGrades[courseGradingItem.item_id][student.id] = '';
+      studentsGrades[courseGradingItem.item_id][student.id] = "";
     });
   });
 };
@@ -297,7 +303,7 @@ export const calculateAverage = (
 ) => {
   let sumResult = 0;
   let totalExpected = notes.length * 100;
-  let averageResult = '0';
+  let averageResult = "0";
 
   notes.map((note) => {
     sumResult += !!grades[note.item_id][studentId]
@@ -349,7 +355,7 @@ export const calculateClassTotalAverage = (
     return acc + Number(totalAverage);
   }, 0);
   const totalClassAverage = gradesTotalSum / students.length;
-  return !!totalClassAverage ? Number(totalClassAverage).toFixed(2) : '0';
+  return !!totalClassAverage ? Number(totalClassAverage).toFixed(2) : "0";
 };
 
 export const calculateGrade = (score: number, notesPercentages: any[] = []) => {
@@ -362,7 +368,7 @@ export const calculateGrade = (score: number, notesPercentages: any[] = []) => {
     );
   });
 
-  return gradingStatus?.name || 'NOT REPORTED';
+  return gradingStatus?.name || "NOT REPORTED";
 };
 
 export const calculateFinalGradingStatus = (
@@ -376,13 +382,13 @@ export const calculateFinalGradingStatus = (
 export const determineResult = (totalAverage: number) => {
   if (totalAverage > 70) {
     return {
-      resultClass: 'result-pass',
-      result: 'PASS',
+      resultClass: "result-pass",
+      result: "PASS",
     };
   } else {
     return {
-      resultClass: 'result-failed',
-      result: 'FAIL',
+      resultClass: "result-failed",
+      result: "FAIL",
     };
   }
 };
@@ -422,16 +428,14 @@ export const formatStudentScoreExamGrades = (
 ) => {
   return moversExamScore?.map((moverExamScore, index) => {
     const rawScore = grades[moverExamScore.item_id][studentId];
-    const score = rawScore
-      ? Number(rawScore).toFixed(2) 
-      : "0.00";
+    const score = rawScore ? Number(rawScore).toFixed(2) : "0.00";
     const grade = calculateGrade(Number(rawScore), notesPercentages);
 
     return {
       id: index,
       criterion: moverExamScore.item_name,
       level: examType || moverExamScore?.category,
-      examType: examType, 
+      examType: examType,
       score,
       grade,
     };
@@ -509,16 +513,16 @@ export const formatReportBarChartData = (
   moversExamScore.forEach((item) => {
     labels.push(item.item_name);
     const value = Number(grades[item.item_id][studentId]) * 1;
-    data.push(Number(value.toFixed(2))); 
+    data.push(Number(value.toFixed(2)));
   }, 0);
 
   return {
     labels,
     datasets: [
       {
-        label: 'SKILLS',
-        backgroundColor: 'rgba(255, 167 ,0, 1)',
-        highlightFill: 'rgba(255, 151 , 0, 1)',
+        label: "SKILLS",
+        backgroundColor: "rgba(255, 167 ,0, 1)",
+        highlightFill: "rgba(255, 151 , 0, 1)",
         borderWidth: 2,
         data,
       },
@@ -539,7 +543,7 @@ export const getNextLevelFromProgression = (
   const {
     ADULT_LEVEL_PROGRESSION,
     KIDS_LEVEL_PROGRESSION,
-  } = require('./levelProgression');
+  } = require("./levelProgression");
 
   const progression = isKid ? KIDS_LEVEL_PROGRESSION : ADULT_LEVEL_PROGRESSION;
 
@@ -570,14 +574,14 @@ export const getNextLevelFromProgression = (
 
 export const getKidsLevelById = (levelId: string) => {
   const kidsLevelMapping: Record<string, string> = {
-    '7': 'Pre-A1 Starter',
-    '8': 'A1.1 Movers',
-    '12': 'A1.2 Movers',
-    '13': 'A2.1 Flyers',
-    '9': 'A2.2 Flyers',
-    '10': 'B1.1 Preintermediate',
-    '11': 'B1.2 Pre-Intermediate',
-    '14': 'Private Classes',
+    "7": "Pre-A1 Starter",
+    "8": "A1.1 Movers",
+    "12": "A1.2 Movers",
+    "13": "A2.1 Flyers",
+    "9": "A2.2 Flyers",
+    "10": "B1.1 Preintermediate",
+    "11": "B1.2 Pre-Intermediate",
+    "14": "Private Classes",
   };
 
   return kidsLevelMapping[levelId];
@@ -585,14 +589,14 @@ export const getKidsLevelById = (levelId: string) => {
 
 export const getAdultLevelById = (levelId: string) => {
   const adultLevelMapping: Record<string, string> = {
-    '1': 'A1 Beginner',
-    '2': 'A2 Elementary',
-    '3': 'B1 Pre-Intermediate',
-    '4': 'B1+ Intermediate',
-    '5': 'B2 Upper Intermediate',
-    '6': 'B2 First Preparation',
-    '7': 'Pre-A1 Starter',
-    '14': 'Private Classes',
+    "1": "A1 Beginner",
+    "2": "A2 Elementary",
+    "3": "B1 Pre-Intermediate",
+    "4": "B1+ Intermediate",
+    "5": "B2 Upper Intermediate",
+    "6": "B2 First Preparation",
+    "7": "Pre-A1 Starter",
+    "14": "Private Classes",
   };
 
   return adultLevelMapping[levelId];
@@ -603,11 +607,11 @@ export const countAttendance = (dates: any = {}, studentId: any) => {
   let attendanceAverage = 0;
   const attendanceTotal = datesValues.reduce((acc: number, attendance: any) => {
     if (
-      attendance[studentId] === 'present' ||
-      attendance[studentId] === 'recovered'
+      attendance[studentId] === "present" ||
+      attendance[studentId] === "recovered"
     )
       return acc + 1;
-    if (attendance[studentId] === 'late') return acc + 0.5;
+    if (attendance[studentId] === "late") return acc + 0.5;
     return acc;
   }, 0);
 
@@ -623,8 +627,8 @@ export const countAbsences = (dates: any = {}, studentId: any) => {
   const datesValues = Object.values(dates);
   let attendanceAverage = 0;
   const attendanceTotal = datesValues.reduce((acc: number, attendance: any) => {
-    if (attendance[studentId] === 'absent') return acc + 1;
-    if (attendance[studentId] === 'late') return acc + 0.5;
+    if (attendance[studentId] === "absent") return acc + 1;
+    if (attendance[studentId] === "late") return acc + 0.5;
     return acc;
   }, 0);
 
@@ -639,64 +643,67 @@ export const countAbsences = (dates: any = {}, studentId: any) => {
 export const getColorOfAssistance = (value: any) => {
   const percentage = Number(value);
   if (percentage >= 12 && percentage < 20) {
-    return 'warning-field';
+    return "warning-field";
   }
   if (percentage >= 20) {
-    return 'danger-field';
+    return "danger-field";
   }
 
-  return '';
+  return "";
 };
 
 export const formatExamParams = (result: any[], examType: string) => {
-  const normalizedExamType = examType.replace('.', '');
-  const fourModuleExams = ['PRELIM', 'FIRST'];
-  const threeModuleExams = ['STARTERS', 'MOVERS', 'FLYERS', 'KEY'];
+  const normalizedExamType = examType.replace(".", "");
+  const fourModuleExams = ["PRELIM", "FIRST"];
+  const threeModuleExams = ["STARTERS", "MOVERS", "FLYERS", "KEY"];
 
   const values = result?.map((exam) => {
     const criterion = exam.criterion?.toLowerCase();
-    
+
     if (threeModuleExams.includes(normalizedExamType)) {
-      if (criterion.includes('reading') && criterion.includes('writing')) {
+      if (criterion.includes("reading") && criterion.includes("writing")) {
         return {
-          readingWriting: `${exam?.score ? exam?.score : 0.00}%`,
+          readingWriting: `${exam?.score ? exam?.score : 0.0}%`,
           readingWritingStatus: `${exam.grade}`,
         };
-      } else if (criterion.includes('listening')) {
+      } else if (criterion.includes("listening")) {
         return {
-          listeningYLE: `${exam?.score ? exam?.score : 0.00}%`,
+          listeningYLE: `${exam?.score ? exam?.score : 0.0}%`,
           listeningYLEStatus: `${exam.grade}`,
         };
-      } else if (criterion.includes('speaking')) {
+      } else if (criterion.includes("speaking")) {
         return {
-          speakingYLE: `${exam?.score ? exam?.score : 0.00}%`,
+          speakingYLE: `${exam?.score ? exam?.score : 0.0}%`,
           speakingYLEStatus: `${exam.grade}`,
         };
       }
     } else if (fourModuleExams.includes(normalizedExamType)) {
-      if (criterion.includes('reading') && !criterion.includes('writing')) {
+      if (criterion.includes("reading") && !criterion.includes("writing")) {
         return {
-          reading: `${exam?.score ? exam?.score : 0.00}%`,
+          reading: `${exam?.score ? exam?.score : 0.0}%`,
           readingStatus: `${exam.grade}`,
         };
-      } else if (criterion.includes('writing') && !criterion.includes('reading')) {
+      } else if (
+        criterion.includes("writing") &&
+        !criterion.includes("reading")
+      ) {
         return {
-          writing: `${exam?.score ? exam?.score : 0.00}%`,
+          writing: `${exam?.score ? exam?.score : 0.0}%`,
           writingStatus: `${exam.grade}`,
         };
-      } else if (criterion.includes('listening')) {
+      } else if (criterion.includes("listening")) {
         return {
-          listening: `${exam?.score ? exam?.score : 0.00}%`,
+          listening: `${exam?.score ? exam?.score : 0.0}%`,
           listeningStatus: `${exam.grade}`,
         };
-      } else if (criterion.includes('speaking')) {
+      } else if (criterion.includes("speaking")) {
         return {
-          speaking: `${exam?.score ? exam?.score : 0.00}%`,
+          speaking: `${exam?.score ? exam?.score : 0.0}%`,
           speakingStatus: `${exam.grade}`,
         };
       }
     }
-    
+
     return {};
   });
 
@@ -713,68 +720,71 @@ export const formatReportUrl = ({
   tests,
   testsStatus,
   exam,
-  reading = '0.00%',
-  readingStatus = 'NOT REPORTED',
-  listening = '0.00%',
-  listeningStatus = 'NOT REPORTED',
-  writing = '0.00%',
-  writingStatus = 'NOT REPORTED',
-  speaking = '0.00%',
-  speakingStatus = 'NOT REPORTED',
+  reading = "0.00%",
+  readingStatus = "NOT REPORTED",
+  listening = "0.00%",
+  listeningStatus = "NOT REPORTED",
+  writing = "0.00%",
+  writingStatus = "NOT REPORTED",
+  speaking = "0.00%",
+  speakingStatus = "NOT REPORTED",
   generalExamsTotal,
-  readingWriting = '0.00%',
-  readingWritingStatus = 'NOT REPORTED',
-  listeningYLE = '0.00%',
-  listeningYLEStatus = 'NOT REPORTED',
-  speakingYLE = '0.00%',
-  speakingYLEStatus = 'NOT REPORTED',
+  readingWriting = "0.00%",
+  readingWritingStatus = "NOT REPORTED",
+  listeningYLE = "0.00%",
+  listeningYLEStatus = "NOT REPORTED",
+  speakingYLE = "0.00%",
+  speakingYLEStatus = "NOT REPORTED",
   yleTotal,
   gpa,
   final,
 }: any) => {
   const baseUrl = new URL(
-    'https://chiispiitas.github.io/Brighton/Certificate%20Generator/index.html'
+    "https://chiispiitas.github.io/Brighton/Certificate%20Generator/index.html"
   );
-  
-  baseUrl.searchParams.append('student', student.toUpperCase());
-  baseUrl.searchParams.append(
-    'program',
-    ageGroup === 'adult' ? 'General English' : 'Young Learners'
-  );
-  baseUrl.searchParams.append('level', level);
-  baseUrl.searchParams.append('short-level', level?.split(' ')[0]);
-  baseUrl.searchParams.append('assignments', assignments);
-  baseUrl.searchParams.append('assignments-total', assignmentsTotal);
-  baseUrl.searchParams.append('assignments-status', assignmentsStatus);
-  baseUrl.searchParams.append('tests', tests);
-  baseUrl.searchParams.append('tests-status', testsStatus);
-  baseUrl.searchParams.append('exam', exam);
-  baseUrl.searchParams.append('gpa', gpa);
-  baseUrl.searchParams.append('final', final);
-  baseUrl.searchParams.append('password', 'Brighton1234@');
 
-  const normalizedExam = exam.replace('.', '');
-  const fourModuleExams = ['PRELIM', 'FIRST'];
-  const threeModuleExams = ['STARTERS', 'MOVERS', 'FLYERS', 'KEY'];
+  baseUrl.searchParams.append("student", student.toUpperCase());
+  baseUrl.searchParams.append(
+    "program",
+    ageGroup === "adult" ? "General English" : "Young Learners"
+  );
+  baseUrl.searchParams.append("level", level);
+  baseUrl.searchParams.append("short-level", level?.split(" ")[0]);
+  baseUrl.searchParams.append("assignments", assignments);
+  baseUrl.searchParams.append("assignments-total", assignmentsTotal);
+  baseUrl.searchParams.append("assignments-status", assignmentsStatus);
+  baseUrl.searchParams.append("tests", tests);
+  baseUrl.searchParams.append("tests-status", testsStatus);
+  baseUrl.searchParams.append("exam", exam);
+  baseUrl.searchParams.append("gpa", gpa);
+  baseUrl.searchParams.append("final", final);
+  baseUrl.searchParams.append("password", "Brighton1234@");
+
+  const normalizedExam = exam.replace(".", "");
+  const fourModuleExams = ["PRELIM", "FIRST"];
+  const threeModuleExams = ["STARTERS", "MOVERS", "FLYERS", "KEY"];
 
   if (fourModuleExams.includes(normalizedExam)) {
-    baseUrl.searchParams.append('reading', reading);
-    baseUrl.searchParams.append('reading-status', readingStatus);
-    baseUrl.searchParams.append('listening', listening);
-    baseUrl.searchParams.append('listening-status', listeningStatus);
-    baseUrl.searchParams.append('writing', writing);
-    baseUrl.searchParams.append('writing-status', writingStatus);
-    baseUrl.searchParams.append('speaking', speaking);
-    baseUrl.searchParams.append('speaking-status', speakingStatus);
-    baseUrl.searchParams.append('general-exams-total', generalExamsTotal);
+    baseUrl.searchParams.append("reading", reading);
+    baseUrl.searchParams.append("reading-status", readingStatus);
+    baseUrl.searchParams.append("listening", listening);
+    baseUrl.searchParams.append("listening-status", listeningStatus);
+    baseUrl.searchParams.append("writing", writing);
+    baseUrl.searchParams.append("writing-status", writingStatus);
+    baseUrl.searchParams.append("speaking", speaking);
+    baseUrl.searchParams.append("speaking-status", speakingStatus);
+    baseUrl.searchParams.append("general-exams-total", generalExamsTotal);
   } else if (threeModuleExams.includes(normalizedExam)) {
-    baseUrl.searchParams.append('reading-and-writing', readingWriting);
-    baseUrl.searchParams.append('reading-and-writing-status', readingWritingStatus);
-    baseUrl.searchParams.append('listening-yle', listeningYLE);
-    baseUrl.searchParams.append('listening-yle-status', listeningYLEStatus);
-    baseUrl.searchParams.append('speaking-yle', speakingYLE);
-    baseUrl.searchParams.append('speaking-yle-status', speakingYLEStatus);
-    baseUrl.searchParams.append('yle-total', yleTotal);
+    baseUrl.searchParams.append("reading-and-writing", readingWriting);
+    baseUrl.searchParams.append(
+      "reading-and-writing-status",
+      readingWritingStatus
+    );
+    baseUrl.searchParams.append("listening-yle", listeningYLE);
+    baseUrl.searchParams.append("listening-yle-status", listeningYLEStatus);
+    baseUrl.searchParams.append("speaking-yle", speakingYLE);
+    baseUrl.searchParams.append("speaking-yle-status", speakingYLEStatus);
+    baseUrl.searchParams.append("yle-total", yleTotal);
   }
 
   return baseUrl;
@@ -782,64 +792,94 @@ export const formatReportUrl = ({
 
 export const getExamType = (level: string, ageGroup: string) => {
   const levelUpper = level.toUpperCase();
-  
-  if (levelUpper.includes('PRE-A1') || levelUpper.includes('STARTER')) {
+
+  if (levelUpper.includes("PRE-A1") || levelUpper.includes("STARTER")) {
     return EXAMS_TYPE.STARTERS;
   }
-  if (levelUpper.includes('A1') && !levelUpper.includes('A2')) {
+  if (levelUpper.includes("A1") && !levelUpper.includes("A2")) {
     return EXAMS_TYPE.MOVERS;
   }
-  if (levelUpper.includes('A2')) {
-    const isAdult = ageGroup && ageGroup.toLowerCase().includes('adult');
+  if (levelUpper.includes("A2")) {
+    const isAdult = ageGroup && ageGroup.toLowerCase().includes("adult");
     return isAdult ? EXAMS_TYPE.KEY : EXAMS_TYPE.FLYERS;
   }
-  if (levelUpper.includes('B1')) {
+  if (levelUpper.includes("B1")) {
     return EXAMS_TYPE.PRELIM;
   }
-  if (levelUpper.includes('B2')) {
+  if (levelUpper.includes("B2")) {
     return EXAMS_TYPE.FIRST;
   }
-  
-  console.warn(`No exam type match found for level: ${level}, ageGroup: ${ageGroup}`);
-  const isAdult = ageGroup && ageGroup.toLowerCase().includes('adult');
-  return isAdult ? EXAMS_TYPE.KEY : EXAMS_TYPE.FLYERS; 
+
+  console.warn(
+    `No exam type match found for level: ${level}, ageGroup: ${ageGroup}`
+  );
+  const isAdult = ageGroup && ageGroup.toLowerCase().includes("adult");
+  return isAdult ? EXAMS_TYPE.KEY : EXAMS_TYPE.FLYERS;
 };
 export const getExamTypeByLevelId = (levelId: number): string => {
   const LEVEL_TO_EXAM_TYPE: Record<string, string> = {
-    'level_1': EXAMS_TYPE.MOVERS,     
-    'level_2': EXAMS_TYPE.KEY,       
-    'level_3': EXAMS_TYPE.PRELIM,     
-    'level_4': EXAMS_TYPE.PRELIM,   
-    'level_5': EXAMS_TYPE.FIRST,      
-    'level_6': EXAMS_TYPE.FIRST,  
-    'level_7': EXAMS_TYPE.STARTERS,   
-    'level_8': EXAMS_TYPE.MOVERS,   
-    'level_9': EXAMS_TYPE.FLYERS,    
-    'level_10': EXAMS_TYPE.PRELIM,  
-    'level_11': EXAMS_TYPE.PRELIM,   
-    'level_12': EXAMS_TYPE.MOVERS,    
-    'level_13': EXAMS_TYPE.FLYERS,    
-    'level_14': EXAMS_TYPE.PRELIM,   
+    level_1: EXAMS_TYPE.MOVERS,
+    level_2: EXAMS_TYPE.KEY,
+    level_3: EXAMS_TYPE.PRELIM,
+    level_4: EXAMS_TYPE.PRELIM,
+    level_5: EXAMS_TYPE.FIRST,
+    level_6: EXAMS_TYPE.FIRST,
+    level_7: EXAMS_TYPE.STARTERS,
+    level_8: EXAMS_TYPE.MOVERS,
+    level_9: EXAMS_TYPE.FLYERS,
+    level_10: EXAMS_TYPE.PRELIM,
+    level_11: EXAMS_TYPE.PRELIM,
+    level_12: EXAMS_TYPE.MOVERS,
+    level_13: EXAMS_TYPE.FLYERS,
+    level_14: EXAMS_TYPE.PRELIM,
   };
-  
+
   return LEVEL_TO_EXAM_TYPE[`level_${levelId}`] || EXAMS_TYPE.PRELIM;
 };
 
 export const getExamConfiguration = () => {
-  const threeModuleExams = ['READING & WRITING', 'LISTENING', 'SPEAKING'];
-  const fourModuleExams = ['READING', 'LISTENING', 'WRITING', 'SPEAKING'];
-  
+  const threeModuleExams = ["READING & WRITING", "LISTENING", "SPEAKING"];
+  const fourModuleExams = ["READING", "LISTENING", "WRITING", "SPEAKING"];
+
   return {
-    [EXAMS_TYPE.STARTERS]: { examType: EXAMS_TYPE.STARTERS, modules: threeModuleExams },
-    [EXAMS_TYPE.MOVERS]: { examType: EXAMS_TYPE.MOVERS, modules: threeModuleExams },
-    [EXAMS_TYPE.FLYERS]: { examType: EXAMS_TYPE.FLYERS, modules: threeModuleExams },
+    [EXAMS_TYPE.STARTERS]: {
+      examType: EXAMS_TYPE.STARTERS,
+      modules: threeModuleExams,
+    },
+    [EXAMS_TYPE.MOVERS]: {
+      examType: EXAMS_TYPE.MOVERS,
+      modules: threeModuleExams,
+    },
+    [EXAMS_TYPE.FLYERS]: {
+      examType: EXAMS_TYPE.FLYERS,
+      modules: threeModuleExams,
+    },
     [EXAMS_TYPE.KEY]: { examType: EXAMS_TYPE.KEY, modules: threeModuleExams },
-    [EXAMS_TYPE.PRELIM]: { examType: EXAMS_TYPE.PRELIM, modules: fourModuleExams },
-    [EXAMS_TYPE.FIRST]: { examType: EXAMS_TYPE.FIRST, modules: fourModuleExams }
+    [EXAMS_TYPE.PRELIM]: {
+      examType: EXAMS_TYPE.PRELIM,
+      modules: fourModuleExams,
+    },
+    [EXAMS_TYPE.FIRST]: {
+      examType: EXAMS_TYPE.FIRST,
+      modules: fourModuleExams,
+    },
   };
 };
 
 export const getModulesByExamType = (examType: string): string[] => {
   const examConfig = getExamConfiguration();
   return examConfig[examType]?.modules || [];
+};
+export const getPrincipalRoute = (role: string): string => {
+  switch (role) {
+    case USER_TYPES.ADMIN:
+    case USER_TYPES.FINANCIAL:
+    case USER_TYPES.RECEPTIONIST:
+    case USER_TYPES.COORDINATOR:
+      return "/dashboard";
+    case USER_TYPES.PROFESSOR:
+      return "/teachers";
+    default:
+      return "/authentication/login";
+  }
 };

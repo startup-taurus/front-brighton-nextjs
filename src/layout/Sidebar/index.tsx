@@ -11,15 +11,16 @@ import layoutContext from 'helper/Layout';
 import { UserContext } from '../../../helper/User';
 import { ImgPath } from 'utils/Constant';
 import { USER_TYPES } from 'utils/constants';
+import { getPrincipalRoute } from 'utils/utils';
 
 const Sidebar = ({ menuList }: { menuList: sidebarMenuType[] }) => {
   const { sidebarIconType } = useContext(CustomizerContext);
   const { sideBarToggle } = useContext(layoutContext);
   const { user } = useContext(UserContext);
 
-  const mainLink = user?.role === USER_TYPES.ADMIN ? '/dashboard' : '/teachers';
+  const mainLink = getPrincipalRoute(user?.role);
   const IconType = sidebarIconType || ConfigDB.data.settings.sidebar.iconType;
-
+console.log(mainLink, user.role)
   return (
     <div
       className={`sidebar-wrapper ${sideBarToggle ? 'close_icon' : ''}`}
@@ -28,7 +29,7 @@ const Sidebar = ({ menuList }: { menuList: sidebarMenuType[] }) => {
       <div>
         <SidebarLogo />
         <div className='logo-icon-wrapper'>
-          <Link href={mainLink}>
+          <Link href={mainLink}>2555
             <Image
               width={35}
               height={35}

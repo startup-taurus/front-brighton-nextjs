@@ -67,9 +67,12 @@ const UserProvider = ({ children }: contextType) => {
     ) {
       router.push('/dashboard');
     } else if (
-      new RegExp(`^(/dashboard|/admin(\\/.*)?)$`).test(path) &&
+      new RegExp(`^(/dashboard|/admin(\/.*)?)$`).test(path) &&
       isUserLogged &&
-      user?.role !== USER_TYPES.ADMIN
+      user?.role !== USER_TYPES.ADMIN &&
+      user?.role !== USER_TYPES.COORDINATOR &&
+      user?.role !== USER_TYPES.FINANCIAL &&
+      user?.role !== USER_TYPES.RECEPTIONIST
     ) {
       router.push('/teachers');
     }
