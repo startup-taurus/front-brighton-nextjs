@@ -10,15 +10,16 @@ import {
   buildGradebookStructure,
   calculateAssignmentAverage,
   calculateAverage,
-  calculateFinalGradingStatus,
   calculateReportExamAverage,
   calculateStudentAverage,
+  calculateFinalGradingStatus, 
   formatExamParams,
   formatGradebookComponents,
   formatReportBarChartData,
   formatReportUrl,
   formatStudentScoreAssignmentsGrades,
   formatStudentScoreExamGrades,
+  getExamType, 
   isBrowser,
 } from "../../../../utils/utils";
 import { ComponentsGradebook } from "../../../../Types/GradingItem";
@@ -43,7 +44,7 @@ const assignmentsTestCols = [
   },
   {
     name: "SCORE",
-    selector: (row: any) => row.score,
+    selector: (row: any) => `${row.score}%`,  
   },
   {
     name: "GRADE",
@@ -63,11 +64,11 @@ const examPageCols = [
   },
   {
     name: "EXAM",
-    selector: (row: any) => row.level,
+    selector: (row: any) => row.examType || row.level,
   },
   {
     name: "SCORE",
-    selector: (row: any) => row.score,
+    selector: (row: any) => `${row.score}%`,  
   },
   {
     name: "GRADE",
@@ -96,15 +97,14 @@ const StudentReportTable = ({
 
   const [assignmentsData, setAssignmentsData] = useState<any[]>([]);
   const [examData, setExamData] = useState<any[]>([]);
-
   const [assignmentsAverage, setAssignmentsAverage] = useState("0");
   const [examAverage, setExamAverage] = useState("0");
   const [studentTotalAverage, setStudentTotalAverage] = useState("0");
+  const [examType, setExamType] = useState<string>(""); 
   const [reportChartData, setReportChartData] = useState<any>(
     DEFAULT_BAR_CHART_DATA,
   );
   const [resultGPA, setResultGPA] = useState<string>("NOT RESULTED");
-
   const [reportURL, setReportURL] = useState<string>("");
 
   const gradingGrade = useMemo(
@@ -138,18 +138,22 @@ const StudentReportTable = ({
       componentsGradebook.moversExam,
       selectedStudentId,
     );
-
+  
     const assignmentsFormatedData = formatStudentScoreAssignmentsGrades(
       { assignments, progressTest, moversExam },
       courseDetail?.course_name,
     );
-
+  
+    const currentExamType = courseDetail?.syllabus?.exam_type || getExamType(courseDetail?.course_name, courseDetail?.age_group);
+    setExamType(currentExamType); 
+    
     const examFormatedData = formatStudentScoreExamGrades(
       componentsGradebook.moversExam,
       courseDetail?.course_name,
       selectedStudentId,
       gradingGrade,
       notesPercentages,
+      currentExamType 
     );
 
     const assignmentAverage = calculateAssignmentAverage(
@@ -181,7 +185,7 @@ const StudentReportTable = ({
       gradingPercentage,
     );
 
-    const examProps = formatExamParams(examFormatedData);
+    const examProps = formatExamParams(examFormatedData, currentExamType);
     const gpaResult = calculateFinalGradingStatus(
       notesPercentages,
       studentAverage,
@@ -193,14 +197,12 @@ const StudentReportTable = ({
       level: courseDetail?.course_name,
       assignments: `${assignmentsFormatedData[0]?.score}%`,
       assignmentsStatus: assignmentsFormatedData[0]?.grade,
-      assignmentsTotal: assignmentAverage,
+      assignmentsTotal: `${assignmentAverage}%`,  
       tests: `${assignmentsFormatedData[1]?.score}%`,
       testsStatus: assignmentsFormatedData[1]?.grade,
-      exam:
-        courseDetail?.age_group === "adult"
-          ? EXAMS_TYPE.PRELIM
-          : EXAMS_TYPE.MOVERS,
-      generalExamsTotal: reportExamAverage,
+      exam: examType,
+      generalExamsTotal: `${reportExamAverage}%`, 
+      yleTotal: `${reportExamAverage}%`, 
       gpa: `${studentAverage}% (${gpaResult})`,
       final: `${gpaResult}`,
       ...examProps,
@@ -218,7 +220,7 @@ const StudentReportTable = ({
 
     setReportChartData(chartFormattedData);
     setResultGPA(gpaResult);
-  }, [gradingGrade, componentsGradebook, selectedStudentId]);
+  }, [gradingGrade, componentsGradebook, selectedStudentId, courseDetail, gradingPercentage, notesPercentages]);
 
   return (
     <>
@@ -227,7 +229,7 @@ const StudentReportTable = ({
           <div className="attendance-resume">
             <p className="field-description">ATTENDANCE</p>
             <p className="field-value">
-              {studentAttendance ? studentAttendance?.attendancePercentage : 0}%
+              {studentAttendance?.attendancePercentage ? studentAttendance.attendancePercentage : "0.00"}%
             </p>
           </div>
         </div>
@@ -243,7 +245,7 @@ const StudentReportTable = ({
           <ReportTable
             data={examData}
             columns={examPageCols}
-            resumeRowTitle={`EXAM (${gradingPercentage?.exam_percentage}%)`}
+            resumeRowTitle={`${examType} EXAM (${gradingPercentage?.exam_percentage}%)`}
             finalPercentage={examAverage}
           />
         )}

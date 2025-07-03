@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
+import Swal from 'sweetalert2';
 import EventCalendar from '@/components/Dashboard/SchoolManagenement/EventCalendar';
 import NoticeBoard from '@/components/Dashboard/SchoolManagenement/NoticeBoard';
 import SchoolData from '@/components/Dashboard/SchoolManagenement/SchoolData';
@@ -15,6 +17,47 @@ import StudentPerformanceChart from '@/components/own/charts/student-performance
 
 const SchoolManagement = () => {
   const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  const { access_denied } = router.query;
+
+  useEffect(() => {
+    if (access_denied) {
+      let message = "You don't have access to this section";
+      
+      switch (access_denied) {
+        case 'admin':
+          message = "You don't have access to the administration section";
+          break;
+        case 'coordinator':
+          message = "You don't have access to the coordinator section";
+          break;
+        case 'receptionist':
+          message = "You don't have access to this section";
+          break;
+      }
+
+      Swal.fire({
+        icon: 'error',
+        title: 'Access Denied',
+        text: message,
+        confirmButtonText: 'Understood'
+      }).then(() => {
+        const { access_denied, ...cleanQuery } = router.query;
+        router.replace({
+          pathname: router.pathname,
+          query: cleanQuery
+        }, undefined, { shallow: true });
+      });
+    }
+  }, [access_denied, router]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const AcademicPerformance = dynamic(
     () =>
@@ -29,6 +72,37 @@ const SchoolManagement = () => {
     () => import('@/components/Dashboard/SchoolManagenement/SchoolIncome'),
     { ssr: false }
   );
+
+  useEffect(() => {
+    if (access_denied) {
+      let message = "You don't have access to this section";
+      
+      switch (access_denied) {
+        case 'admin':
+          message = "You don't have access to the administration section";
+          break;
+        case 'coordinator':
+          message = "You don't have access to the coordinator section";
+          break;
+        case 'professor':
+          message = "You don't have access to view other professor's information";
+          break;
+      }
+
+      Swal.fire({
+        icon: 'error',
+        title: 'Access Denied',
+        text: message,
+        confirmButtonText: 'Understood'
+      }).then(() => {
+        const { access_denied, ...cleanQuery } = router.query;
+        router.replace({
+          pathname: router.pathname,
+          query: cleanQuery
+        }, undefined, { shallow: true });
+      });
+    }
+  }, [access_denied, router]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
