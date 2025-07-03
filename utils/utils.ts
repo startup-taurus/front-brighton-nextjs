@@ -43,7 +43,7 @@ export const handleError = (
     !stopRedirect
   ) {
     Cookies.remove('token');
-    window.location.replace('/dashboard/login');
+    window.location.replace('/authentication/login');
   }
   if (!hideError) {
     toast.error(e?.response?.data?.message ?? ERROR_MESSAGE);
