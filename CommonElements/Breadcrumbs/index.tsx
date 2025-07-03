@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useContext } from "react";
 import { Col, Container, Row } from "reactstrap";
 import Link from "next/link";
 import SvgIcon from "CommonElements/Icons/SvgIcon";
+import { UserContext } from "helper/User";
+import { getPrincipalRoute } from "utils/utils";
 
 type varTypes = {
   title: string;
@@ -10,7 +12,9 @@ type varTypes = {
   subParent?: string;
 };
 
-const Breadcrumbs = ({ title, mainTitle, parent, subParent }: varTypes) => {
+const Breadcrumbs = ({ title, mainTitle, parent, subParent }: varTypes) => {  const { user } = useContext(UserContext);
+
+  const mainLink = getPrincipalRoute(user?.role);
   return (
     <div>
       <Container fluid={true}>
@@ -22,7 +26,7 @@ const Breadcrumbs = ({ title, mainTitle, parent, subParent }: varTypes) => {
             <Col xs={6} className="p-0">
               <ol className="breadcrumb">
                 <li className="breadcrumb-item">
-                  <Link href={`/teachers`}>
+                  <Link href={mainLink}>
                     <SvgIcon iconId="stroke-home" />
                   </Link>
                 </li>
