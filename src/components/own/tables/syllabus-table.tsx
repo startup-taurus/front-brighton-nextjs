@@ -39,7 +39,6 @@ const SyllabusTable = ({ reload }: any) => {
   };
 
   const toggleDetail = (data: any) => {
-    console.log('data', data);
     setSelectedData(data);
     setIsCopyMode(false);
     setIsOpenDetail(!isOpenDetail);
