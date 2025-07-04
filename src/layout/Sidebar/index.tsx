@@ -1,6 +1,6 @@
 'use client';
 import Link from 'next/link';
-import { sidebarMenuType } from 'Types/LayoutDataType'; 
+import { sidebarMenuType } from 'Types/LayoutDataType';
 import { useContext } from 'react';
 import Image from 'next/image';
 import SidebarLogo from './SidebarLogo';
@@ -20,7 +20,7 @@ const Sidebar = ({ menuList }: { menuList: sidebarMenuType[] }) => {
 
   const mainLink = getPrincipalRoute(user?.role);
   const IconType = sidebarIconType || ConfigDB.data.settings.sidebar.iconType;
-console.log(mainLink, user.role)
+
   return (
     <div
       className={`sidebar-wrapper ${sideBarToggle ? 'close_icon' : ''}`}
@@ -29,7 +29,8 @@ console.log(mainLink, user.role)
       <div>
         <SidebarLogo />
         <div className='logo-icon-wrapper'>
-          <Link href={mainLink}>2555
+          <Link href={mainLink}>
+            2555
             <Image
               width={35}
               height={35}

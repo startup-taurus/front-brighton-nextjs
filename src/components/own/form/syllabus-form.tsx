@@ -22,31 +22,22 @@ import { getAllLevels } from 'helper/api-data/level';
 import { EXAMS_TYPE, EXAM_TYPE_OPTIONS } from 'utils/constants';
 import { getExamTypeByLevelId, getModulesByExamType } from 'utils/utils';
 
-const getAvailableExamTypeOptions = (levelId: number | string) => {
-  if (!levelId) return [];
-  
-  const level = Number(levelId);
-  
-  const b1B2Levels = [3, 4, 5, 6, 10, 11];
-  
-  if (b1B2Levels.includes(level)) {
-    return [
-      { value: EXAMS_TYPE.PRELIM, label: 'PRELIMINARY (B1 KIDS/ADULTS) - 4 Modules' },
-      { value: EXAMS_TYPE.FIRST, label: 'FIRST (B2 ADULTS) - 4 Modules' },
-    ];
-  }
-  
-  return [
-    { value: EXAMS_TYPE.STARTERS, label: 'STARTERS (PRE-A1 KIDS) - 3 Modules' },
-    { value: EXAMS_TYPE.MOVERS, label: 'MOVERS (A1 KIDS/ADULTS) - 3 Modules' },
-    { value: EXAMS_TYPE.FLYERS, label: 'FLYERS (A2 KIDS) - 3 Modules' },
-    { value: EXAMS_TYPE.KEY, label: 'KEY (A2 KIDS/ADULTS) - 3 Modules' },
-  ];
-};
+const EXAMS_LIST = [
+  {
+    value: EXAMS_TYPE.PRELIM,
+    label: 'PRELIMINARY (B1 KIDS/ADULTS) - 4 Modules',
+  },
+  { value: EXAMS_TYPE.FIRST, label: 'FIRST (B2 ADULTS) - 4 Modules' },
+
+  { value: EXAMS_TYPE.STARTERS, label: 'STARTERS (PRE-A1 KIDS) - 3 Modules' },
+  { value: EXAMS_TYPE.MOVERS, label: 'MOVERS (A1 KIDS/ADULTS) - 3 Modules' },
+  { value: EXAMS_TYPE.FLYERS, label: 'FLYERS (A2 KIDS) - 3 Modules' },
+  { value: EXAMS_TYPE.KEY, label: 'KEY (A2 KIDS/ADULTS) - 3 Modules' },
+];
 
 const validations = Yup.object().shape({
   syllabus_name: Yup.string().required('The syllabus name is required'),
-  level_id: Yup.number().nullable().required('The level is required'),  
+  level_id: Yup.number().nullable().required('The level is required'),
 });
 
 const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
@@ -157,11 +148,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      toggle={toggle}
-      size='lg'
-    >
+    <Modal isOpen={isOpen} toggle={toggle} size='lg'>
       <ModalHeader toggle={toggle}>
         {isCopy
           ? 'Duplicate Syllabus'
@@ -175,35 +162,40 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
           initialValues={
             data
               ? {
-                    id: isCopy ? '' : data.id,
-                    syllabus_name: data.syllabus_name,
-                    level_id: data?.level?.id || null, 
-                    items: data?.items?.map((item: any) => item.item_name) || [],
-                    test_percentage: data?.percentages?.test_percentage || 0,
-                    exam_percentage: data?.percentages?.exam_percentage || 0,
-                    assig_percentage: data?.percentages?.assig_percentage || 0,
-                    assignments: data?.assignments?.length > 0 ? data.assignments : [],
-                    progress_tests: data?.progress_tests?.length > 0 ? data.progress_tests : [],
-                    exam_modules: data?.exam_modules || data?.movers_exam || getModulesByExamType(data?.exam_type || EXAMS_TYPE.PRELIM),
-                    percentages: data?.percentages_syllabus || [
-                      { name: '', min: 0, max: 0 },
-                    ],
-                    exam_type: data?.exam_type || EXAMS_TYPE.PRELIM,
-                  }
-                : {
-                    id: '',
-                    syllabus_name: '',
-                    level_id: null, 
-                    items: [],
-                    test_percentage: 0,
-                    exam_percentage: 0,
-                    assig_percentage: 0,
-                    assignments: [],
-                    progress_tests: [],
-                    exam_modules: [],
-                    percentages: [{ name: '', min: 0, max: 0 }],
-                    exam_type: ''
-                  }
+                  id: isCopy ? '' : data.id,
+                  syllabus_name: data.syllabus_name,
+                  level_id: data?.level?.id || null,
+                  items: data?.items?.map((item: any) => item.item_name) || [],
+                  test_percentage: data?.percentages?.test_percentage || 0,
+                  exam_percentage: data?.percentages?.exam_percentage || 0,
+                  assig_percentage: data?.percentages?.assig_percentage || 0,
+                  assignments:
+                    data?.assignments?.length > 0 ? data.assignments : [],
+                  progress_tests:
+                    data?.progress_tests?.length > 0 ? data.progress_tests : [],
+                  exam_modules:
+                    data?.exam_modules ||
+                    data?.movers_exam ||
+                    getModulesByExamType(data?.exam_type || EXAMS_TYPE.PRELIM),
+                  percentages: data?.percentages_syllabus || [
+                    { name: '', min: 0, max: 0 },
+                  ],
+                  exam_type: data?.exam_type || EXAMS_TYPE.PRELIM,
+                }
+              : {
+                  id: '',
+                  syllabus_name: '',
+                  level_id: null,
+                  items: [],
+                  test_percentage: 0,
+                  exam_percentage: 0,
+                  assig_percentage: 0,
+                  assignments: [],
+                  progress_tests: [],
+                  exam_modules: [],
+                  percentages: [{ name: '', min: 0, max: 0 }],
+                  exam_type: '',
+                }
           }
           validationSchema={validations}
           onSubmit={(values, othersProps) =>
@@ -224,11 +216,18 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
             } = props;
 
             const renderArrayField = (name: string, label: string) => {
-              const fieldValue = values[name as keyof typeof values] as string[];
-              const safeArray = Array.isArray(fieldValue) && fieldValue.length > 0 ? fieldValue : [''];
-              
+              const fieldValue = values[
+                name as keyof typeof values
+              ] as string[];
+              const safeArray =
+                Array.isArray(fieldValue) && fieldValue.length > 0
+                  ? fieldValue
+                  : [''];
+
               return (
                 <Col xs={12} className='mt-3'>
+                  <pre> {data?.exam_type}</pre>
+                  <pre>{values.exam_type}</pre>
                   <Label>{label}</Label>
                   <FieldArray
                     name={name}
@@ -292,10 +291,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
               values: any,
               setFieldValue: (field: string, value: any) => void
             ) => (
-              <Col
-                xs={12}
-                className='mt-3'
-              >
+              <Col xs={12} className='mt-3'>
                 <Label>{label}</Label>
                 <FieldArray
                   name={name}
@@ -314,10 +310,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                       </div>
                       <div className='syllabus-container'>
                         {values[name].map((percentage: any, index: number) => (
-                          <Row
-                            key={index}
-                            className='mb-2 align-items-center'
-                          >
+                          <Row key={index} className='mb-2 align-items-center'>
                             <Col md={4}>
                               <Label>Name</Label>
                               <Input
@@ -360,10 +353,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                                 className='syllabus-input'
                               />
                             </Col>
-                            <Col
-                              md={2}
-                              className='d-flex align-items-end'
-                            >
+                            <Col md={2} className='d-flex align-items-end'>
                               <Button
                                 type='button'
                                 color='danger'
@@ -396,10 +386,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                     invalid={touched.syllabus_name && !!errors.syllabus_name}
                     className='syllabus-input-title'
                   />
-                  <ErrorMessage
-                    name='syllabus_name'
-                    component={FormFeedback}
-                  />
+                  <ErrorMessage name='syllabus_name' component={FormFeedback} />
                 </Col>
                 <Col xs={4}>
                   <Label for='level'>Level</Label>
@@ -417,24 +404,31 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                               : selectedOption.value
                             : '';
                           setFieldValue('level_id', level);
-                          
-                          if (level) {
-                            const autoExamType = getExamTypeByLevelId(Number(level));
-                            const availableOptions = getAvailableExamTypeOptions(level);
-                            
-                            const isCurrentExamTypeValid = availableOptions.some(
-                              option => option.value === values.exam_type
-                            );
-                            
-                            if (!isCurrentExamTypeValid) {
-                              setFieldValue('exam_type', autoExamType);
-                              const autoModules = getModulesByExamType(autoExamType);
-                              setFieldValue('exam_modules', autoModules);
-                            }
-                          } else {
-                            setFieldValue('exam_type', '');
-                            setFieldValue('exam_modules', ['']);
-                          }
+
+                          // if (level) {
+                          //   const autoExamType = getExamTypeByLevelId(
+                          //     Number(level)
+                          //   );
+                          //   const availableOptions =
+                          //     getAvailableExamTypeOptions(level);
+
+                          //   const isCurrentExamTypeValid =
+                          //     availableOptions.some(
+                          //       (option) => option.value === values.exam_type
+                          //     );
+
+                          //   if (!isCurrentExamTypeValid) {
+                          //     console.log(autoExamType);
+
+                          //     setFieldValue('exam_type', autoExamType);
+                          //     const autoModules =
+                          //       getModulesByExamType(autoExamType);
+                          //     setFieldValue('exam_modules', autoModules);
+                          //   }
+                          // } else {
+                          //   setFieldValue('exam_type', '');
+                          //   setFieldValue('exam_modules', ['']);
+                          // }
                         }}
                         value={
                           levelOptions.find((option: any) => {
@@ -456,38 +450,42 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                       />
                     )}
                   </Field>
-                  <ErrorMessage
-                    name='level_id'
-                    component={FormFeedback}
-                  />
+                  <ErrorMessage name='level_id' component={FormFeedback} />
                 </Col>
 
                 <Col xs={12}>
                   <Label for='exam_type'>Exam Type</Label>
                   <Field name='exam_type'>
                     {({ field, form }: any) => {
-                      const availableOptions = getAvailableExamTypeOptions(values.level_id);
-                      
                       return (
                         <Select
                           {...field}
                           id='exam_type'
-                          options={availableOptions}
+                          options={EXAMS_LIST}
                           onChange={(selectedOption: any) => {
-                            const newExamType = selectedOption ? selectedOption.value : '';
+                            const newExamType = selectedOption
+                              ? selectedOption.value
+                              : '';
                             setFieldValue('exam_type', newExamType);
-                            
+
                             if (newExamType) {
-                              const autoModules = getModulesByExamType(newExamType);
+                              const autoModules =
+                                getModulesByExamType(newExamType);
                               setFieldValue('exam_modules', autoModules);
                             } else {
                               setFieldValue('exam_modules', ['']);
                             }
                           }}
                           value={
-                            availableOptions.find((option: any) => option.value === values.exam_type) || null
+                            EXAMS_LIST.find(
+                              (option: any) => option.value === values.exam_type
+                            ) || null
                           }
-                          placeholder={values.level_id ? 'Select exam type' : 'Please select a level first'}
+                          placeholder={
+                            values.level_id
+                              ? 'Select exam type'
+                              : 'Please select a level first'
+                          }
                           isSearchable
                           isDisabled={!values.level_id}
                         />
@@ -497,7 +495,8 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                   <ErrorMessage name='exam_type' component={FormFeedback} />
                   {values.level_id && values.exam_type && (
                     <small className='text-muted mt-1 d-block'>
-                      Auto-selected based on level. You can change it manually if needed.
+                      Auto-selected based on level. You can change it manually
+                      if needed.
                     </small>
                   )}
                 </Col>
@@ -548,11 +547,14 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                 <hr className='my-4' />
                 {renderArrayField('progress_tests', 'Progress Tests')}
                 <hr className='my-4' />
-                
+
                 {values.exam_type && (
                   <>
                     <hr className='my-4' />
-                    {renderArrayField('exam_modules', `Exam Modules - ${values.exam_type}`)}
+                    {renderArrayField(
+                      'exam_modules',
+                      `Exam Modules - ${values.exam_type}`
+                    )}
                   </>
                 )}
                 <hr className='my-4' />
@@ -562,14 +564,8 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                   values,
                   setFieldValue
                 )}
-                <Col
-                  xs={12}
-                  className='d-flex justify-content-end mt-5'
-                >
-                  <Button
-                    color='secondary'
-                    onClick={toggle}
-                  >
+                <Col xs={12} className='d-flex justify-content-end mt-5'>
+                  <Button color='secondary' onClick={toggle}>
                     Close
                   </Button>
                   &nbsp;&nbsp;

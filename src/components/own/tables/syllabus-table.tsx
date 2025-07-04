@@ -39,6 +39,7 @@ const SyllabusTable = ({ reload }: any) => {
   };
 
   const toggleDetail = (data: any) => {
+    console.log('data', data);
     setSelectedData(data);
     setIsCopyMode(false);
     setIsOpenDetail(!isOpenDetail);
@@ -73,12 +74,7 @@ const SyllabusTable = ({ reload }: any) => {
 
   if (isLoading) {
     return (
-      <TableSkeleton
-        rows={10}
-        columns={5}
-        showHeader={true}
-        animated={true}
-      />
+      <TableSkeleton rows={10} columns={5} showHeader={true} animated={true} />
     );
   }
 
