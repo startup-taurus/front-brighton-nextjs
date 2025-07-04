@@ -226,8 +226,6 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
 
               return (
                 <Col xs={12} className='mt-3'>
-                  <pre> {data?.exam_type}</pre>
-                  <pre>{values.exam_type}</pre>
                   <Label>{label}</Label>
                   <FieldArray
                     name={name}
