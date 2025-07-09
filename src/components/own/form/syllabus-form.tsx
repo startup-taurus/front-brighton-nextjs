@@ -42,21 +42,30 @@ const validations = Yup.object().shape({
 
 const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
   const [isLoading, setIsLoading] = useState(false);
-  const limit = 10;
-  const [page, setPage] = useState(1);
-  const [levelSearchTerm, setLevelSearchTerm] = useState('');
   const [levelOptions, setLevelOptions] = useState<any[]>([]);
 
   const { data: levels } = useSWR(
-    ['/level/get-all', page, limit, levelSearchTerm],
-    () => getAllLevels(page, limit, levelSearchTerm)
+    ['/level/get-all'],
+    () => getAllLevels(1, 100, '', true) 
   );
+
+  const limit = 10;
+  const [page, setPage] = useState(1);
+  const [levelSearchTerm, setLevelSearchTerm] = useState('');
 
   const save = async (syllabus: any, { setSubmitting }: any) => {
     setSubmitting(true);
     setIsLoading(true);
     try {
-      const response = await createSyllabus(syllabus);
+      const filteredSyllabus = {
+        ...syllabus,
+        items: syllabus.items?.filter((item: string) => item && item.trim() !== '') || [],
+        assignments: syllabus.assignments?.filter((item: string) => item && item.trim() !== '') || [],
+        progress_tests: syllabus.progress_tests?.filter((item: string) => item && item.trim() !== '') || [],
+        exam_modules: syllabus.exam_modules?.filter((item: string) => item && item.trim() !== '') || []
+      };
+      
+      const response = await createSyllabus(filteredSyllabus);
       if (response.statusCode === 200) {
         setSubmitting(false);
         toggle();
@@ -76,7 +85,15 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
     setSubmitting(true);
     setIsLoading(true);
     try {
-      const response = await updateSyllabus(syllabus.id, syllabus);
+      const filteredSyllabus = {
+        ...syllabus,
+        items: syllabus.items?.filter((item: string) => item && item.trim() !== '') || [],
+        assignments: syllabus.assignments?.filter((item: string) => item && item.trim() !== '') || [],
+        progress_tests: syllabus.progress_tests?.filter((item: string) => item && item.trim() !== '') || [],
+        exam_modules: syllabus.exam_modules?.filter((item: string) => item && item.trim() !== '') || []
+      };
+      
+      const response = await updateSyllabus(syllabus.id, filteredSyllabus);
       if (response.statusCode === 200) {
         setSubmitting(false);
         toggle();
@@ -95,44 +112,16 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
   useEffect(() => {
     if (!levels?.data) return;
 
-    const rawLevels: any[] = Array.isArray(levels.data)
-      ? levels.data
-      : levels.data.result || [];
+    const rawLevels: any[] = levels.data.results || [];
 
-    const normalizeToOption = (item: any) => {
-      if (typeof item === 'string') {
-        return { value: item, label: item };
-      }
-      const id = item.id || '';
-      const label = item.full_level || item.name || item.level || '';
-      return { value: { id }, label };
-    };
+    const formattedOptions = rawLevels.map((level: any) => ({
+      value: level.id,
+      label: level.full_level
+    }));
 
-    const newOptions = rawLevels.map(normalizeToOption);
-
-    setLevelOptions((prev) => {
-      const all = [...prev, ...newOptions];
-
-      const unique = all.filter((opt, i, arr) => {
-        const optId = typeof opt.value === 'object' ? opt.value.id : opt.value;
-        return (
-          arr.findIndex((o) => {
-            const oId = typeof o.value === 'object' ? o.value.id : o.value;
-            return oId === optId;
-          }) === i
-        );
-      });
-
-      return unique.map((opt) => {
-        const value = typeof opt.value === 'object' ? opt.value.id : opt.value;
-        const label =
-          typeof opt.label === 'object'
-            ? opt.label.full_level || opt.label.name || ''
-            : opt.label;
-        return { value, label };
-      });
-    });
+    setLevelOptions(formattedOptions);
   }, [levels]);
+
 
   const onLevelScrollToBottom = () => {
     const levelData = levels?.data;
@@ -402,31 +391,6 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                               : selectedOption.value
                             : '';
                           setFieldValue('level_id', level);
-
-                          // if (level) {
-                          //   const autoExamType = getExamTypeByLevelId(
-                          //     Number(level)
-                          //   );
-                          //   const availableOptions =
-                          //     getAvailableExamTypeOptions(level);
-
-                          //   const isCurrentExamTypeValid =
-                          //     availableOptions.some(
-                          //       (option) => option.value === values.exam_type
-                          //     );
-
-                          //   if (!isCurrentExamTypeValid) {
-                          //     console.log(autoExamType);
-
-                          //     setFieldValue('exam_type', autoExamType);
-                          //     const autoModules =
-                          //       getModulesByExamType(autoExamType);
-                          //     setFieldValue('exam_modules', autoModules);
-                          //   }
-                          // } else {
-                          //   setFieldValue('exam_type', '');
-                          //   setFieldValue('exam_modules', ['']);
-                          // }
                         }}
                         value={
                           levelOptions.find((option: any) => {

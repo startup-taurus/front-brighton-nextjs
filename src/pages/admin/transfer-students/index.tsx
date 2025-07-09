@@ -30,9 +30,7 @@ const TransferStudents = () => {
 
   const limit = 10;
   const [coursePage, setCoursePage] = useState(1);
-  const [levelPage, setLevelPage] = useState(1);
   const [courseSearch, setCourseSearch] = useState('');
-  const [levelSearch, setLevelSearch] = useState('');
   const [courseOptions, setCourseOptions] = useState<any[]>([]);
   const [levelOptions, setLevelOptions] = useState<any[]>([]);
   const [courseFilter, setCourseFilter] = useState<SelectOption | null>(null);
@@ -43,8 +41,8 @@ const TransferStudents = () => {
     () => getActiveCourses(coursePage, limit, courseSearch)
   );
   const { data: levelData } = useSWR(
-    ['/level/get-all', levelPage, limit, levelSearch],
-    () => getAllLevels(levelPage, limit, levelSearch)
+    ['/level/get-all'],
+    () => getAllLevels(1, 100, '', true)
   );
 
   useEffect(() => {
@@ -71,23 +69,12 @@ const TransferStudents = () => {
   }, [courseData]);
 
   useEffect(() => {
-    if (levelData?.data) {
-      const levelArray = Array.isArray(levelData.data)
-        ? levelData.data
-        : levelData.data.result;
-      const newOptions = levelArray.map((level: any) => ({
-        value: level.id || level.level,
-        label: level.full_level || level.level,
+    if (levelData?.data?.results) {
+      const options = levelData.data.results.map((level: any) => ({
+        value: level.id,
+        label: level.full_level,
       }));
-      setLevelOptions((prevOptions) => {
-        const combinedOptions = [...prevOptions, ...newOptions];
-        return combinedOptions.filter(
-          (currentOption, currentIndex) =>
-            combinedOptions.findIndex(
-              (option) => option.value === currentOption.value
-            ) === currentIndex
-        );
-      });
+      setLevelOptions(options);
     }
   }, [levelData]);
 
@@ -127,11 +114,7 @@ const TransferStudents = () => {
       name: 'selected_level_id',
       type: 'select',
       items: levelOptions,
-      onInputChange: (value) => setLevelSearch(value),
-      onMenuScrollToBottom: () => setLevelPage((page) => page + 1),
-      isAsync: true,
       value: levelFilter,
-      inputValue: levelSearch,
       onChange: (option) => {
         setLevelFilter(option);
       },

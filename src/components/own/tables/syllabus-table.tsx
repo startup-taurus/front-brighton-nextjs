@@ -8,7 +8,11 @@ import TableActionButtons from '../table-action-buttons/table-action-buttons';
 import SyllabusForm from '../form/syllabus-form';
 import TableSkeleton from '../common/table-skeleton/TableSkeleton';
 
-const SyllabusTable = ({ reload }: any) => {
+interface SyllabusTableProps {
+  reload?: any;
+}
+
+const SyllabusTable: React.FC<SyllabusTableProps> = ({ reload }) => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenDetail, setIsOpenDetail] = useState(false);
@@ -26,7 +30,20 @@ const SyllabusTable = ({ reload }: any) => {
     [router.query.page, router.query.rowPerPage]
   );
 
-  const syllabusKey = `/syllabus/get-all?page=${page}&limit=${rowPerPage}`;
+  const activeFilters = {
+    syllabus_name: (router.query.syllabus_name as string) || '',
+    level_id: (router.query.level_id as string) || '',
+  };
+
+  const nonEmptyFilters = Object.entries(activeFilters)
+    .filter(([key, value]) => value && value.toString().trim() !== '')
+    .reduce((acc, [key, value]) => ({ ...acc, [key]: value }), {});
+
+  const syllabusKey = `/syllabus/get-all?page=${page}&limit=${rowPerPage}${
+    Object.keys(nonEmptyFilters).length > 0 
+      ? `&${Object.entries(nonEmptyFilters).map(([k, v]) => `${k}=${encodeURIComponent(String(v))}`).join('&')}` 
+      : ''
+  }`;
 
   const toggle = (syllabus: any) => {
     setIsOpen(!isOpen);
@@ -64,7 +81,7 @@ const SyllabusTable = ({ reload }: any) => {
     data: syllabus,
     error,
     isLoading,
-  } = useSWR(syllabusKey, () => getAllSyllabus(page, rowPerPage), {
+  } = useSWR(syllabusKey, () => getAllSyllabus(page, rowPerPage, nonEmptyFilters), {
     revalidateOnFocus: false,
     revalidateOnReconnect: false,
     dedupingInterval: 10000,
