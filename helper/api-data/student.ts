@@ -1,4 +1,4 @@
-import { getFetcher, postFetcher, putFetcher } from '../api';
+import { deleteFetcher, getFetcher, postFetcher, putFetcher } from '../api';
 export const getAllStudent = (
   page: number,
   limit: number,
@@ -107,6 +107,10 @@ export const getStudentTransfers = (studentId: number) => {
 
 export const getPendingStudentTransfers = () => {
   return getFetcher(`/transfer-data/get-pending`, false);
+};
+
+export const deleteStudent = (studentId: number) => {
+  return deleteFetcher(`/student/delete/${studentId}`);
 };
 
 export const getBestStudentsByCourse = (

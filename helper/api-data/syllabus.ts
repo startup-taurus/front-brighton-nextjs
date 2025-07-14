@@ -3,11 +3,10 @@ import { getFetcher, postFetcher, putFetcher } from '../api';
 export const getAllSyllabus = (
   page: number,
   limit: number,
-  filters?: any
+  filters?: string
 ) => {
-  const filterParams = filters ? `&${Object.entries(filters).map(([k, v]) => `${k}=${encodeURIComponent(String(v))}`).join('&')}` : '';
   return getFetcher(
-    `/syllabus/get-all?page=${page}&limit=${limit}${filterParams}`,
+    `/syllabus/get-all?page=${page}&limit=${limit}${filters ? `&${filters}` : ''}`,
     false
   );
 };

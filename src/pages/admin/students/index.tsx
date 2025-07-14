@@ -33,7 +33,9 @@ const Students = () => {
 
   const limit = 10;
   const [coursePage, setCoursePage] = useState(1);
+  const [levelPage, setLevelPage] = useState(1);
   const [courseSearchTerm, setCourseSearchTerm] = useState('');
+  const [levelSearchTerm, setLevelSearchTerm] = useState('');
   const [courseOptions, setCourseOptions] = useState<any[]>([]);
   const [levelOptions, setLevelOptions] = useState<any[]>([]);
   const [courseNoFilter, setCourseNoFilter] = useState<SelectOption | null>(
@@ -64,14 +66,21 @@ const Students = () => {
   );
 
   const { data: levels } = useSWR(
-    ['/level/get-all'],
-    () => getAllLevels(1, 100, '', true)
+    ['/level/get-all', levelPage, limit, levelSearchTerm],
+    () => getAllLevels(levelPage, limit, levelSearchTerm)
   );
 
   const onCourseScrollToBottom = () => {
     if (course?.data?.length !== 0) {
       const nextPage = coursePage + 1;
       setCoursePage(nextPage);
+    }
+  };
+
+  const onLevelScrollToBottom = () => {
+    if (levels?.data?.length !== 0) {
+      const nextPage = levelPage + 1;
+      setLevelPage(nextPage);
     }
   };
 
@@ -99,12 +108,27 @@ const Students = () => {
   }, [course]);
 
   useEffect(() => {
-    if (levels?.data?.results) {
-      const options = levels.data.results.map((level: any) => ({
-        value: level.id,
-        label: level.full_level,
+    if (levels?.data) {
+      const levelData = Array.isArray(levels.data)
+        ? levels.data
+        : levels.data?.result || [];
+
+      const options = levelData.map((item: any) => ({
+        value: typeof item === 'string' ? item : item.id || item.level || item,
+        label:
+          typeof item === 'string'
+            ? item
+            : item.full_level || item.level || item,
       }));
-      setLevelOptions(options);
+
+      setLevelOptions((prevOptions) => {
+        const combined = [...prevOptions, ...options];
+        return combined.filter(
+          (option, index, self) =>
+            self.findIndex((options) => options.value === option.value) ===
+            index
+        );
+      });
     }
   }, [levels]);
 
@@ -144,16 +168,16 @@ const Students = () => {
       labelName: 'Level',
       name: 'level_id',
       type: 'select',
-      items: levelOptions,
+      items: levelOptions.length > 0 ? levelOptions : [],
       value: levelFilter,
       onChange: (option) => {
         setLevelFilter(option);
       },
+      onMenuScrollToBottom: onLevelScrollToBottom,
     },
     {
       labelName: 'Promotion',
       name: 'promotion',
-      type: 'select',
       items: PROMOTION_FILTER,
     },
   ];

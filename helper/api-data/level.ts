@@ -1,14 +1,8 @@
 import { getFetcher } from '../api';
 
-export const getAllLevels = (
-  page: number, 
-  limit: number, 
-  searchTerm = '', 
-  all = false
-) => {
-  const allParam = all ? '&all=true' : '';
+export const getAllLevels = (page: number, limit: number, searchTerm = '') => {
   return getFetcher(
-    `/level/get-all?page=${page}&limit=${limit}${searchTerm ? `&search=${searchTerm}` : ''}${allParam}`,
+    `/level/get-all?page=${page}&limit=${limit}${searchTerm ? `&search=${searchTerm}` : ''}`,
     false
   );
 };

@@ -42,30 +42,21 @@ const validations = Yup.object().shape({
 
 const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [levelOptions, setLevelOptions] = useState<any[]>([]);
-
-  const { data: levels } = useSWR(
-    ['/level/get-all'],
-    () => getAllLevels(1, 100, '', true) 
-  );
-
   const limit = 10;
   const [page, setPage] = useState(1);
   const [levelSearchTerm, setLevelSearchTerm] = useState('');
+  const [levelOptions, setLevelOptions] = useState<any[]>([]);
+
+  const { data: levels } = useSWR(
+    ['/level/get-all', page, limit, levelSearchTerm],
+    () => getAllLevels(page, limit, levelSearchTerm)
+  );
 
   const save = async (syllabus: any, { setSubmitting }: any) => {
     setSubmitting(true);
     setIsLoading(true);
     try {
-      const filteredSyllabus = {
-        ...syllabus,
-        items: syllabus.items?.filter((item: string) => item && item.trim() !== '') || [],
-        assignments: syllabus.assignments?.filter((item: string) => item && item.trim() !== '') || [],
-        progress_tests: syllabus.progress_tests?.filter((item: string) => item && item.trim() !== '') || [],
-        exam_modules: syllabus.exam_modules?.filter((item: string) => item && item.trim() !== '') || []
-      };
-      
-      const response = await createSyllabus(filteredSyllabus);
+      const response = await createSyllabus(syllabus);
       if (response.statusCode === 200) {
         setSubmitting(false);
         toggle();
@@ -85,15 +76,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
     setSubmitting(true);
     setIsLoading(true);
     try {
-      const filteredSyllabus = {
-        ...syllabus,
-        items: syllabus.items?.filter((item: string) => item && item.trim() !== '') || [],
-        assignments: syllabus.assignments?.filter((item: string) => item && item.trim() !== '') || [],
-        progress_tests: syllabus.progress_tests?.filter((item: string) => item && item.trim() !== '') || [],
-        exam_modules: syllabus.exam_modules?.filter((item: string) => item && item.trim() !== '') || []
-      };
-      
-      const response = await updateSyllabus(syllabus.id, filteredSyllabus);
+      const response = await updateSyllabus(syllabus.id, syllabus);
       if (response.statusCode === 200) {
         setSubmitting(false);
         toggle();
@@ -112,16 +95,44 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
   useEffect(() => {
     if (!levels?.data) return;
 
-    const rawLevels: any[] = levels.data.results || [];
+    const rawLevels: any[] = Array.isArray(levels.data)
+      ? levels.data
+      : levels.data.result || [];
 
-    const formattedOptions = rawLevels.map((level: any) => ({
-      value: level.id,
-      label: level.full_level
-    }));
+    const normalizeToOption = (item: any) => {
+      if (typeof item === 'string') {
+        return { value: item, label: item };
+      }
+      const id = item.id || '';
+      const label = item.full_level || item.name || item.level || '';
+      return { value: { id }, label };
+    };
 
-    setLevelOptions(formattedOptions);
+    const newOptions = rawLevels.map(normalizeToOption);
+
+    setLevelOptions((prev) => {
+      const all = [...prev, ...newOptions];
+
+      const unique = all.filter((opt, i, arr) => {
+        const optId = typeof opt.value === 'object' ? opt.value.id : opt.value;
+        return (
+          arr.findIndex((o) => {
+            const oId = typeof o.value === 'object' ? o.value.id : o.value;
+            return oId === optId;
+          }) === i
+        );
+      });
+
+      return unique.map((opt) => {
+        const value = typeof opt.value === 'object' ? opt.value.id : opt.value;
+        const label =
+          typeof opt.label === 'object'
+            ? opt.label.full_level || opt.label.name || ''
+            : opt.label;
+        return { value, label };
+      });
+    });
   }, [levels]);
-
 
   const onLevelScrollToBottom = () => {
     const levelData = levels?.data;
