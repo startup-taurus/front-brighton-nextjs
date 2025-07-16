@@ -37,7 +37,6 @@ export const requestTransferAndProgress = (
   levelId: string | null,
   isGroup: boolean | false
 ) => {
-  // In requestTransferAndProgress:
   if (!courseId && !levelId) {
     return Promise.reject({
       statusCode: 400,
@@ -68,7 +67,6 @@ export const transferAndProgressStudents = (
   courseId: string | null,
   levelId: string | null
 ) => {
-  // In transferAndProgressStudents:
   if (!courseId && !levelId) {
     return Promise.reject({
       statusCode: 400,
