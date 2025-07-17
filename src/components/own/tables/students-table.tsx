@@ -3,7 +3,7 @@ import useSWR, { mutate } from 'swr';
 import { useRouter } from 'next/router';
 import Swal from 'sweetalert2';
 import DataTable from 'react-data-table-component';
-import { updateStatusStudent } from 'helper/api-data/student';
+import { updateStatusStudent, deleteStudent } from 'helper/api-data/student';
 import TableActionButtons from '@/components/own/table-action-buttons/table-action-buttons';
 import StudentForm from '../form/student-form';
 import StudentDetail from '../student-detail/student-datail';
@@ -52,13 +52,27 @@ const StudentsTable = ({
       if (response.statusCode === 200) {
         clearQueryString(router);
         mutate([
-          `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${
-            filters ? `&${filters}` : ''
-          }`,
-        ]);
+      `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}&order=desc&orderBy=createdAt`,
+    ],);
+        clearSelections();
       }
     } catch (error) {
       console.error('Error al actualizar usuario:', error);
+    }
+  };
+
+  const deleteStudentHandler = async (data: any) => {
+    try {
+      const response = await deleteStudent(data.id);
+      if (response.statusCode === 200) {
+        clearQueryString(router);
+        mutate([
+      `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}&order=desc&orderBy=createdAt`,
+    ],);
+        clearSelections();
+      }
+    } catch (error) {
+      console.error('Error al eliminar estudiante:', error);
     }
   };
 
@@ -77,6 +91,20 @@ const StudentsTable = ({
         updateStatus(row);
       }
       clearSelections();
+    });
+  };
+
+  const handleDeleteAlert = (data: any) => {
+    Swal.fire({
+      title: 'Are you sure you want to delete this student?',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, delete!',
+      cancelButtonText: 'Cancel',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        deleteStudentHandler(data);
+      }
     });
   };
 
@@ -103,6 +131,7 @@ const StudentsTable = ({
               onView={() => toggleDetail(row)}
               onBlock={() => handleAlert(row)}
               onEdit={() => toggle(row)}
+              onDelete={() => handleDeleteAlert(row)}
               status={row.status === 'active' ? false : true}
             />
           </div>
@@ -232,13 +261,10 @@ const StudentsTable = ({
         toggle={toggle}
         data={selectedData}
         onReload={() => {
-          // Limpia query + recarga
           clearQueryString(router);
           mutate([
-            `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${
-              filters ? `&${filters}` : ''
-            }&order=desc&orderBy=createdAt`,
-          ]);
+      `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}&order=desc&orderBy=createdAt`,
+    ],);
           clearSelections();
         }}
       />

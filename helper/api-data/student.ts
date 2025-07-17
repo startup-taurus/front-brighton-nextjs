@@ -1,4 +1,4 @@
-import { getFetcher, postFetcher, putFetcher } from '../api';
+import { getFetcher, postFetcher, putFetcher, deleteFetcher } from '../api';
 export const getAllStudent = (
   page: number,
   limit: number,
@@ -40,8 +40,7 @@ export const requestTransferAndProgress = (
   if (!courseId && !levelId) {
     return Promise.reject({
       statusCode: 400,
-      message:
-        'Please provide either a course or a level to transfer students.',
+      message: 'Please provide either a course or a level to transfer students.',
     });
   }
 
@@ -71,8 +70,7 @@ export const transferAndProgressStudents = (
   if (!courseId && !levelId) {
     return Promise.reject({
       statusCode: 400,
-      message:
-        'Please provide either a course or a level to transfer students.',
+      message: 'Please provide either a course or a level to transfer students.',
     });
   }
 
@@ -107,6 +105,10 @@ export const getStudentTransfers = (studentId: number) => {
 
 export const getPendingStudentTransfers = () => {
   return getFetcher(`/transfer-data/get-pending`, false);
+};
+
+export const deleteStudent = (studentId: number) => {
+  return deleteFetcher(`/student/delete/${studentId}`);
 };
 
 export const getBestStudentsByCourse = (
