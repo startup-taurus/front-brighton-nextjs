@@ -51,7 +51,9 @@ const StudentsTable = ({
       const response = await updateStatusStudent(data.id, newStatus);
       if (response.statusCode === 200) {
         clearQueryString(router);
-        mutate(`/student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}`);
+        mutate([
+      `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}&order=desc&orderBy=createdAt`,
+    ],);
         clearSelections();
       }
     } catch (error) {
@@ -64,7 +66,9 @@ const StudentsTable = ({
       const response = await deleteStudent(data.id);
       if (response.statusCode === 200) {
         clearQueryString(router);
-        mutate(`/student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}`);
+        mutate([
+      `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}&order=desc&orderBy=createdAt`,
+    ],);
         clearSelections();
       }
     } catch (error) {
@@ -258,7 +262,9 @@ const StudentsTable = ({
         data={selectedData}
         onReload={() => {
           clearQueryString(router);
-          mutate(`/student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}&order=desc&orderBy=createdAt`);
+          mutate([
+      `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}&order=desc&orderBy=createdAt`,
+    ],);
           clearSelections();
         }}
       />
