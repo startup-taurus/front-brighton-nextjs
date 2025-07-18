@@ -224,7 +224,7 @@ const Students = () => {
                 rowPerPage={rowPerPage}
                 students={students?.data}
                 filters={filters}
-                loading={students.isLoading}
+                loading={students.isLoading || students.isValidating}
                 onSelectedStudentsChange={setSelectedStudentsCount}
               />
             </div>
