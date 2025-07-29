@@ -33,6 +33,10 @@ export const getAllCourses = () => {
   return getFetcher(`/course/get-all`, false);
 };
 
+export const getCoursesForCalendar = () => {
+  return getFetcher('/course/get-calendar', false);
+};
+
 export const getCourseWithProfessors = (
   page: number,
   limit: number,
