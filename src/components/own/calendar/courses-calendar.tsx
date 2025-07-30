@@ -44,11 +44,8 @@ const CoursesCalendar: React.FC = () => {
       if (response.status === "success" && response.data) {
         const calendarEvents = generateCalendarEvents(response.data);
         setEvents(calendarEvents);
-      } else {
-        console.log('No data or unsuccessful response:', response);
       }
     } catch (error) {
-      console.error('Error fetching courses for calendar:', error);
     } finally {
       setLoading(false);
     }
@@ -117,7 +114,6 @@ const CoursesCalendar: React.FC = () => {
         currentDate = addDays(currentDate, 1);
         
         if (eventCount > 1000) {
-          console.warn('Too many events generated, breaking loop');
           break;
         }
       }
@@ -169,12 +165,11 @@ const CoursesCalendar: React.FC = () => {
             slotMinTime="07:00:00"
             slotMaxTime="22:00:00"
             allDaySlot={false}
-            eventClick={(info) => {
-              const event = events.find(e => e.id === info.event.id);
-              const course = event?.resource?.course;
-              const professor = event?.resource?.professor;
-              
-              alert(`Curso: ${course?.course_name}\nProfesor: ${professor || 'No asignado'}\nHorario: ${info.event.start?.toLocaleTimeString()} - ${info.event.end?.toLocaleTimeString()}\nNivel: ${event?.resource?.level || 'No asignado'}`);
+            dayMaxEvents={false} 
+            dayCellContent={(args) => {
+              return {
+                html: `<div style="min-height: auto; height: auto;">${args.dayNumberText}</div>`
+              };
             }}
             eventContent={(eventInfo) => {
               const timeStart = eventInfo.event.start?.toLocaleTimeString('es-ES', { 
@@ -186,33 +181,74 @@ const CoursesCalendar: React.FC = () => {
                 minute: '2-digit' 
               });
               
-              return (
-                <div style={{ 
-                  padding: '2px 4px', 
-                  fontSize: '11px', 
-                  fontWeight: 'bold',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  lineHeight: '1.2'
-                }}>
+              const isMonthView = eventInfo.view.type === 'dayGridMonth';
+              
+              if (isMonthView) {
+                return (
                   <div style={{ 
-                    fontSize: '12px', 
+                    padding: '4px 6px',
+                    fontSize: '12px',
                     fontWeight: 'bold',
-                    marginBottom: '1px'
+                    overflow: 'visible',
+                    lineHeight: '1.3',
+                    borderRadius: '4px',
+                    backgroundColor: '#ff8c00',
+                    color: 'white',
+                    margin: '2px 0',
+                    minHeight: '32px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    width: '100%',
+                    boxSizing: 'border-box'
                   }}>
-                    {timeStart} - {timeEnd}
+                    <div style={{ 
+                      fontSize: '11px',
+                      fontWeight: 'bold',
+                      marginBottom: '2px'
+                    }}>
+                      {timeStart}-{timeEnd}
+                    </div>
+                    <div style={{ 
+                      fontSize: '10px',
+                      opacity: 0.95,
+                      wordWrap: 'break-word',
+                      whiteSpace: 'normal', 
+                      overflow: 'visible' 
+                    }}>
+                      {eventInfo.event.title}
+                    </div>
                   </div>
+                );
+              } else {
+                return (
                   <div style={{ 
-                    fontSize: '10px', 
-                    opacity: 0.95,
-                    whiteSpace: 'nowrap',
+                    padding: '2px 4px', 
+                    fontSize: '11px', 
+                    fontWeight: 'bold',
                     overflow: 'hidden',
-                    textOverflow: 'ellipsis'
+                    textOverflow: 'ellipsis',
+                    lineHeight: '1.2'
                   }}>
-                    {eventInfo.event.title}
+                    <div style={{ 
+                      fontSize: '12px', 
+                      fontWeight: 'bold',
+                      marginBottom: '1px'
+                    }}>
+                      {timeStart} - {timeEnd}
+                    </div>
+                    <div style={{ 
+                      fontSize: '10px', 
+                      opacity: 0.95,
+                      whiteSpace: 'nowrap',
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis'
+                    }}>
+                      {eventInfo.event.title}
+                    </div>
                   </div>
-                </div>
-              );
+                );
+              }
             }}
           />
         </div>
