@@ -17,3 +17,9 @@ export interface Course {
   professor_name: string;
   level_name: string;
 }
+
+export interface CourseDetailModalProps {
+  isOpen: boolean;
+  toggle: () => void;
+  selectedCourse: Course & { student_count?: number; professor_id?: string } | null;
+}
