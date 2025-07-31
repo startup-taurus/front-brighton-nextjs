@@ -14,6 +14,7 @@ import CardSkeleton from '@/components/own/common/card-skeleton';
 import TableSkeleton from '@/components/own/common/table-skeleton/TableSkeleton';
 import StudentTransferTable from '@/components/Dashboard/SchoolManagenement/StudentsTransferTable';
 import StudentPerformanceChart from '@/components/own/charts/student-performance-chart';
+import CoursesCalendar from '@/components/own/calendar/courses-calendar';
 
 const SchoolManagement = () => {
   const [loading, setLoading] = useState(true);
@@ -144,6 +145,10 @@ const SchoolManagement = () => {
                     colProps={{ xxl: 12, md: 5 }}
                     height={380}
                   />
+                  <CardSkeleton
+                    colProps={{ xxl: 12 }}
+                    height={500}
+                  />
                 </>
               ) : (
                 <>
@@ -152,6 +157,11 @@ const SchoolManagement = () => {
                   <SchoolPerformance /> */}
 
                   <StudentPerformanceChart />
+                  
+                  {/* Calendario de Cursos */}
+                  <Col xxl={12}>
+                    <CoursesCalendar />
+                  </Col>
                 </>
               )}
             </Row>
