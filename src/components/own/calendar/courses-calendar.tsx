@@ -1,140 +1,24 @@
 'use client';
-import React, { useState, useEffect } from 'react';
+import React from 'react';
+import useSWR from 'swr';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import { parseISO, addDays, format, setHours, setMinutes, setSeconds, isSameDay, isAfter, isBefore } from 'date-fns';
 import { Card, CardBody, CardHeader } from 'reactstrap';
 import { getCoursesForCalendar } from 'helper/api-data/course';
-
-interface CalendarEvent {
-  id: string;
-  title: string;
-  start: Date;
-  end: Date;
-  resource?: any;
-}
-
-interface Course {
-  id: string;
-  course_name: string;
-  start_date: string;
-  end_date: string;
-  schedule_days: string[];
-  start_time: string;
-  end_time: string;
-  professor_name: string;
-  level_name: string;
-}
+import { generateCalendarEvents, formatEventTime } from 'utils/utils';
 
 const CoursesCalendar: React.FC = () => {
-  const [events, setEvents] = useState<CalendarEvent[]>([]);
-  const [loading, setLoading] = useState(true);
+  const courseDetail = useSWR(
+    '/course/get-calendar',
+    () => getCoursesForCalendar()
+  );
 
-  useEffect(() => {
-    fetchCourses();
-  }, []);
+  if (!courseDetail?.data?.data) return null;
 
-  const fetchCourses = async () => {
-    try {
-      setLoading(true);
-      const response = await getCoursesForCalendar();
-      
-      if (response.status === "success" && response.data) {
-        const calendarEvents = generateCalendarEvents(response.data);
-        setEvents(calendarEvents);
-      }
-    } catch (error) {
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const generateCalendarEvents = (courses: Course[]): CalendarEvent[] => {
-    const events: CalendarEvent[] = [];
-    
-
-    courses.forEach((course) => {
-      
-      const startDate = parseISO(course.start_date);
-      const endDate = parseISO(course.end_date);
-      const [startHour, startMinute] = course.start_time.split(':').map(Number);
-      const [endHour, endMinute] = course.end_time.split(':').map(Number);
-
-
-      let currentDate = startDate;
-      let eventCount = 0;
-      
-      while (isBefore(currentDate, endDate) || isSameDay(currentDate, endDate)) {
-        const dayOfWeek = format(currentDate, 'EEEE');
-        
-        
-        const dayMatches = course.schedule_days.some(day => 
-          day.toLowerCase() === dayOfWeek.toLowerCase()
-        );
-        
-        if (dayMatches) {
-          
-          const eventStart = setSeconds(
-            setMinutes(
-              setHours(currentDate, startHour),
-              startMinute
-            ),
-            0
-          );
-          
-          const eventEnd = setSeconds(
-            setMinutes(
-              setHours(currentDate, endHour),
-              endMinute
-            ),
-            0
-          );
-
-          const professorText = course.professor_name && course.professor_name !== 'No asignado' 
-            ? ` - ${course.professor_name}` 
-            : '';
-          
-          events.push({
-            id: `${course.id}-${format(currentDate, 'yyyy-MM-dd')}`,
-            title: `${course.course_name}${professorText}`,
-            start: eventStart,
-            end: eventEnd,
-            resource: {
-              course,
-              level: course.level_name,
-              professor: course.professor_name,
-            },
-          });
-          
-          eventCount++;
-        }
-        
-        currentDate = addDays(currentDate, 1);
-        
-        if (eventCount > 1000) {
-          break;
-        }
-      }
-      
-    });
-
-    return events;
-  };
-
-  if (loading) {
-    return (
-      <Card>
-        <CardHeader>
-          <h5>Courses Calendar</h5>
-        </CardHeader>
-        <CardBody>
-          <div className="text-center">Loading calendar...</div>
-        </CardBody>
-      </Card>
-    );
-  }
+  const courses = courseDetail?.data?.data;
+  const events = generateCalendarEvents(courses);
 
   return (
     <Card>
@@ -143,7 +27,7 @@ const CoursesCalendar: React.FC = () => {
         <p className="text-muted mb-0">View all scheduled courses</p>
       </CardHeader>
       <CardBody>
-        <div style={{ height: '600px' }}>
+        <div className="courses-calendar__container">
           <FullCalendar
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
             initialView="timeGridWeek"
@@ -159,7 +43,8 @@ const CoursesCalendar: React.FC = () => {
               end: event.end,
               backgroundColor: '#ff8c00', 
               borderColor: '#ff8c00',
-              textColor: '#ffffff'
+              textColor: '#ffffff',
+              classNames: ['custom-event']
             }))}
             height="100%"
             slotMinTime="07:00:00"
@@ -168,86 +53,41 @@ const CoursesCalendar: React.FC = () => {
             dayMaxEvents={false} 
             dayCellContent={(args) => {
               return {
-                html: `<div style="min-height: auto; height: auto;">${args.dayNumberText}</div>`
+                html: `<div class="courses-calendar__day-cell">${args.dayNumberText}</div>`
               };
             }}
             eventContent={(eventInfo) => {
-              const timeStart = eventInfo.event.start?.toLocaleTimeString('es-ES', { 
-                hour: '2-digit', 
-                minute: '2-digit' 
-              });
-              const timeEnd = eventInfo.event.end?.toLocaleTimeString('es-ES', { 
-                hour: '2-digit', 
-                minute: '2-digit' 
-              });
+              const timeStart = formatEventTime(eventInfo.event.start);
+              const timeEnd = formatEventTime(eventInfo.event.end);
               
               const isMonthView = eventInfo.view.type === 'dayGridMonth';
               
               if (isMonthView) {
-                return (
-                  <div style={{ 
-                    padding: '4px 6px',
-                    fontSize: '12px',
-                    fontWeight: 'bold',
-                    overflow: 'visible',
-                    lineHeight: '1.3',
-                    borderRadius: '4px',
-                    backgroundColor: '#ff8c00',
-                    color: 'white',
-                    margin: '2px 0',
-                    minHeight: '32px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'center',
-                    width: '100%',
-                    boxSizing: 'border-box'
-                  }}>
-                    <div style={{ 
-                      fontSize: '11px',
-                      fontWeight: 'bold',
-                      marginBottom: '2px'
-                    }}>
-                      {timeStart}-{timeEnd}
+                return {
+                  html: `
+                    <div class="courses-calendar__event--month" style="background-color: #ff8c00; color: white; padding: 4px 6px; border-radius: 4px; width: 100%; height: 100%;">
+                      <div class="courses-calendar__event--month-time" style="font-size: 11px; font-weight: bold; color: white;">
+                        ${timeStart}-${timeEnd}
+                      </div>
+                      <div class="courses-calendar__event--month-title" style="font-size: 10px; color: white;">
+                        ${eventInfo.event.title}
+                      </div>
                     </div>
-                    <div style={{ 
-                      fontSize: '10px',
-                      opacity: 0.95,
-                      wordWrap: 'break-word',
-                      whiteSpace: 'normal', 
-                      overflow: 'visible' 
-                    }}>
-                      {eventInfo.event.title}
-                    </div>
-                  </div>
-                );
+                  `
+                };
               } else {
-                return (
-                  <div style={{ 
-                    padding: '2px 4px', 
-                    fontSize: '11px', 
-                    fontWeight: 'bold',
-                    overflow: 'hidden',
-                    textOverflow: 'ellipsis',
-                    lineHeight: '1.2'
-                  }}>
-                    <div style={{ 
-                      fontSize: '12px', 
-                      fontWeight: 'bold',
-                      marginBottom: '1px'
-                    }}>
-                      {timeStart} - {timeEnd}
+                return {
+                  html: `
+                    <div class="courses-calendar__event--week" style="background-color: #ff8c00; color: white; padding: 2px 4px; border-radius: 3px; width: 100%; height: 100%;">
+                      <div class="courses-calendar__event--week-time" style="font-size: 12px; font-weight: bold; color: white;">
+                        ${timeStart} - ${timeEnd}
+                      </div>
+                      <div class="courses-calendar__event--week-title" style="font-size: 10px; color: white;">
+                        ${eventInfo.event.title}
+                      </div>
                     </div>
-                    <div style={{ 
-                      fontSize: '10px', 
-                      opacity: 0.95,
-                      whiteSpace: 'nowrap',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis'
-                    }}>
-                      {eventInfo.event.title}
-                    </div>
-                  </div>
-                );
+                  `
+                };
               }
             }}
           />
