@@ -178,15 +178,15 @@ const SyllabusTable: React.FC<SyllabusTableProps> = ({ reload }) => {
         highlightOnHover
         selectableRows={false}
       />
-      <SyllabusItemsModal
+           <SyllabusItemsModal
         isOpen={isOpen}
-        toggle={(data: any) => toggle(data, true)}
+        toggle={(data: any, shouldReload = false) => toggle(data, shouldReload)}
         syllabusName={selectedSyllabus}
         items={selectedItems}
       />
       <SyllabusForm
         isOpen={isOpenDetail}
-        toggle={(data: any) => toggleDetail(data, true)}
+        toggle={(data: any, shouldReload = false) => toggleDetail(data, shouldReload)}
         data={selectedData}
         isCopy={isCopyMode}
         onReload={mutateData}
