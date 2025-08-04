@@ -1,0 +1,118 @@
+// Courses Calendar Component Styles
+
+.courses-calendar {
+  &__container {
+    height: 600px;
+  }
+}
+
+// FullCalendar custom styles
+.fc {
+  // Eventos con fondo naranja y texto blanco
+  .fc-event {
+    background-color: #ff8c00 !important;
+    border-color: #ff8c00 !important;
+    color: #ffffff !important;
+  }
+
+  // Botones del calendario
+  .fc-button {
+    background-color: var(--theme-deafult) !important;
+    border-color: var(--theme-deafult) !important;
+
+    &:hover {
+      background-color: var(--theme-deafult) !important;
+      border-color: var(--theme-deafult) !important;
+    }
+  }
+
+  .fc-button-active {
+    background-color: var(--theme-deafult) !important;
+    border-color: var(--theme-deafult) !important;
+  }
+
+  // Título del calendario
+  .fc-toolbar-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--body-font-color);
+  }
+
+  // Día actual - solo el título con fondo naranja y texto verde
+  .fc-day-today {
+    .fc-col-header-cell-cushion,
+    .fc-daygrid-day-top {
+      font-weight: bold !important;
+    }
+  }
+
+  // Para vista de semana/día - título del día actual
+  .fc-timegrid-col.fc-day-today .fc-col-header-cell-cushion {
+    background-color: #ff8c00 !important;
+    color: #00ff00 !important;
+    font-weight: bold !important;
+  }
+}
+
+// Soporte para tema oscuro
+body.dark-only {
+  .fc {
+    .fc-toolbar-title {
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    // Día actual en tema oscuro
+    .fc-day-today {
+      .fc-col-header-cell-cushion,
+      .fc-daygrid-day-top {
+        background-color: #ff8c00 !important;
+        color: #00ff00 !important;
+      }
+    }
+
+    .fc-timegrid-col.fc-day-today .fc-col-header-cell-cushion {
+      background-color: #ff8c00 !important;
+      color: #00ff00 !important;
+    }
+
+    .fc-event {
+      background-color: #ff8c00 !important;
+      border-color: #ff8c00 !important;
+      color: #ffffff !important;
+    }
+  }
+}
+
+// Diseño responsivo
+@media (max-width: 768px) {
+  .courses-calendar {
+    &__container {
+      height: 500px;
+    }
+  }
+
+  .fc {
+    .fc-toolbar {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .fc-toolbar-title {
+      font-size: 1.2rem;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .courses-calendar {
+    &__container {
+      height: 400px;
+    }
+  }
+
+  .fc {
+    .fc-toolbar-title {
+      font-size: 1rem;
+    }
+  }
+}

@@ -122,7 +122,7 @@ const StudentTransferForm: React.FC<Props> = ({
       }
       setHasMoreCourses(opts.length === limit);
 
-      if (initialTransferData?.selected_course && coursePage === 1) {
+      if (initialTransferData?.selected_course) {
         const foundCourse = opts.find(
           (o: any) => o.value === initialTransferData.selected_course!.value
         );
@@ -136,9 +136,6 @@ const StudentTransferForm: React.FC<Props> = ({
               value: (foundCourse as any)?.levelId,
             };
         setSelectedLevel(lvl as Option);
-      } else if (!initialTransferData?.selected_course && coursePage === 1) {
-        setSelectedCourse(null);
-        setSelectedLevel(null);
       }
     }
   }, [coursesData, initialTransferData, coursePage, limit]);
@@ -163,7 +160,7 @@ const StudentTransferForm: React.FC<Props> = ({
   const handleCourseInputChange = (inputValue: string) => {
     setCourseSearchTerm(inputValue);
     setCoursePage(1);
-    setCourseOptions([]);
+    // setCourseOptions([]);
     setHasMoreCourses(true);
   };
 
@@ -222,41 +219,36 @@ const StudentTransferForm: React.FC<Props> = ({
   const renderReadOnly = (label: string, value?: string) => (
     <FormGroup>
       <Label>{label}</Label>
-      <p className='form-control-static bg-light p-2 rounded text-dark'>
+      <p className="form-control-static bg-light p-2 rounded text-dark">
         {value || 'None'}
       </p>
     </FormGroup>
   );
 
   return (
-    <Modal
-      isOpen={isOpen}
-      toggle={toggle}
-      size='lg'
-      centered
-    >
+    <Modal isOpen={isOpen} toggle={toggle} size="lg" centered>
       <ModalHeader toggle={toggle}>
         {isViewOnly ? 'View Transfer' : 'Transfer Students'}
       </ModalHeader>
       <ModalBody>
         <Form>
           <Row>
-            <Col md='12'>
+            <Col md="12">
               <h5>Students ({students.length})</h5>
               <ul
-                className='list-group mb-4'
+                className="list-group mb-4"
                 style={{ maxHeight: '150px', overflowY: 'auto' }}
               >
                 {students.map((student) => (
                   <li
                     key={student.id}
-                    className='list-group-item d-flex justify-content-between align-items-center'
+                    className="list-group-item d-flex justify-content-between align-items-center"
                   >
                     <div>
                       <strong>
                         {student.user?.name || student.name || 'N/A'}
                       </strong>
-                      <div className='text-muted small'>
+                      <div className="text-muted small">
                         Current Level:{' '}
                         {student.level?.name || student.level || 'None'} |{' '}
                         Current Course:{' '}
@@ -283,15 +275,15 @@ const StudentTransferForm: React.FC<Props> = ({
               <>{renderReadOnly('Destination Course', selectedCourse?.label)}</>
             ) : (
               <>
-                <Col md='12'>
+                <Col md="12">
                   <FormGroup>
-                    <Label for='course'>Destination Course</Label>
+                    <Label for="course">Destination Course</Label>
                     <Select
-                      id='course'
+                      id="course"
                       options={courseOptions}
                       value={selectedCourse}
                       onChange={handleCourseChange}
-                      placeholder='Search or select a course...'
+                      placeholder="Search or select a course..."
                       isClearable
                       isSearchable
                       isOptionDisabled={(opt: Option) =>
@@ -303,7 +295,7 @@ const StudentTransferForm: React.FC<Props> = ({
                       filterOption={null}
                     />
                     {!selectedCourse && (
-                      <small className='text-danger'>Required</small>
+                      <small className="text-danger">Required</small>
                     )}
                   </FormGroup>
                 </Col>
@@ -314,22 +306,16 @@ const StudentTransferForm: React.FC<Props> = ({
       </ModalBody>
       <ModalFooter>
         {isViewOnly ? (
-          <Button
-            color='secondary'
-            onClick={toggle}
-          >
+          <Button color="secondary" onClick={toggle}>
             Close
           </Button>
         ) : (
           <>
-            <Button
-              color='secondary'
-              onClick={toggle}
-            >
+            <Button color="secondary" onClick={toggle}>
               Cancel
             </Button>
             <LoadingButton
-              color='primary'
+              color="primary"
               onClick={handleSubmit}
               loading={isLoading}
             >

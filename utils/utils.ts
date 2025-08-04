@@ -14,6 +14,10 @@ import {
   isBefore,
   parseISO,
   startOfWeek,
+  setHours,
+  setMinutes,
+  setSeconds,
+  isSameDay,
 } from "date-fns";
 import {
   ComponentsGradebook,
@@ -22,6 +26,7 @@ import {
 } from "../Types/GradingItem";
 import Swal from "sweetalert2";
 import { Role } from "./Constant";
+import { CalendarEvent, Course } from "Types/CalendarTypes";
 
 export const isBrowser = () => typeof window !== "undefined";
 
@@ -882,4 +887,77 @@ export const getPrincipalRoute = (role: string): string => {
     default:
       return "/authentication/login";
   }
+};
+
+export const generateCalendarEvents = (courses: Course[]): CalendarEvent[] => {
+  const events: CalendarEvent[] = [];
+
+  courses.forEach((course) => {
+    const startDate = parseISO(course.start_date);
+    const endDate = parseISO(course.end_date);
+    const [startHour, startMinute] = course.start_time.split(':').map(Number);
+    const [endHour, endMinute] = course.end_time.split(':').map(Number);
+
+    let currentDate = startDate;
+    let eventCount = 0;
+    
+    while (isBefore(currentDate, endDate) || isSameDay(currentDate, endDate)) {
+      const dayOfWeek = format(currentDate, 'EEEE');
+      
+      const dayMatches = course.schedule_days.some(day => 
+        day.toLowerCase() === dayOfWeek.toLowerCase()
+      );
+      
+      if (dayMatches) {
+        const eventStart = setSeconds(
+          setMinutes(
+            setHours(currentDate, startHour),
+            startMinute
+          ),
+          0
+        );
+        
+        const eventEnd = setSeconds(
+          setMinutes(
+            setHours(currentDate, endHour),
+            endMinute
+          ),
+          0
+        );
+
+        const professorText = course.professor_name && course.professor_name !== 'No asignado' 
+          ? ` - ${course.professor_name}` 
+          : '';
+        
+        events.push({
+          id: `${course.id}-${format(currentDate, 'yyyy-MM-dd')}`,
+          title: `${course.course_name}${professorText}`,
+          start: eventStart,
+          end: eventEnd,
+          resource: {
+            course,
+            level: course.level_name,
+            professor: course.professor_name,
+          },
+        });
+        
+        eventCount++;
+      }
+      
+      currentDate = addDays(currentDate, 1);
+      
+      if (eventCount > 1000) {
+        break;
+      }
+    }
+  });
+
+  return events;
+};
+
+export const formatEventTime = (date: Date | null | undefined): string => {
+  return date?.toLocaleTimeString('es-ES', { 
+    hour: '2-digit', 
+    minute: '2-digit' 
+  }) || '';
 };
