@@ -402,31 +402,6 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                               : selectedOption.value
                             : '';
                           setFieldValue('level_id', level);
-
-                          // if (level) {
-                          //   const autoExamType = getExamTypeByLevelId(
-                          //     Number(level)
-                          //   );
-                          //   const availableOptions =
-                          //     getAvailableExamTypeOptions(level);
-
-                          //   const isCurrentExamTypeValid =
-                          //     availableOptions.some(
-                          //       (option) => option.value === values.exam_type
-                          //     );
-
-                          //   if (!isCurrentExamTypeValid) {
-                          //     console.log(autoExamType);
-
-                          //     setFieldValue('exam_type', autoExamType);
-                          //     const autoModules =
-                          //       getModulesByExamType(autoExamType);
-                          //     setFieldValue('exam_modules', autoModules);
-                          //   }
-                          // } else {
-                          //   setFieldValue('exam_type', '');
-                          //   setFieldValue('exam_modules', ['']);
-                          // }
                         }}
                         value={
                           levelOptions.find((option: any) => {

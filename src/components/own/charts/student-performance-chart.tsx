@@ -67,9 +67,9 @@ const StudentPerformanceChart: React.FC<StudentPerformanceChartProps> = ({
         (course: any) =>
           ({
             value: course.id,
-            label: `${course.course_number} - ${course.course_name} - ${course.syllabus.level.full_level}`,
-            levelId: course.syllabus.level.id,
-            levelLabel: course.syllabus.level.full_level,
+            label: `${course.course_number} - ${course.course_name} - ${course.syllabus?.level?.full_level }`,
+            levelId: course.syllabus?.level?.id,
+            levelLabel: course.syllabus?.level?.full_level ,
           }) as Option
       );
 
