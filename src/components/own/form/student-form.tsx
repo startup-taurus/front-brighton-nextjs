@@ -196,16 +196,16 @@ const StudentForm = ({
   };
 
   useEffect(() => {
-    if (data?.course)
+    if (data?.course && data.course.length > 0)
       setCourseOptions([
         {
-          value: data?.course[0].id,
+          value: data.course[0].id,
           label:
-            data?.course[0]?.course_number +
+            data.course[0]?.course_number +
             ' - ' +
-            data?.course[0]?.course_name +
+            data.course[0]?.course_name +
             ' - ' +
-            data?.course[0].professor,
+            data.course[0].professor,
         },
       ]);
   }, []);
@@ -226,7 +226,7 @@ const StudentForm = ({
     let filteredOptions = options;
     if (!isTransfer) {
       filteredOptions = options.filter((courseItem: any) => {
-        return courseItem?.value != data?.course[0]?.id;
+        return courseItem?.value != (data?.course && data.course.length > 0 ? data.course[0]?.id : null);
       });
     }
 
