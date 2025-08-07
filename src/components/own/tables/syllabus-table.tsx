@@ -8,10 +8,7 @@ import TableActionButtons from '../table-action-buttons/table-action-buttons';
 import SyllabusForm from '../form/syllabus-form';
 import TableSkeleton from '../common/table-skeleton/TableSkeleton';
 import { getFiltersString } from '../../../../utils/utils';
-
-interface SyllabusTableProps {
-  reload?: any;
-}
+import { SyllabusTableProps } from '../../../../Types/TableType';
 
 const SyllabusTable: React.FC<SyllabusTableProps> = ({ reload }) => {
   const router = useRouter();
