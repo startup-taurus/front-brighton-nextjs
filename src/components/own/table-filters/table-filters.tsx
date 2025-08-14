@@ -121,7 +121,8 @@ const TableFilters = ({ selectFilters }: TableFiltersProps) => {
       }
       const val = formikRef.current?.values[field.name];
       if (val) {
-        query[field.name] = String(val);
+        query[field.name] = String(val).trim();
+        
       }
     });
 

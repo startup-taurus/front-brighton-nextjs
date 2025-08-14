@@ -35,3 +35,7 @@ export interface tableSearchBarpropsType {
   handleMinAgeChange: (eve: ChangeEvent<HTMLInputElement>) => void;
   handleMaxAgeChange: (eve: ChangeEvent<HTMLInputElement>) => void;
 }
+
+export interface SyllabusTableProps {
+  reload?: any;
+}
