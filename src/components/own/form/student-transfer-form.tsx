@@ -99,15 +99,17 @@ const StudentTransferForm: React.FC<Props> = ({
 
   useEffect(() => {
     if (coursesData?.data) {
-      const opts = coursesData.data.map(
-        (course: any) =>
-          ({
-            value: course.id,
-            label: `${course.course_number} - ${course.course_name} - ${course.syllabus.level.full_level}`,
-            levelId: course.syllabus.level.id,
-            levelLabel: course.syllabus.level.full_level,
-          }) as any
-      );
+      const opts = coursesData.data
+        .filter((course: any) => course.syllabus?.level) 
+        .map(
+          (course: any) =>
+            ({
+              value: course.id,
+              label: `${course.course_number} - ${course.course_name} - ${course.syllabus.level.full_level}`,
+              levelId: course.syllabus.level.id,
+              levelLabel: course.syllabus.level.full_level,
+            }) as any
+        );
 
       if (coursePage === 1) {
         setCourseOptions(opts as Option[]);
@@ -160,7 +162,6 @@ const StudentTransferForm: React.FC<Props> = ({
   const handleCourseInputChange = (inputValue: string) => {
     setCourseSearchTerm(inputValue);
     setCoursePage(1);
-    // setCourseOptions([]);
     setHasMoreCourses(true);
   };
 
