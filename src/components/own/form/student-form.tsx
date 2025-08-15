@@ -146,6 +146,10 @@ const StudentForm = ({
           typeof data.book_given === 'string'
             ? data.book_given === 'true'
             : Boolean(data.book_given),
+        pending_payments:
+          typeof data.pendingPayments === 'string'
+            ? data.pendingPayments === 'true'
+            : Boolean(data.pendingPayments),
       };
       const response = await updateStudent(processedData.id, processedData);
       if (response.statusCode === 200) {
@@ -331,7 +335,7 @@ const StudentForm = ({
                     username: data?.user?.username,
                     email: data?.user?.email,
                     phone_number: data?.phone_number || '',
-
+                    pendingPayments: data?.pending_payments || false,
                     courseId:
                       data?.course?.length > 0 ? data?.course[0]?.id : '',
                   }
@@ -628,6 +632,10 @@ const StudentForm = ({
                       as={Input}
                       type='select'
                       id='pendingPayments'
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        const boolValue = e.target.value === 'true';
+                        setFieldValue('pendingPayments', boolValue);
+                      }}
                     >
                       <option value='true'>Yes</option>
                       <option value='false'>No</option>

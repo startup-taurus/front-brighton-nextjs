@@ -16,6 +16,7 @@ import Select from 'react-select';
 import { createCourse, updateCourse } from 'helper/api-data/course';
 import { getActiveProfessors } from 'helper/api-data/professor';
 import { getAllSyllabus } from 'helper/api-data/syllabus';
+import { toast } from 'react-toastify';
 const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const CourseForm = ({ data, isOpen, toggle }: any) => {
   const limit = 1000;
@@ -45,10 +46,12 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
       
       const response = await createCourse(payload);
       if (response.statusCode === 200) {
+        toast.success('Course created successfully!');
         toggle();
       }
     } catch (error) {
-      console.error('Error al crear curso:', error);
+      console.error('Error creating course:', error);
+      toast.error('Error creating course. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -75,10 +78,12 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
       
       const response = await updateCourse(data.id, payload);
       if (response.statusCode === 200) {
+        toast.success('Course updated successfully!'); 
         toggle();
       }
     } catch (error) {
-      console.error('Error al actualizar usuario:', error);
+      console.error('Error updating course:', error);
+      toast.error('Error updating course. Please try again.'); 
     } finally {
       setIsLoading(false);
     }
@@ -144,6 +149,7 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                   course_type: data.course_type,
                   classroom: data.classroom,
                   hourly_rate: data.hourly_rate,
+                  total_hours: data.total_hours , 
                   professor_id: data.professor_id,
                   age_group: data.age_group,
                   syllabus_id: data.syllabus_id,
@@ -167,6 +173,7 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                   course_type: '',
                   classroom: '',
                   hourly_rate: null,
+                  total_hours: '', 
                   professor_id: '',
                   age_group: '',
                   schedules: [{ days: [], startTime: '', endTime: '' }],
@@ -401,20 +408,97 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                     component={FormFeedback}
                   />
                 </Col>
-                {/* Solo mostrar Hourly Rate para cursos privados */}
+                {/* Solo mostrar Hourly Rate y Total Hours para cursos privados */}
                 {(props.values.course_type === 'private' || props.values.course_type === 'private - online') && (
-                  <Col xs={6}>
-                    <Label for='hourly_rate'>Hourly Rate</Label>
-                    <Field
-                      name='hourly_rate'
-                      as={Input}
-                      type='number'
-                    />
-                    <ErrorMessage
-                      name='hourly_rate'
-                      component={FormFeedback}
-                    />
-                  </Col>
+                  <>
+                    <Col xs={6}>
+                      <Label for='hourly_rate'>Hourly Rate</Label>
+                      <Field
+                        name='hourly_rate'
+                        as={Input}
+                        type='number'
+                        min='0'
+                        step='0.01'
+                        onKeyDown={(e: any) => {
+                          const invalidKeys = ['-', 'e', 'E', '+'];
+                          if (invalidKeys.includes(e.key)) {
+                            e.preventDefault();
+                          }
+                        }}
+                        onChange={(e: any) => {
+                          const inputValue = e.target.value;
+                          
+                          if (!inputValue) {
+                            props.setFieldValue('hourly_rate', '');
+                            return;
+                          }
+                          
+                          if (inputValue.includes('-')) {
+                            e.target.value = '';
+                            props.setFieldValue('hourly_rate', '');
+                            return;
+                          }
+                          
+                          const numericValue = parseFloat(inputValue);
+                          
+                          if (isNaN(numericValue) || numericValue < 0) {
+                            toast.error('Hourly rate must be a positive value');
+                            e.target.value = '';
+                            props.setFieldValue('hourly_rate', '');
+                            return;
+                          }
+                          
+                          props.setFieldValue('hourly_rate', numericValue);
+                        }}
+                      />
+                      <ErrorMessage
+                        name='hourly_rate'
+                        component={FormFeedback}
+                      />
+                    </Col>
+                    <Col xs={6}>
+                      <Label for='total_hours'>Total Hours</Label>
+                      <Field
+                        name='total_hours'
+                        as={Input}
+                        type='number'
+                        min='1'
+                        max='200'
+                        placeholder='10'
+                        disabled={props.values.course_type === 'private - online'}
+                        onKeyDown={(e: any) => {
+                          if (e.key === '-' || e.key === 'e' || e.key === 'E' || e.key === '+' || e.key === '.') {
+                            e.preventDefault();
+                          }
+                        }}
+                        onInput={(e: any) => {
+                          let value = e.target.value;
+                          if (value.includes('-') || value < 1) {
+                            e.target.value = '';
+                            props.setFieldValue('total_hours', '');
+                          }
+                        }}
+                        onChange={(e: any) => {
+                          const value = parseInt(e.target.value);
+                          if (e.target.value === '' || e.target.value === null) {
+                            props.setFieldValue('total_hours', '');
+                            return;
+                          }
+                          if (isNaN(value) || value < 1) {
+                            toast.error('Total hours must be a positive number');
+                            props.setFieldValue('total_hours', '');
+                            e.target.value = '';
+                            return;
+                          }
+                          props.setFieldValue('total_hours', value);
+                        }}
+                      />
+                      <ErrorMessage
+                        name='total_hours'
+                        component={FormFeedback}
+                      />
+                    </Col>
+                  </>
                 )}
                 {/* Solo mostrar Schedule para cursos que NO sean privados */}
                 {!(props.values.course_type === 'private' || props.values.course_type === 'private - online') && (

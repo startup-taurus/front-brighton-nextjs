@@ -97,8 +97,9 @@ const TeachersReport: NextPageWithLayout = () => {
   }, [entries]);
 
   const remainingHours = useMemo(() => {
-    return Math.max(0, 30 - usedHours);
-  }, [usedHours]);
+    const totalHours = courseData?.total_hours || 30;
+    return Math.max(0, totalHours - usedHours);
+  }, [usedHours, courseData?.total_hours]);
 
 
   useEffect(() => {
@@ -128,9 +129,10 @@ const TeachersReport: NextPageWithLayout = () => {
       return;
     }
 
+    const totalHours = courseData?.total_hours || 30;
     const newTotalHours = usedHours - currentEntry.hours + editData.hours;
-    if (newTotalHours > 30) {
-      toast.error('Cannot update entry. Total hours would exceed 30 hours limit.');
+    if (newTotalHours > totalHours) {
+      toast.error(`Cannot update entry. Total hours would exceed ${totalHours} hours limit.`);
       return;
     }
 
@@ -151,9 +153,10 @@ const TeachersReport: NextPageWithLayout = () => {
       return;
     }
 
+    const totalHours = courseData?.total_hours || 30;
     const newTotalHours = usedHours + newEntry.hours;
-    if (newTotalHours > 30) {
-      toast.error('Cannot add entry. Total hours would exceed 30 hours limit.');
+    if (newTotalHours > totalHours) {
+      toast.error(`Cannot add entry. Total hours would exceed ${totalHours} hours limit.`);
       return;
     }
 
@@ -250,14 +253,14 @@ const TeachersReport: NextPageWithLayout = () => {
                     color="success"
                     size="sm"
                     onClick={() => setIsCreatingNew(true)}
-                    disabled={usedHours >= 30}
+                    disabled={usedHours >= (courseData?.total_hours || 30)}
                   >
                     + Add New Entry
                   </Button>
                 )}
-                {usedHours >= 30 && (
+                {usedHours >= (courseData?.total_hours || 30) && (
                   <div className="text-muted small mt-1">
-                    Maximum hours limit (30) reached
+                    Maximum hours limit ({courseData?.total_hours || 30}) reached
                   </div>
                 )}
               </div>
@@ -297,11 +300,14 @@ const TeachersReport: NextPageWithLayout = () => {
                     <td>
                       <Input
                         type="number"
-                        step="0.5"
-                        min="0"
+                        step="1"
+                        min="1"
                         max="8"
                         value={newEntry.hours}
-                        onChange={(e) => setNewEntry(prev => ({...prev, hours: parseFloat(e.target.value) || 0}))}
+                        onChange={(e) => {
+                          const value = parseInt(e.target.value) || 1;
+                          setNewEntry(prev => ({...prev, hours: Math.max(1, value)}));
+                        }}
                       />
                     </td>
                     <td>
@@ -358,11 +364,14 @@ const TeachersReport: NextPageWithLayout = () => {
                       {editingEntry === item.id ? (
                         <Input
                           type="number"
-                          step="0.5"
-                          min="0"
+                          step="1"
+                          min="1"
                           max="8"
                           value={editData.hours || ''}
-                          onChange={(e) => setEditData(prev => ({...prev, hours: parseFloat(e.target.value) || 0}))}
+                          onChange={(e) => {
+                            const value = parseInt(e.target.value) || 1;
+                            setEditData(prev => ({...prev, hours: Math.max(1, value)}));
+                          }}
                         />
                       ) : (
                         item.hours
