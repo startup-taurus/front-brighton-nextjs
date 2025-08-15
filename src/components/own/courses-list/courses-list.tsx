@@ -20,15 +20,12 @@ const CoursesList = ({ title, coursesList }: CoursesListProps) => {
     }));
   };
 
-  // Función para determinar qué mostrar en la columna del curso
   const getCourseDisplayText = (course: any) => {
     const isPrivateClass = course?.course_type === 'private' || course?.course_type === 'private-online';
     
     if (isPrivateClass) {
-      // Para clases privadas, solo mostrar el nombre del curso
       return course?.course_name || 'Private Class';
     } else {
-      // Para cursos regulares, mostrar nombre + horario
       return `${course?.course_name} - ${course.classSchedule || ''}`;
     }
   };
