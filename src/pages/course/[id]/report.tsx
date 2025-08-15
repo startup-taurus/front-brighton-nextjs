@@ -71,7 +71,7 @@ const TeachersReport: NextPageWithLayout = () => {
   );
 
   const courseData = courseDetail?.data;
-  const isPrivateClass = useMemo(() => courseData?.course_type === 'private', [courseData?.course_type]);
+  const isPrivateClass = useMemo(() => courseData?.course_type === 'private' || courseData?.course_type === 'private - online', [courseData?.course_type]);
 
   const { data: reportData, error: reportError, mutate: mutateReport } = useSWR(
     courseId && courseData ? `/report/${courseId}/${isPrivateClass}` : null,

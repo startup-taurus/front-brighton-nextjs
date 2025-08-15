@@ -465,7 +465,6 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                         min='1'
                         max='200'
                         placeholder='10'
-                        disabled={props.values.course_type === 'private - online'}
                         onKeyDown={(e: any) => {
                           if (e.key === '-' || e.key === 'e' || e.key === 'E' || e.key === '+' || e.key === '.') {
                             e.preventDefault();
