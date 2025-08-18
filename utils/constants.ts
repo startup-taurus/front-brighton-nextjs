@@ -29,6 +29,8 @@ export const COURSE_TYPE_FILTER = [
   { label: 'ON-SITE', value: 'on-site' },
   { label: 'PRIVATE - ONLINE', value: 'private - online' },
   { label: 'ONLINE', value: 'online' },
+  { label: 'PRIVATE', value: 'private' },
+
 ];
 
 export const STATUS_LEVEL_CHANGE = [
@@ -154,4 +156,7 @@ export const EXAM_MODULES = {
   }
 };
 
-
+export const PRIVATE_COURSE_TYPES = {
+  PRIVATE: 'private',
+  PRIVATE_ONLINE: 'private - online'  
+};

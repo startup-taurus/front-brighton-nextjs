@@ -176,12 +176,11 @@ body.dark-only.box-layout {
 @import "components/link-list";
 @import "components/schedule-calendar";
 @import "components/courses-calendar";
-
+@import "components/course-report";
 //	*** pages ***
 
 @import "pages/comingsoon";
 @import "pages/dashboard_default";
-
 @import "pages/login";
 @import "pages/holidays";
 @import "pages/landing";

@@ -18,8 +18,20 @@ const CourseHome: NextPageWithLayout = () => {
   );
 
   if (!courseDetail?.data?.data) return null;
-  const { course_name, course_number, professor, students, total_students } =
-    courseDetail?.data?.data;
+  const { 
+    course_name, 
+    course_number, 
+    professor, 
+    students, 
+    total_students,
+    course_type,
+    start_date,
+    hourly_rate,
+    classroom,
+    status,
+    classSchedule
+  } = courseDetail?.data?.data;
+
   return (
     <Card className='mt-2'>
       <TeachersHeader
@@ -27,6 +39,14 @@ const CourseHome: NextPageWithLayout = () => {
         nameCourse={course_name}
         nameTeacher={professor?.name}
         numberOfStudents={total_students}
+        courseType={course_type}
+        courseData={{
+          status,
+          start_date,
+          hourly_rate,
+          classroom,
+          classSchedule
+        }}
       />
       <TableStudents students={students}></TableStudents>
     </Card>

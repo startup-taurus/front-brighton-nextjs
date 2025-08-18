@@ -146,6 +146,10 @@ const StudentForm = ({
           typeof data.book_given === 'string'
             ? data.book_given === 'true'
             : Boolean(data.book_given),
+        pending_payments:
+          typeof data.pendingPayments === 'string'
+            ? data.pendingPayments === 'true'
+            : Boolean(data.pendingPayments),
       };
       const response = await updateStudent(processedData.id, processedData);
       if (response.statusCode === 200) {
@@ -196,16 +200,16 @@ const StudentForm = ({
   };
 
   useEffect(() => {
-    if (data?.course)
+    if (data?.course && data.course.length > 0)
       setCourseOptions([
         {
-          value: data?.course[0].id,
+          value: data.course[0].id,
           label:
-            data?.course[0]?.course_number +
+            data.course[0]?.course_number +
             ' - ' +
-            data?.course[0]?.course_name +
+            data.course[0]?.course_name +
             ' - ' +
-            data?.course[0].professor,
+            data.course[0].professor,
         },
       ]);
   }, []);
@@ -226,7 +230,7 @@ const StudentForm = ({
     let filteredOptions = options;
     if (!isTransfer) {
       filteredOptions = options.filter((courseItem: any) => {
-        return courseItem?.value != data?.course[0]?.id;
+        return courseItem?.value != (data?.course && data.course.length > 0 ? data.course[0]?.id : null);
       });
     }
 
@@ -331,7 +335,7 @@ const StudentForm = ({
                     username: data?.user?.username,
                     email: data?.user?.email,
                     phone_number: data?.phone_number || '',
-
+                    pendingPayments: data?.pending_payments || false,
                     courseId:
                       data?.course?.length > 0 ? data?.course[0]?.id : '',
                   }
@@ -628,6 +632,10 @@ const StudentForm = ({
                       as={Input}
                       type='select'
                       id='pendingPayments'
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+                        const boolValue = e.target.value === 'true';
+                        setFieldValue('pendingPayments', boolValue);
+                      }}
                     >
                       <option value='true'>Yes</option>
                       <option value='false'>No</option>

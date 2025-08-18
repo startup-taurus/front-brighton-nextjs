@@ -16,6 +16,8 @@ import Select from 'react-select';
 import { createCourse, updateCourse } from 'helper/api-data/course';
 import { getActiveProfessors } from 'helper/api-data/professor';
 import { getAllSyllabus } from 'helper/api-data/syllabus';
+import { toast } from 'react-toastify';
+import { PRIVATE_COURSE_TYPES } from '../../../../utils/constants';
 const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const CourseForm = ({ data, isOpen, toggle }: any) => {
   const limit = 1000;
@@ -27,14 +29,32 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
   const save = async (data: any) => {
     try {
       setIsLoading(true);
-      const formattedSchedule = formatSchedule(data.schedules);
-      const payload = { ...data, schedule: formattedSchedule };
+      
+      let payload = { ...data };
+      
+      if (data.course_type === PRIVATE_COURSE_TYPES.PRIVATE || data.course_type === PRIVATE_COURSE_TYPES.PRIVATE_ONLINE) {
+
+
+        if (!data.start_date) {
+          const today = new Date().toISOString().split('T')[0];
+          payload.start_date = today;
+        }
+        payload.syllabus_id = null;
+        payload.classroom = null;
+        payload.schedule = null;
+      } else {
+        const formattedSchedule = formatSchedule(data.schedules);
+        payload.schedule = formattedSchedule;
+      }
+      
       const response = await createCourse(payload);
       if (response.statusCode === 200) {
+        toast.success('Course created successfully!');
         toggle();
       }
     } catch (error) {
-      console.error('Error al crear curso:', error);
+      console.error('Error creating course:', error);
+      toast.error('Error creating course. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -43,14 +63,30 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
   const update = async (data: any) => {
     try {
       setIsLoading(true);
-      const formattedSchedule = formatSchedule(data.schedules);
-      const payload = { ...data, schedule: formattedSchedule };
+      
+      let payload = { ...data };
+      
+      if (data.course_type === PRIVATE_COURSE_TYPES.PRIVATE || data.course_type === PRIVATE_COURSE_TYPES.PRIVATE_ONLINE) {
+        if (!data.start_date) {
+          const today = new Date().toISOString().split('T')[0];
+          payload.start_date = today;
+        }
+        payload.syllabus_id = null;
+        payload.classroom = null;
+        payload.schedule = null;
+      } else {
+        const formattedSchedule = formatSchedule(data.schedules);
+        payload.schedule = formattedSchedule;
+      }
+      
       const response = await updateCourse(data.id, payload);
       if (response.statusCode === 200) {
+        toast.success('Course updated successfully!'); 
         toggle();
       }
     } catch (error) {
-      console.error('Error al actualizar usuario:', error);
+      console.error('Error updating course:', error);
+      toast.error('Error updating course. Please try again.'); 
     } finally {
       setIsLoading(false);
     }
@@ -116,6 +152,7 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                   course_type: data.course_type,
                   classroom: data.classroom,
                   hourly_rate: data.hourly_rate,
+                  total_hours: data.total_hours , 
                   professor_id: data.professor_id,
                   age_group: data.age_group,
                   syllabus_id: data.syllabus_id,
@@ -139,6 +176,7 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                   course_type: '',
                   classroom: '',
                   hourly_rate: null,
+                  total_hours: 0, 
                   professor_id: '',
                   age_group: '',
                   schedules: [{ days: [], startTime: '', endTime: '' }],
@@ -148,7 +186,7 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
           onSubmit={(info) => (data ? update(info) : save(info))}
         >
           {(props) => {
-            const { errors, handleSubmit, isSubmitting, setFieldValue, dirty } =
+            const {  handleSubmit,  setFieldValue, dirty } =
               props;
             return (
               <form
@@ -179,18 +217,20 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                     component={FormFeedback}
                   />
                 </Col>
-                <Col xs={6}>
-                  <Label for='start_date'>Start Date</Label>
-                  <Field
-                    name='start_date'
-                    as={Input}
-                    type='date'
-                  />
-                  <ErrorMessage
-                    name='start_date'
-                    component={FormFeedback}
-                  />
-                </Col>
+                {!(props.values.course_type === PRIVATE_COURSE_TYPES.PRIVATE || props.values.course_type === PRIVATE_COURSE_TYPES.PRIVATE_ONLINE) && (
+                  <Col xs={6}>
+                    <Label for='start_date'>Start Date</Label>
+                    <Field
+                      name='start_date'
+                      as={Input}
+                      type='date'
+                    />
+                    <ErrorMessage
+                      name='start_date'
+                      component={FormFeedback}
+                    />
+                  </Col>
+                )}
                 <Col xs={12}>
                   <Label for='comment'>Comment</Label>
                   <Field
@@ -224,30 +264,32 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                     component={FormFeedback}
                   />
                 </Col>
-                <Col xs={4}>
-                  <Label for='classroom'>Classroom</Label>
-                  <Field
-                    name='classroom'
-                    as={Input}
-                    type='select'
-                  >
-                    <option
-                      value=''
-                      selected
-                      disabled
+                {!(props.values.course_type === PRIVATE_COURSE_TYPES.PRIVATE || props.values.course_type === PRIVATE_COURSE_TYPES.PRIVATE_ONLINE) && (
+                  <Col xs={4}>
+                    <Label for='classroom'>Classroom</Label>
+                    <Field
+                      name='classroom'
+                      as={Input}
+                      type='select'
                     >
-                      Select clasrroom
-                    </option>
-                    <option value='cambrige'>Cambrige</option>
-                    <option value='oxford'>Oxord</option>
-                    <option value='brighton'>Brighton</option>
-                    <option value='hardvard'>Hardvard</option>
-                  </Field>
-                  <ErrorMessage
-                    name='classroom'
-                    component={FormFeedback}
-                  />
-                </Col>
+                      <option
+                        value=''
+                        selected
+                        disabled
+                      >
+                        Select clasrroom
+                      </option>
+                      <option value='cambrige'>Cambrige</option>
+                      <option value='oxford'>Oxord</option>
+                      <option value='brighton'>Brighton</option>
+                      <option value='hardvard'>Hardvard</option>
+                    </Field>
+                    <ErrorMessage
+                      name='classroom'
+                      component={FormFeedback}
+                    />
+                  </Col>
+                )}
                 <Col xs={4}>
                   <Label for='age_group'>Age Group</Label>
                   <Field
@@ -309,28 +351,30 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                     component={FormFeedback}
                   />
                 </Col>
-                <Col xs={6}>
-                  <Label for='hourly_rate'>Syllabus</Label>
-                  <Select
-                    id='syllabus_id'
-                    options={syllabusOptions}
-                    onChange={(selectedOption: any) =>
-                      setFieldValue('syllabus_id', selectedOption.value)
-                    }
-                    placeholder='Select a syllabus'
-                    value={
-                      syllabusOptions.find(
-                        (option: any) =>
-                          option.value === props.values.syllabus_id
-                      ) || null
-                    }
-                    isSearchable
-                  />
-                  <ErrorMessage
-                    name='syllabus_id'
-                    component={FormFeedback}
-                  />
-                </Col>
+                {!(props.values.course_type === PRIVATE_COURSE_TYPES.PRIVATE || props.values.course_type === PRIVATE_COURSE_TYPES.PRIVATE_ONLINE) && (
+                  <Col xs={6}>
+                    <Label for='hourly_rate'>Syllabus</Label>
+                    <Select
+                      id='syllabus_id'
+                      options={syllabusOptions}
+                      onChange={(selectedOption: any) =>
+                        setFieldValue('syllabus_id', selectedOption.value)
+                      }
+                      placeholder='Select a syllabus'
+                      value={
+                        syllabusOptions.find(
+                          (option: any) =>
+                            option.value === props.values.syllabus_id
+                        ) || null
+                      }
+                      isSearchable
+                    />
+                    <ErrorMessage
+                      name='syllabus_id'
+                      component={FormFeedback}
+                    />
+                  </Col>
+                )}
                 <Col xs={6}>
                   <Label for='course_type'>Course Type</Label>
                   <Field
@@ -340,6 +384,12 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                     type='select'
                     onChange={(e: any) => {
                       props.setFieldValue('course_type', e.target.value);
+                      if (e.target.value === 'private' || e.target.value === 'private - online') {
+                        props.setFieldValue('syllabus_id', '');
+                        props.setFieldValue('classroom', '');
+                        props.setFieldValue('start_date', '');
+                        props.setFieldValue('schedules', [{ days: [], startTime: '', endTime: '' }]);
+                      }
                     }}
                   >
                     <option
@@ -358,110 +408,168 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                     component={FormFeedback}
                   />
                 </Col>
-                <Col xs={6}>
-                  <Label for='hourly_rate'>Hourly Rate</Label>
-                  <Field
-                    name='hourly_rate'
-                    as={Input}
-                    type='number'
-                    disabled={
-                      !(
-                        props.values.course_type === 'private' ||
-                        props.values.course_type === 'private - online'
-                      )
-                    }
-                  />
-                  <ErrorMessage
-                    name='hourly_rate'
-                    component={FormFeedback}
-                  />
-                </Col>
-                <Col xs={12}>
-                  <Label for='schedule'>Schedule</Label>
-                  <FieldArray name='schedules'>
-                    {({ push, remove, form }) => (
-                      <div>
-                        {form.values.schedules.map(
-                          (schedule: any, index: number) => (
-                            <div
-                              key={index}
-                              className='row align-items-center border-bottom pb-3'
-                            >
-                              <Col xs={10}>
-                                <div className='m-checkbox-inline custom-radio-ml '>
-                                  {daysOfWeek.map((day) => (
-                                    <div className='checkbox px-1'>
-                                      <Field
-                                        type='checkbox'
-                                        id={index + day}
-                                        className='form-check-input'
-                                        name={`schedules[${index}].days`}
-                                        value={day}
-                                      />
-                                      <label
-                                        htmlFor={index + day}
-                                        className='form-label'
-                                        key={day}
-                                      >
-                                        {day}
-                                      </label>
-                                    </div>
-                                  ))}
-                                </div>
-                              </Col>
-                              <Col xs={2}>
-                                {/* <Button
-                                  color="danger"
-                                  onClick={() => remove(index)}
-                                >
-                                  <FaTrash />
-                                </Button> */}
-                              </Col>
-                              <Col xs={5}>
-                                <Label for={`schedules[${index}].startTime`}>
-                                  Start Time
-                                </Label>
-                                <Field
-                                  name={`schedules[${index}].startTime`}
-                                  as={Input}
-                                  type='time'
-                                />
-                                <ErrorMessage
-                                  name={`schedules[${index}].startTime`}
-                                  component={FormFeedback}
-                                />
-                              </Col>
-                              <Col xs={5}>
-                                <Label for={`schedules[${index}].endTime`}>
-                                  End Time
-                                </Label>
-                                <Field
-                                  name={`schedules[${index}].endTime`}
-                                  as={Input}
-                                  type='time'
-                                />
-                                <ErrorMessage
-                                  name={`schedules[${index}].endTime`}
-                                  component={FormFeedback}
-                                />
-                              </Col>
-                            </div>
-                          )
-                        )}
-                        {/* <div className="d-flex justify-content-end">
-                          <Button
-                            color="primary"
-                            onClick={() =>
-                              push({ days: [], startTime: "", endTime: "" })
-                            }
-                          >
-                            <FaCirclePlus />
-                          </Button>
-                        </div> */}
-                      </div>
-                    )}
-                  </FieldArray>
-                </Col>
+                {(props.values.course_type === PRIVATE_COURSE_TYPES.PRIVATE || props.values.course_type === PRIVATE_COURSE_TYPES.PRIVATE_ONLINE) && (
+                  <>
+                    <Col xs={6}>
+                      <Label for='hourly_rate'>Hourly Rate</Label>
+                      <Field
+                        name='hourly_rate'
+                        as={Input}
+                        type='number'
+                        min='0'
+                        step='0.01'
+                        onKeyDown={(e: any) => {
+                          const invalidKeys = ['-', 'e', 'E', '+'];
+                          if (invalidKeys.includes(e.key)) {
+                            e.preventDefault();
+                          }
+                        }}
+                        onChange={(e: any) => {
+                          const inputValue = e.target.value;
+                          
+                          if (!inputValue) {
+                            props.setFieldValue('hourly_rate', '');
+                            return;
+                          }
+                          
+                          if (inputValue.includes('-')) {
+                            e.target.value = '';
+                            props.setFieldValue('hourly_rate', '');
+                            return;
+                          }
+                          
+                          const numericValue = parseFloat(inputValue);
+                          
+                          if (isNaN(numericValue) || numericValue < 0) {
+                            toast.error('Hourly rate must be a positive value');
+                            e.target.value = '';
+                            props.setFieldValue('hourly_rate', '');
+                            return;
+                          }
+                          
+                          props.setFieldValue('hourly_rate', numericValue);
+                        }}
+                      />
+                      <ErrorMessage
+                        name='hourly_rate'
+                        component={FormFeedback}
+                      />
+                    </Col>
+                    <Col xs={6}>
+                      <Label for='total_hours'>Total Hours</Label>
+                      <Field
+                        name='total_hours'
+                        as={Input}
+                        type='number'
+                        min='1'
+                        max='200'
+                        placeholder='10'
+                        onKeyDown={(e: any) => {
+                          if (e.key === '-' || e.key === 'e' || e.key === 'E' || e.key === '+' || e.key === '.') {
+                            e.preventDefault();
+                          }
+                        }}
+                        onInput={(e: any) => {
+                          let value = e.target.value;
+                          if (value.includes('-') || value < 1) {
+                            e.target.value = '';
+                            props.setFieldValue('total_hours', '');
+                          }
+                        }}
+                        onChange={(e: any) => {
+                          const value = parseInt(e.target.value);
+                          if (e.target.value === '' || e.target.value === null) {
+                            props.setFieldValue('total_hours', '');
+                            return;
+                          }
+                          if (isNaN(value) || value < 1) {
+                            toast.error('Total hours must be a positive number');
+                            props.setFieldValue('total_hours', '');
+                            e.target.value = '';
+                            return;
+                          }
+                          props.setFieldValue('total_hours', value);
+                        }}
+                      />
+                      <ErrorMessage
+                        name='total_hours'
+                        component={FormFeedback}
+                      />
+                    </Col>
+                  </>
+                )}
+                {!(props.values.course_type === PRIVATE_COURSE_TYPES.PRIVATE || props.values.course_type === PRIVATE_COURSE_TYPES.PRIVATE_ONLINE) && (
+                  <Col xs={12}>
+                    <Label for='schedule'>Schedule</Label>
+                    <FieldArray name='schedules'>
+                      {({ push, remove, form }) => (
+                        <div>
+                          {form.values.schedules.map(
+                            (schedule: any, index: number) => (
+                              <div
+                                key={index}
+                                className='row align-items-center border-bottom pb-3'
+                              >
+                                <Col xs={10}>
+                                  <div className='m-checkbox-inline custom-radio-ml '>
+                                    {daysOfWeek.map((day) => (
+                                      <div className='checkbox px-1'>
+                                        <Field
+                                          type='checkbox'
+                                          id={index + day}
+                                          className='form-check-input'
+                                          name={`schedules[${index}].days`}
+                                          value={day}
+                                        />
+                                        <label
+                                          htmlFor={index + day}
+                                          className='form-label'
+                                          key={day}
+                                        >
+                                          {day}
+                                        </label>
+                                      </div>
+                                    ))}
+                                  </div>
+                                </Col>
+                                <Col xs={2}>
+                                </Col>
+                                <Col xs={5}>
+                                  <Label for={`schedules[${index}].startTime`}>
+                                    Start Time
+                                  </Label>
+                                  <Field
+                                    name={`schedules[${index}].startTime`}
+                                    as={Input}
+                                    type='time'
+                                  />
+                                  <ErrorMessage
+                                    name={`schedules[${index}].startTime`}
+                                    component={FormFeedback}
+                                  />
+                                </Col>
+                                <Col xs={5}>
+                                  <Label for={`schedules[${index}].endTime`}>
+                                    End Time
+                                  </Label>
+                                  <Field
+                                    name={`schedules[${index}].endTime`}
+                                    as={Input}
+                                    type='time'
+                                  />
+                                  <ErrorMessage
+                                    name={`schedules[${index}].endTime`}
+                                    component={FormFeedback}
+                                  />
+                                </Col>
+                              </div>
+                            )
+                          )}
+                        </div>
+                      )}
+                    </FieldArray>
+                  </Col>
+                )}
 
                 <Col
                   xs={12}

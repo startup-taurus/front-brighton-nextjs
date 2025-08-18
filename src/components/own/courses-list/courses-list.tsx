@@ -2,6 +2,7 @@ import Link from 'next/link';
 import React, { useState } from 'react';
 import { Table, Tooltip } from 'reactstrap';
 import { useRouter } from 'next/router';
+import { PRIVATE_COURSE_TYPES } from '../../../../utils/constants';
 
 interface CoursesListProps {
   title: string;
@@ -19,6 +20,19 @@ const CoursesList = ({ title, coursesList }: CoursesListProps) => {
       [tooltipId]: !prev[tooltipId],
     }));
   };
+
+  const getCourseDisplayText = (course: any) => {
+    const isPrivateClass = course?.course_type === PRIVATE_COURSE_TYPES.PRIVATE || 
+                          course?.course_type === PRIVATE_COURSE_TYPES.PRIVATE_ONLINE;
+    
+    if (isPrivateClass) {
+      return course?.course_name || 'Private Class';
+    } else {
+      const schedule = course.classSchedule || '';
+      return schedule ? `${course?.course_name} - ${schedule}` : course?.course_name;
+    }
+  };
+
   return (
     <div>
       <h2 className='main-title'>{title}</h2>
@@ -27,7 +41,7 @@ const CoursesList = ({ title, coursesList }: CoursesListProps) => {
           {coursesList?.map((course: any, index: number) => (
             <tr key={`dashboard-course-${index}`}>
               <td>{course?.course_number}</td>
-              <td>{`${course?.course_name} - ${course.classSchedule}`}</td>
+              <td>{getCourseDisplayText(course)}</td>
               <td className='col-bg-primary '>
                 <Link
                   href={`/course/${course?.course_id}/home${professorId ? `?professorId=${professorId}` : ''}`}
