@@ -163,7 +163,7 @@ const CoursesTable = ({ reload }: any) => {
     },
     {
       name: 'Schedule',
-      selector: (row: any) => `${row.schedule}`,
+      selector: (row: any) => row.schedule ? `${row.schedule}` : '',
       sortable: true,
       center: false,
     },

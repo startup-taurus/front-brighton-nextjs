@@ -2,6 +2,7 @@ import Link from 'next/link';
 import React, { useState } from 'react';
 import { Table, Tooltip } from 'reactstrap';
 import { useRouter } from 'next/router';
+import { PRIVATE_COURSE_TYPES } from '../../../../utils/constants';
 
 interface CoursesListProps {
   title: string;
@@ -21,12 +22,14 @@ const CoursesList = ({ title, coursesList }: CoursesListProps) => {
   };
 
   const getCourseDisplayText = (course: any) => {
-    const isPrivateClass = course?.course_type === 'private' || course?.course_type === 'private-online';
+    const isPrivateClass = course?.course_type === PRIVATE_COURSE_TYPES.PRIVATE || 
+                          course?.course_type === PRIVATE_COURSE_TYPES.PRIVATE_ONLINE;
     
     if (isPrivateClass) {
       return course?.course_name || 'Private Class';
     } else {
-      return `${course?.course_name} - ${course.classSchedule || ''}`;
+      const schedule = course.classSchedule || '';
+      return schedule ? `${course?.course_name} - ${schedule}` : course?.course_name;
     }
   };
 

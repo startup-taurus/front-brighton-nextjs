@@ -173,7 +173,7 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                   course_type: '',
                   classroom: '',
                   hourly_rate: null,
-                  total_hours: '', 
+                  total_hours: 0, 
                   professor_id: '',
                   age_group: '',
                   schedules: [{ days: [], startTime: '', endTime: '' }],
@@ -183,7 +183,7 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
           onSubmit={(info) => (data ? update(info) : save(info))}
         >
           {(props) => {
-            const { errors, handleSubmit, isSubmitting, setFieldValue, dirty } =
+            const {  handleSubmit,  setFieldValue, dirty } =
               props;
             return (
               <form
@@ -214,7 +214,6 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                     component={FormFeedback}
                   />
                 </Col>
-                {/* Solo mostrar Start Date para cursos que NO sean privados */}
                 {!(props.values.course_type === 'private' || props.values.course_type === 'private - online') && (
                   <Col xs={6}>
                     <Label for='start_date'>Start Date</Label>
@@ -262,7 +261,6 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                     component={FormFeedback}
                   />
                 </Col>
-                {/* Solo mostrar Classroom para cursos que NO sean privados */}
                 {!(props.values.course_type === 'private' || props.values.course_type === 'private - online') && (
                   <Col xs={4}>
                     <Label for='classroom'>Classroom</Label>
@@ -535,12 +533,6 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                                   </div>
                                 </Col>
                                 <Col xs={2}>
-                                  {/* <Button
-                                    color="danger"
-                                    onClick={() => remove(index)}
-                                  >
-                                    <FaTrash />
-                                  </Button> */}
                                 </Col>
                                 <Col xs={5}>
                                   <Label for={`schedules[${index}].startTime`}>
