@@ -32,7 +32,9 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
       
       let payload = { ...data };
       
-      if (data.course_type === 'private' || data.course_type === 'private - online') {
+      if (data.course_type === PRIVATE_COURSE_TYPES.PRIVATE || data.course_type === PRIVATE_COURSE_TYPES.PRIVATE_ONLINE) {
+
+
         if (!data.start_date) {
           const today = new Date().toISOString().split('T')[0];
           payload.start_date = today;
@@ -64,7 +66,7 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
       
       let payload = { ...data };
       
-      if (data.course_type === 'private' || data.course_type === 'private - online') {
+      if (data.course_type === PRIVATE_COURSE_TYPES.PRIVATE || data.course_type === PRIVATE_COURSE_TYPES.PRIVATE_ONLINE) {
         if (!data.start_date) {
           const today = new Date().toISOString().split('T')[0];
           payload.start_date = today;
@@ -406,7 +408,7 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                     component={FormFeedback}
                   />
                 </Col>
-                {(props.values.course_type === 'private' || props.values.course_type === 'private - online') && (
+                {(props.values.course_type === PRIVATE_COURSE_TYPES.PRIVATE || props.values.course_type === PRIVATE_COURSE_TYPES.PRIVATE_ONLINE) && (
                   <>
                     <Col xs={6}>
                       <Label for='hourly_rate'>Hourly Rate</Label>
