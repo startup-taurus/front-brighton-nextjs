@@ -132,7 +132,7 @@ const CoursesTable = ({ reload }: any) => {
     },
     {
       name: 'Classroom',
-      selector: (row: any) => `${row.classroom}`.toLocaleUpperCase(),
+      selector: (row: any) => row.classroom ? `${row.classroom}`.toLocaleUpperCase() : '',
       sortable: true,
       center: false,
     },
