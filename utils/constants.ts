@@ -158,5 +158,5 @@ export const EXAM_MODULES = {
 
 export const PRIVATE_COURSE_TYPES = {
   PRIVATE: 'private',
-  PRIVATE_ONLINE: 'private-online'
+  PRIVATE_ONLINE: 'private - online'  
 };

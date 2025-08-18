@@ -13,7 +13,7 @@ import {
   updatePrivateClass 
 } from '../../../../helper/api-data/private-class-hours';
 import { UserContext } from 'helper/User';
-import { USER_TYPES } from 'utils/constants';
+import { PRIVATE_COURSE_TYPES, USER_TYPES } from 'utils/constants';
 import { toast } from 'react-toastify';
 import { getFetcher, putFetcher } from '../../../../helper/api';
 import { ReportEntry, NewEntry, EditData } from '../../../../Types/ReportTypes';
@@ -71,7 +71,9 @@ const TeachersReport: NextPageWithLayout = () => {
   );
 
   const courseData = courseDetail?.data;
-  const isPrivateClass = useMemo(() => courseData?.course_type === 'private' || courseData?.course_type === 'private - online', [courseData?.course_type]);
+  const isPrivateClass = useMemo(() => courseData?.course_type === PRIVATE_COURSE_TYPES.PRIVATE || courseData?.course_type === PRIVATE_COURSE_TYPES.PRIVATE_ONLINE, [courseData?.course_type]);
+
+
 
   const { data: reportData, error: reportError, mutate: mutateReport } = useSWR(
     courseId && courseData ? `/report/${courseId}/${isPrivateClass}` : null,
