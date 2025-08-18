@@ -17,6 +17,7 @@ import { createCourse, updateCourse } from 'helper/api-data/course';
 import { getActiveProfessors } from 'helper/api-data/professor';
 import { getAllSyllabus } from 'helper/api-data/syllabus';
 import { toast } from 'react-toastify';
+import { PRIVATE_COURSE_TYPES } from '../../../../utils/constants';
 const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const CourseForm = ({ data, isOpen, toggle }: any) => {
   const limit = 1000;
@@ -214,7 +215,7 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                     component={FormFeedback}
                   />
                 </Col>
-                {!(props.values.course_type === 'private' || props.values.course_type === 'private - online') && (
+                {!(props.values.course_type === PRIVATE_COURSE_TYPES.PRIVATE || props.values.course_type === PRIVATE_COURSE_TYPES.PRIVATE_ONLINE) && (
                   <Col xs={6}>
                     <Label for='start_date'>Start Date</Label>
                     <Field
@@ -261,7 +262,7 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                     component={FormFeedback}
                   />
                 </Col>
-                {!(props.values.course_type === 'private' || props.values.course_type === 'private - online') && (
+                {!(props.values.course_type === PRIVATE_COURSE_TYPES.PRIVATE || props.values.course_type === PRIVATE_COURSE_TYPES.PRIVATE_ONLINE) && (
                   <Col xs={4}>
                     <Label for='classroom'>Classroom</Label>
                     <Field
@@ -348,8 +349,7 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                     component={FormFeedback}
                   />
                 </Col>
-                {/* Solo mostrar Syllabus para cursos que NO sean privados */}
-                {!(props.values.course_type === 'private' || props.values.course_type === 'private - online') && (
+                {!(props.values.course_type === PRIVATE_COURSE_TYPES.PRIVATE || props.values.course_type === PRIVATE_COURSE_TYPES.PRIVATE_ONLINE) && (
                   <Col xs={6}>
                     <Label for='hourly_rate'>Syllabus</Label>
                     <Select
@@ -406,7 +406,6 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                     component={FormFeedback}
                   />
                 </Col>
-                {/* Solo mostrar Hourly Rate y Total Hours para cursos privados */}
                 {(props.values.course_type === 'private' || props.values.course_type === 'private - online') && (
                   <>
                     <Col xs={6}>
@@ -497,8 +496,7 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                     </Col>
                   </>
                 )}
-                {/* Solo mostrar Schedule para cursos que NO sean privados */}
-                {!(props.values.course_type === 'private' || props.values.course_type === 'private - online') && (
+                {!(props.values.course_type === PRIVATE_COURSE_TYPES.PRIVATE || props.values.course_type === PRIVATE_COURSE_TYPES.PRIVATE_ONLINE) && (
                   <Col xs={12}>
                     <Label for='schedule'>Schedule</Label>
                     <FieldArray name='schedules'>
