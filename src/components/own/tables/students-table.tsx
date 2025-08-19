@@ -149,7 +149,7 @@ const StudentsTable = ({
     },
     {
       name: 'Student name',
-      selector: (row: any) => row.user?.name,
+      selector: (row: any) => row.user?.name ? row.user.name.toUpperCase() : '',
       sortable: true,
       center: false,
     },
@@ -162,7 +162,7 @@ const StudentsTable = ({
     {
       name: 'Phone',
       selector: (row: any) =>
-        row.phone_number?.trim() ? row.phone_number : 'No phone number',
+        row.phone_number?.trim() ? row.phone_number.toUpperCase() : 'NO PHONE NUMBER',
       sortable: true,
       center: false,
     },
@@ -183,14 +183,14 @@ const StudentsTable = ({
     {
       name: 'Course',
       selector: (row: any) =>
-        row.course[0]?.course_name ? row.course[0].course_name : '',
+        row.course[0]?.course_name ? row.course[0].course_name.toUpperCase() : '',
       sortable: true,
       center: false,
     },
     {
       name: 'Course No',
       selector: (row: any) =>
-        row.course[0]?.course_number ? row.course[0].course_number : '',
+        row.course[0]?.course_number ? row.course[0].course_number.toUpperCase() : '',
       sortable: true,
       center: false,
     },
@@ -198,9 +198,9 @@ const StudentsTable = ({
       name: 'Level',
       selector: (row: any) => {
         if (!row.level) return '';
-        if (typeof row.level === 'string') return row.level;
+        if (typeof row.level === 'string') return row.level.toUpperCase();
         if (typeof row.level === 'object') {
-          return row.level.name || row.level.full_level || '';
+          return (row.level.name || row.level.full_level || '').toUpperCase();
         }
         return '';
       },
@@ -209,13 +209,13 @@ const StudentsTable = ({
     },
     {
       name: 'Promotion',
-      selector: (row: any) => row.promotion ?? '',
+      selector: (row: any) => row.promotion ? row.promotion.toUpperCase() : '',
       sortable: true,
       center: false,
     },
     {
       name: 'Age Category',
-      selector: (row: any) => row.age_category ?? '',
+      selector: (row: any) => row.age_category ? row.age_category.toUpperCase() : '',
       sortable: true,
       center: false,
     },

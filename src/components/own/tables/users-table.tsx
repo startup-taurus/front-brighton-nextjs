@@ -108,13 +108,13 @@ const UsersTable = ({ reload }: any) => {
     },
     {
       name: 'Names',
-      selector: (row: any) => `${row.name}`,
+      selector: (row: any) => `${row.name}`.toUpperCase(),
       sortable: true,
       center: false,
     },
     {
       name: 'Username',
-      selector: (row: any) => `${row.username}`,
+      selector: (row: any) => `${row.username}`.toUpperCase(),
       sortable: true,
       center: false,
     },

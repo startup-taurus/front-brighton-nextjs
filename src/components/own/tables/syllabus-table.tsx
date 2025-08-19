@@ -112,7 +112,7 @@ const SyllabusTable: React.FC<SyllabusTableProps> = ({ reload }) => {
     },
     {
       name: 'Syllabus Name',
-      selector: (row: any) => `${row.syllabus_name}`,
+      selector: (row: any) => `${row.syllabus_name}`.toUpperCase(),
       sortable: true,
       center: false,
     },
@@ -120,9 +120,9 @@ const SyllabusTable: React.FC<SyllabusTableProps> = ({ reload }) => {
       name: 'Level',
       selector: (row: any) => {
         if (!row.level) return '';
-        if (typeof row.level === 'string') return row.level;
+        if (typeof row.level === 'string') return row.level.toUpperCase();
         if (typeof row.level === 'object') {
-          return row.level.name || row.level.full_level || '';
+          return (row.level.name || row.level.full_level || '').toUpperCase();
         }
         return '';
       },

@@ -61,7 +61,7 @@ const ProfessorsTable: React.FC = () => {
                 },
                 {
                   name: 'Professor',
-                  selector: (row) => row.professorName,
+                  selector: (row) => row.professorName.toUpperCase(),
                   sortable: true,
                 },
                 {

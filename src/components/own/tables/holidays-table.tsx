@@ -110,26 +110,25 @@ const HolidaysTable = ({ reload }: any) => {
     },
     {
       name: 'Holiday Name',
-      selector: (row: any) => `${row.holiday_name}`,
+      selector: (row: any) => `${row.holiday_name}`.toUpperCase(),
       sortable: true,
       center: false,
     },
     {
       name: 'Holiday Date',
-      selector: (row: any) => `${row.holiday_date}`,
+      selector: (row: any) => `${row.holiday_date}`.toUpperCase(),
       sortable: true,
       center: false,
     },
     {
       name: 'Description',
-      selector: (row: any) => `${row.description || ''}`,
+      selector: (row: any) => `${row.description || ''}`.toUpperCase(),
       sortable: false,
       center: false,
     },
     {
       name: 'Type',
-      selector: (row: any) =>
-        `${row.holiday_type.charAt(0).toUpperCase() + row.holiday_type.slice(1)}`,
+      selector: (row: any) => `${row.holiday_type}`.toUpperCase(),
       sortable: true,
       center: false,
     },

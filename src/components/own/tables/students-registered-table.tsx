@@ -115,20 +115,20 @@ const StudentsRegisteredTable = ({
     },
     {
       name: 'ID',
-      selector: (row: any) => `${row.id_number}`,
+      selector: (row: any) => `${row.id_number}`.toUpperCase(),
       sortable: true,
       center: false,
     },
     {
       name: 'Student name',
       selector: (row: any) =>
-        `${row.first_name} ${row.middle_name} ${row.last_name} ${row.second_last_name}`,
+        `${row.first_name} ${row.middle_name} ${row.last_name} ${row.second_last_name}`.toUpperCase(),
       sortable: true,
       center: false,
     },
     {
       name: 'Phone',
-      selector: (row: any) => `${row.phone_number}`,
+      selector: (row: any) => `${row.phone_number}`.toUpperCase(),
       sortable: true,
       center: false,
     },
@@ -140,25 +140,25 @@ const StudentsRegisteredTable = ({
     },
     {
       name: 'Level',
-      selector: (row: any) => `${row.level?.name ?? ''}`,
+      selector: (row: any) => `${row.level?.name ?? ''}`.toUpperCase(),
       sortable: true,
       center: false,
     },
     {
       name: 'emergency contact name',
-      selector: (row: any) => `${row.emergency_contact_name ?? ''}`,
+      selector: (row: any) => `${row.emergency_contact_name ?? ''}`.toUpperCase(),
       sortable: true,
       center: false,
     },
     {
       name: 'emergency contact phone',
-      selector: (row: any) => `${row.emergency_contact_phone ?? ''}`,
+      selector: (row: any) => `${row.emergency_contact_phone ?? ''}`.toUpperCase(),
       sortable: true,
       center: false,
     },
     {
       name: 'emergency contact relationship',
-      selector: (row: any) => `${row.emergency_contact_relationship ?? ''}`,
+      selector: (row: any) => `${row.emergency_contact_relationship ?? ''}`.toUpperCase(),
       sortable: true,
       center: false,
     },
