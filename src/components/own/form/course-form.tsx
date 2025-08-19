@@ -11,7 +11,7 @@ import {
   ModalHeader,
 } from 'reactstrap';
 import LoadingButton from '../common/loading-button/LoadingButton';
-import useSWR from 'swr';
+import useSWR, { mutate } from 'swr';
 import Select from 'react-select';
 import { createCourse, updateCourse } from 'helper/api-data/course';
 import { getActiveProfessors } from 'helper/api-data/professor';
@@ -22,13 +22,14 @@ const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const CourseForm = ({ data, isOpen, toggle }: any) => {
   const limit = 1000;
   const page = 1;
-  const [searchTerm, setSearchTerm] = useState('');
   const [searchTermSyllabus, setSearchTermSyllabus] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const save = async (data: any) => {
     try {
       setIsLoading(true);
+      
+      mutate([`/course/get-all-with-professors?page=1&rowPerPage=10`], undefined, { revalidate: true });
       
       let payload = { ...data };
       
@@ -50,6 +51,7 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
       const response = await createCourse(payload);
       if (response.statusCode === 200) {
         toast.success('Course created successfully!');
+        mutate([`/course/get-all-with-professors?page=1&rowPerPage=10`]);
         toggle();
       }
     } catch (error) {
@@ -63,6 +65,8 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
   const update = async (data: any) => {
     try {
       setIsLoading(true);
+      
+      mutate([`/course/get-all-with-professors?page=1&rowPerPage=10`], undefined, { revalidate: true });
       
       let payload = { ...data };
       
@@ -82,6 +86,7 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
       const response = await updateCourse(data.id, payload);
       if (response.statusCode === 200) {
         toast.success('Course updated successfully!'); 
+        mutate([`/course/get-all-with-professors?page=1&rowPerPage=10`]);
         toggle();
       }
     } catch (error) {
@@ -103,8 +108,8 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
   };
 
   const { data: course, isLoading: isLoadingCourse } = useSWR(
-    ['/course/get-active', page, limit, searchTerm],
-    () => getActiveProfessors(page, limit, searchTerm)
+    ['/course/get-active', page, limit],
+    () => getActiveProfessors(page, limit)
   );
 
   const { data: syllabus, isLoading: isLoadingSyllabus } = useSWR(
@@ -314,32 +319,21 @@ const CourseForm = ({ data, isOpen, toggle }: any) => {
                 </Col>
                 <Col xs={6}>
                   <Label for='professor_id'>Professor</Label>
-                  <Field name='professor_id'>
-                    {({ field, form }: any) => (
-                      <Select
-                        {...field}
-                        id='professor_id'
-                        options={professorOptions}
-                        onChange={(selectedOption: any) => {
-                          const professorId = selectedOption
-                            ? selectedOption.value
-                            : '';
-                          setFieldValue('professor_id', professorId);
-                        }}
-                        placeholder='Select a professor'
-                        value={
-                          professorOptions.find(
-                            (option: any) =>
-                              option.value === props.values.professor_id
-                          ) || null
-                        }
-                        isSearchable
-                        onInputChange={(inputValue) => {
-                          setSearchTerm(inputValue);
-                        }}
-                      />
-                    )}
-                  </Field>
+                  <Select
+                    id='professor_id'
+                    options={professorOptions}
+                    onChange={(selectedOption: any) =>
+                      setFieldValue('professor_id', selectedOption.value)
+                    }
+                    placeholder='Select a professor'
+                    value={
+                      professorOptions.find(
+                        (option: any) =>
+                          option.value === props.values.professor_id
+                      ) || null
+                    }
+                    isSearchable
+                  />
                   {props.touched.professor_id &&
                     !!props.errors.professor_id && (
                       <div className='invalid-input'>
