@@ -17,3 +17,7 @@ export const getAttendanceByCourseAndStudent = (
 export const createAttendance = (data: any) => {
   return postFetcher(`/attendance/create`, data);
 };
+
+export const getConsecutiveAbsencesReport = () => {
+  return getFetcher(`/attendance/consecutive-absences-report`, true);
+};

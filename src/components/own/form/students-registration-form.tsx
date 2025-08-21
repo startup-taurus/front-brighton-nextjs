@@ -15,13 +15,14 @@ import {
   LEVELS_FOR_ADULTS,
   LEVELS_FOR_KIDS,
   SCHEDULE_DATES,
+  USER_TYPES,
 } from '../../../../utils/constants';
 import { createRegisteredStudent } from '../../../../helper/api-data/registered-student';
+import { checkDuplicateByRole } from '../../../../helper/api-data/user';
 import { parse } from 'date-fns';
 import { LanguageProvider, useLanguage } from '../context/LanguageContext';
 import LanguageToggle from './LanguageToggle';
 
-// Main component that provides the language context
 const StudentsRegistrationForm = () => {
   return (
     <LanguageProvider>
@@ -30,11 +31,8 @@ const StudentsRegistrationForm = () => {
   );
 };
 
-// Inner component that uses the language context
 const RegistrationFormContent = () => {
   const { t, language } = useLanguage();
-  // Create validation schema using the current language
-  // This will be recreated whenever the language changes
   const validations = React.useMemo(
     () =>
       Yup.object().shape({
@@ -45,7 +43,22 @@ const RegistrationFormContent = () => {
         id_number: Yup.string()
           .min(10, t('id_number_min'))
           .max(10, t('id_number_max'))
-          .required(t('id_number_required')),
+          .required(t('id_number_required'))
+          .test('unique-cedula', t('cedula_already_exists'), async function (value) {
+            if (!value) return true;
+            try {
+              const response = await checkDuplicateByRole({
+                cedula: value,
+                role: USER_TYPES.STUDENT,
+                email: '',
+                username: '',
+
+              });
+              return response.data?.isValid !== false;
+            } catch (error) {
+              return true;
+            }
+          }),
         birthday: Yup.date()
           .max(new Date(), t('birthday_invalid'))
           .transform((value, originalValue, schema) => {
@@ -61,7 +74,24 @@ const RegistrationFormContent = () => {
           .min(10, t('phone_min'))
           .max(10, t('phone_max'))
           .required(t('phone_required')),
-        email: Yup.string().required(t('email_required')),
+        email: Yup.string()
+          .email(t('email_invalid'))
+          .required(t('email_required'))
+          .test('unique-email', t('email_already_exists'), async function (value) {
+            if (!value) return true;
+            try {
+              const response = await checkDuplicateByRole({
+                email: value,
+                role: USER_TYPES.STUDENT,
+                cedula: '',
+                username: '',
+
+              });
+              return response.data?.isValid !== false;
+            } catch (error) {
+              return true;
+            }
+          }),
         address: Yup.string().required(t('address_required')),
         age_category: Yup.string().required(t('age_category_required')),
         emergency_contact_name: Yup.string().when('age_category', {
@@ -109,7 +139,7 @@ const RegistrationFormContent = () => {
         isAcceptedTermsAndCondition: Yup.string().required(t('terms_required')),
       }),
     [language, t]
-  ); // Recreate validation schema when language changes
+  ); 
 
   const currentDate = new Date();
   const maxDate =

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ErrorMessage, Field, Formik } from 'formik';
+import { toast } from 'react-toastify';
 
 import {
   Button,
@@ -15,7 +16,10 @@ import {
 } from 'reactstrap';
 import LoadingButton from '../common/loading-button/LoadingButton';
 import { createProfessor, updateProfessor } from 'helper/api-data/professor';
+import { checkDuplicateByRole } from 'helper/api-data/user';
 import { ImgPath, UrlImage } from 'utils/Constant';
+import { USER_TYPES } from 'utils/constants';
+import { validateEmailFormat } from 'utils/utils';
 
 const TeacherForm = ({ data, isOpen, toggle }: any) => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -30,23 +34,58 @@ const TeacherForm = ({ data, isOpen, toggle }: any) => {
     }
   }, [isOpen, data]);
 
-  const save = async (data: any) => {
-    try {
-      const formData = new FormData();
-      Object.keys(data).forEach((key) => {
-        formData.append(key, data[key]);
-      });
+const save = async (formValues: any) => {
+  try {
+    const emailValidation = validateEmailFormat(formValues.email);
+    if (!emailValidation.isValid) {
+      toast.error(emailValidation.message);
+      return;
+    }
 
-      const response = await createProfessor(formData);
-      if (response.statusCode === 200) {
-        toggle(null, true);
-      }
-    } catch (error) {}
-  };
+    const duplicateResponse = await checkDuplicateByRole({
+      email: formValues.email,
+      cedula: formValues.cedula,
+      role: USER_TYPES.PROFESSOR,
+      username: formValues.username || ''
+    });
+
+    if (duplicateResponse.data?.isValid === false) {
+      toast.error(duplicateResponse.data?.message || 'Duplicate entry found');
+      return;
+    }
+
+    const formData = new FormData();
+    Object.keys(formValues).forEach((key) => {
+      formData.append(key, formValues[key]);
+    });
+
+    const response = await createProfessor(formData);
+    if (response.statusCode === 200) {
+      toast.success('Teacher created successfully!');
+      toggle(null, true);
+    }
+  } catch (error) {
+    console.error('Error creating teacher:', error);
+    toast.error('Error creating teacher');
+  }
+};
 
   const update = async (values: any) => {
     try {
       const { id, image, ...rest } = values;
+
+      const duplicateResponse = await checkDuplicateByRole({
+        email: rest.email,
+        cedula: rest.cedula,
+        role: USER_TYPES.PROFESSOR, 
+        username: rest.username , 
+        excludeUserId: id
+      });
+      
+      if (duplicateResponse.data?.isValid === false) {
+        toast.error(duplicateResponse.data?.message);
+        return;
+      }
 
       let payload: any = rest;
 
@@ -68,10 +107,14 @@ const TeacherForm = ({ data, isOpen, toggle }: any) => {
 
       const res = await updateProfessor(id, payload);
       if (res.statusCode === 200) {
+        toast.success('Teacher updated successfully!');
         setImagePreview(null);
         toggle(null, true);
       }
-    } catch (err) {}
+    } catch (error) {
+      console.error('Error updating teacher:', error);
+      toast.error('Error updating teacher');
+    }
   };
   const NameField = ({ field, form, ...props }: any) => {
     const suffix = 'Brighton';

@@ -1,5 +1,6 @@
 import React from 'react';
 import { ErrorMessage, Field, Formik } from 'formik';
+import { toast } from 'react-toastify';
 import {
   Button,
   Col,
@@ -13,18 +14,41 @@ import {
   ModalHeader,
 } from 'reactstrap';
 import LoadingButton from '../common/loading-button/LoadingButton';
-import { createUser, updateUser } from 'helper/api-data/user';
+import { createUser, updateUser, checkDuplicateUser } from 'helper/api-data/user';
 import { USER_ROLES } from '../../../../utils/constants';
+import { validateEmailFormat } from '../../../../utils/utils';
 
 const UserForm = ({ data, isOpen, toggle }: any) => {
-  const save = async (data: any) => {
+  const save = async (formValues: any) => {
     try {
-      const response = await createUser(data);
+      const emailValidation = validateEmailFormat(formValues.email);
+      if (!emailValidation.isValid) {
+        toast.error(emailValidation.message);
+        return;
+      }
+
+      const finalUsername = formValues.username.endsWith('Brighton') 
+        ? formValues.username 
+        : formValues.username + 'Brighton';
+      
+      const duplicateResponse = await checkDuplicateUser({
+        email: formValues.email,
+        username: finalUsername
+      });
+      
+      if (duplicateResponse.data?.isValid === false) {
+        toast.error(duplicateResponse.data?.message );
+        return;
+      }
+
+      const response = await createUser(formValues);
       if (response.statusCode === 200) {
+        toast.success('User created successfully!');
         toggle();
       }
     } catch (error) {
       console.error('Error al crear usuario:', error);
+      toast.error('Error creating user');
     }
   };
   const NameField = ({ field, form, ...props }: any) => {
@@ -49,14 +73,37 @@ const UserForm = ({ data, isOpen, toggle }: any) => {
     );
   };
 
-  const update = async (data: any) => {
+  const update = async (formValues: any) => {
     try {
-      const response = await updateUser(data.id, data);
+      const emailValidation = validateEmailFormat(formValues.email);
+      if (!emailValidation.isValid) {
+        toast.error(emailValidation.message);
+        return;
+      }
+
+      const finalUsername = formValues.username.endsWith('Brighton') 
+        ? formValues.username 
+        : formValues.username + 'Brighton';
+      
+      const duplicateResponse = await checkDuplicateUser({
+        email: formValues.email,
+        username: finalUsername,
+        excludeUserId: formValues.id
+      });
+      
+      if (duplicateResponse.data?.isValid === false) {
+        toast.error(duplicateResponse.data?.message );
+        return;
+      }
+
+      const response = await updateUser(formValues.id, formValues);
       if (response.statusCode === 200) {
+        toast.success('User updated successfully!');
         toggle();
       }
     } catch (error) {
       console.error('Error al actualizar usuario:', error);
+      toast.error('Error updating user');
     }
   };
 
