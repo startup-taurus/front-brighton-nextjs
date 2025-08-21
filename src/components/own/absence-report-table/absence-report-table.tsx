@@ -5,13 +5,8 @@ import TableSkeleton from '@/components/own/common/table-skeleton/TableSkeleton'
 import { CommonHeader } from '@/components/Dashboard/SchoolManagenement/AcademicPerformance/CommonHeader';
 import { getConsecutiveAbsencesReport } from 'helper/api-data/attendance';
 import { Badge } from 'reactstrap';
+import { AbsenceReportData } from '../../../../Types/ReportTypes';
 
-interface AbsenceReportData {
-  course_code: string;
-  course_name: string;
-  student_name: string;
-  consecutive_absences: number;
-}
 
 const AbsenceReportTable: React.FC = () => {
   const [reportData, setReportData] = useState<AbsenceReportData[]>([]);
@@ -52,7 +47,7 @@ const AbsenceReportTable: React.FC = () => {
       md={7}
     >
       <Card>
-        <CommonHeader title='Reporte de Faltas Consecutivas' />
+        <CommonHeader title='Report of Consecutive Absences' />
         <CardBody className='pt-0'>
           {loading ? (
             <TableSkeleton

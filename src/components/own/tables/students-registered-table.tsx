@@ -145,19 +145,19 @@ const StudentsRegisteredTable = ({
       center: false,
     },
     {
-      name: 'emergency contact name',
+      name: 'Emergency contact name',
       selector: (row: any) => `${row.emergency_contact_name ?? ''}`.toUpperCase(),
       sortable: true,
       center: false,
     },
     {
-      name: 'emergency contact phone',
+      name: 'Emergency contact phone',
       selector: (row: any) => `${row.emergency_contact_phone ?? ''}`.toUpperCase(),
       sortable: true,
       center: false,
     },
     {
-      name: 'emergency contact relationship',
+      name: 'Emergency contact relationship',
       selector: (row: any) => `${row.emergency_contact_relationship ?? ''}`.toUpperCase(),
       sortable: true,
       center: false,
