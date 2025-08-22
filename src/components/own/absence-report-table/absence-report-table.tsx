@@ -14,10 +14,38 @@ const AbsenceReportTable: React.FC = () => {
     getConsecutiveAbsencesReport
   );
 
-  const getBadgeColor = (absences: number) => {
-    if (absences >= 5) return 'danger';
-    if (absences >= 3) return 'warning';
-    return 'info';
+  const getBadgeStyle = (absences: number) => {
+    if (absences >= 5) {
+      return {
+        backgroundColor: '#e99999',
+        color: 'white',
+        border: 'none',
+        padding: '0.25rem 0.5rem',
+        borderRadius: '0.25rem',
+        fontSize: '0.75rem',
+        fontWeight: 'bold'
+      };
+    }
+    if (absences >= 3) {
+      return {
+        backgroundColor: '#ffe599',
+        color: '#333',
+        border: 'none',
+        padding: '0.25rem 0.5rem',
+        borderRadius: '0.25rem',
+        fontSize: '0.75rem',
+        fontWeight: 'bold'
+      };
+    }
+    return {
+      backgroundColor: '#17a2b8',
+      color: 'white',
+      border: 'none',
+      padding: '0.25rem 0.5rem',
+      borderRadius: '0.25rem',
+      fontSize: '0.75rem',
+      fontWeight: 'bold'
+    };
   };
 
   return (
@@ -34,7 +62,7 @@ const AbsenceReportTable: React.FC = () => {
             />
           ) : error ? (
             <Alert color='danger'>
-              Error al cargar el reporte de ausencias
+              Error loading the absence report
             </Alert>
           ) : (
             <DataTable
@@ -64,9 +92,9 @@ const AbsenceReportTable: React.FC = () => {
                   selector: (row) => row.consecutive_absences,
                   sortable: true,
                   cell: (row) => (
-                    <Badge color={getBadgeColor(row.consecutive_absences)}>
+                    <span style={getBadgeStyle(row.consecutive_absences)}>
                       {row.consecutive_absences}
-                    </Badge>
+                    </span>
                   ),
                 },
               ]}
