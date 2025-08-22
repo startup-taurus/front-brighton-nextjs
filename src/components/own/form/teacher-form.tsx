@@ -217,7 +217,7 @@ const update = async (values: any) => {
                   </div>
                 </Col>
                 <Col xs={6}>
-                  <Label for='name'>Name *</Label>
+                  <Label for='name'>Name</Label>
                   <Field
                     name='name'
                     as={Input}

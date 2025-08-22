@@ -36,8 +36,8 @@ const HolidayForm = ({ data, isOpen, toggle }: any) => {
   };
 
   const update = async (data: any) => {
-    if (isCoordinator && !canEditHoliday) {
-      toast.error('Coordinators do not have permission to edit holidays');
+    if (!canEditHoliday) {
+      toast.error('You do not have permission to edit holidays');
       return;
     }
     try {

@@ -335,6 +335,12 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                                   )
                                 }
                                 className='syllabus-input'
+                                min={0}
+                    onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                     if (["e", "E", "+", "-"].includes(e.key)) {
+                      e.preventDefault();
+                      }
+                    }}
                               />
                             </Col>
                             <Col md={3}>
@@ -349,6 +355,12 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                                   )
                                 }
                                 className='syllabus-input'
+                                min={0}
+                                onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                                if (["e", "E", "+", "-"].includes(e.key)) {
+                                e.preventDefault();
+                                }
+                                }}
                               />
                             </Col>
                             <Col md={2} className='d-flex align-items-end'>
@@ -476,19 +488,26 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
 
                 {renderArrayField('items', 'Items')}
 
-                <Col md={4}>
-                  <Label for='assig_percentage'>Assignment Percentage %</Label>
-                  <Field
+              <Col md={4}>
+               <Label for='assig_percentage'>Assignment Percentage %</Label>
+                <Field
                     name='assig_percentage'
                     as={Input}
                     type='number'
                     className='syllabus-input'
-                  />
+                    min={0}
+                    onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                     if (["e", "E", "+", "-"].includes(e.key)) {
+                      e.preventDefault();
+                      }
+                    }}
+                    />
                   <ErrorMessage
                     name='assig_percentage'
                     component={FormFeedback}
                   />
-                </Col>
+                </Col>  
+
                 <Col md={4}>
                   <Label for='test_percentage'>Test Percentage %</Label>
                   <Field
@@ -496,6 +515,12 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                     as={Input}
                     type='number'
                     className='syllabus-input'
+                    min={0}
+                    onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                     if (["e", "E", "+", "-"].includes(e.key)) {
+                      e.preventDefault();
+                      }
+                    }}
                   />
                   <ErrorMessage
                     name='test_percentage'
@@ -509,6 +534,12 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                     as={Input}
                     type='number'
                     className='syllabus-input'
+                    min={0}
+                    onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                     if (["e", "E", "+", "-"].includes(e.key)) {
+                      e.preventDefault();
+                      }
+                    }}
                   />
                   <ErrorMessage
                     name='exam_percentage'
