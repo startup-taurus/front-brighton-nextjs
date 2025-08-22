@@ -17,10 +17,59 @@ import useSWR from 'swr';
 import { getActiveCourses } from 'helper/api-data/course';
 import { getAllLevels } from 'helper/api-data/level';
 import { createStudent, updateStudent } from 'helper/api-data/student';
-import { checkDuplicateByStudent } from 'helper/api-data/student';
 import { toast } from 'react-toastify';
 import { validateEmailFormat } from '../../../../utils/utils';
+import * as Yup from 'yup';
+import { parse } from 'date-fns';
 
+const validations = Yup.object().shape({
+  name: Yup.string().required('The name is required'),
+  email: Yup.string().required('The email is required'),
+  cedula: Yup.string()
+    .min(10, 'Cédula must be more than 10 characters long')
+    .max(10, 'Cédula must be less than 10 characters long')
+    .required('Cédula is required'),
+  courseId: Yup.string().required('The course is required'),
+  level_id: Yup.string().required('The level is required'),
+  status: Yup.string().required('The status is required'),
+  age_category: Yup.string().required('Age category is required'),
+  birth_date: Yup.date()
+    .max(new Date(), 'Select a valid date')
+    .transform((value, originalValue, schema) => {
+      if (schema.isType(value)) return value;
+      return parse(originalValue, 'dd-MM-yyyy', new Date());
+    })
+    .typeError('Select a valid date')
+    .required('The birthdate is required'),
+  phone_number: Yup.string()
+    .min(10, 'Phone number must be at least 10 characters long')
+    .max(10, 'Phone number must be less than 10 characters long')
+    .required('Phone number is required'),
+  book_given: Yup.boolean().required('Book given status is required'),
+  pendingPayments: Yup.boolean(),
+
+  emergency_contact_name: Yup.string().when('age_category', {
+    is: 'kids',
+    then: (schema: Yup.StringSchema) =>
+      schema.required('Emergency contact name is required'),
+    otherwise: (schema: Yup.StringSchema) => schema,
+  }),
+  emergency_contact_phone: Yup.string().when('age_category', {
+    is: 'kids',
+    then: (schema: Yup.StringSchema) =>
+      schema.required('Emergency contact phone is required'),
+    otherwise: (schema: Yup.StringSchema) => schema,
+  }),
+  emergency_contact_relationship: Yup.string().when('age_category', {
+    is: 'kids',
+    then: (schema: Yup.StringSchema) =>
+      schema.required('Emergency contact relationship is required'),
+    otherwise: (schema: Yup.StringSchema) => schema,
+  }),
+
+  promotion: Yup.string(),
+  observations: Yup.string(),
+});
 
 const StudentForm = ({
   data,
@@ -62,22 +111,13 @@ const StudentForm = ({
     }
   }, [data]);
 
+
 const save = async (row: any) => {
   try {
     setIsLoading(true);
     const emailValidation = validateEmailFormat(row.email);
     if (!emailValidation.isValid) {
       toast.error(emailValidation.message);
-      return;
-    }
-
-    const duplicateResponse = await checkDuplicateByStudent({
-      email: row.email,
-      cedula: row.cedula,
-    });
-    
-    if (!duplicateResponse.data.isValid) {
-      toast.error(duplicateResponse.data.message);
       return;
     }
 
@@ -108,6 +148,8 @@ const save = async (row: any) => {
     setIsLoading(false);
   }
 };
+
+// ... existing code ...
 
   const update = async (data: any) => {
     try {
@@ -340,6 +382,7 @@ const save = async (row: any) => {
                     birth_date: '',
                   }
             }
+            validationSchema={validations}
             onSubmit={(info) =>
               data && !isTransfer ? update(info) : save(info)
             }

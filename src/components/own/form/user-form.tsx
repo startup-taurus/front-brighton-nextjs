@@ -1,6 +1,7 @@
 import React from 'react';
 import { ErrorMessage, Field, Formik } from 'formik';
 import { toast } from 'react-toastify';
+import * as Yup from 'yup';
 import {
   Button,
   Col,
@@ -14,43 +15,46 @@ import {
   ModalHeader,
 } from 'reactstrap';
 import LoadingButton from '../common/loading-button/LoadingButton';
-import { createUser, updateUser, checkDuplicateUser } from 'helper/api-data/user';
+import { createUser, updateUser } from 'helper/api-data/user';
 import { USER_ROLES } from '../../../../utils/constants';
 import { validateEmailFormat } from '../../../../utils/utils';
 
 const UserForm = ({ data, isOpen, toggle }: any) => {
-  const save = async (formValues: any) => {
-    try {
-      const emailValidation = validateEmailFormat(formValues.email);
-      if (!emailValidation.isValid) {
-        toast.error(emailValidation.message);
-        return;
-      }
-
-      const finalUsername = formValues.username.endsWith('Brighton') 
-        ? formValues.username 
-        : formValues.username + 'Brighton';
-      
-      const duplicateResponse = await checkDuplicateUser({
-        email: formValues.email,
-        username: finalUsername
-      });
-      
-      if (duplicateResponse.data?.isValid === false) {
-        toast.error(duplicateResponse.data?.message );
-        return;
-      }
-
-      const response = await createUser(formValues);
-      if (response.statusCode === 200) {
-        toast.success('User created successfully!');
-        toggle();
-      }
-    } catch (error) {
-      console.error('Error al crear usuario:', error);
-      toast.error('Error creating user');
+const save = async (formValues: any) => {
+  try {
+    const emailValidation = validateEmailFormat(formValues.email);
+    if (!emailValidation.isValid) {
+      toast.error(emailValidation.message);
+      return;
     }
-  };
+
+    const response = await createUser(formValues);
+    if (response.statusCode === 200) {
+      toast.success('User created successfully!');
+      toggle();
+    }
+  } catch (error) {
+    toast.error('Error creating user');
+  }
+};
+
+const update = async (formValues: any) => {
+  try {
+    const emailValidation = validateEmailFormat(formValues.email);
+    if (!emailValidation.isValid) {
+      toast.error(emailValidation.message);
+      return;
+    }
+
+    const response = await updateUser(formValues.id, formValues);
+    if (response.statusCode === 200) {
+      toast.success('User updated successfully!');
+      toggle();
+    }
+  } catch (error) {
+    toast.error('Error updating user');
+  }
+};
   const NameField = ({ field, form, ...props }: any) => {
     const suffix = 'Brighton';
     let baseValue = field.value || '';
@@ -73,39 +77,16 @@ const UserForm = ({ data, isOpen, toggle }: any) => {
     );
   };
 
-  const update = async (formValues: any) => {
-    try {
-      const emailValidation = validateEmailFormat(formValues.email);
-      if (!emailValidation.isValid) {
-        toast.error(emailValidation.message);
-        return;
-      }
-
-      const finalUsername = formValues.username.endsWith('Brighton') 
-        ? formValues.username 
-        : formValues.username + 'Brighton';
-      
-      const duplicateResponse = await checkDuplicateUser({
-        email: formValues.email,
-        username: finalUsername,
-        excludeUserId: formValues.id
-      });
-      
-      if (duplicateResponse.data?.isValid === false) {
-        toast.error(duplicateResponse.data?.message );
-        return;
-      }
-
-      const response = await updateUser(formValues.id, formValues);
-      if (response.statusCode === 200) {
-        toast.success('User updated successfully!');
-        toggle();
-      }
-    } catch (error) {
-      console.error('Error al actualizar usuario:', error);
-      toast.error('Error updating user');
-    }
-  };
+const validations = Yup.object().shape({
+  name: Yup.string().required('The name is required'),
+  username: Yup.string().required('The username is required'),
+  email: Yup.string()
+    .email('Please enter a valid email')
+    .required('The email is required'),
+  password: Yup.string()
+    .min(6, 'Password must be at least 6 characters long')
+    .required('The password is required'),
+});
 
   return (
     <Modal
@@ -138,10 +119,11 @@ const UserForm = ({ data, isOpen, toggle }: any) => {
                   status: 'active',
                 }
           }
+          validationSchema={validations}
           onSubmit={(info) => (data ? update(info) : save(info))}
         >
           {(props) => {
-            const { errors, handleSubmit, isSubmitting, dirty } = props;
+            const { errors, handleSubmit, isSubmitting, dirty, touched } = props;
             return (
               <form
                 noValidate
@@ -154,6 +136,7 @@ const UserForm = ({ data, isOpen, toggle }: any) => {
                   <Field
                     name='name'
                     as={Input}
+                    invalid={touched.name && !!errors.name}
                   />
                   <ErrorMessage
                     name='name'
@@ -166,6 +149,7 @@ const UserForm = ({ data, isOpen, toggle }: any) => {
                     name='username'
                     as={Input}
                     component={NameField}
+                    invalid={touched.username && !!errors.username}
                   />
                   <ErrorMessage
                     name='username'
@@ -177,6 +161,7 @@ const UserForm = ({ data, isOpen, toggle }: any) => {
                   <Field
                     name='email'
                     as={Input}
+                    invalid={touched.email && !!errors.email}
                   />
                   <ErrorMessage
                     name='email'
@@ -189,6 +174,7 @@ const UserForm = ({ data, isOpen, toggle }: any) => {
                     name='password'
                     as={Input}
                     type='password'
+                    invalid={touched.password && !!errors.password}
                   />
                   <ErrorMessage
                     name='password'

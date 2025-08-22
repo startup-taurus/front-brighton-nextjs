@@ -1,5 +1,5 @@
-import { CheckDuplicateByStudentRequest } from 'Types/UserApiTypes';
 import { getFetcher, postFetcher, putFetcher, deleteFetcher } from '../api';
+
 export const getAllStudent = (
   page: number,
   limit: number,
@@ -123,6 +123,3 @@ export const getBestStudentsByCourse = (
   return getFetcher(url, false);
 };
 
-export const checkDuplicateByStudent = (data: CheckDuplicateByStudentRequest) => {
-  return postFetcher('/student/check-duplicate', data);
-};

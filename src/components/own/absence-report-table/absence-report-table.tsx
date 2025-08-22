@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { Card, CardBody, Col, Alert } from 'reactstrap';
 import DataTable from 'react-data-table-component';
 import TableSkeleton from '@/components/own/common/table-skeleton/TableSkeleton';
@@ -6,34 +6,13 @@ import { CommonHeader } from '@/components/Dashboard/SchoolManagenement/Academic
 import { getConsecutiveAbsencesReport } from 'helper/api-data/attendance';
 import { Badge } from 'reactstrap';
 import { AbsenceReportData } from '../../../../Types/ReportTypes';
-
+import useSWR from 'swr';
 
 const AbsenceReportTable: React.FC = () => {
-  const [reportData, setReportData] = useState<AbsenceReportData[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    const fetchReportData = async () => {
-      try {
-        setLoading(true);
-        const data = await getConsecutiveAbsencesReport();
-        
-        if (Array.isArray(data)) {
-          setReportData(data);
-        } else {
-          setError('No se pudieron cargar los datos del reporte');
-        }
-      } catch (err) {
-        console.error('Error fetching absence report:', err);
-        setError('Error al cargar el reporte de ausencias');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchReportData();
-  }, []);
+  const { data: reportData, error, isLoading } = useSWR<AbsenceReportData[]>(
+    '/attendance/consecutive-absences-report',
+    getConsecutiveAbsencesReport
+  );
 
   const getBadgeColor = (absences: number) => {
     if (absences >= 5) return 'danger';
@@ -42,14 +21,11 @@ const AbsenceReportTable: React.FC = () => {
   };
 
   return (
-    <Col
-      xxl={6}
-      md={7}
-    >
+    <Col xxl={6} md={7}>
       <Card>
         <CommonHeader title='Report of Consecutive Absences' />
         <CardBody className='pt-0'>
-          {loading ? (
+          {isLoading ? (
             <TableSkeleton
               rows={10}
               columns={4}
@@ -58,7 +34,7 @@ const AbsenceReportTable: React.FC = () => {
             />
           ) : error ? (
             <Alert color='danger'>
-              {error}
+              Error al cargar el reporte de ausencias
             </Alert>
           ) : (
             <DataTable
@@ -94,7 +70,7 @@ const AbsenceReportTable: React.FC = () => {
                   ),
                 },
               ]}
-              data={reportData}
+              data={reportData || []}
               pagination
               paginationPerPage={10}
               highlightOnHover

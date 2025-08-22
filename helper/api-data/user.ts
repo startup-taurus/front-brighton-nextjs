@@ -1,5 +1,4 @@
 import { getFetcher, postFetcher, putFetcher } from 'helper/api';
-import { CheckDuplicateByRoleRequest, CheckDuplicateUserRequest } from 'Types/UserApiTypes';
 
 export const postLogin = (data: any) => {
   return postFetcher('/user/login', data, '', false, true);
@@ -26,12 +25,4 @@ export const getAllUsers = (page: number, limit: number, filters?: any) => {
 
 export const getDashboardData = () => {
   return getFetcher(`/user/get-dashboard-data`, false);
-};
-
-export const checkDuplicateByRole = (data: CheckDuplicateByRoleRequest) => {
-  return postFetcher('/user/check-duplicate', data); 
-};
-
-export const checkDuplicateUser = (data: CheckDuplicateUserRequest) => {
-  return postFetcher('/user/check-duplicate-user', data);
 };

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ErrorMessage, Field, Formik } from 'formik';
 import { toast } from 'react-toastify';
+import * as Yup from 'yup';
 
 import {
   Button,
@@ -16,10 +17,8 @@ import {
 } from 'reactstrap';
 import LoadingButton from '../common/loading-button/LoadingButton';
 import { createProfessor, updateProfessor } from 'helper/api-data/professor';
-import { checkDuplicateByRole } from 'helper/api-data/user';
 import { ImgPath, UrlImage } from 'utils/Constant';
-import { USER_TYPES } from 'utils/constants';
-import { validateEmailFormat } from 'utils/utils';
+import { validateEmailFormat } from '../../../../utils/utils';
 
 const TeacherForm = ({ data, isOpen, toggle }: any) => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -42,18 +41,6 @@ const save = async (formValues: any) => {
       return;
     }
 
-    const duplicateResponse = await checkDuplicateByRole({
-      email: formValues.email,
-      cedula: formValues.cedula,
-      role: USER_TYPES.PROFESSOR,
-      username: formValues.username || ''
-    });
-
-    if (duplicateResponse.data?.isValid === false) {
-      toast.error(duplicateResponse.data?.message || 'Duplicate entry found');
-      return;
-    }
-
     const formData = new FormData();
     Object.keys(formValues).forEach((key) => {
       formData.append(key, formValues[key]);
@@ -65,57 +52,49 @@ const save = async (formValues: any) => {
       toggle(null, true);
     }
   } catch (error) {
-    console.error('Error creating teacher:', error);
     toast.error('Error creating teacher');
   }
 };
 
-  const update = async (values: any) => {
-    try {
-      const { id, image, ...rest } = values;
-
-      const duplicateResponse = await checkDuplicateByRole({
-        email: rest.email,
-        cedula: rest.cedula,
-        role: USER_TYPES.PROFESSOR, 
-        username: rest.username , 
-        excludeUserId: id
-      });
-      
-      if (duplicateResponse.data?.isValid === false) {
-        toast.error(duplicateResponse.data?.message);
-        return;
-      }
-
-      let payload: any = rest;
-
-      if (
-        image &&
-        typeof image === 'object' &&
-        !(image instanceof File) &&
-        Object.keys(image).length === 0
-      ) {
-        rest.image = '';
-      }
-
-      if (image instanceof File) {
-        const fd = new FormData();
-        Object.entries(rest).forEach(([k, v]) => fd.append(k, v as any));
-        fd.append('image', image);
-        payload = fd;
-      }
-
-      const res = await updateProfessor(id, payload);
-      if (res.statusCode === 200) {
-        toast.success('Teacher updated successfully!');
-        setImagePreview(null);
-        toggle(null, true);
-      }
-    } catch (error) {
-      console.error('Error updating teacher:', error);
-      toast.error('Error updating teacher');
+const update = async (values: any) => {
+  try {
+    const emailValidation = validateEmailFormat(values.email);
+    if (!emailValidation.isValid) {
+      toast.error(emailValidation.message);
+      return;
     }
-  };
+
+    const { id, image, ...rest } = values;
+
+    let payload: any = rest;
+
+    if (
+      image &&
+      typeof image === 'object' &&
+      !(image instanceof File) &&
+      Object.keys(image).length === 0
+    ) {
+      rest.image = '';
+    }
+
+    if (image instanceof File) {
+      const fd = new FormData();
+      Object.entries(rest).forEach(([k, v]) => fd.append(k, v as any));
+      fd.append('image', image);
+      payload = fd;
+    }
+
+    const res = await updateProfessor(id, payload);
+    if (res.statusCode === 200) {
+      toast.success('Teacher updated successfully!');
+      setImagePreview(null);
+      toggle(null, true);
+    }
+  } catch (error) {
+    toast.error('Error updating teacher');
+  }
+};
+
   const NameField = ({ field, form, ...props }: any) => {
     const suffix = 'Brighton';
     let baseValue = field.value || '';
@@ -179,10 +158,11 @@ const save = async (formValues: any) => {
                   report_link: '',
                 }
           }
+          validationSchema={validations}
           onSubmit={(info) => (data ? update(info) : save(info))}
         >
           {(props) => {
-            const { errors, handleSubmit, isSubmitting, setFieldValue, dirty } =
+            const { errors, handleSubmit, isSubmitting, setFieldValue, dirty, touched } =
               props;
             const handleImageChange = (
               event: React.ChangeEvent<HTMLInputElement>
@@ -237,10 +217,11 @@ const save = async (formValues: any) => {
                   </div>
                 </Col>
                 <Col xs={6}>
-                  <Label for='name'>Name</Label>
+                  <Label for='name'>Name *</Label>
                   <Field
                     name='name'
                     as={Input}
+                    invalid={touched.name && !!errors.name}
                   />
                   <ErrorMessage
                     name='name'
@@ -248,11 +229,12 @@ const save = async (formValues: any) => {
                   />
                 </Col>
                 <Col xs={6}>
-                  <Label for='username'>Username</Label>
+                  <Label for='username'>Username </Label>
                   <Field
                     name='username'
                     as={Input}
                     component={NameField}
+                    invalid={touched.username && !!errors.username}
                   />
                   <ErrorMessage
                     name='username'
@@ -260,10 +242,11 @@ const save = async (formValues: any) => {
                   />
                 </Col>
                 <Col xs={6}>
-                  <Label for='email'>Email</Label>
+                  <Label for='email'>Email </Label>
                   <Field
                     name='email'
                     as={Input}
+                    invalid={touched.email && !!errors.email}
                   />
                   <ErrorMessage
                     name='email'
@@ -308,6 +291,7 @@ const save = async (formValues: any) => {
                   <Field
                     name='cedula'
                     as={Input}
+                    invalid={touched.cedula && !!errors.cedula}
                   />
                   <ErrorMessage
                     name='cedula'
@@ -315,11 +299,13 @@ const save = async (formValues: any) => {
                   />
                 </Col>
                 <Col xs={6}>
-                  <Label for='hourly_rate'>Hourly Rate</Label>
+                  <Label for='hourly_rate'>Hourly Rate </Label>
                   <Field
                     name='hourly_rate'
                     as={Input}
                     type='number'
+                    step='0.01'
+                    invalid={touched.hourly_rate && !!errors.hourly_rate}
                   />
                   <ErrorMessage
                     name='hourly_rate'
@@ -379,3 +365,18 @@ const save = async (formValues: any) => {
 };
 
 export default TeacherForm;
+
+const validations = Yup.object().shape({
+  name: Yup.string().required('The name is required'),
+  username: Yup.string().required('The username is required'),
+  email: Yup.string()
+    .email('Please enter a valid email')
+    .required('The email is required'),
+  cedula: Yup.string()
+    .min(10, 'Cédula must be exactly 10 characters long')
+    .max(10, 'Cédula must be exactly 10 characters long')
+    .required('Cédula is required'),
+  hourly_rate: Yup.number()
+    .positive('Hourly rate must be a positive number')
+    .required('Hourly rate is required'),
+});
