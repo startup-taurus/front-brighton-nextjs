@@ -18,6 +18,7 @@ import { getActiveCourses } from 'helper/api-data/course';
 import { getAllLevels } from 'helper/api-data/level';
 import { createStudent, updateStudent } from 'helper/api-data/student';
 import { toast } from 'react-toastify';
+import { validateEmailFormat } from '../../../../utils/utils';
 import * as Yup from 'yup';
 import { parse } from 'date-fns';
 
@@ -110,36 +111,56 @@ const StudentForm = ({
     }
   }, [data]);
 
-  const save = async (row: any) => {
-    try {
-      setIsLoading(true);
 
-      const processedData = {
-        ...row,
-        book_given:
-          typeof row.book_given === 'string'
-            ? row.book_given === 'true'
-            : Boolean(row.book_given),
-      };
-      const response = await createStudent(processedData);
-      if (response.statusCode === 200) {
-        toast.success('Student created successfull!');
-        toggle();
-
-        if (onReload) {
-          onReload();
-        }
-        onSuccessCreate && onSuccessCreate(data?.user?.id);
-      }
-    } finally {
-      setIsLoading(false);
+const save = async (row: any) => {
+  try {
+    setIsLoading(true);
+    const emailValidation = validateEmailFormat(row.email);
+    if (!emailValidation.isValid) {
+      toast.error(emailValidation.message);
+      return;
     }
-  };
+
+    const processedData = {
+      ...row,
+      book_given:
+        typeof row.book_given === 'string'
+          ? row.book_given === 'true'
+          : Boolean(row.book_given),
+    };
+    
+    const response = await createStudent(processedData);
+    if (response.statusCode === 200) {
+      toggle();
+      toast.success('Student created successfully!');
+      
+      if (onSuccessCreate) {
+        onSuccessCreate();
+      }
+      
+      if (onReload) {
+        onReload();
+      }
+    }
+  } catch (error) {
+    toast.error('Error creating student');
+  } finally {
+    setIsLoading(false);
+  }
+};
+
+// ... existing code ...
 
   const update = async (data: any) => {
     try {
       setIsLoading(true);
-
+  
+      const emailValidation = validateEmailFormat(data.email);
+      if (!emailValidation.isValid) {
+        toast.error(emailValidation.message);
+        return;
+      }
+  
       const processedData = {
         ...data,
         book_given:

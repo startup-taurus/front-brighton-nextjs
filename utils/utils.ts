@@ -961,3 +961,21 @@ export const formatEventTime = (date: Date | null | undefined): string => {
     minute: '2-digit' 
   }) || '';
 };
+
+export const validateEmailFormat = (email: string): { isValid: boolean; message?: string } => {
+  if (!email) {
+    return { isValid: false, message: 'Email is required' };
+  }
+
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  
+  if (!emailRegex.test(email)) {
+    return { isValid: false, message: 'Email must contain @ and . in the correct format (e.g., user@domain.com)' };
+  }
+
+  if (email.includes('@@@') || email.includes('...')) {
+    return { isValid: false, message: 'Invalid email format' };
+  }
+
+  return { isValid: true };
+};

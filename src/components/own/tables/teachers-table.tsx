@@ -115,7 +115,7 @@ const TeachersTable = ({ reload }: any) => {
     },
     {
       name: 'Names',
-      selector: (row: any) => `${row.user.name}`,
+      selector: (row: any) => `${row.user.name}`.toUpperCase(),
       sortable: true,
       center: false,
     },
@@ -127,13 +127,13 @@ const TeachersTable = ({ reload }: any) => {
     },
     {
       name: 'Phone',
-      selector: (row: any) => `${row.phone}`,
+      selector: (row: any) => `${row.phone}`.toUpperCase(),
       sortable: true,
       center: false,
     },
     {
       name: 'Hourly Rate',
-      selector: (row: any) => `${row.hourly_rate}`,
+      selector: (row: any) => `${row.hourly_rate}`.toUpperCase(),
       sortable: true,
       center: false,
     },

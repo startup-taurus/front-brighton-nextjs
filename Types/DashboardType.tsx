@@ -116,6 +116,7 @@ export interface Course {
     hasBeenTakenAttendance: boolean;
     endThisMonth: boolean;
     endsInTwoWeeks: boolean;
+    startsInTwoWeeks: boolean;
     isAlreadyEnd: boolean;
   };
 }

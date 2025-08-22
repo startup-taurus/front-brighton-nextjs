@@ -220,7 +220,7 @@ const TransferStudentsTable = ({ reload }: { reload: boolean }) => {
     },
     {
       name: 'Course',
-      selector: (row: any) => row.selected_course?.course_name || '-',
+      selector: (row: any) => row.selected_course?.course_name,
       sortable: true,
     },
     {
@@ -230,12 +230,12 @@ const TransferStudentsTable = ({ reload }: { reload: boolean }) => {
     },
     {
       name: 'Type',
-      selector: (row: any) => (row.is_group ? 'Group' : 'Individual'),
+      selector: (row: any) => (row.is_group ? 'Group' : 'Individual').toUpperCase(),
       sortable: true,
     },
     {
       name: 'Created By',
-      selector: (row: any) => row.created_by?.name || '-',
+      selector: (row: any) => (row.created_by?.name || '-').toUpperCase(),
       sortable: true,
     },
     {
@@ -245,7 +245,7 @@ const TransferStudentsTable = ({ reload }: { reload: boolean }) => {
           year: 'numeric',
           month: 'short',
           day: 'numeric',
-        }),
+        }).toUpperCase(),
       sortable: true,
     },
   ];

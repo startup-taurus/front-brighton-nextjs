@@ -1,4 +1,5 @@
 import { getFetcher, postFetcher, putFetcher, deleteFetcher } from '../api';
+
 export const getAllStudent = (
   page: number,
   limit: number,
@@ -121,3 +122,4 @@ export const getBestStudentsByCourse = (
   if (levelId) url += `&level_id=${levelId}`;
   return getFetcher(url, false);
 };
+

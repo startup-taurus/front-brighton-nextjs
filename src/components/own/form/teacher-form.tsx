@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { ErrorMessage, Field, Formik } from 'formik';
+import { toast } from 'react-toastify';
+import * as Yup from 'yup';
 
 import {
   Button,
@@ -16,6 +18,7 @@ import {
 import LoadingButton from '../common/loading-button/LoadingButton';
 import { createProfessor, updateProfessor } from 'helper/api-data/professor';
 import { ImgPath, UrlImage } from 'utils/Constant';
+import { validateEmailFormat } from '../../../../utils/utils';
 
 const TeacherForm = ({ data, isOpen, toggle }: any) => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -30,49 +33,68 @@ const TeacherForm = ({ data, isOpen, toggle }: any) => {
     }
   }, [isOpen, data]);
 
-  const save = async (data: any) => {
-    try {
-      const formData = new FormData();
-      Object.keys(data).forEach((key) => {
-        formData.append(key, data[key]);
-      });
+const save = async (formValues: any) => {
+  try {
+    const emailValidation = validateEmailFormat(formValues.email);
+    if (!emailValidation.isValid) {
+      toast.error(emailValidation.message);
+      return;
+    }
 
-      const response = await createProfessor(formData);
-      if (response.statusCode === 200) {
-        toggle(null, true);
-      }
-    } catch (error) {}
-  };
+    const formData = new FormData();
+    Object.keys(formValues).forEach((key) => {
+      formData.append(key, formValues[key]);
+    });
 
-  const update = async (values: any) => {
-    try {
-      const { id, image, ...rest } = values;
+    const response = await createProfessor(formData);
+    if (response.statusCode === 200) {
+      toast.success('Teacher created successfully!');
+      toggle(null, true);
+    }
+  } catch (error) {
+    toast.error('Error creating teacher');
+  }
+};
 
-      let payload: any = rest;
+const update = async (values: any) => {
+  try {
+    const emailValidation = validateEmailFormat(values.email);
+    if (!emailValidation.isValid) {
+      toast.error(emailValidation.message);
+      return;
+    }
 
-      if (
-        image &&
-        typeof image === 'object' &&
-        !(image instanceof File) &&
-        Object.keys(image).length === 0
-      ) {
-        rest.image = '';
-      }
+    const { id, image, ...rest } = values;
 
-      if (image instanceof File) {
-        const fd = new FormData();
-        Object.entries(rest).forEach(([k, v]) => fd.append(k, v as any));
-        fd.append('image', image);
-        payload = fd;
-      }
+    let payload: any = rest;
 
-      const res = await updateProfessor(id, payload);
-      if (res.statusCode === 200) {
-        setImagePreview(null);
-        toggle(null, true);
-      }
-    } catch (err) {}
-  };
+    if (
+      image &&
+      typeof image === 'object' &&
+      !(image instanceof File) &&
+      Object.keys(image).length === 0
+    ) {
+      rest.image = '';
+    }
+
+    if (image instanceof File) {
+      const fd = new FormData();
+      Object.entries(rest).forEach(([k, v]) => fd.append(k, v as any));
+      fd.append('image', image);
+      payload = fd;
+    }
+
+    const res = await updateProfessor(id, payload);
+    if (res.statusCode === 200) {
+      toast.success('Teacher updated successfully!');
+      setImagePreview(null);
+      toggle(null, true);
+    }
+  } catch (error) {
+    toast.error('Error updating teacher');
+  }
+};
+
   const NameField = ({ field, form, ...props }: any) => {
     const suffix = 'Brighton';
     let baseValue = field.value || '';
@@ -136,10 +158,11 @@ const TeacherForm = ({ data, isOpen, toggle }: any) => {
                   report_link: '',
                 }
           }
+          validationSchema={validations}
           onSubmit={(info) => (data ? update(info) : save(info))}
         >
           {(props) => {
-            const { errors, handleSubmit, isSubmitting, setFieldValue, dirty } =
+            const { errors, handleSubmit, isSubmitting, setFieldValue, dirty, touched } =
               props;
             const handleImageChange = (
               event: React.ChangeEvent<HTMLInputElement>
@@ -198,6 +221,7 @@ const TeacherForm = ({ data, isOpen, toggle }: any) => {
                   <Field
                     name='name'
                     as={Input}
+                    invalid={touched.name && !!errors.name}
                   />
                   <ErrorMessage
                     name='name'
@@ -205,11 +229,12 @@ const TeacherForm = ({ data, isOpen, toggle }: any) => {
                   />
                 </Col>
                 <Col xs={6}>
-                  <Label for='username'>Username</Label>
+                  <Label for='username'>Username </Label>
                   <Field
                     name='username'
                     as={Input}
                     component={NameField}
+                    invalid={touched.username && !!errors.username}
                   />
                   <ErrorMessage
                     name='username'
@@ -217,10 +242,11 @@ const TeacherForm = ({ data, isOpen, toggle }: any) => {
                   />
                 </Col>
                 <Col xs={6}>
-                  <Label for='email'>Email</Label>
+                  <Label for='email'>Email </Label>
                   <Field
                     name='email'
                     as={Input}
+                    invalid={touched.email && !!errors.email}
                   />
                   <ErrorMessage
                     name='email'
@@ -265,6 +291,7 @@ const TeacherForm = ({ data, isOpen, toggle }: any) => {
                   <Field
                     name='cedula'
                     as={Input}
+                    invalid={touched.cedula && !!errors.cedula}
                   />
                   <ErrorMessage
                     name='cedula'
@@ -272,11 +299,13 @@ const TeacherForm = ({ data, isOpen, toggle }: any) => {
                   />
                 </Col>
                 <Col xs={6}>
-                  <Label for='hourly_rate'>Hourly Rate</Label>
+                  <Label for='hourly_rate'>Hourly Rate </Label>
                   <Field
                     name='hourly_rate'
                     as={Input}
                     type='number'
+                    step='0.01'
+                    invalid={touched.hourly_rate && !!errors.hourly_rate}
                   />
                   <ErrorMessage
                     name='hourly_rate'
@@ -336,3 +365,18 @@ const TeacherForm = ({ data, isOpen, toggle }: any) => {
 };
 
 export default TeacherForm;
+
+const validations = Yup.object().shape({
+  name: Yup.string().required('The name is required'),
+  username: Yup.string().required('The username is required'),
+  email: Yup.string()
+    .email('Please enter a valid email')
+    .required('The email is required'),
+  cedula: Yup.string()
+    .min(10, 'Cédula must be exactly 10 characters long')
+    .max(10, 'Cédula must be exactly 10 characters long')
+    .required('Cédula is required'),
+  hourly_rate: Yup.number()
+    .positive('Hourly rate must be a positive number')
+    .required('Hourly rate is required'),
+});

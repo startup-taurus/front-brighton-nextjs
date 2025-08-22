@@ -15,6 +15,7 @@ import TableSkeleton from '@/components/own/common/table-skeleton/TableSkeleton'
 import StudentTransferTable from '@/components/Dashboard/SchoolManagenement/StudentsTransferTable';
 import StudentPerformanceChart from '@/components/own/charts/student-performance-chart';
 import CoursesCalendar from '@/components/own/calendar/courses-calendar';
+import AbsenceReportTable from '@/components/own/absence-report-table/absence-report-table';
 
 const SchoolManagement = () => {
   const [loading, setLoading] = useState(true);
@@ -198,6 +199,7 @@ const SchoolManagement = () => {
                 <>
                   <ProfessorsTable />
                   <StudentTransferTable />
+                  <AbsenceReportTable />
                 </>
               )}
             </Row>

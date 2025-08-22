@@ -18,3 +18,10 @@ export interface EditData {
   hours?: number;
   topic?: string;
 }
+
+export interface AbsenceReportData {
+  course_code: string;
+  course_name: string;
+  student_name: string;
+  consecutive_absences: number;
+}

@@ -8,7 +8,6 @@ import {
   FormikHelpers,
 } from 'formik';
 import { Col, FormFeedback, FormGroup, Input, Label, Button } from 'reactstrap';
-import LoadingButton from '../common/loading-button/LoadingButton';
 
 import * as Yup from 'yup';
 import {
@@ -21,7 +20,6 @@ import { parse } from 'date-fns';
 import { LanguageProvider, useLanguage } from '../context/LanguageContext';
 import LanguageToggle from './LanguageToggle';
 
-// Main component that provides the language context
 const StudentsRegistrationForm = () => {
   return (
     <LanguageProvider>
@@ -30,86 +28,85 @@ const StudentsRegistrationForm = () => {
   );
 };
 
-// Inner component that uses the language context
 const RegistrationFormContent = () => {
   const { t, language } = useLanguage();
-  // Create validation schema using the current language
-  // This will be recreated whenever the language changes
-  const validations = React.useMemo(
-    () =>
-      Yup.object().shape({
-        first_name: Yup.string().required(t('first_name_required')),
-        middle_name: Yup.string().required(t('middle_name_required')),
-        last_name: Yup.string().required(t('last_name_required')),
-        second_last_name: Yup.string().required(t('second_last_name_required')),
-        id_number: Yup.string()
-          .min(10, t('id_number_min'))
-          .max(10, t('id_number_max'))
-          .required(t('id_number_required')),
-        birthday: Yup.date()
-          .max(new Date(), t('birthday_invalid'))
-          .transform((value, originalValue, schema) => {
-            if (schema.isType(value)) {
-              return value;
-            }
-            const result = parse(originalValue, 'dd-MM-yyyy', new Date());
-            return result;
-          })
-          .typeError(t('birthday_invalid'))
-          .required(t('birthday_required')),
-        phone_number: Yup.string()
-          .min(10, t('phone_min'))
-          .max(10, t('phone_max'))
-          .required(t('phone_required')),
-        email: Yup.string().required(t('email_required')),
-        address: Yup.string().required(t('address_required')),
-        age_category: Yup.string().required(t('age_category_required')),
-        emergency_contact_name: Yup.string().when('age_category', {
-          is: 'kids',
-          then: () => Yup.string().required(t('emergency_name_required')),
-          otherwise: () => Yup.string(),
-        }),
-        emergency_contact_phone: Yup.string().when('age_category', {
-          is: 'kids',
 
-          then: () =>
-            Yup.string()
-              .min(10, t('phone_min'))
-              .max(10, t('phone_max'))
-              .required(t('emergency_phone_required'))
-              .test(
-                'different-phone',
-                t('emergency_phone_different'),
-                function (value) {
-                  return !value || this.parent.phone_number !== value;
-                }
-              ),
-          otherwise: () =>
-            Yup.string()
-              .test(
-                'different-phone',
-                t('emergency_phone_different'),
-                function (value) {
-                  return !value || this.parent.phone_number !== value;
-                }
-              )
-              .min(10, t('phone_min'))
-              .max(10, t('phone_max')),
-        }),
-        emergency_contact_relationship: Yup.string().when('age_category', {
-          is: 'kids',
-          then: () =>
-            Yup.string().required(t('emergency_relationship_required')),
-          otherwise: () => Yup.string(),
-        }),
-        level_id: Yup.string().required(t('level_required')),
-        schedule: Yup.string().required(t('schedule_required')),
-        same_billing: Yup.string().required(t('billing_required')),
-        billing_address: Yup.string(),
-        isAcceptedTermsAndCondition: Yup.string().required(t('terms_required')),
+const validations = React.useMemo(
+  () =>
+    Yup.object().shape({
+      first_name: Yup.string().required(t('first_name_required')),
+      middle_name: Yup.string().required(t('middle_name_required')),
+      last_name: Yup.string().required(t('last_name_required')),
+      second_last_name: Yup.string().required(t('second_last_name_required')),
+      id_number: Yup.string()
+        .min(10, t('id_number_min'))
+        .max(10, t('id_number_max'))
+        .required(t('id_number_required')),
+      birthday: Yup.date()
+        .max(new Date(), t('birthday_invalid'))
+        .transform((value, originalValue, schema) => {
+          if (schema.isType(value)) {
+            return value;
+          }
+          const result = parse(originalValue, 'dd-MM-yyyy', new Date());
+          return result;
+        })
+        .typeError(t('birthday_invalid'))
+        .required(t('birthday_required')),
+      phone_number: Yup.string()
+        .min(10, t('phone_min'))
+        .max(10, t('phone_max'))
+        .required(t('phone_required')),
+      email: Yup.string()
+        .email(t('email_invalid'))
+        .required(t('email_required')),
+      address: Yup.string().required(t('address_required')),
+      age_category: Yup.string().required(t('age_category_required')),
+      emergency_contact_name: Yup.string().when('age_category', {
+        is: 'kids',
+        then: () => Yup.string().required(t('emergency_name_required')),
+        otherwise: () => Yup.string(),
       }),
-    [language, t]
-  ); // Recreate validation schema when language changes
+      emergency_contact_phone: Yup.string().when('age_category', {
+        is: 'kids',
+        then: () =>
+          Yup.string()
+            .min(10, t('phone_min'))
+            .max(10, t('phone_max'))
+            .required(t('emergency_phone_required'))
+            .test(
+              'different-phone',
+              t('emergency_phone_different'),
+              function (value) {
+                return !value || this.parent.phone_number !== value;
+              }
+            ),
+        otherwise: () =>
+          Yup.string()
+            .test(
+              'different-phone',
+              t('emergency_phone_different'),
+              function (value) {
+                return !value || this.parent.phone_number !== value;
+              }
+            )
+            .min(10, t('phone_min'))
+            .max(10, t('phone_max')),
+      }),
+      emergency_contact_relationship: Yup.string().when('age_category', {
+        is: 'kids',
+        then: () =>
+          Yup.string().required(t('emergency_relationship_required')),
+        otherwise: () => Yup.string(),
+      }),
+      level_id: Yup.string().required(t('level_required')),
+      schedule: Yup.string().required(t('schedule_required')),
+      same_billing: Yup.string().required(t('billing_required')),
+      billing_address: Yup.string(),
+      isAcceptedTermsAndCondition: Yup.string().required(t('terms_required')),
+    }),
+  [language, t]
+);
 
   const currentDate = new Date();
   const maxDate =
