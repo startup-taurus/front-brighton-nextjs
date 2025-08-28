@@ -1,5 +1,5 @@
-import React, { useContext } from 'react';
-import { ErrorMessage, Field, Formik } from 'formik';
+import React, {useContext, useState} from 'react';
+import {ErrorMessage, Field, Formik} from 'formik';
 import {
   Button,
   Col,
@@ -11,27 +11,38 @@ import {
   ModalHeader,
 } from 'reactstrap';
 import LoadingButton from '../common/loading-button/LoadingButton';
-import { createHoliday, updateHoliday } from 'helper/api-data/holidays';
-import { UserContext } from '../../../../helper/User';
+import {createHoliday, updateHoliday} from 'helper/api-data/holidays';
+import {UserContext} from '../../../../helper/User';
 import usePermission from '../../../../hooks/usePermission';
-import { PERMISSIONS } from '../../../../utils/permissions';
-import { toast } from 'react-toastify';
-import { USER_TYPES } from 'utils/constants';
+import {PERMISSIONS} from '../../../../utils/permissions';
+import {toast} from 'react-toastify';
+import {USER_TYPES} from 'utils/constants';
 
-const HolidayForm = ({ data, isOpen, toggle }: any) => {
-  const { user } = useContext(UserContext);
-  const { can } = usePermission();
+const HolidayForm = ({data, isOpen, toggle, onReload}: any) => {
+  const {user} = useContext(UserContext);
+  const {can} = usePermission();
+  const [isLoading, setIsLoading] = useState(false);
   const isCoordinator = user?.role === USER_TYPES.COORDINATOR;
   const canCreateHoliday = can(PERMISSIONS.CREATE_HOLIDAY);
   const canEditHoliday = can(PERMISSIONS.EDIT_HOLIDAY);
+
   const save = async (data: any) => {
     try {
+      setIsLoading(true);
       const response = await createHoliday(data);
       if (response.statusCode === 200) {
         toggle();
+        toast.success('Holiday created successfully');
+
+        if (onReload) {
+          onReload();
+        }
       }
     } catch (error) {
       console.error('Error creating holiday:', error);
+      toast.error('Error creating holiday');
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -41,21 +52,26 @@ const HolidayForm = ({ data, isOpen, toggle }: any) => {
       return;
     }
     try {
+      setIsLoading(true);
       const response = await updateHoliday(data.id, data);
       if (response.statusCode === 200) {
         toggle();
+        toast.success('Holiday updated successfully');
+
+        if (onReload) {
+          onReload();
+        }
       }
     } catch (error) {
       console.error('Error updating holiday:', error);
+      toast.error('Error updating holiday');
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return (
-    <Modal
-      isOpen={isOpen}
-      toggle={toggle}
-      size='lg'
-    >
+    <Modal isOpen={isOpen} toggle={toggle} size='lg'>
       <ModalHeader toggle={toggle}>
         {data ? 'Edit Holiday' : 'Add New Holiday'}
       </ModalHeader>
@@ -82,7 +98,7 @@ const HolidayForm = ({ data, isOpen, toggle }: any) => {
           onSubmit={(info) => (data ? update(info) : save(info))}
         >
           {(props) => {
-            const { errors, handleSubmit, isSubmitting, dirty } = props;
+            const {errors, handleSubmit, isSubmitting, dirty} = props;
             return (
               <form
                 noValidate
@@ -92,54 +108,27 @@ const HolidayForm = ({ data, isOpen, toggle }: any) => {
               >
                 <Col xs={6}>
                   <Label for='holiday_name'>Holiday Name</Label>
-                  <Field
-                    name='holiday_name'
-                    as={Input}
-                  />
-                  <ErrorMessage
-                    name='holiday_name'
-                    component={FormFeedback}
-                  />
+                  <Field name='holiday_name' as={Input} />
+                  <ErrorMessage name='holiday_name' component={FormFeedback} />
                 </Col>
                 <Col xs={6}>
                   <Label for='holiday_date'>Holiday Date</Label>
-                  <Field
-                    name='holiday_date'
-                    as={Input}
-                    type='date'
-                  />
-                  <ErrorMessage
-                    name='holiday_date'
-                    component={FormFeedback}
-                  />
+                  <Field name='holiday_date' as={Input} type='date' />
+                  <ErrorMessage name='holiday_date' component={FormFeedback} />
                 </Col>
                 <Col xs={12}>
                   <Label for='description'>Description</Label>
-                  <Field
-                    name='description'
-                    as={Input}
-                    type='textarea'
-                  />
-                  <ErrorMessage
-                    name='description'
-                    component={FormFeedback}
-                  />
+                  <Field name='description' as={Input} type='textarea' />
+                  <ErrorMessage name='description' component={FormFeedback} />
                 </Col>
                 <Col xs={6}>
                   <Label for='holiday_type'>Holiday Type</Label>
-                  <Field
-                    name='holiday_type'
-                    as={Input}
-                    type='select'
-                  >
+                  <Field name='holiday_type' as={Input} type='select'>
                     <option value='national'>National</option>
                     <option value='regional'>Regional</option>
                     <option value='local'>Local</option>
                   </Field>
-                  <ErrorMessage
-                    name='holiday_type'
-                    component={FormFeedback}
-                  />
+                  <ErrorMessage name='holiday_type' component={FormFeedback} />
                 </Col>
                 <Col xs={6}>
                   <Label for='status'>Status</Label>
@@ -149,36 +138,24 @@ const HolidayForm = ({ data, isOpen, toggle }: any) => {
                     type='select'
                     id='studentFilter'
                   >
-                    <option
-                      value=''
-                      disabled
-                    >
+                    <option value='' disabled>
                       Select status of student
                     </option>
                     <option value='active'>Active</option>
                     <option value='inactive'>Inactive</option>
                   </Field>
-                  <ErrorMessage
-                    name='status'
-                    component={FormFeedback}
-                  />
+                  <ErrorMessage name='status' component={FormFeedback} />
                 </Col>
-                <Col
-                  xs={12}
-                  className='d-flex justify-content-end mt-5'
-                >
-                  <Button
-                    color='cancel'
-                    onClick={toggle}
-                  >
+                <Col xs={12} className='d-flex justify-content-end mt-5'>
+                  <Button color='cancel' onClick={toggle}>
                     Close
                   </Button>
                   &nbsp; &nbsp;
                   <LoadingButton
                     color='primary'
                     type='submit'
-                    isLoading={isSubmitting}
-                    disabled={data && !dirty}
+                    isLoading={isSubmitting || isLoading}
+                    disabled={(data && !dirty) || isLoading}
                     loadingText={data ? 'Updating...' : 'Saving...'}
                     defaultText={data ? 'Update' : 'Save'}
                   />

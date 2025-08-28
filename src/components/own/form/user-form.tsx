@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ErrorMessage, Field, Formik } from 'formik';
 import { toast } from 'react-toastify';
 import * as Yup from 'yup';
@@ -18,8 +18,21 @@ import LoadingButton from '../common/loading-button/LoadingButton';
 import { createUser, updateUser } from 'helper/api-data/user';
 import { USER_ROLES } from '../../../../utils/constants';
 import { validateEmailFormat } from '../../../../utils/utils';
+import { ImgPath, UrlImage } from 'utils/Constant';
 
 const UserForm = ({ data, isOpen, toggle }: any) => {
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (data && data.image) {
+      setImagePreview(
+        `${UrlImage}/${data.image}?t=${new Date().getTime()}`
+      );
+    } else if (!isOpen) {
+      setImagePreview(null);
+    }
+  }, [isOpen, data]);
+
 const save = async (formValues: any) => {
   try {
     const emailValidation = validateEmailFormat(formValues.email);
@@ -28,10 +41,31 @@ const save = async (formValues: any) => {
       return;
     }
 
-    const response = await createUser(formValues);
+    const { image, ...rest } = formValues;
+
+    let payload: any = rest;
+
+    if (
+      image &&
+      typeof image === 'object' &&
+      !(image instanceof File) &&
+      Object.keys(image).length === 0
+    ) {
+      rest.image = '';
+    }
+
+    if (image instanceof File) {
+      const fd = new FormData();
+      Object.entries(rest).forEach(([k, v]) => fd.append(k, v as any));
+      fd.append('image', image);
+      payload = fd;
+    }
+
+    const response = await createUser(payload);
     if (response.statusCode === 200) {
       toast.success('User created successfully!');
-      toggle();
+      setImagePreview(null);
+      toggle(null, true);
     }
   } catch (error) {
     toast.error('Error creating user');
@@ -46,10 +80,30 @@ const update = async (formValues: any) => {
       return;
     }
 
-    const response = await updateUser(formValues.id, formValues);
+    const { id, image, ...rest } = formValues;
+
+    let payload: any = rest;
+
+    if (
+      image &&
+      typeof image === 'object' &&
+      !(image instanceof File) &&
+      Object.keys(image).length === 0
+    ) {
+      rest.image = '';
+    }
+
+    if (image instanceof File) {
+      const fd = new FormData();
+      Object.entries(rest).forEach(([k, v]) => fd.append(k, v as any));
+      fd.append('image', image);
+      payload = fd;
+    }
+
+    const response = await updateUser(id, payload);
     if (response.statusCode === 200) {
       toast.success('User updated successfully!');
-      toggle();
+      toggle(null, true);
     }
   } catch (error) {
     toast.error('Error updating user');
@@ -109,6 +163,7 @@ const validations = Yup.object().shape({
                   password: data.password,
                   role: data.role,
                   status: data.status,
+                  image: data.image,
                 }
               : {
                   name: '',
@@ -117,13 +172,25 @@ const validations = Yup.object().shape({
                   password: '',
                   role: '',
                   status: 'active',
+                  image: '',
                 }
           }
           validationSchema={validations}
           onSubmit={(info) => (data ? update(info) : save(info))}
         >
           {(props) => {
-            const { errors, handleSubmit, isSubmitting, dirty, touched } = props;
+            const { errors, handleSubmit, isSubmitting, dirty, touched, setFieldValue } = props;
+            
+            const handleImageChange = (
+              event: React.ChangeEvent<HTMLInputElement>
+            ) => {
+              const file = event.target.files?.[0];
+              if (file) {
+                setImagePreview(URL.createObjectURL(file));
+                setFieldValue('image', file);
+              }
+            };
+
             return (
               <form
                 noValidate
@@ -131,6 +198,41 @@ const validations = Yup.object().shape({
                 onSubmit={handleSubmit}
                 className={`row g-3`}
               >
+                <Col
+                  xs={12}
+                  className='user-profile d-flex justify-content-center'
+                >
+                  <div className='hovercard text-center card mt-2'>
+                    <div className='card-header mt-4'></div>
+                    <div className='user-image'>
+                      <div className='avatar'>
+                        <img
+                          alt='User Avatar'
+                          src={imagePreview || `${ImgPath}/user/7.jpg`}
+                          className='step1 media'
+                        />
+                      </div>
+                      <div className='icon-wrapper step2'>
+                        <i className='icofont icofont-pencil-alt-5'>
+                          <input
+                            className='upload'
+                            type='file'
+                            name='image'
+                            id='image'
+                            onChange={handleImageChange}
+                            accept='image/*'
+                            style={{
+                              left: 0,
+                              opacity: 0,
+                              position: 'absolute',
+                              right: 0,
+                            }}
+                          />
+                        </i>
+                      </div>
+                    </div>
+                  </div>
+                </Col>
                 <Col xs={6}>
                   <Label for='name'>Name</Label>
                   <Field

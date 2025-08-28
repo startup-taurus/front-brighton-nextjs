@@ -196,7 +196,7 @@ const { data: levels } = useSWR(
   };
 
   useEffect(() => {
-    if (data?.course)
+    if (data?.course && data.course.length > 0)
       setCourseOptions([
         {
           value: data?.course[0].id,
