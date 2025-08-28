@@ -18,7 +18,6 @@ import { getActiveCourses } from 'helper/api-data/course';
 import { getAllLevels } from 'helper/api-data/level';
 import { createStudent, updateStudent } from 'helper/api-data/student';
 import { toast } from 'react-toastify';
-import { validateEmailFormat } from '../../../../utils/utils';
 import * as Yup from 'yup';
 import { parse } from 'date-fns';
 
@@ -80,7 +79,8 @@ const StudentForm = ({
   onReload,
 }: any) => {
   const limit = 10;
-  const [page, setPage] = useState(1);
+  const [coursePage, setCoursePage] = useState(1);
+  const [levelPage, setLevelPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showWarning, setShowWarning] = useState(false);
@@ -91,16 +91,15 @@ const StudentForm = ({
   const [courseOptions, setCourseOptions] = useState<any[]>([]);
   const [levelOptions, setLevelOptions] = useState<any[]>([]);
   const [levelSearchTerm, setLevelSearchTerm] = useState('');
+const { data: course } = useSWR(
+  ['/course/get-active', coursePage, limit, searchTerm],
+  () => getActiveCourses(coursePage, limit, searchTerm)
+);
 
-  const { data: course } = useSWR(
-    ['/course/get-active', page, limit, searchTerm],
-    () => getActiveCourses(page, limit, searchTerm)
-  );
-
-  const { data: levels } = useSWR(
-    ['/level/get-all', page, limit, levelSearchTerm],
-    () => getAllLevels(page, limit, levelSearchTerm)
-  );
+const { data: levels } = useSWR(
+  ['/level/get-all', levelPage, limit, levelSearchTerm],
+  () => getAllLevels(levelPage, limit, levelSearchTerm)
+);
 
   useEffect(() => {
     if (data?.course && Array.isArray(data.course)) {
@@ -111,66 +110,42 @@ const StudentForm = ({
     }
   }, [data]);
 
+  const save = async (row: any) => {
+    try {
+      setIsLoading(true);
 
-const save = async (row: any) => {
-  try {
-    setIsLoading(true);
-    const emailValidation = validateEmailFormat(row.email);
-    if (!emailValidation.isValid) {
-      toast.error(emailValidation.message);
-      return;
-    }
+      const processedData = {
+        ...row,
+        book_given:
+          typeof row.book_given === 'string'
+            ? row.book_given === 'true'
+            : Boolean(row.book_given),
+      };
+      const response = await createStudent(processedData);
+      if (response.statusCode === 200) {
+        toast.success('Student created successfull!');
+        toggle();
 
-    const processedData = {
-      ...row,
-      book_given:
-        typeof row.book_given === 'string'
-          ? row.book_given === 'true'
-          : Boolean(row.book_given),
-    };
-    
-    const response = await createStudent(processedData);
-    if (response.statusCode === 200) {
-      toggle();
-      toast.success('Student created successfully!');
-      
-      if (onSuccessCreate) {
-        onSuccessCreate();
+        if (onReload) {
+          onReload();
+        }
+        onSuccessCreate && onSuccessCreate(data?.user?.id);
       }
-      
-      if (onReload) {
-        onReload();
-      }
+    } finally {
+      setIsLoading(false);
     }
-  } catch (error) {
-    toast.error('Error creating student');
-  } finally {
-    setIsLoading(false);
-  }
-};
-
-// ... existing code ...
+  };
 
   const update = async (data: any) => {
     try {
       setIsLoading(true);
-  
-      const emailValidation = validateEmailFormat(data.email);
-      if (!emailValidation.isValid) {
-        toast.error(emailValidation.message);
-        return;
-      }
-  
+
       const processedData = {
         ...data,
         book_given:
           typeof data.book_given === 'string'
             ? data.book_given === 'true'
             : Boolean(data.book_given),
-        pending_payments:
-          typeof data.pendingPayments === 'string'
-            ? data.pendingPayments === 'true'
-            : Boolean(data.pendingPayments),
       };
       const response = await updateStudent(processedData.id, processedData);
       if (response.statusCode === 200) {
@@ -190,8 +165,8 @@ const save = async (row: any) => {
 
   const onCourseScrollToBottom = () => {
     if (course?.data?.length != 0) {
-      const nextPage = page + 1;
-      setPage(nextPage);
+      const nextPage = coursePage + 1;
+      setCoursePage(nextPage);
     }
   };
 
@@ -203,8 +178,8 @@ const save = async (row: any) => {
         ? levelData.length > 0
         : levelData?.result?.length > 0)
     ) {
-      const nextPage = page + 1;
-      setPage(nextPage);
+      const nextPage = levelPage + 1;
+      setLevelPage(nextPage);
     }
   };
 
@@ -224,16 +199,25 @@ const save = async (row: any) => {
     if (data?.course && data.course.length > 0)
       setCourseOptions([
         {
-          value: data.course[0].id,
+          value: data?.course[0].id,
           label:
-            data.course[0]?.course_number +
+            data?.course[0]?.course_number +
             ' - ' +
-            data.course[0]?.course_name +
+            data?.course[0]?.course_name +
             ' - ' +
-            data.course[0].professor,
+            data?.course[0].professor,
         },
       ]);
-  }, []);
+  }, [data]);
+
+  useEffect(() => {
+    if (data?.level) {
+      setLevelOptions([{
+        value: data.level.id,
+        label: data.level.name || data.level.full_level || '',
+      }]);
+    }
+  }, [data]);
 
   useEffect(() => {
     const options = course?.data
@@ -251,18 +235,18 @@ const save = async (row: any) => {
     let filteredOptions = options;
     if (!isTransfer) {
       filteredOptions = options.filter((courseItem: any) => {
-        return courseItem?.value != (data?.course && data.course.length > 0 ? data.course[0]?.id : null);
+        return courseItem?.value != data?.course?.[0]?.id;
       });
     }
 
     setCourseOptions((prevOptions) => {
-      const combined = [...prevOptions, ...options];
+      const combined = [...prevOptions, ...filteredOptions];
       return combined.filter(
         (option, index, self) =>
           self.findIndex((o) => o.value === option.value) === index
       );
     });
-  }, [course, course?.data]);
+  }, [course, course?.data, isTransfer, data?.course]);
 
   useEffect(() => {
     if (levels?.data) {
@@ -356,9 +340,10 @@ const save = async (row: any) => {
                     username: data?.user?.username,
                     email: data?.user?.email,
                     phone_number: data?.phone_number || '',
-                    pendingPayments: data?.pending_payments || false,
+
                     courseId:
                       data?.course?.length > 0 ? data?.course[0]?.id : '',
+                    level_id: data?.level_id || '',
                   }
                 : {
                     name: '',
@@ -653,10 +638,6 @@ const save = async (row: any) => {
                       as={Input}
                       type='select'
                       id='pendingPayments'
-                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
-                        const boolValue = e.target.value === 'true';
-                        setFieldValue('pendingPayments', boolValue);
-                      }}
                     >
                       <option value='true'>Yes</option>
                       <option value='false'>No</option>
