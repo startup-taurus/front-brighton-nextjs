@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { ErrorMessage, Field, Formik, FieldArray } from 'formik';
+import React, {useEffect, useState} from 'react';
+import {ErrorMessage, Field, Formik, FieldArray} from 'formik';
 import {
   Button,
   Col,
@@ -11,53 +11,217 @@ import {
   FormFeedback,
   Row,
 } from 'reactstrap';
-import { FaTrash } from 'react-icons/fa';
+import {FaTrash} from 'react-icons/fa';
 import * as Yup from 'yup';
+import Swal from 'sweetalert2';
+import {toast} from 'react-toastify';
 
 import LoadingButton from '../common/loading-button/LoadingButton';
-import { createSyllabus, updateSyllabus } from 'helper/api-data/syllabus';
+import {createSyllabus, updateSyllabus} from 'helper/api-data/syllabus';
 import Select from 'react-select';
 import useSWR from 'swr';
-import { getAllLevels } from 'helper/api-data/level';
-import { EXAMS_TYPE, EXAM_TYPE_OPTIONS } from 'utils/constants';
-import { getExamTypeByLevelId, getModulesByExamType } from 'utils/utils';
+import {getAllLevels} from 'helper/api-data/level';
+import {EXAMS_TYPE, EXAM_TYPE_OPTIONS} from 'utils/constants';
+import {getExamTypeByLevelId, getModulesByExamType} from 'utils/utils';
+import {getAllSyllabus} from 'helper/api-data/syllabus';
 
 const EXAMS_LIST = [
   {
     value: EXAMS_TYPE.PRELIM,
     label: 'PRELIMINARY (B1 KIDS/ADULTS) - 4 Modules',
   },
-  { value: EXAMS_TYPE.FIRST, label: 'FIRST (B2 ADULTS) - 4 Modules' },
+  {value: EXAMS_TYPE.FIRST, label: 'FIRST (B2 ADULTS) - 4 Modules'},
 
-  { value: EXAMS_TYPE.STARTERS, label: 'STARTERS (PRE-A1 KIDS) - 3 Modules' },
-  { value: EXAMS_TYPE.MOVERS, label: 'MOVERS (A1 KIDS/ADULTS) - 3 Modules' },
-  { value: EXAMS_TYPE.FLYERS, label: 'FLYERS (A2 KIDS) - 3 Modules' },
-  { value: EXAMS_TYPE.KEY, label: 'KEY (A2 KIDS/ADULTS) - 3 Modules' },
+  {value: EXAMS_TYPE.STARTERS, label: 'STARTERS (PRE-A1 KIDS) - 3 Modules'},
+  {value: EXAMS_TYPE.MOVERS, label: 'MOVERS (A1 KIDS/ADULTS) - 3 Modules'},
+  {value: EXAMS_TYPE.FLYERS, label: 'FLYERS (A2 KIDS) - 3 Modules'},
+  {value: EXAMS_TYPE.KEY, label: 'KEY (A2 KIDS/ADULTS) - 3 Modules'},
 ];
 
 const validations = Yup.object().shape({
   syllabus_name: Yup.string().required('The syllabus name is required'),
   level_id: Yup.number().nullable().required('The level is required'),
+  items: Yup.array()
+    .of(Yup.string().trim())
+    .test(
+      'at-least-one-item',
+      'At least one item is required',
+      function (value) {
+        const validItems =
+          value?.filter((item) => item && item.trim() !== '') || [];
+        return validItems.length > 0;
+      }
+    ),
+  assignments: Yup.array()
+    .of(Yup.string().trim())
+    .test(
+      'at-least-one-assignment',
+      'At least one assignment is required',
+      function (value) {
+        const validAssignments =
+          value?.filter(
+            (assignment) => assignment && assignment.trim() !== ''
+          ) || [];
+        return validAssignments.length > 0;
+      }
+    ),
+  progress_tests: Yup.array()
+    .of(Yup.string().trim())
+    .test(
+      'at-least-one-progress-test',
+      'At least one progress test is required',
+      function (value) {
+        const validTests =
+          value?.filter((test) => test && test.trim() !== '') || [];
+        return validTests.length > 0;
+      }
+    ),
 });
 
-const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
+const SyllabusForm = ({data, isOpen, toggle, isCopy, onReload}: any) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [existingSyllabi, setExistingSyllabi] = useState<any[]>([]);
   const limit = 10;
   const [page, setPage] = useState(1);
   const [levelSearchTerm, setLevelSearchTerm] = useState('');
   const [levelOptions, setLevelOptions] = useState<any[]>([]);
 
-  const { data: levels } = useSWR(
+  const {data: levels} = useSWR(
     ['/level/get-all', page, limit, levelSearchTerm],
     () => getAllLevels(page, limit, levelSearchTerm)
   );
 
-  const save = async (syllabus: any, { setSubmitting }: any) => {
+  const {data: allSyllabi} = useSWR('/syllabus/get-all-for-validation', () =>
+    getAllSyllabus(1, 1000, '')
+  );
+
+  useEffect(() => {
+    if (allSyllabi?.data?.results) {
+      setExistingSyllabi(allSyllabi.data.results);
+    }
+  }, [allSyllabi]);
+
+  const validateArrayNotEmpty = (
+    array: string[] | undefined,
+    fieldName: string
+  ) => {
+    const validItems =
+      array?.filter((item: string) => item && item.trim() !== '') || [];
+    return {
+      isValid: validItems.length > 0,
+      error:
+        validItems.length === 0
+          ? `Please fill in at least one ${fieldName}`
+          : null,
+    };
+  };
+
+  const validateUniqueName = (syllabusName: string) => {
+    if (!syllabusName || syllabusName.trim() === '') {
+      return {isValid: true, error: null};
+    }
+
+    const trimmedName = syllabusName.toLowerCase().trim();
+    let nameExists = false;
+
+    if (!data || isCopy) {
+      nameExists = existingSyllabi.some(
+        (syllabus: any) =>
+          syllabus.syllabus_name &&
+          syllabus.syllabus_name.toLowerCase().trim() === trimmedName
+      );
+    } else {
+      nameExists = existingSyllabi.some(
+        (syllabus: any) =>
+          syllabus.id !== data.id &&
+          syllabus.syllabus_name &&
+          syllabus.syllabus_name.toLowerCase().trim() === trimmedName
+      );
+    }
+
+    return {
+      isValid: !nameExists,
+      error: nameExists ? 'A syllabus with this name already exists' : null,
+    };
+  };
+
+  const validateForm = (values: any) => {
+    const errors = [];
+
+    if (!values.syllabus_name || values.syllabus_name.trim() === '') {
+      errors.push('The syllabus name is required');
+    }
+    if (!values.level_id) {
+      errors.push('The level is required');
+    }
+    const itemValidation = validateArrayNotEmpty(values.items, 'syllabus item');
+    if (!itemValidation.isValid) {
+      errors.push(itemValidation.error!);
+    }
+    const assignmentValidation = validateArrayNotEmpty(
+      values.assignments,
+      'assignment'
+    );
+    if (!assignmentValidation.isValid) {
+      errors.push(assignmentValidation.error!);
+    }
+
+    const progressTestValidation = validateArrayNotEmpty(
+      values.progress_tests,
+      'progress test'
+    );
+    if (!progressTestValidation.isValid) {
+      errors.push(progressTestValidation.error!);
+    }
+
+    const uniqueNameValidation = validateUniqueName(values.syllabus_name);
+    if (!uniqueNameValidation.isValid) {
+      errors.push(uniqueNameValidation.error!);
+    }
+
+    return {isValid: errors.length === 0, errors};
+  };
+  const getValidationErrors = (values: any) => {
+    const {errors} = validateForm(values);
+    return errors;
+  };
+
+  const save = async (syllabus: any, {setSubmitting}: any) => {
+    const validationErrors = getValidationErrors(syllabus);
+
+    if (validationErrors.length > 0) {
+      const duplicateNameError = validationErrors.find((error) =>
+        error.includes('already exists')
+      );
+
+      if (duplicateNameError) {
+        toast.error(duplicateNameError);
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Validation Error',
+          html: `
+            <div style="text-align: center;">
+              <strong>Please fix the following issues:</strong>
+              <ul style="text-align: center; margin-top: 10px; list-style: none; padding: 0;">
+                ${validationErrors.map((error) => `<li style="margin: 5px 0;">${error}</li>`).join('')}
+              </ul>
+            </div>
+          `,
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#d33',
+        });
+      }
+      setSubmitting(false);
+      return;
+    }
+
     setSubmitting(true);
     setIsLoading(true);
     try {
       const response = await createSyllabus(syllabus);
       if (response.statusCode === 200) {
+        toast.success("Syllabus created successfully");
         setSubmitting(false);
         toggle();
         if (onReload) {
@@ -72,12 +236,39 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
     }
   };
 
-  const update = async (syllabus: any, { setSubmitting }: any) => {
+  const update = async (syllabus: any, {setSubmitting}: any) => {
+    const validationErrors = getValidationErrors(syllabus);
+    if (validationErrors.length > 0) {
+      const duplicateNameError = validationErrors.find((error) =>
+        error.includes('already exists')
+      );
+
+      if (duplicateNameError) {
+        toast.error(duplicateNameError);
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'Validation Error',
+          html: `
+            <strong>Please fix the following issues:</strong>
+            <ul style="text-align: left; margin-top: 10px;">
+              ${validationErrors.map((error) => `<li>${error}</li>`).join('')}
+            </ul>
+          `,
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#d33',
+        });
+      }
+      setSubmitting(false);
+      return;
+    }
+
     setSubmitting(true);
     setIsLoading(true);
     try {
       const response = await updateSyllabus(syllabus.id, syllabus);
       if (response.statusCode === 200) {
+        toast.success("Syllabus updated successfully");
         setSubmitting(false);
         toggle();
         if (onReload) {
@@ -101,11 +292,11 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
 
     const normalizeToOption = (item: any) => {
       if (typeof item === 'string') {
-        return { value: item, label: item };
+        return {value: item, label: item};
       }
       const id = item.id || '';
       const label = item.full_level || item.name || item.level || '';
-      return { value: { id }, label };
+      return {value: {id}, label};
     };
 
     const newOptions = rawLevels.map(normalizeToOption);
@@ -129,7 +320,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
           typeof opt.label === 'object'
             ? opt.label.full_level || opt.label.name || ''
             : opt.label;
-        return { value, label };
+        return {value, label};
       });
     });
   }, [levels]);
@@ -178,7 +369,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                     data?.movers_exam ||
                     getModulesByExamType(data?.exam_type || EXAMS_TYPE.PRELIM),
                   percentages: data?.percentages_syllabus || [
-                    { name: '', min: 0, max: 0 },
+                    {name: '', min: 0, max: 0},
                   ],
                   exam_type: data?.exam_type || EXAMS_TYPE.PRELIM,
                 }
@@ -193,11 +384,10 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                   assignments: [],
                   progress_tests: [],
                   exam_modules: [],
-                  percentages: [{ name: '', min: 0, max: 0 }],
+                  percentages: [{name: '', min: 0, max: 0}],
                   exam_type: '',
                 }
           }
-          validationSchema={validations}
           onSubmit={(values, othersProps) =>
             data && !isCopy
               ? update(values, othersProps)
@@ -300,7 +490,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                           type='button'
                           color='primary'
                           onClick={() =>
-                            arrayHelpers.push({ name: '', min: 0, max: 0 })
+                            arrayHelpers.push({name: '', min: 0, max: 0})
                           }
                         >
                           Add Percentage
@@ -335,12 +525,6 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                                   )
                                 }
                                 className='syllabus-input'
-                                min={0}
-                    onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-                     if (["e", "E", "+", "-"].includes(e.key)) {
-                      e.preventDefault();
-                      }
-                    }}
                               />
                             </Col>
                             <Col md={3}>
@@ -355,12 +539,6 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                                   )
                                 }
                                 className='syllabus-input'
-                                min={0}
-                                onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-                                if (["e", "E", "+", "-"].includes(e.key)) {
-                                e.preventDefault();
-                                }
-                                }}
                               />
                             </Col>
                             <Col md={2} className='d-flex align-items-end'>
@@ -401,7 +579,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                 <Col xs={4}>
                   <Label for='level'>Level</Label>
                   <Field name='level_id'>
-                    {({ field, form }: any) => (
+                    {({field, form}: any) => (
                       <Select
                         {...field}
                         id='level'
@@ -441,7 +619,7 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                 <Col xs={12}>
                   <Label for='exam_type'>Exam Type</Label>
                   <Field name='exam_type'>
-                    {({ field, form }: any) => {
+                    {({field, form}: any) => {
                       return (
                         <Select
                           {...field}
@@ -488,26 +666,19 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
 
                 {renderArrayField('items', 'Items')}
 
-              <Col md={4}>
-               <Label for='assig_percentage'>Assignment Percentage %</Label>
-                <Field
+                <Col md={4}>
+                  <Label for='assig_percentage'>Assignment Percentage %</Label>
+                  <Field
                     name='assig_percentage'
                     as={Input}
                     type='number'
                     className='syllabus-input'
-                    min={0}
-                    onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-                     if (["e", "E", "+", "-"].includes(e.key)) {
-                      e.preventDefault();
-                      }
-                    }}
-                    />
+                  />
                   <ErrorMessage
                     name='assig_percentage'
                     component={FormFeedback}
                   />
-                </Col>  
-
+                </Col>
                 <Col md={4}>
                   <Label for='test_percentage'>Test Percentage %</Label>
                   <Field
@@ -515,12 +686,6 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                     as={Input}
                     type='number'
                     className='syllabus-input'
-                    min={0}
-                    onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-                     if (["e", "E", "+", "-"].includes(e.key)) {
-                      e.preventDefault();
-                      }
-                    }}
                   />
                   <ErrorMessage
                     name='test_percentage'
@@ -534,12 +699,6 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                     as={Input}
                     type='number'
                     className='syllabus-input'
-                    min={0}
-                    onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-                     if (["e", "E", "+", "-"].includes(e.key)) {
-                      e.preventDefault();
-                      }
-                    }}
                   />
                   <ErrorMessage
                     name='exam_percentage'
@@ -568,6 +727,29 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                   values,
                   setFieldValue
                 )}
+
+                {/* Remover el alert HTML existente */}
+                {/* 
+                {(() => {
+                  const validationErrors = getValidationErrors(values);
+                  if (validationErrors.length > 0) {
+                    return (
+                      <Col xs={12} className='mb-3'>
+                        <div className='alert alert-danger'>
+                          <strong>Please fix the following issues:</strong>
+                          <ul className='mb-0 mt-2'>
+                            {validationErrors.map((error, index) => (
+                              <li key={index}>{error}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      </Col>
+                    );
+                  }
+                  return null;
+                })()}
+                */}
+
                 <Col xs={12} className='d-flex justify-content-end mt-5'>
                   <Button color='secondary' onClick={toggle}>
                     Close
@@ -587,7 +769,6 @@ const SyllabusForm = ({ data, isOpen, toggle, isCopy, onReload }: any) => {
                     defaultText={
                       isCopy ? 'Duplicate' : data ? 'Update' : 'Save'
                     }
-                    disabled={!isCopy && !dirty}
                   />
                 </Col>
               </form>

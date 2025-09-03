@@ -11,7 +11,7 @@ import {
   getAllProfessors,
 } from '../../../../helper/api-data/professor';
 import { getAllCourses } from '../../../../helper/api-data/course';
-import useSWR from 'swr';
+import useSWR, { mutate } from 'swr';
 import { SelectOption } from 'Types/SelectType';
 
 const Students = () => {
@@ -79,10 +79,10 @@ const Students = () => {
   };
 
   const handleReload = () => {
-    setReload(!reload);
+    mutate('/course/get-all');
   };
 
-  const { data: coursesData } = useSWR(
+  const { data: coursesData, isLoading, isValidating } = useSWR(
     '/course/get-all',
     () => getAllCourses(),
     {
@@ -192,7 +192,7 @@ const Students = () => {
               />
             </CardHeader>
             <div className='pb-4'>
-              <CoursesTable reload={reload} />
+              <CoursesTable reload={reload} loading={isLoading || isValidating} />
             </div>
           </Card>
         </Row>

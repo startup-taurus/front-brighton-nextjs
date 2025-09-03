@@ -43,7 +43,11 @@ const SchoolData = () => {
           const startingCourses: Course[] = [];
           
           response.data.professors.forEach((professor: Professor) => {
-            professor.courses.forEach((course: Course) => {
+            const activeCourses = professor.courses.filter(
+              (course: Course) => !course.options.isAlreadyEnd
+            );
+            
+            activeCourses.forEach((course: Course) => {
               if (course.options.endsInTwoWeeks) {
                 endingCourses.push({
                   ...course,
@@ -194,6 +198,7 @@ const SchoolData = () => {
                   <th>Professor</th>
                   <th>Student</th>
                   <th>Schedule</th>
+                  <th style={{ minWidth: '120px' }}>End Date</th>
                 </tr>
               </thead>
               <tbody>
@@ -204,6 +209,7 @@ const SchoolData = () => {
                     <td>{course.professor_name}</td>
                     <td>{course.student_count}</td>
                     <td>{course.classSchedule}</td>
+                    <td style={{ minWidth: '120px' }}>{course.end_date || 'N/A'}</td>
                   </tr>
                 ))}
               </tbody>
@@ -237,6 +243,7 @@ const SchoolData = () => {
                   <th>Professor</th>
                   <th>Student</th>
                   <th>Schedule</th>
+                  <th style={{ minWidth: '120px' }}>End Date</th>
                 </tr>
               </thead>
               <tbody>
@@ -247,6 +254,7 @@ const SchoolData = () => {
                     <td>{course.professor_name}</td>
                     <td>{course.student_count}</td>
                     <td>{course.classSchedule}</td>
+                    <td style={{ minWidth: '120px' }}>{course.end_date || 'N/A'}</td>
                   </tr>
                 ))}
               </tbody>

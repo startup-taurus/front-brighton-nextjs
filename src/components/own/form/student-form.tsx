@@ -121,6 +121,11 @@ const { data: levels } = useSWR(
             ? row.book_given === 'true'
             : Boolean(row.book_given),
       };
+      
+      if (!data && (processedData.username === '' || processedData.username === undefined || processedData.username === null)) {
+        delete processedData.username;
+      }
+      
       const response = await createStudent(processedData);
       if (response.statusCode === 200) {
         toast.success('Student created successfull!');

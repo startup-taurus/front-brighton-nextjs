@@ -16,6 +16,7 @@ import { SelectOption } from 'Types/SelectType';
 const Students = () => {
   const router = useRouter();
   const [isOpenModal, setIsOpenModal] = useState(false);
+  const [isReloading, setIsReloading] = useState(false);
   const page = router.query.page ? Number(router.query.page) : 1;
   const rowPerPage = router.query.rowPerPage
     ? Number(router.query.rowPerPage)
@@ -28,11 +29,10 @@ const Students = () => {
   const [levelFilter, setLevelFilter] = useState<SelectOption | null>(null);
 
   const filters = getFiltersString(router);
+  const key = `/registered-student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}`;
 
-  const students = useSWR(
-    [
-      `/registered-student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}`,
-    ],
+  const { data: students, isLoading, isValidating } = useSWR(
+    key,
     () => getAllRegisteredStudents(page, rowPerPage, filters)
   );
 
@@ -50,7 +50,6 @@ const Students = () => {
 
   useEffect(() => {
     if (levels?.data) {
-      // Manejar tanto la estructura antigua como la nueva
       const levelData = Array.isArray(levels.data)
         ? levels.data
         : levels.data?.result || [];
@@ -99,10 +98,13 @@ const Students = () => {
   };
 
   const handleReload = () => {
-    mutate([
-      `/registered-student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}`,
-    ]);
+    setIsReloading(true);
+    mutate(key).finally(() => {
+      setTimeout(() => setIsReloading(false), 500); 
+    });
   };
+
+  const loading = isLoading || isValidating || isReloading;
 
   return (
     <div className='page-body'>
@@ -122,9 +124,10 @@ const Students = () => {
               <StudentsRegisteredTable
                 page={page}
                 rowPerPage={rowPerPage}
-                students={students?.data}
+                students={students}
                 filters={filters}
-                loading={students?.isLoading}
+                loading={loading}
+                onReload={handleReload}
               />
             </div>
           </Card>

@@ -19,6 +19,7 @@ import { createUser, updateUser } from 'helper/api-data/user';
 import { USER_ROLES } from '../../../../utils/constants';
 import { validateEmailFormat } from '../../../../utils/utils';
 import { ImgPath, UrlImage } from 'utils/Constant';
+import { mutate } from 'swr';
 
 const UserForm = ({ data, isOpen, toggle }: any) => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -65,6 +66,7 @@ const save = async (formValues: any) => {
     if (response.statusCode === 200) {
       toast.success('User created successfully!');
       setImagePreview(null);
+      mutate((key: string[] | string) => Array.isArray(key) && key[0] && key[0].includes('/user/get-all'));
       toggle(null, true);
     }
   } catch (error) {
@@ -103,6 +105,7 @@ const update = async (formValues: any) => {
     const response = await updateUser(id, payload);
     if (response.statusCode === 200) {
       toast.success('User updated successfully!');
+      mutate((key: string[] | string) => Array.isArray(key) && key[0] && key[0].includes('/user/get-all'));
       toggle(null, true);
     }
   } catch (error) {
@@ -137,9 +140,11 @@ const validations = Yup.object().shape({
   email: Yup.string()
     .email('Please enter a valid email')
     .required('The email is required'),
-  password: Yup.string()
-    .min(6, 'Password must be at least 6 characters long')
-    .required('The password is required'),
+  password: data 
+    ? Yup.string().min(6, 'Password must be at least 6 characters long')
+    : Yup.string()
+        .min(6, 'Password must be at least 6 characters long')
+        .required('The password is required'),
 });
 
   return (

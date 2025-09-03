@@ -1,30 +1,45 @@
-import SyllabusForm from '@/components/own/form/syllabus-form';
-import TableHeaderActions from '@/components/own/table-header-actions/table-header-actions';
-import SyllabusTable from '@/components/own/tables/syllabus-table';
-import TableFilters from '@/components/own/table-filters/table-filters';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Card, CardHeader, Container, Row } from 'reactstrap';
+import SyllabusTable from '@/components/own/tables/syllabus-table';
+import TableHeaderActions from '@/components/own/table-header-actions/table-header-actions';
+import SyllabusForm from '@/components/own/form/syllabus-form';
 import { useRouter } from 'next/router';
-import useSWR from 'swr';
-import { getAllLevels } from 'helper/api-data/level';
 import { FiltersProps } from '../../../../Types/types';
-import { SelectOption } from 'Types/SelectType';
+import TableFilters from '@/components/own/table-filters/table-filters';
 import { getFiltersString } from '../../../../utils/utils';
+import useSWR, { mutate } from 'swr';
+import { getAllSyllabus } from '../../../../helper/api-data/syllabus';
+import { getAllLevels } from '../../../../helper/api-data/level';
+import { SelectOption } from 'Types/SelectType';
 
 const Syllabus = () => {
   const router = useRouter();
   const [isOpenModal, setIsOpenModal] = useState(false);
-  const [reload, setReload] = useState(false);
-  
+  const page = router.query.page ? Number(router.query.page) : 1;
+  const rowPerPage = router.query.rowPerPage
+    ? Number(router.query.rowPerPage)
+    : 10;
+
   const limit = 10;
   const [levelPage, setLevelPage] = useState(1);
   const [levelSearchTerm, setLevelSearchTerm] = useState('');
   const [levelOptions, setLevelOptions] = useState<any[]>([]);
-  const [levelSearch, setLevelSearch] = useState('');
   const [levelFilter, setLevelFilter] = useState<SelectOption | null>(null);
-  
+
   const filters = getFiltersString(router);
-  
+
+  const syllabuses = useSWR(
+    [
+      `/syllabus/get-all?page=${page}&limit=${rowPerPage}${filters ? `&${filters}` : ''}`,
+    ],
+    () =>
+      getAllSyllabus(
+        page,
+        rowPerPage,
+        filters || undefined
+      )
+  );
+
   const { data: levels } = useSWR(
     ['/level/get-all', levelPage, limit, levelSearchTerm],
     () => getAllLevels(levelPage, limit, levelSearchTerm)
@@ -63,10 +78,10 @@ const Syllabus = () => {
   }, [levels]);
 
   const selectFilters: FiltersProps[] = [
-    { 
-      labelName: 'Syllabus Name', 
-      name: 'syllabus_name', 
-      type: 'text' 
+    {
+      labelName: 'Syllabus Name',
+      name: 'syllabus_name',
+      type: 'text',
     },
     {
       labelName: 'Level',
@@ -86,7 +101,9 @@ const Syllabus = () => {
   };
 
   const handleReload = () => {
-    setReload(!reload);
+    mutate([
+      `/syllabus/get-all?page=${page}&limit=${rowPerPage}${filters ? `&${filters}` : ''}`,
+    ]);
   };
 
   return (
@@ -101,16 +118,24 @@ const Syllabus = () => {
         <Row>
           <Card>
             <CardHeader className='d-flex justify-content-end'>
-              <TableHeaderActions
-                onReload={handleReload}
-                addButton={{
-                  title: 'Create syllabus',
-                  onClick: () => toggle(),
-                }}
-              />
+              <div className='d-flex align-items-center'>
+                <TableHeaderActions
+                  onReload={handleReload}
+                  addButton={{
+                    title: 'Create Syllabus',
+                    onClick: () => toggle(),
+                  }}
+                />
+              </div>
             </CardHeader>
             <div className='pb-4'>
-              <SyllabusTable reload={reload} />
+              <SyllabusTable
+                page={page}
+                rowPerPage={rowPerPage}
+                syllabuses={syllabuses?.data}
+                filters={filters}
+                loading={syllabuses.isLoading || syllabuses.isValidating}
+              />
             </div>
           </Card>
         </Row>

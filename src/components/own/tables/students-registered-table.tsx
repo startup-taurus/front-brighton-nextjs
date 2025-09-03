@@ -17,12 +17,17 @@ const StudentsRegisteredTable = ({
   rowPerPage,
   filters,
   loading,
+  onReload,
 }: any) => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenDetail, setIsOpenDetail] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
   const [selectedStudent, setSelectedStudent] = useState<any>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [isChangingPage, setIsChangingPage] = useState(false);
+
+  const key = `/registered-student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}`;
 
   const toggleStudentForm = (data: any) => {
     setSelectedStudent({
@@ -51,9 +56,7 @@ const StudentsRegisteredTable = ({
 
     setIsOpen(!isOpen);
     if (isOpen) {
-      mutate([
-        `/registered-student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}`,
-      ]);
+      mutate(key);
     }
   };
 
@@ -73,25 +76,45 @@ const StudentsRegisteredTable = ({
       reverseButtons: true,
     }).then((result) => {
       if (result.isConfirmed) {
+        setIsDeleting(true);
         deleteRegisteredStudent(row.id).then(() => {
           toast.success('Student deleted correctly!');
-          mutate([
-            `/registered-student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}`,
-          ]);
+          mutate(key).finally(() => {
+            setTimeout(() => setIsDeleting(false), 500);
+          });
+        }).catch(() => {
+          setIsDeleting(false);
         });
       }
     });
   };
 
   const onDelete = (id: any) => {
+    setIsDeleting(true);
     deleteRegisteredStudent(id).then(() => {
-      mutate([
-        `/registered-student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}`,
-      ]);
+      mutate(key).finally(() => {
+        setTimeout(() => setIsDeleting(false), 500);
+      });
+    }).catch(() => {
+      setIsDeleting(false);
     });
   };
 
-  if (loading) {
+  const handlePageChange = (newPage: number) => {
+    setIsChangingPage(true);
+    setQueryStringValue('page', newPage, router);
+    setTimeout(() => setIsChangingPage(false), 800);
+  };
+
+  const handleRowsPerPageChange = (newPerPage: number) => {
+    setIsChangingPage(true);
+    setQueryStringValue('rowPerPage', newPerPage, router);
+    setTimeout(() => setIsChangingPage(false), 800);
+  };
+
+  const isLoadingData = loading || isDeleting || isChangingPage;
+
+  if (isLoadingData) {
     return (
       <TableSkeleton rows={10} columns={8} showHeader={true} animated={true} />
     );
@@ -171,14 +194,12 @@ const StudentsRegisteredTable = ({
         data={students?.data.result}
         pagination
         paginationServer
-        progressPending={loading}
+        progressPending={isLoadingData}
         paginationDefaultPage={page ?? 1}
         paginationPerPage={rowPerPage ?? 10}
         paginationTotalRows={students.data.totalCount}
-        onChangePage={(page) => setQueryStringValue('page', page, router)}
-        onChangeRowsPerPage={(newPerPage) =>
-          setQueryStringValue('rowPerPage', newPerPage, router)
-        }
+        onChangePage={handlePageChange}
+        onChangeRowsPerPage={handleRowsPerPageChange}
         highlightOnHover
         selectableRows={false}
       />

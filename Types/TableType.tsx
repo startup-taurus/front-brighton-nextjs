@@ -39,3 +39,10 @@ export interface tableSearchBarpropsType {
 export interface SyllabusTableProps {
   reload?: any;
 }
+export interface HolidaysTableProps {
+  page?: number;
+  rowPerPage?: number;
+  holidays?: any;
+  loading?: boolean;
+  reload?: boolean;
+}
