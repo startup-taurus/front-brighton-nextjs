@@ -931,8 +931,6 @@ export const generateCalendarEvents = (courses: Course[]): CalendarEvent[] => {
         );
 
         const professorText = course.professor_name && course.professor_name !== 'No asignado' 
-          ? ` - ${course.professor_name}` 
-          : '';
         
         events.push({
           id: `${course.id}-${format(currentDate, 'yyyy-MM-dd')}`,

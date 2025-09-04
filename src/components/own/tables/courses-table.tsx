@@ -146,7 +146,18 @@ const CoursesTable = ({ reload, loading }: any) => {
     },
     {
       name: 'End date',
-      selector: (row: any) => row.end_date ? `${row.end_date}` : 'N/A',
+      selector: (row: any) => {
+        if (row.end_date) {
+          return `${row.end_date}`;
+        } else if (row.start_date) {
+          const startDate = new Date(row.start_date);
+          const endDate = new Date(startDate);
+          endDate.setMonth(endDate.getMonth() + 3);
+          return endDate.toISOString().split('T')[0];
+        } else {
+          return '';
+        }
+      },
       sortable: true,
       center: false,
     },

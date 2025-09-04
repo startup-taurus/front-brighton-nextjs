@@ -52,14 +52,12 @@ const SyllabusTable = ({
   };
 
   const mutateData = () => {
-    // Invalidar la clave específica para esta tabla
     mutate(
       `/syllabus/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}`,
       undefined,
       { revalidate: true }
     );
     
-    // También invalidar cualquier otra clave relacionada con syllabus
     mutate(
       (key) => typeof key === 'string' && key.startsWith('/syllabus/'),
       undefined,
