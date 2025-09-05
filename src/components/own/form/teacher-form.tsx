@@ -20,7 +20,7 @@ import { createProfessor, updateProfessor } from 'helper/api-data/professor';
 import { ImgPath, UrlImage } from 'utils/Constant';
 import { validateEmailFormat } from '../../../../utils/utils';
 
-const TeacherForm = ({ data, isOpen, toggle }: any) => {
+const TeacherForm = ({ data, isOpen, toggle, onReload }: any) => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   useEffect(() => {
@@ -49,6 +49,9 @@ const save = async (formValues: any) => {
     const response = await createProfessor(formData);
     if (response.statusCode === 200) {
       toast.success('Teacher created successfully!');
+      if (onReload) {
+        onReload();
+      }
       toggle(null, true);
     }
   } catch (error) {
@@ -87,6 +90,9 @@ const update = async (values: any) => {
     const res = await updateProfessor(id, payload);
     if (res.statusCode === 200) {
       toast.success('Teacher updated successfully!');
+      if (onReload) {
+        onReload();
+      }
       setImagePreview(null);
       toggle(null, true);
     }

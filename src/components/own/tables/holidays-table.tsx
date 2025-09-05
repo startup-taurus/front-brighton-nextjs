@@ -13,8 +13,15 @@ import { PERMISSIONS } from '../../../../utils/permissions';
 import { Alert } from 'reactstrap';
 import { toast } from 'react-toastify';
 import { USER_TYPES } from 'utils/constants';
+import { HolidaysTableProps } from '../../../../Types/TableType';
 
-const HolidaysTable = ({ reload }: any) => {
+const HolidaysTable = ({ 
+  page: propPage,
+  rowPerPage: propRowPerPage,
+  holidays: propHolidays,
+  loading: propLoading,
+  reload 
+}: HolidaysTableProps) => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenDetail, setIsOpenDetail] = useState(false);
@@ -26,9 +33,23 @@ const HolidaysTable = ({ reload }: any) => {
   const canEditHoliday = can(PERMISSIONS.EDIT_HOLIDAY);
   const canDeleteHoliday = can(PERMISSIONS.DELETE_HOLIDAY);
 
+  const page = propPage ?? (router.query.page ? Number(router.query.page) : 1);
+  const rowPerPage = propRowPerPage ?? (router.query.rowPerPage ? Number(router.query.rowPerPage) : 10);
+
+  const {
+    data: holidays,
+    error,
+    isLoading,
+  } = useSWR(
+    propHolidays && propHolidays.result ? null : [`/holidays/get-all`, page, rowPerPage], 
+    () => getAllHolidays(page, rowPerPage)
+  );
+
   useEffect(() => {
-    mutate([`/holidays/get-all`, page, rowPerPage]);
-  }, [reload]);
+    if (!propHolidays || !propHolidays.result) {
+      mutate([`/holidays/get-all`, page, rowPerPage]);
+    }
+  }, [reload, page, rowPerPage, propHolidays]);
 
   const toggle = (data: any) => {
     setSelectedData(data);
@@ -69,20 +90,9 @@ const HolidaysTable = ({ reload }: any) => {
     }
   };
 
-  const page = router.query.page ? Number(router.query.page) : 1;
-  const rowPerPage = router.query.rowPerPage
-    ? Number(router.query.rowPerPage)
-    : 10;
+  const isLoadingData = propLoading ?? isLoading;
 
-  const {
-    data: holidays,
-    error,
-    isLoading,
-  } = useSWR([`/holidays/get-all`, page, rowPerPage], () =>
-    getAllHolidays(page, rowPerPage)
-  );
-
-  if (isLoading) {
+  if (isLoadingData) {
     return (
       <TableSkeleton
         rows={10}
@@ -93,7 +103,11 @@ const HolidaysTable = ({ reload }: any) => {
     );
   }
 
-  if (!holidays?.data?.result) return null;
+  const holidaysData = (propHolidays && propHolidays.result) 
+    ? propHolidays 
+    : holidays?.data;
+
+  if (!holidaysData?.result) return null;
 
   const columns = [
     {
@@ -150,13 +164,13 @@ const HolidaysTable = ({ reload }: any) => {
     <div className='table-responsive'>
       <DataTable
         columns={columns}
-        data={holidays.data.result}
-        progressPending={isLoading}
+        data={holidaysData.result}
+        progressPending={isLoadingData}
         paginationDefaultPage={page ?? 1}
         paginationPerPage={rowPerPage ?? 10}
         pagination
         paginationServer
-        paginationTotalRows={holidays.data.totalCount}
+        paginationTotalRows={holidaysData.totalCount}
         onChangePage={(page) => {
           router.push({
             pathname: router.pathname,

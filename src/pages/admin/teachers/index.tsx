@@ -10,6 +10,8 @@ import { useRouter } from 'next/router';
 import useSWR from 'swr';
 import { getAllProfessors } from '../../../../helper/api-data/professor';
 import { SelectOption } from 'Types/SelectType';
+import { mutate } from 'swr';
+import { getFiltersString } from '../../../../utils/utils';
 
 const Teachers = () => {
   const limit = 10;
@@ -17,6 +19,8 @@ const Teachers = () => {
   const [page, setPage] = useState(1);
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [reload, setReload] = useState(false);
+  const rowPerPage = router.query.rowPerPage ? Number(router.query.rowPerPage) : 10;
+  const filters = getFiltersString(router);
   const [professorOptions, setProfessorOptions] = useState<
     Array<{ label: string; value: string }>
   >([]);
@@ -66,7 +70,15 @@ const Teachers = () => {
   };
 
   const handleReload = () => {
-    setReload(!reload);
+    mutate([
+      `/professor/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}`,
+    ]);
+    
+    mutate(
+      (key) => typeof key === 'string' && key.startsWith('/professor/'),
+      undefined,
+      { revalidate: true }
+    );
   };
 
   const selectFilters: FiltersProps[] = [
@@ -123,6 +135,7 @@ const Teachers = () => {
         isOpen={isOpenModal}
         toggle={toggle}
         data={null}
+        onReload={handleReload}
       />
     </div>
   );

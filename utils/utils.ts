@@ -169,7 +169,7 @@ export const getDayOfClassesOfWeek = (courses: any): any[] => {
 
       return {
         id: index,
-        title: course?.course_name,
+        title: course?.course_number,
         start: startDateTime,
         end: endDateTime,
         url: `course/${course.course_id}/home`,
@@ -316,7 +316,7 @@ export const calculateAverage = (
       : 0;
   });
 
-  averageResult = ((sumResult * 100) / totalExpected).toFixed(2) ?? 0;
+  averageResult = (sumResult / totalExpected * 100).toFixed(2) ?? 0;
 
   return averageResult;
 };
@@ -332,13 +332,18 @@ export const calculateTotalAverage = (
   const progressTest = calculateAverage(grades, notes.progressTest, studentId);
   const moversExam = calculateAverage(grades, notes.moversExam, studentId);
 
+  const totalPercentage = 
+    Number(gradingPercentages.assig_percentage) +
+    Number(gradingPercentages.test_percentage) +
+    Number(gradingPercentages.exam_percentage);
+
   result =
     Number(assignments) *
-      calculateRelativePercentage(gradingPercentages.assig_percentage) +
+      (Number(gradingPercentages.assig_percentage) / totalPercentage) +
     Number(progressTest) *
-      calculateRelativePercentage(gradingPercentages.test_percentage) +
+      (Number(gradingPercentages.test_percentage) / totalPercentage) +
     Number(moversExam) *
-      calculateRelativePercentage(gradingPercentages.exam_percentage);
+      (Number(gradingPercentages.exam_percentage) / totalPercentage);
 
   return Number(result).toFixed(2);
 };
@@ -925,19 +930,15 @@ export const generateCalendarEvents = (courses: Course[]): CalendarEvent[] => {
           0
         );
 
-        const professorText = course.professor_name && course.professor_name !== 'No asignado' 
-          ? ` - ${course.professor_name}` 
-          : '';
         
         events.push({
           id: `${course.id}-${format(currentDate, 'yyyy-MM-dd')}`,
-          title: `${course.course_name}${professorText}`,
+          title: `${course.course_number}`,
           start: eventStart,
           end: eventEnd,
           resource: {
             course,
             level: course.level_name,
-            professor: course.professor_name,
           },
         });
         

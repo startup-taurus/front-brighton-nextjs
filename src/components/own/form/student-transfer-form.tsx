@@ -287,9 +287,7 @@ const StudentTransferForm: React.FC<Props> = ({
                       placeholder="Search or select a course..."
                       isClearable
                       isSearchable
-                      isOptionDisabled={(opt: Option) =>
-                        Number(opt.value) === Number(currentCourseId)
-                      }
+                      isOptionDisabled={() => false}
                       onMenuScrollToBottom={handleCourseScrollToBottom}
                       onInputChange={handleCourseInputChange}
                       isLoading={isLoadingCourses}

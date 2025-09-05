@@ -7,10 +7,14 @@ import SyllabusItemsModal from '../form/syllabus-item';
 import TableActionButtons from '../table-action-buttons/table-action-buttons';
 import SyllabusForm from '../form/syllabus-form';
 import TableSkeleton from '../common/table-skeleton/TableSkeleton';
-import { getFiltersString } from '../../../../utils/utils';
-import { SyllabusTableProps } from '../../../../Types/TableType';
 
-const SyllabusTable: React.FC<SyllabusTableProps> = ({ reload }) => {
+const SyllabusTable = ({
+  syllabuses,
+  page,
+  rowPerPage,
+  filters,
+  loading,
+}: any) => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenDetail, setIsOpenDetail] = useState(false);
@@ -19,9 +23,6 @@ const SyllabusTable: React.FC<SyllabusTableProps> = ({ reload }) => {
   const [selectedData, setSelectedData] = useState(null);
   const [isCopyMode, setIsCopyMode] = useState(false);
   
-  const page = router.query.page ? Number(router.query.page) : 1;
-  const rowPerPage = router.query.rowPerPage ? Number(router.query.rowPerPage) : 10;
-  const filters = getFiltersString(router);
 
   const toggle = (syllabus: any, forceUpdate = false) => {
     setIsOpen(!isOpen);
@@ -51,10 +52,12 @@ const SyllabusTable: React.FC<SyllabusTableProps> = ({ reload }) => {
   };
 
   const mutateData = () => {
-    mutate([
+    mutate(
       `/syllabus/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}`,
-    ]);
-
+      undefined,
+      { revalidate: true }
+    );
+    
     mutate(
       (key) => typeof key === 'string' && key.startsWith('/syllabus/'),
       undefined,
@@ -62,17 +65,12 @@ const SyllabusTable: React.FC<SyllabusTableProps> = ({ reload }) => {
     );
   };
 
-  useEffect(() => {
-    if (reload) {
-      mutateData();
-    }
-  }, [reload]);
 
   const {
     data: syllabus,
     isLoading,
   } = useSWR(
-    `/syllabus/get-all?page=${page}&rowPerPage=${rowPerPage}${
+    syllabuses ? null : `/syllabus/get-all?page=${page}&rowPerPage=${rowPerPage}${
             filters ? `&${filters}` : ''
           }`,
     () => {
@@ -88,13 +86,16 @@ const SyllabusTable: React.FC<SyllabusTableProps> = ({ reload }) => {
     }
   );
 
-  if (isLoading) {
+  const finalSyllabusData = syllabuses || syllabus;
+  const showLoading = loading || (isLoading && !syllabuses);
+
+  if (showLoading) {
     return (
       <TableSkeleton rows={10} columns={6} showHeader={true} animated={true} />
     );
   }
 
-  if (!syllabus?.data?.results) return null;
+  if (!finalSyllabusData?.data?.results) return null;
 
   const columns = [
     {
@@ -153,13 +154,13 @@ const SyllabusTable: React.FC<SyllabusTableProps> = ({ reload }) => {
     <div className='table-responsive signal-table'>
       <DataTable
         columns={columns}
-        data={syllabus.data.results}
-        progressPending={isLoading}
+        data={finalSyllabusData.data.results}
+        progressPending={showLoading}
         paginationDefaultPage={page ?? 1}
         paginationPerPage={rowPerPage ?? 10}
         pagination
         paginationServer
-        paginationTotalRows={syllabus.data.totalCount}
+        paginationTotalRows={finalSyllabusData.data.totalCount}
         onChangePage={(page) => {
           router.push({
             pathname: router.pathname,

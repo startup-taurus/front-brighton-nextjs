@@ -91,7 +91,7 @@ const StudentTransferTable: React.FC = () => {
                 rowsToShow.map(({ transfer, student }, idx) => (
                   <tr key={`${transfer.id}-${student.student_id}`}>
                     <td>{idx + 1}</td>
-                    <td>{student.student.user.name}</td>
+                    <td>{student.student.user.name.toUpperCase()}</td>
                     <td>{transfer.selected_course.course_name}</td>
                     <td>{transfer.selected_level.full_level}</td>
                   </tr>

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import useSWR, { mutate } from 'swr';
-import { useRouter } from 'next/router';
+import React, {useState, useEffect} from 'react';
+import useSWR, {mutate} from 'swr';
+import {useRouter} from 'next/router';
 import {
   getAllProfessors,
   updateStatusProfessor,
@@ -9,10 +9,10 @@ import TableActionButtons from '@/components/own/table-action-buttons/table-acti
 import Swal from 'sweetalert2';
 import DataTable from 'react-data-table-component';
 import TeacherForm from '../form/teacher-form';
-import { getFiltersString } from '../../../../utils/utils';
+import {getFiltersString} from '../../../../utils/utils';
 import TableSkeleton from '@/components/own/common/table-skeleton/TableSkeleton';
 
-const TeachersTable = ({ reload }: any) => {
+const TeachersTable = ({reload}: any) => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
@@ -39,7 +39,7 @@ const TeachersTable = ({ reload }: any) => {
     mutate(
       (key) => typeof key === 'string' && key.startsWith('/professor/'),
       undefined,
-      { revalidate: true }
+      {revalidate: true}
     );
   };
 
@@ -82,12 +82,7 @@ const TeachersTable = ({ reload }: any) => {
 
   if (isLoading) {
     return (
-      <TableSkeleton
-        rows={10}
-        columns={8}
-        showHeader={true}
-        animated={true}
-      />
+      <TableSkeleton rows={10} columns={8} showHeader={true} animated={true} />
     );
   }
 
@@ -171,13 +166,13 @@ const TeachersTable = ({ reload }: any) => {
         onChangePage={(page) => {
           router.push({
             pathname: router.pathname,
-            query: { ...router.query, page },
+            query: {...router.query, page},
           });
         }}
         onChangeRowsPerPage={(newPerPage) => {
           router.push({
             pathname: router.pathname,
-            query: { ...router.query, rowPerPage: newPerPage },
+            query: {...router.query, rowPerPage: newPerPage},
           });
         }}
         highlightOnHover
@@ -187,6 +182,7 @@ const TeachersTable = ({ reload }: any) => {
         isOpen={isOpen}
         toggle={toggle}
         data={selectedData}
+        onReload={mutateData}
       />
       {/* <TeacherDetail
         isOpen={isOpenDetail}

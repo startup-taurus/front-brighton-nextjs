@@ -12,7 +12,7 @@ import CourseForm from '../form/course-form';
 import { getFiltersString } from '../../../../utils/utils';
 import TableSkeleton from '../common/table-skeleton/TableSkeleton';
 
-const CoursesTable = ({ reload }: any) => {
+const CoursesTable = ({ reload, loading }: any) => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
@@ -85,7 +85,9 @@ const CoursesTable = ({ reload }: any) => {
     () => getCourseWithProfessors(page, rowPerPage, filters)
   );
 
-  if (isLoading) {
+  const showLoading = loading || isLoading;
+
+  if (showLoading) {
     return (
       <TableSkeleton
         rows={10}
@@ -142,7 +144,23 @@ const CoursesTable = ({ reload }: any) => {
       sortable: true,
       center: false,
     },
-
+    {
+      name: 'End date',
+      selector: (row: any) => {
+        if (row.end_date) {
+          return `${row.end_date}`;
+        } else if (row.start_date) {
+          const startDate = new Date(row.start_date);
+          const endDate = new Date(startDate);
+          endDate.setMonth(endDate.getMonth() + 3);
+          return endDate.toISOString().split('T')[0];
+        } else {
+          return '';
+        }
+      },
+      sortable: true,
+      center: false,
+    },
     {
       name: 'Status',
       cell: (row: any) => (
@@ -174,7 +192,7 @@ const CoursesTable = ({ reload }: any) => {
       <DataTable
         columns={columns}
         data={courses.data.result}
-        progressPending={isLoading}
+        progressPending={showLoading}
         paginationDefaultPage={page ?? 1}
         paginationPerPage={rowPerPage ?? 10}
         pagination

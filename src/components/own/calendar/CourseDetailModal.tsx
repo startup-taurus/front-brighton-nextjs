@@ -53,6 +53,17 @@ const CourseDetailModal: React.FC<CourseDetailModalProps> = ({
 
             <div className="course-header mb-4">
               <h4 className="text-primary mb-2">{selectedCourse.course_name}</h4>
+              <div className="d-flex align-items-center mb-3">
+                <div className="detail-card p-2 border rounded me-3">
+                  <div className="d-flex align-items-center">
+                    <i className="fa fa-hashtag text-primary me-2"></i>
+                    <strong>Course Number:</strong>
+                    <span className="text-success fw-bold ms-2">
+                      {selectedCourse.course_number || 'Not available'}
+                    </span>
+                  </div>
+                </div>
+              </div>
               <div className='d-flex align-items-center'>
                 <Image
                   className='me-3 rounded-circle'
