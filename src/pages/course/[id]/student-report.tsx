@@ -136,7 +136,7 @@ const StudentReport: NextPageWithLayout = () => {
                       value={student?.id}
                       key={`student-report-${student?.id}`}
                     >
-                      {student?.name}
+                      {student?.name?.toUpperCase()}
                     </option>
                   ))}
                 </Input>

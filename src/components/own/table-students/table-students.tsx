@@ -6,7 +6,7 @@ import CustomTable from '@/components/own/custom-table/custom-table';
 const columns = [
   {
     name: 'STUDENT',
-    selector: (row: { name: any }) => row?.name,
+    selector: (row: { name: any }) => row?.name?.toUpperCase(),
     sortable: true,
   },
 

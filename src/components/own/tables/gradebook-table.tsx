@@ -414,7 +414,7 @@ const GradebookTable = ({
             grades &&
             active.map((student: any, i: number) => (
               <tr key={`grade-student-${i}`}>
-                <td className='student-col'>{student.name}</td>
+                <td className='student-col'>{student.name.toUpperCase()}</td>
                 {componentsGradebook?.assignments?.map((item: any, j) => (
                   <td
                     className='td-container'
@@ -560,7 +560,7 @@ const GradebookTable = ({
               <td
                 className={`student-col ${student?.is_retired || student?.status === STATUS.INACTIVE ? 'd-flex  align-items-start align-md-center justify-center-start ' : ''}`}
               >
-                {student.name}
+                {student.name.toUpperCase()}
                 {(student?.is_retired ||
                   student?.status === STATUS.INACTIVE) && (
                   <Badge
