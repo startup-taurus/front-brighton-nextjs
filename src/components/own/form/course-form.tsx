@@ -19,21 +19,7 @@ import {getAllSyllabus} from 'helper/api-data/syllabus';
 import {toast} from 'react-toastify';
 import Swal from 'sweetalert2';
 import {PRIVATE_COURSE_TYPES} from '../../../../utils/constants';
-import * as Yup from 'yup';
-
 const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-
-// Esquema de validación para el formulario
-const validationSchema = Yup.object().shape({
-  course_name: Yup.string().required('El nombre del curso es requerido'),
-  course_number: Yup.string().required('El número del curso es requerido'),
-  course_type: Yup.string().required('El tipo de curso es requerido'),
-  status: Yup.string().required('El estado es requerido'),
-  total_hours: Yup.number()
-    .min(1, 'Las horas totales deben ser al menos 1')
-    .required('Las horas totales son requeridas'),
-});
-
 const CourseForm = ({data, isOpen, toggle}: any) => {
   const limit = 1000;
   const page = 1;
@@ -235,7 +221,6 @@ const CourseForm = ({data, isOpen, toggle}: any) => {
                   syllabus_id: '',
                 }
           }
-          validationSchema={validationSchema}
           onSubmit={(info) => (data ? update(info) : save(info))}
         >
           {(props) => {
@@ -604,7 +589,35 @@ const CourseForm = ({data, isOpen, toggle}: any) => {
                     color='primary'
                     type='submit'
                     isLoading={isLoading}
-                    disabled={data && !dirty}
+                    disabled={
+                      (data && !dirty) || 
+                      (
+                        props.values.course_type === PRIVATE_COURSE_TYPES.PRIVATE || 
+                        props.values.course_type === PRIVATE_COURSE_TYPES.PRIVATE_ONLINE
+                          ? !(
+                              props.values.course_name && 
+                              props.values.course_number && 
+                              props.values.course_type && 
+                              props.values.status && 
+                              props.values.age_group && 
+                              props.values.professor_id
+                            )
+                          : !(
+                              props.values.course_name && 
+                              props.values.course_number && 
+                              props.values.course_type && 
+                              props.values.start_date && 
+                              props.values.status && 
+                              props.values.classroom && 
+                              props.values.age_group && 
+                              props.values.professor_id && 
+                              props.values.syllabus_id && 
+                              props.values.schedules[0].days.length > 0 && 
+                              props.values.schedules[0].startTime && 
+                              props.values.schedules[0].endTime
+                            )
+                      )
+                    }
                     loadingText={data ? 'Updating...' : 'Saving...'}
                     defaultText={data ? 'Update' : 'Save'}
                   />
