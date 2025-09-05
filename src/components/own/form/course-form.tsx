@@ -28,17 +28,19 @@ const CourseForm = ({data, isOpen, toggle}: any) => {
 
   const save = async (data: any) => {
     try {
-      if (!data.course_type || (
-        data.course_type !== PRIVATE_COURSE_TYPES.PRIVATE &&
-        data.course_type !== PRIVATE_COURSE_TYPES.PRIVATE_ONLINE
-      )) {
+      if (
+        !data.course_type ||
+        (data.course_type !== PRIVATE_COURSE_TYPES.PRIVATE &&
+          data.course_type !== PRIVATE_COURSE_TYPES.PRIVATE_ONLINE)
+      ) {
         const result = await Swal.fire({
           title: 'Important Notice',
-          html: '<b>Please note:</b> Once a course is created, the following fields cannot be modified later:<br><br>' +
-                '• Course type <br>' +
-                '• Start Date<br>' +
-                '• Schedule (days of week)<br>' +
-                '• Start and End Times',
+          html:
+            '<b>Please note:</b> Once a course is created, the following fields cannot be modified later:<br><br>' +
+            '• Course type <br>' +
+            '• Start Date<br>' +
+            '• Schedule (days of week)<br>' +
+            '• Start and End Times',
           icon: 'warning',
           showCancelButton: true,
           confirmButtonText: 'Proceed',
@@ -51,7 +53,7 @@ const CourseForm = ({data, isOpen, toggle}: any) => {
           return;
         }
       }
-      
+
       setIsLoading(true);
 
       mutate(
@@ -224,6 +226,20 @@ const CourseForm = ({data, isOpen, toggle}: any) => {
           onSubmit={(info) => (data ? update(info) : save(info))}
         >
           {(props) => {
+            const onChangeCourseType = (e: any) => {
+              props.setFieldValue('course_type', e.target.value);
+              if (
+                e.target.value === PRIVATE_COURSE_TYPES.PRIVATE ||
+                e.target.value === PRIVATE_COURSE_TYPES.PRIVATE_ONLINE
+              ) {
+                props.setFieldValue('syllabus_id', '');
+                props.setFieldValue('classroom', '');
+                props.setFieldValue('start_date', '');
+                props.setFieldValue('schedules', [
+                  {days: [], startTime: '', endTime: ''},
+                ]);
+              }
+            };
             const {handleSubmit, setFieldValue, dirty} = props;
             return (
               <form
@@ -251,20 +267,7 @@ const CourseForm = ({data, isOpen, toggle}: any) => {
                     type='select'
                     disabled={data ? true : false}
                     className={data ? 'bg-light text-muted' : ''}
-                    onChange={(e: any) => {
-                      props.setFieldValue('course_type', e.target.value);
-                      if (
-                        e.target.value === 'private' ||
-                        e.target.value === 'private - online'
-                      ) {
-                        props.setFieldValue('syllabus_id', '');
-                        props.setFieldValue('classroom', '');
-                        props.setFieldValue('start_date', '');
-                        props.setFieldValue('schedules', [
-                          {days: [], startTime: '', endTime: ''},
-                        ]);
-                      }
-                    }}
+                    onChange={onChangeCourseType}
                   >
                     <option value='' disabled>
                       Select course type
@@ -343,7 +346,9 @@ const CourseForm = ({data, isOpen, toggle}: any) => {
                                     as={Input}
                                     type='time'
                                     disabled={data ? true : false}
-                                    className={data ? 'bg-light text-muted' : ''}
+                                    className={
+                                      data ? 'bg-light text-muted' : ''
+                                    }
                                   />
                                   <ErrorMessage
                                     name={`schedules[${index}].startTime`}
@@ -359,14 +364,15 @@ const CourseForm = ({data, isOpen, toggle}: any) => {
                                     as={Input}
                                     type='time'
                                     disabled={data ? true : false}
-                                    className={data ? 'bg-light text-muted' : ''}
+                                    className={
+                                      data ? 'bg-light text-muted' : ''
+                                    }
                                   />
                                   <ErrorMessage
                                     name={`schedules[${index}].endTime`}
                                     component={FormFeedback}
                                   />
                                 </Col>
-
                               </div>
                             )
                           )}
@@ -376,7 +382,15 @@ const CourseForm = ({data, isOpen, toggle}: any) => {
                   </Col>
                 )}
 
-                <Col xs={(props.values.course_type === PRIVATE_COURSE_TYPES.PRIVATE || props.values.course_type === PRIVATE_COURSE_TYPES.PRIVATE_ONLINE) ? 6 : 4}>
+                <Col
+                  xs={
+                    props.values.course_type === PRIVATE_COURSE_TYPES.PRIVATE ||
+                    props.values.course_type ===
+                      PRIVATE_COURSE_TYPES.PRIVATE_ONLINE
+                      ? 6
+                      : 4
+                  }
+                >
                   <Label for='status'>Status</Label>
                   <Field name='status' as={Input} type='select'>
                     <option value='' disabled>
@@ -387,7 +401,11 @@ const CourseForm = ({data, isOpen, toggle}: any) => {
                   </Field>
                   <ErrorMessage name='status' component={FormFeedback} />
                 </Col>
-                {!(props.values.course_type === PRIVATE_COURSE_TYPES.PRIVATE || props.values.course_type === PRIVATE_COURSE_TYPES.PRIVATE_ONLINE) && (
+                {!(
+                  props.values.course_type === PRIVATE_COURSE_TYPES.PRIVATE ||
+                  props.values.course_type ===
+                    PRIVATE_COURSE_TYPES.PRIVATE_ONLINE
+                ) && (
                   <Col xs={4}>
                     <Label for='classroom'>Classroom</Label>
                     <Field name='classroom' as={Input} type='select'>
@@ -402,7 +420,15 @@ const CourseForm = ({data, isOpen, toggle}: any) => {
                     <ErrorMessage name='classroom' component={FormFeedback} />
                   </Col>
                 )}
-                <Col xs={(props.values.course_type === PRIVATE_COURSE_TYPES.PRIVATE || props.values.course_type === PRIVATE_COURSE_TYPES.PRIVATE_ONLINE) ? 6 : 4}>
+                <Col
+                  xs={
+                    props.values.course_type === PRIVATE_COURSE_TYPES.PRIVATE ||
+                    props.values.course_type ===
+                      PRIVATE_COURSE_TYPES.PRIVATE_ONLINE
+                      ? 6
+                      : 4
+                  }
+                >
                   <Label for='age_group'>Age Group</Label>
                   <Field name='age_group' as={Input} type='select'>
                     <option value='' selected disabled>
@@ -462,20 +488,12 @@ const CourseForm = ({data, isOpen, toggle}: any) => {
                     />
                     <ErrorMessage name='syllabus_id' component={FormFeedback} />
                   </Col>
-                  
                 )}
-                                                <Col xs={12}>
-                                  <Label for='comment'>Comment</Label>
-                                  <Field
-                                    name='comment'
-                                    as={Input}
-                                    type='textarea'
-                                  />
-                                  <ErrorMessage
-                                    name='comment'
-                                    component={FormFeedback}
-                                  />
-                                </Col>
+                <Col xs={12}>
+                  <Label for='comment'>Comment</Label>
+                  <Field name='comment' as={Input} type='textarea' />
+                  <ErrorMessage name='comment' component={FormFeedback} />
+                </Col>
                 {(props.values.course_type === PRIVATE_COURSE_TYPES.PRIVATE ||
                   props.values.course_type ===
                     PRIVATE_COURSE_TYPES.PRIVATE_ONLINE) && (
@@ -590,33 +608,33 @@ const CourseForm = ({data, isOpen, toggle}: any) => {
                     type='submit'
                     isLoading={isLoading}
                     disabled={
-                      (data && !dirty) || 
-                      (
-                        props.values.course_type === PRIVATE_COURSE_TYPES.PRIVATE || 
-                        props.values.course_type === PRIVATE_COURSE_TYPES.PRIVATE_ONLINE
-                          ? !(
-                              props.values.course_name && 
-                              props.values.course_number && 
-                              props.values.course_type && 
-                              props.values.status && 
-                              props.values.age_group && 
-                              props.values.professor_id
-                            )
-                          : !(
-                              props.values.course_name && 
-                              props.values.course_number && 
-                              props.values.course_type && 
-                              props.values.start_date && 
-                              props.values.status && 
-                              props.values.classroom && 
-                              props.values.age_group && 
-                              props.values.professor_id && 
-                              props.values.syllabus_id && 
-                              props.values.schedules[0].days.length > 0 && 
-                              props.values.schedules[0].startTime && 
-                              props.values.schedules[0].endTime
-                            )
-                      )
+                      (data && !dirty) ||
+                      (props.values.course_type ===
+                        PRIVATE_COURSE_TYPES.PRIVATE ||
+                      props.values.course_type ===
+                        PRIVATE_COURSE_TYPES.PRIVATE_ONLINE
+                        ? !(
+                            props.values.course_name &&
+                            props.values.course_number &&
+                            props.values.course_type &&
+                            props.values.status &&
+                            props.values.age_group &&
+                            props.values.professor_id
+                          )
+                        : !(
+                            props.values.course_name &&
+                            props.values.course_number &&
+                            props.values.course_type &&
+                            props.values.start_date &&
+                            props.values.status &&
+                            props.values.classroom &&
+                            props.values.age_group &&
+                            props.values.professor_id &&
+                            props.values.syllabus_id &&
+                            props.values.schedules[0].days.length > 0 &&
+                            props.values.schedules[0].startTime &&
+                            props.values.schedules[0].endTime
+                          ))
                     }
                     loadingText={data ? 'Updating...' : 'Saving...'}
                     defaultText={data ? 'Update' : 'Save'}

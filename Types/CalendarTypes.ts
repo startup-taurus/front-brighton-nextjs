@@ -9,6 +9,7 @@ export interface CalendarEvent {
 export interface Course {
   id: string;
   course_name: string;
+  course_number: string;
   start_date: string;
   end_date: string;
   schedule_days: string[];

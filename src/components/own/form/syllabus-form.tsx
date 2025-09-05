@@ -728,28 +728,6 @@ const SyllabusForm = ({data, isOpen, toggle, isCopy, onReload}: any) => {
                   setFieldValue
                 )}
 
-                {/* Remover el alert HTML existente */}
-                {/* 
-                {(() => {
-                  const validationErrors = getValidationErrors(values);
-                  if (validationErrors.length > 0) {
-                    return (
-                      <Col xs={12} className='mb-3'>
-                        <div className='alert alert-danger'>
-                          <strong>Please fix the following issues:</strong>
-                          <ul className='mb-0 mt-2'>
-                            {validationErrors.map((error, index) => (
-                              <li key={index}>{error}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      </Col>
-                    );
-                  }
-                  return null;
-                })()}
-                */}
-
                 <Col xs={12} className='d-flex justify-content-end mt-5'>
                   <Button color='secondary' onClick={toggle}>
                     Close

@@ -169,7 +169,7 @@ export const getDayOfClassesOfWeek = (courses: any): any[] => {
 
       return {
         id: index,
-        title: course?.course_name,
+        title: course?.course_number,
         start: startDateTime,
         end: endDateTime,
         url: `course/${course.course_id}/home`,
@@ -930,17 +930,15 @@ export const generateCalendarEvents = (courses: Course[]): CalendarEvent[] => {
           0
         );
 
-        const professorText = course.professor_name && course.professor_name !== 'No asignado' 
         
         events.push({
           id: `${course.id}-${format(currentDate, 'yyyy-MM-dd')}`,
-          title: `${course.course_name}${professorText}`,
+          title: `${course.course_number}`,
           start: eventStart,
           end: eventEnd,
           resource: {
             course,
             level: course.level_name,
-            professor: course.professor_name,
           },
         });
         
