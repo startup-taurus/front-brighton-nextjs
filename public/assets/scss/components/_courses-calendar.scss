@@ -8,12 +8,28 @@
 
 // FullCalendar custom styles
 .fc {
-  // Eventos con fondo naranja y texto blanco
-  .fc-event {
-    background-color: #ff8c00 !important;
-    border-color: #ff8c00 !important;
-    color: #ffffff !important;
+  .fc-event,
+  .fc-event.bg-primary,
+  .fc-event.bg-secondary,
+  .fc-event.bg-dark,
+  .fc-event.bg-danger,
+  .fc-event.bg-success,
+  .fc-event.bg-warning,
+  .fc-event.bg-info {
+    background-color: #F5C698 !important;
+    border-color: #F5C698 !important;
+    color: #8B4513 !important;
   }
+
+  .fc-event-main,
+   .fc-event-title,
+   .fc-event-time,
+   .fc-event *,
+   .fc-event-main *,
+   .fc-event-title *,
+   .fc-event-time * {
+     color: #8B4513 !important;
+   }
 
   // Botones del calendario
   .fc-button {
@@ -75,11 +91,29 @@ body.dark-only {
       color: #00ff00 !important;
     }
 
-    .fc-event {
-      background-color: #ff8c00 !important;
-      border-color: #ff8c00 !important;
-      color: #ffffff !important;
+    .fc-event,
+    .fc-event.bg-primary,
+    .fc-event.bg-secondary,
+    .fc-event.bg-dark,
+    .fc-event.bg-danger,
+    .fc-event.bg-success,
+    .fc-event.bg-warning,
+    .fc-event.bg-info {
+      background-color: #F5C698 !important;
+      border-color: #F5C698 !important;
+      color: #8B4513 !important;
     }
+
+    // Asegurar que el texto dentro del evento también sea rojo en tema oscuro
+    .fc-event-main,
+     .fc-event-title,
+     .fc-event-time,
+     .fc-event *,
+     .fc-event-main *,
+     .fc-event-title *,
+     .fc-event-time * {
+       color: #8B4513 !important;
+     }
   }
 }
 
