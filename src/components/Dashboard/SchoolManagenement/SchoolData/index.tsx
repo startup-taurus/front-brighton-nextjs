@@ -142,8 +142,8 @@ const SchoolData = () => {
             ) : error ? (
               <div className='p-3 text-danger'>{error}</div>
             ) : (
-              <div className='p-3'>
-                <h2 className='mb-0'>{endingSoonCourses.length}</h2>
+              <div className='p-2 d-flex flex-column justify-content-center h-100 text-center'>
+                <h2 className='mb-1'>{endingSoonCourses.length}</h2>
                 <p className='mb-0'>Courses will end in 2 weeks</p>
               </div>
             )}

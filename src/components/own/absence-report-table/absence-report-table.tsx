@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardBody, Col, Alert } from 'reactstrap';
 import DataTable from 'react-data-table-component';
 import TableSkeleton from '@/components/own/common/table-skeleton/TableSkeleton';
@@ -9,6 +9,9 @@ import { AbsenceReportData } from '../../../../Types/ReportTypes';
 import useSWR from 'swr';
 
 const AbsenceReportTable: React.FC = () => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const [perPage, setPerPage] = useState(10);
+  
   const { data: reportData, error, isLoading } = useSWR<AbsenceReportData[]>(
     '/attendance/consecutive-absences-report',
     getConsecutiveAbsencesReport
@@ -49,7 +52,7 @@ const AbsenceReportTable: React.FC = () => {
   };
 
   return (
-    <Col xxl={6} md={7}>
+    <Col xxl={6} md={7} className='student-transfer-container'>
       <Card>
         <CommonHeader title='Report of Consecutive Absences' />
         <CardBody className='pt-0'>
@@ -69,7 +72,7 @@ const AbsenceReportTable: React.FC = () => {
               columns={[
                 {
                   name: '#',
-                  selector: (_row, i: any) => i + 1,
+                  selector: (_row, i: any) => (currentPage - 1) * perPage + i + 1,
                   width: '60px',
                 },
                 {
@@ -100,7 +103,12 @@ const AbsenceReportTable: React.FC = () => {
               ]}
               data={reportData || []}
               pagination
-              paginationPerPage={10}
+              paginationPerPage={perPage}
+              onChangePage={(page) => setCurrentPage(page)}
+              onChangeRowsPerPage={(newPerPage, page) => {
+                setPerPage(newPerPage);
+                setCurrentPage(page);
+              }}
               highlightOnHover
               striped
             />

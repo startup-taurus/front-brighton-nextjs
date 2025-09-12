@@ -33,6 +33,7 @@ const TransferStudentsTable = ({ reload }: { reload: boolean }) => {
   const [description, setDescription] = useState('');
   const [initialTransferData, setInitialTransferData] = useState<any>(null);
   const [isViewOnly, setIsViewOnly] = useState(false);
+  const [isReloading, setIsReloading] = useState(false);
   const userRole = getUserRoleFromLocalStorage();
   const { data: coursesData } = useSWR('/course/get-active', () =>
     getActiveCourses(1, 10)
@@ -147,10 +148,15 @@ const TransferStudentsTable = ({ reload }: { reload: boolean }) => {
   );
 
   useEffect(() => {
-    mutate(key);
+    setIsReloading(true);
+    mutate(key).finally(() => {
+      setTimeout(() => setIsReloading(false), 500);
+    });
   }, [reload, key]);
 
-  if (isLoading) {
+  const isLoadingData = isLoading || isReloading;
+
+  if (isLoadingData) {
     return <TableSkeleton rows={10} columns={7} showHeader animated />;
   }
 
@@ -177,10 +183,12 @@ const TransferStudentsTable = ({ reload }: { reload: boolean }) => {
                 />
               </div>
             ),
-            minWidth: '240px',
+            width: '160px',
+            minWidth: '160px',
+            maxWidth: '160px',
             allowOverflow: true,
             sortable: false,
-            center: false,
+            center: true,
           },
         ]
       : [
@@ -195,9 +203,11 @@ const TransferStudentsTable = ({ reload }: { reload: boolean }) => {
                 />
               </div>
             ),
-            maxWidth: '20px',
+            width: '80px',
+            minWidth: '80px',
+            maxWidth: '80px',
             sortable: false,
-            center: false,
+            center: true,
           },
         ]),
     {
@@ -255,7 +265,7 @@ const TransferStudentsTable = ({ reload }: { reload: boolean }) => {
       <DataTable
         columns={columns}
         data={data}
-        progressPending={isLoading}
+        progressPending={isLoadingData}
         pagination
         paginationServer
         paginationDefaultPage={page}

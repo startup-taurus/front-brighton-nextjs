@@ -119,32 +119,35 @@ const HolidaysTable = ({
           stauts={row.status === 'active' ? false : true}
         />
       ),
+      width: '180px',
+      minWidth: '180px',
+      maxWidth: '180px',
       sortable: false,
-      center: false,
+      center: true,
     },
     {
       name: 'Holiday Name',
       selector: (row: any) => `${row.holiday_name}`.toUpperCase(),
       sortable: true,
-      center: false,
+      center: true,
     },
     {
       name: 'Holiday Date',
       selector: (row: any) => `${row.holiday_date}`.toUpperCase(),
       sortable: true,
-      center: false,
+      center: true,
     },
     {
       name: 'Description',
       selector: (row: any) => `${row.description || ''}`.toUpperCase(),
       sortable: false,
-      center: false,
+      center: true,
     },
     {
       name: 'Type',
       selector: (row: any) => `${row.holiday_type}`.toUpperCase(),
       sortable: true,
-      center: false,
+      center: true,
     },
     {
       name: 'Status',
@@ -156,12 +159,12 @@ const HolidaysTable = ({
         </span>
       ),
       sortable: true,
-      center: false,
+      center: true,
     },
   ];
 
   return (
-    <div className='table-responsive'>
+    <div className='table-responsive holidays-table'>
       <DataTable
         columns={columns}
         data={holidaysData.result}

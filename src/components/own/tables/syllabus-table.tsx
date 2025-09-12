@@ -107,15 +107,17 @@ const SyllabusTable = ({
           onCopy={() => handleCopy(row)}
         />
       ),
-      minWidth: '200px',
+      width: '220px',
+      minWidth: '220px',
+      maxWidth: '220px',
       sortable: false,
-      center: false,
+      center: true,
     },
     {
       name: 'Syllabus Name',
       selector: (row: any) => `${row.syllabus_name}`.toUpperCase(),
       sortable: true,
-      center: false,
+      center: true,
     },
     {
       name: 'Level',
@@ -128,25 +130,25 @@ const SyllabusTable = ({
         return '';
       },
       sortable: true,
-      center: false,
+      center: true,
     },
     {
       name: 'Assig Percentage',
       selector: (row: any) => `${row.percentages?.assig_percentage}%`,
       sortable: true,
-      center: false,
+      center: true,
     },
     {
       name: 'Test Percentage',
       selector: (row: any) => `${row.percentages?.test_percentage}%`,
       sortable: true,
-      center: false,
+      center: true,
     },
     {
       name: 'Exam Percentage',
       selector: (row: any) => `${row.percentages?.exam_percentage}%`,
       sortable: true,
-      center: false,
+      center: true,
     },
   ];
 

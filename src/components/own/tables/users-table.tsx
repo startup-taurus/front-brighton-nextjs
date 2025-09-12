@@ -14,21 +14,28 @@ const UsersTable = ({ reload }: any) => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
+  const [isReloading, setIsReloading] = useState(false);
+
+  const page = router.query.page ? Number(router.query.page) : 1;
+  const rowPerPage = router.query.rowPerPage
+    ? Number(router.query.rowPerPage)
+    : 10;
+  const filters = getFiltersString(router);
+  const key = `/user/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}`;
 
   useEffect(() => {
-    mutate([
-      `/user/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}`,
-    ]);
-  }, [reload]);
+    setIsReloading(true);
+    mutate([key]).finally(() => {
+      setTimeout(() => setIsReloading(false), 500);
+    });
+  }, [reload, key]);
 
   const toggle = (data: any) => {
     setSelectedData(data);
     setIsOpen(!isOpen);
 
     if (isOpen) {
-      mutate([
-        `/user/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}`,
-      ]);
+      mutate([key]);
     }
   };
 
@@ -45,9 +52,7 @@ const UsersTable = ({ reload }: any) => {
     }).then((result) => {
       if (result.isConfirmed) {
         updateStatus(row).then(() => {
-          mutate([
-            `/user/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}`,
-          ]);
+          mutate([key]);
         });
       }
     });
@@ -62,24 +67,18 @@ const UsersTable = ({ reload }: any) => {
     }
   };
 
-  const page = router.query.page ? Number(router.query.page) : 1;
-  const rowPerPage = router.query.rowPerPage
-    ? Number(router.query.rowPerPage)
-    : 10;
-  const filters = getFiltersString(router);
-
   const {
     data: users,
     error,
     isLoading,
   } = useSWR(
-    [
-      `/user/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}`,
-    ],
+    [key],
     () => getAllUsers(page, rowPerPage, filters)
   );
 
-  if (isLoading) {
+  const isLoadingData = isLoading || isReloading;
+
+  if (isLoadingData) {
     return (
       <TableSkeleton
         rows={10}
@@ -102,27 +101,29 @@ const UsersTable = ({ reload }: any) => {
           stauts={row.status === 'active' ? false : true}
         />
       ),
-      minWidth: '180px',
+      width: '200px',
+      minWidth: '200px',
+      maxWidth: '200px',
       sortable: false,
-      center: false,
+      center: true,
     },
     {
       name: 'Names',
       selector: (row: any) => `${row.name}`.toUpperCase(),
       sortable: true,
-      center: false,
+      center: true,
     },
     {
       name: 'Username',
       selector: (row: any) => `${row.username}`.toUpperCase(),
       sortable: true,
-      center: false,
+      center: true,
     },
     {
       name: 'Email',
       selector: (row: any) => `${row.email}`,
       sortable: true,
-      center: false,
+      center: true,
     },
     {
       name: 'Rol',
@@ -143,7 +144,7 @@ const UsersTable = ({ reload }: any) => {
         </span>
       ),
       sortable: true,
-      center: false,
+      center: true,
     },
     {
       name: 'Status',
@@ -155,26 +156,26 @@ const UsersTable = ({ reload }: any) => {
         </span>
       ),
       sortable: true,
-      center: false,
+      center: true,
     },
     {
       name: 'Failed Attempts',
       selector: (row: any) =>
         row.failed_attempts != null ? row.failed_attempts : 0,
       sortable: true,
-      center: false,
+      center: true,
     },
     {
       name: 'Created At',
       selector: (row: any) => new Date(row.created_at).toLocaleString(),
       sortable: true,
-      center: false,
+      center: true,
     },
     {
       name: 'Last Login',
       selector: (row: any) => new Date(row.last_login).toLocaleString(),
       sortable: true,
-      center: false,
+      center: true,
     },
   ];
 
@@ -186,7 +187,7 @@ const UsersTable = ({ reload }: any) => {
         pagination
         paginationServer
         paginationTotalRows={users.data.totalCount}
-        progressPending={isLoading}
+        progressPending={isLoadingData}
         paginationDefaultPage={page ?? 1}
         paginationPerPage={rowPerPage ?? 10}
         onChangePage={(page) => {

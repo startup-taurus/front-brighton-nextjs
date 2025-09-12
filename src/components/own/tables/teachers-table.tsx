@@ -100,37 +100,37 @@ const TeachersTable = ({reload}: any) => {
       ),
       minWidth: '140px',
       sortable: false,
-      center: false,
+      center: true,
     },
     {
       name: 'ID',
       selector: (row: any) => `${row.cedula}`,
       sortable: true,
-      center: false,
+      center: true,
     },
     {
       name: 'Names',
       selector: (row: any) => `${row.user.name}`.toUpperCase(),
       sortable: true,
-      center: false,
+      center: true,
     },
     {
       name: 'Email',
       selector: (row: any) => `${row.email}`,
       sortable: true,
-      center: false,
+      center: true,
     },
     {
       name: 'Phone',
       selector: (row: any) => `${row.phone}`.toUpperCase(),
       sortable: true,
-      center: false,
+      center: true,
     },
     {
       name: 'Hourly Rate',
       selector: (row: any) => `${row.hourly_rate}`.toUpperCase(),
       sortable: true,
-      center: false,
+      center: true,
     },
     {
       name: 'Status',
@@ -142,13 +142,13 @@ const TeachersTable = ({reload}: any) => {
         </span>
       ),
       sortable: true,
-      center: false,
+      center: true,
     },
     {
       name: 'Last login',
       selector: (row: any) => new Date(row.user.last_login).toLocaleString(),
       sortable: true,
-      center: false,
+      center: true,
     },
   ];
 

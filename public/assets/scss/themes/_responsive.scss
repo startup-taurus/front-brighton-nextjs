@@ -7004,6 +7004,7 @@
           -webkit-box-orient: vertical;
           overflow: hidden;
           -webkit-line-clamp: 4;
+          line-clamp: 4;
         }
       }
     }
@@ -7411,6 +7412,246 @@
           .sidebar-main {
             .sidebar-links {
               height: calc(100vh - 210px);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+@media screen and (min-width: 1401px) {
+  .dashboard-tables {
+    .professors-table-container,
+    .students-transfer-table-container {
+      max-width: 50% !important;
+      flex: 0 0 50% !important;
+      margin-bottom: 1rem;
+    }
+  }
+}
+
+
+
+@media screen and (max-width: 1400px) {
+  .dashboard-tables {
+    .col-xxl-6 {
+      max-width: 100%;
+      flex: 0 0 100%;
+      margin-bottom: 1rem;
+    }
+  }
+
+  .absence-report-container {
+    max-width: 100%;
+  }
+}
+
+@media screen and (max-width: 1366px) and (min-width: 1025px) {
+  .dashboard-tables {
+    .col-xxl-6 {
+      max-width: 100%;
+      flex: 0 0 100%;
+      margin-bottom: 1rem;
+    }
+  }
+
+  .professors-table-container,
+  .students-transfer-table-container,
+  .absence-report-container {
+    .card {
+      .card-body {
+        padding: 0.75rem;
+        
+        .rdt_Table {
+          font-size: 0.875rem;
+          
+          .rdt_TableHead {
+            .rdt_TableHeadRow {
+              .rdt_TableCol {
+                padding: 0.5rem 0.25rem;
+                font-size: 0.8rem;
+              }
+            }
+          }
+          
+          .rdt_TableBody {
+            .rdt_TableRow {
+              .rdt_TableCell {
+                padding: 0.5rem 0.25rem;
+                font-size: 0.8rem;
+              }
+            }
+          }
+        }
+        
+        .table {
+          font-size: 0.875rem;
+          
+          th, td {
+            padding: 0.5rem 0.25rem;
+            font-size: 0.8rem;
+          }
+          
+          th {
+            font-weight: 600;
+          }
+        }
+      }
+    }
+  }
+}
+
+
+@media screen and (max-width: 1024px) and (min-width: 768px) {
+  .dashboard-tables {
+    .col-xxl-6 {
+      max-width: 100%;
+      flex: 0 0 100%;
+      margin-bottom: 1rem;
+    }
+  }
+
+  .professors-table-container,
+  .students-transfer-table-container,
+  .absence-report-container {
+    max-width: 100% !important;
+    width: 100% !important;
+    
+    .card {
+      width: 100% !important;
+      
+      .card-body {
+        padding: 0.5rem;
+        width: 100% !important;
+        
+        .rdt_Table {
+          font-size: 0.8rem;
+          width: 100% !important;
+          table-layout: auto;
+          
+          .rdt_TableCol,
+          .rdt_TableCell {
+            padding: 0.375rem 0.2rem;
+            font-size: 0.75rem;
+          }
+        }
+        
+        .table {
+          font-size: 0.8rem;
+          width: 100% !important;
+          table-layout: auto;
+          
+          th, td {
+            padding: 0.375rem 0.2rem;
+            font-size: 0.75rem;
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .dashboard-tables {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 0.5rem !important;
+    box-sizing: border-box;
+    
+    .professors-table-container,
+    .students-transfer-table-container,
+    .absence-report-container {
+      width: 100% !important;
+      max-width: 100% !important;
+      margin: 0 0 1rem 0 !important;
+      padding: 0 !important;
+      flex: none !important;
+      
+      .card {
+         width: 100% !important;
+         max-width: 100% !important;
+         margin: 0 !important;
+         border-radius: 25px !important;
+         overflow: hidden;
+        
+        .card-body {
+          width: 100% !important;
+          max-width: 100% !important;
+          padding: 0.75rem !important;
+          margin: 0 !important;
+          
+          .rdt_Table,
+          .table {
+            width: 100% !important;
+            max-width: 100% !important;
+            margin: 0 !important;
+            table-layout: auto;
+            font-size: 0.75rem;
+            
+            th, td,
+            .rdt_TableCol,
+            .rdt_TableCell {
+              padding: 0.25rem 0.125rem !important;
+              font-size: 0.7rem;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+            }
+          }
+          
+          .rdt_Pagination {
+            width: 100% !important;
+            justify-content: center;
+            
+            .rdt_Pagination__rows {
+              font-size: 0.7rem;
+            }
+            
+            .rdt_Pagination__button {
+              min-width: 32px;
+              height: 32px;
+              font-size: 0.7rem;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (min-width: 481px) and (max-width: 576px) {
+  .dashboard-tables {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 0.5rem !important;
+    
+    .professors-table-container,
+    .students-transfer-table-container,
+    .absence-report-container {
+      width: 100% !important;
+      max-width: 100% !important;
+      margin: 0 0 1rem 0 !important;
+      
+      .card {
+        width: 100% !important;
+        
+        .card-body {
+          width: 100% !important;
+          padding: 0.75rem !important;
+          
+          .rdt_Table,
+          .table {
+            width: 100% !important;
+            font-size: 0.8rem;
+            
+            th, td,
+            .rdt_TableCol,
+            .rdt_TableCell {
+              padding: 0.375rem 0.25rem !important;
+              font-size: 0.75rem;
             }
           }
         }

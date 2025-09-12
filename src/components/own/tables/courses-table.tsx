@@ -102,7 +102,7 @@ const CoursesTable = ({ reload, loading }: any) => {
 
   const columns = [
     {
-      name: 'Acción',
+      name: 'Actions',
       cell: (row: any) => (
         <TableActionButtons
           onEdit={() => toggle(row)}
@@ -110,39 +110,41 @@ const CoursesTable = ({ reload, loading }: any) => {
           stauts={row.status === 'active' ? false : true}
         />
       ),
-      minWidth: '180px',
+      width: '200px',
+      minWidth: '200px',
+      maxWidth: '200px',
       sortable: false,
-      center: false,
+      center: true,
     },
     {
       name: 'N° of course',
       selector: (row: any) => `${row.course_number}`.toUpperCase(),
       sortable: true,
-      center: false,
+      center: true,
     },
     {
       name: 'Name',
       selector: (row: any) => `${row.course_name}`.toUpperCase(),
       sortable: true,
-      center: false,
+      center: true,
     },
     {
       name: 'Professor',
       selector: (row: any) => `${row.professor?.user?.name}`.toUpperCase(),
       sortable: true,
-      center: false,
+      center: true,
     },
     {
       name: 'Classroom',
       selector: (row: any) => row.classroom ? `${row.classroom}`.toUpperCase() : '',
       sortable: true,
-      center: false,
+      center: true,
     },
     {
       name: 'Start date',
       selector: (row: any) => `${row.start_date}`,
       sortable: true,
-      center: false,
+      center: true,
     },
     {
       name: 'End date',
@@ -159,7 +161,7 @@ const CoursesTable = ({ reload, loading }: any) => {
         }
       },
       sortable: true,
-      center: false,
+      center: true,
     },
     {
       name: 'Status',
@@ -171,19 +173,19 @@ const CoursesTable = ({ reload, loading }: any) => {
         </span>
       ),
       sortable: true,
-      center: false,
+      center: true,
     },
     {
       name: 'Type',
       selector: (row: any) => `${row.course_type}`.toUpperCase(),
       sortable: true,
-      center: false,
+      center: true,
     },
     {
       name: 'Schedule',
       selector: (row: any) => row.schedule ? `${row.schedule}`.toUpperCase() : '',
       sortable: true,
-      center: false,
+      center: true,
     },
   ];
 

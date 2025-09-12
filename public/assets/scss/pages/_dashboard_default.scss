@@ -9,6 +9,50 @@
     border-color: transparent;
     box-shadow: none;
   }
+
+// Responsive Grid System for Dashboard Cards
+.row {
+  .col-md-3 {
+    // Laptop screens - 2 cards per row
+    @media (min-width: 1024px) and (max-width: 1366px) {
+      flex: 0 0 50%;
+      max-width: 50%;
+    }
+
+    // Tablets - 2 cards per row
+    @media (min-width: 768px) and (max-width: 1023px) {
+      flex: 0 0 50%;
+      max-width: 50%;
+    }
+
+    // Small tablets - 1 card per row
+    @media (min-width: 576px) and (max-width: 767px) {
+      flex: 0 0 100%;
+      max-width: 100%;
+    }
+
+    // Mobile - 1 card per row
+    @media (max-width: 575px) {
+      flex: 0 0 100%;
+      max-width: 100%;
+    }
+  }
+
+  // Ensure proper spacing between cards
+  [class*="col-"] {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    margin-bottom: 1.5rem;
+
+    @media (min-width: 1024px) and (max-width: 1366px) {
+      margin-bottom: 1.2rem;
+    }
+
+    @media (max-width: 767px) {
+      margin-bottom: 1rem;
+    }
+  }
+}
 }
 
 @keyframes bounce-effect {
@@ -274,6 +318,37 @@ $badge-light-color in (primary, $primary-color),
   background-image: url(/assets/images/dashboard/widget-bg.png);
   background-size: cover;
   margin-bottom: 25px;
+  display: flex;
+  flex-direction: column;
+  height: auto !important;
+  min-height: 220px !important;
+  overflow: visible;
+  box-sizing: border-box;
+
+  // Laptop screens (1024px-1366px)
+  @media (min-width: 1024px) and (max-width: 1366px) {
+    min-height: 210px !important;
+  }
+
+  // Large laptops and small desktops (1200px-1400px)
+  @media (min-width: 1200px) and (max-width: 1400px) {
+    min-height: 215px !important;
+  }
+
+  // Tablets and small laptops (768px-1199px)
+  @media (min-width: 768px) and (max-width: 1199px) {
+    min-height: 200px !important;
+  }
+
+  // Small tablets (max-width: 767px)
+  @media (max-width: 767px) {
+    min-height: 190px !important;
+  }
+
+  // Mobile devices (max-width: 480px)
+  @media (max-width: 480px) {
+    min-height: 180px !important;
+  }
 
   i {
     font-weight: 700;
@@ -290,13 +365,33 @@ $badge-light-color in (primary, $primary-color),
   }
 
   .card-body {
+    flex: 1;
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
     padding: 18px 25px;
+    overflow: visible;
+    box-sizing: border-box;
 
     @media (max-width: 1720px) {
       padding: 18px;
+    }
+
+    // Laptop responsive adjustments
+    @media (min-width: 1024px) and (max-width: 1366px) {
+      padding: 0.8rem;
+    }
+
+    @media (min-width: 768px) and (max-width: 1199px) {
+      padding: 0.7rem;
+    }
+
+    @media (max-width: 767px) {
+      padding: 0.6rem;
+    }
+
+    @media (max-width: 480px) {
+      padding: 0.5rem;
     }
   }
 
@@ -406,6 +501,37 @@ $badge-light-color in (primary, $primary-color),
 .profile-box {
   background: $gradient-bg-primary;
   color: $white;
+  display: flex;
+  flex-direction: column;
+  height: auto !important;
+  min-height: 220px !important;
+  overflow: visible;
+  box-sizing: border-box;
+
+  // Laptop screens (1024px-1366px)
+  @media (min-width: 1024px) and (max-width: 1366px) {
+    min-height: 210px !important;
+  }
+
+  // Large laptops and small desktops (1200px-1400px)
+  @media (min-width: 1200px) and (max-width: 1400px) {
+    min-height: 215px !important;
+  }
+
+  // Tablets and small laptops (768px-1199px)
+  @media (min-width: 768px) and (max-width: 1199px) {
+    min-height: 200px !important;
+  }
+
+  // Small tablets (max-width: 767px)
+  @media (max-width: 767px) {
+    min-height: 190px !important;
+  }
+
+  // Mobile devices (max-width: 480px)
+  @media (max-width: 480px) {
+    min-height: 180px !important;
+  }
 
   .cartoon {
     position: absolute;
@@ -636,6 +762,37 @@ $badge-light-color in (primary, $primary-color),
 }
 
 .appointment-sec {
+  display: flex;
+  flex-direction: column;
+  height: auto !important;
+  min-height: 220px !important;
+  overflow: visible;
+  box-sizing: border-box;
+
+  // Laptop screens (1024px-1366px)
+  @media (min-width: 1024px) and (max-width: 1366px) {
+    min-height: 210px !important;
+  }
+
+  // Large laptops and small desktops (1200px-1400px)
+  @media (min-width: 1200px) and (max-width: 1400px) {
+    min-height: 215px !important;
+  }
+
+  // Tablets and small laptops (768px-1199px)
+  @media (min-width: 768px) and (max-width: 1199px) {
+    min-height: 200px !important;
+  }
+
+  // Small tablets (max-width: 767px)
+  @media (max-width: 767px) {
+    min-height: 190px !important;
+  }
+
+  // Mobile devices (max-width: 480px)
+  @media (max-width: 480px) {
+    min-height: 180px !important;
+  }
   .card-header-right-icon {
     select {
       background-color: rgba($primary-color, 0.08) !important;
@@ -673,6 +830,37 @@ $badge-light-color in (primary, $primary-color),
 }
 
 .notification {
+  display: flex;
+  flex-direction: column;
+  height: auto !important;
+  min-height: 220px !important;
+  overflow: visible;
+  box-sizing: border-box;
+
+  // Laptop screens (1024px-1366px)
+  @media (min-width: 1024px) and (max-width: 1366px) {
+    min-height: 210px !important;
+  }
+
+  // Large laptops and small desktops (1200px-1400px)
+  @media (min-width: 1200px) and (max-width: 1400px) {
+    min-height: 215px !important;
+  }
+
+  // Tablets and small laptops (768px-1199px)
+  @media (min-width: 768px) and (max-width: 1199px) {
+    min-height: 200px !important;
+  }
+
+  // Small tablets (max-width: 767px)
+  @media (max-width: 767px) {
+    min-height: 190px !important;
+  }
+
+  // Mobile devices (max-width: 480px)
+  @media (max-width: 480px) {
+    min-height: 180px !important;
+  }
   ul {
     position: relative;
 
@@ -1170,15 +1358,393 @@ $badge-light-color in (primary, $primary-color),
   fill: $danger-color;
 }
 
+// School Management Dashboard Cards
+.dashboard-card-responsive {
+  display: flex;
+  flex-direction: column;
+  height: 160px !important;
+  overflow: visible;
+  box-sizing: border-box;
+
+  .card-header {
+    flex-shrink: 0;
+  }
+
+  // Large screens (above 1381px width)
+  @media (min-width: 1381px) {
+    height: 160px !important;
+  }
+
+  // Laptop screens (1024px-1366px)
+  @media (min-width: 1024px) and (max-width: 1366px) {
+    height: 160px !important;
+  }
+
+  // Large laptops and small desktops (1200px-1400px)
+  @media (min-width: 1200px) and (max-width: 1400px) {
+    height: 160px !important;
+  }
+
+  // Tablets and small laptops (768px-1199px)
+  @media (min-width: 768px) and (max-width: 1199px) {
+    height: 240px !important;
+  }
+
+  // Small tablets (max-width: 767px)
+  @media (max-width: 767px) {
+    height: 230px !important;
+  }
+
+  // Mobile devices (max-width: 480px)
+  @media (max-width: 480px) {
+    height: 220px !important;
+  }
+}
+
+.dashboard-card-body-responsive {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+  overflow: visible;
+  box-sizing: border-box;
+
+  &.text-center {
+    justify-content: center;
+    align-items: flex-start;
+    padding: 0.5rem;
+  }
+
+  // Large screens (above 1381px width)
+  @media (min-width: 1381px) {
+    padding: 0.5rem;
+  }
+
+  // Laptop responsive adjustments
+  @media (min-width: 1024px) and (max-width: 1366px) {
+    padding: 0.5rem;
+  }
+
+  @media (min-width: 768px) and (max-width: 1199px) {
+    padding: 0.7rem;
+  }
+
+  @media (max-width: 767px) {
+    padding: 0.6rem;
+  }
+
+  @media (max-width: 480px) {
+    padding: 0.5rem;
+  }
+
+  // Specific styles for course cards (text-center content)
+  &.text-center {
+    .p-3 {
+      padding: 1rem !important;
+      
+      @media (min-width: 1024px) and (max-width: 1366px) {
+        padding: 0.8rem !important;
+      }
+      
+      @media (min-width: 768px) and (max-width: 1199px) {
+        padding: 0.7rem !important;
+      }
+      
+      @media (max-width: 767px) {
+        padding: 0.6rem !important;
+      }
+      
+      @media (max-width: 480px) {
+        padding: 0.5rem !important;
+      }
+    }
+    
+    h2 {
+      font-size: 2rem;
+      
+      @media (min-width: 1024px) and (max-width: 1366px) {
+        font-size: 1.8rem;
+      }
+      
+      @media (min-width: 768px) and (max-width: 1199px) {
+        font-size: 1.6rem;
+      }
+      
+      @media (max-width: 767px) {
+        font-size: 1.4rem;
+      }
+      
+      @media (max-width: 480px) {
+        font-size: 1.2rem;
+      }
+    }
+    
+    p {
+      font-size: 0.9rem;
+      
+      @media (min-width: 1024px) and (max-width: 1366px) {
+        font-size: 0.85rem;
+      }
+      
+      @media (min-width: 768px) and (max-width: 1199px) {
+        font-size: 0.8rem;
+      }
+      
+      @media (max-width: 767px) {
+        font-size: 0.75rem;
+      }
+      
+      @media (max-width: 480px) {
+        font-size: 0.7rem;
+      }
+    }
+     
+     // Icon responsiveness for course cards
+     .feather {
+       width: 18px;
+       height: 18px;
+       
+       @media (min-width: 1024px) and (max-width: 1366px) {
+         width: 16px;
+         height: 16px;
+       }
+       
+       @media (min-width: 768px) and (max-width: 1199px) {
+         width: 15px;
+         height: 15px;
+       }
+       
+       @media (max-width: 767px) {
+         width: 14px;
+         height: 14px;
+       }
+       
+       @media (max-width: 480px) {
+         width: 13px;
+         height: 13px;
+       }
+     }
+    }
+
+  // DashboardHead responsive styles for course cards
+  .card-header {
+    .header-top {
+      h5 {
+        font-size: 1rem;
+        
+        @media (min-width: 1024px) and (max-width: 1366px) {
+          font-size: 0.9rem;
+        }
+        
+        @media (min-width: 768px) and (max-width: 1199px) {
+          font-size: 0.85rem;
+        }
+        
+        @media (max-width: 767px) {
+          font-size: 0.8rem;
+        }
+        
+        @media (max-width: 480px) {
+          font-size: 0.75rem;
+        }
+      }
+      
+      .card-header-right-icon {
+        svg {
+          width: 18px;
+          height: 18px;
+          
+          @media (min-width: 1024px) and (max-width: 1366px) {
+            width: 16px;
+            height: 16px;
+          }
+          
+          @media (min-width: 768px) and (max-width: 1199px) {
+            width: 15px;
+            height: 15px;
+          }
+          
+          @media (max-width: 767px) {
+            width: 14px;
+            height: 14px;
+          }
+          
+          @media (max-width: 480px) {
+            width: 13px;
+            height: 13px;
+          }
+        }
+      }
+    }
+  }
+
+  .school-wrapper {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+    overflow: visible;
+    min-height: 100px;
+
+    .school-header {
+      flex: 1;
+      overflow: visible;
+      padding-top: 0.5rem;
+
+      h4 {
+        margin-bottom: 0.5rem;
+        font-size: 1.5rem;
+        white-space: normal;
+        word-wrap: break-word;
+        line-height: 1.2;
+
+        @media (min-width: 1024px) and (max-width: 1366px) {
+          font-size: 1.3rem;
+        }
+
+        @media (min-width: 768px) and (max-width: 1199px) {
+          font-size: 1.2rem;
+        }
+
+        @media (max-width: 767px) {
+          font-size: 1.1rem;
+        }
+
+        @media (max-width: 480px) {
+          font-size: 1rem;
+        }
+      }
+
+      .d-flex {
+        font-size: 0.8rem;
+
+        @media (min-width: 1024px) and (max-width: 1366px) {
+          font-size: 0.75rem;
+        }
+
+        @media (max-width: 767px) {
+          font-size: 0.7rem;
+        }
+
+        span, p {
+          white-space: normal;
+          word-wrap: break-word;
+          line-height: 1.1;
+        }
+      }
+    }
+
+    .school-body {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      img {
+        max-width: 100%;
+        height: auto;
+        object-fit: contain;
+
+        @media (min-width: 1024px) and (max-width: 1366px) {
+          width: 60px;
+          height: 50px;
+        }
+
+        @media (min-width: 768px) and (max-width: 1199px) {
+          width: 55px;
+          height: 45px;
+        }
+
+        @media (max-width: 767px) {
+          width: 50px;
+          height: 40px;
+        }
+
+        @media (max-width: 480px) {
+          width: 45px;
+          height: 35px;
+        }
+      }
+    }
+  }
+}
+
 .ecommerce-widget {
   box-shadow: none;
   border: 1px solid #f1f3ff !important;
   border-radius: 5px;
+  overflow: visible;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  height: auto !important;
+  min-height: 220px !important;
+
+  // Laptop screens (1024px-1366px)
+  @media (min-width: 1024px) and (max-width: 1366px) {
+    min-height: 210px !important;
+  }
+
+  // Large laptops and small desktops (1200px-1400px)
+  @media (min-width: 1200px) and (max-width: 1400px) {
+    min-height: 215px !important;
+  }
+
+  // Tablets and small laptops (768px-1199px)
+  @media (min-width: 768px) and (max-width: 1199px) {
+    min-height: 200px !important;
+  }
+
+  // Small tablets (max-width: 767px)
+  @media (max-width: 767px) {
+    min-height: 190px !important;
+  }
+
+  // Mobile devices (max-width: 480px)
+  @media (max-width: 480px) {
+    min-height: 180px !important;
+  }
+
+  .card-body {
+    flex: 1;
+    overflow: visible;
+    padding: 1rem;
+
+    // Laptop responsive adjustments
+    @media (min-width: 1024px) and (max-width: 1366px) {
+      padding: 0.8rem;
+    }
+
+    @media (min-width: 768px) and (max-width: 1199px) {
+      padding: 0.7rem;
+    }
+
+    @media (max-width: 767px) {
+      padding: 0.6rem;
+    }
+
+    @media (max-width: 480px) {
+      padding: 0.5rem;
+    }
+  }
 
   .total-num {
     color: $theme-body-font-color;
     margin: 0;
     letter-spacing: 1px;
+    font-size: 1.2rem;
+
+    @media (min-width: 1024px) and (max-width: 1366px) {
+      font-size: 1.1rem;
+    }
+
+    @media (min-width: 768px) and (max-width: 1199px) {
+      font-size: 1rem;
+    }
+
+    @media (max-width: 767px) {
+      font-size: 0.9rem;
+    }
 
     span {
       color: $black;
@@ -1187,21 +1753,51 @@ $badge-light-color in (primary, $primary-color),
 
   .row {
     align-items: center;
+    margin: 0;
   }
 
   .progress-showcase {
     margin-top: 30px;
+
+    @media (min-width: 1024px) and (max-width: 1366px) {
+      margin-top: 20px;
+    }
+
+    @media (max-width: 767px) {
+      margin-top: 15px;
+    }
   }
 
   span {
     color: $theme-body-sub-title-color;
     margin: 0;
     cursor: pointer;
+    font-size: 0.8rem;
+
+    @media (min-width: 1024px) and (max-width: 1366px) {
+      font-size: 0.75rem;
+    }
+
+    @media (max-width: 767px) {
+      font-size: 0.7rem;
+    }
   }
 
   .icon {
     color: $light-semi-gray;
     font-size: 40px;
+
+    @media (min-width: 1024px) and (max-width: 1366px) {
+      font-size: 35px;
+    }
+
+    @media (min-width: 768px) and (max-width: 1199px) {
+      font-size: 30px;
+    }
+
+    @media (max-width: 767px) {
+      font-size: 25px;
+    }
   }
 
   .flot-chart-container {
@@ -1209,6 +1805,14 @@ $badge-light-color in (primary, $primary-color),
     padding: 0;
     margin: 0;
     border: transparent;
+
+    @media (min-width: 1024px) and (max-width: 1366px) {
+      height: 80px;
+    }
+
+    @media (max-width: 767px) {
+      height: 60px;
+    }
   }
 
   .morris-default-style {
@@ -1218,6 +1822,8 @@ $badge-light-color in (primary, $primary-color),
   svg {
     -webkit-filter: drop-shadow(12px 12px 7px rgba(0, 0, 0, 0.3));
     filter: drop-shadow(12px 12px 7px rgba(0, 0, 0, 0.3));
+    max-width: 100%;
+    height: auto;
   }
 }
 

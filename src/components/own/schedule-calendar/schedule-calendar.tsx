@@ -1,11 +1,14 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import timeGridPlugin from '@fullcalendar/timegrid';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import interactionPlugin from '@fullcalendar/interaction';
 import { Col, Row } from 'reactstrap';
 import { getDayOfClassesOfWeek } from '../../../../utils/utils';
 
 const ScheduleCalendar = ({ courses }: any) => {
   const [daysOfClasses, setDayOfClasses] = useState<any[]>([]);
+  const calendarRef = useRef<FullCalendar>(null);
 
   useEffect(() => {
     const schedule = getDayOfClassesOfWeek(courses);
@@ -23,23 +26,6 @@ const ScheduleCalendar = ({ courses }: any) => {
           xs={12}
           lg={12}
         >
-          <FullCalendar
-            plugins={[timeGridPlugin]}
-            headerToolbar={{
-              left: '',
-              center: 'title',
-              right: '',
-            }}
-            initialView='timeGridWeek'
-            weekends={true}
-            expandRows={false}
-            allDaySlot={false}
-            nowIndicator={true}
-            initialEvents={daysOfClasses}
-            slotMinTime='07:00:00'
-            slotMaxTime='22:00:00'
-            height='auto'
-          />
         </Col>
       </Row>
     </div>
