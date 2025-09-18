@@ -1,46 +1,48 @@
 import React, { useState, useEffect } from 'react';
-import useSWR, { mutate } from 'swr';
+import { mutate } from 'swr';
 import { useRouter } from 'next/router';
-import { getAllUsers, updateStatusUser } from 'helper/api-data/user';
+import { updateStatusUser } from 'helper/api-data/user';
 import TableActionButtons from '@/components/own/table-action-buttons/table-action-buttons';
 import Swal from 'sweetalert2';
 import DataTable from 'react-data-table-component';
 import UserForm from '../form/user-form';
-import { getFiltersString } from '../../../../utils/utils';
 import TableSkeleton from '@/components/own/common/table-skeleton/TableSkeleton';
 import { USER_TYPES } from 'utils/constants';
+import { setQueryStringValue, clearQueryString } from '../../../../utils/utils';
 
-const UsersTable = ({ reload }: any) => {
+const UsersTable = ({
+  users,
+  page,
+  rowPerPage,
+  filters,
+  loading,
+}: any) => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
-  const [isReloading, setIsReloading] = useState(false);
-
-  const page = router.query.page ? Number(router.query.page) : 1;
-  const rowPerPage = router.query.rowPerPage
-    ? Number(router.query.rowPerPage)
-    : 10;
-  const filters = getFiltersString(router);
-  const key = `/user/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}`;
-
-  useEffect(() => {
-    setIsReloading(true);
-    mutate([key]).finally(() => {
-      setTimeout(() => setIsReloading(false), 500);
-    });
-  }, [reload, key]);
 
   const toggle = (data: any) => {
     setSelectedData(data);
     setIsOpen(!isOpen);
+  };
 
-    if (isOpen) {
-      mutate([key]);
+  const updateStatus = async (data: any) => {
+    try {
+      const newStatus = data?.status === 'active' ? 'inactive' : 'active';
+      const response = await updateStatusUser(data.id, newStatus);
+      if (response.statusCode === 200) {
+        clearQueryString(router);
+        mutate([
+          `/user/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}`,
+        ]);
+      }
+    } catch (error) {
+      console.error('Error al actualizar usuario:', error);
     }
   };
 
   const handleAlert = (row: any) => {
-    let status = row?.status === 'active' ? 'deactivate' : 'active';
+    const status = row?.status === 'active' ? 'deactivate' : 'active';
     Swal.fire({
       title: 'Are you sure to ' + status + '?',
       text: 'You are about to ' + status + ' this user',
@@ -51,42 +53,13 @@ const UsersTable = ({ reload }: any) => {
       reverseButtons: true,
     }).then((result) => {
       if (result.isConfirmed) {
-        updateStatus(row).then(() => {
-          mutate([key]);
-        });
+        updateStatus(row);
       }
     });
   };
 
-  const updateStatus = async (data: any) => {
-    try {
-      let status = data?.status === 'active' ? 'inactive' : 'active';
-      const response = await updateStatusUser(data.id, status);
-    } catch (error) {
-      console.error('Error al actualizar usuario:', error);
-    }
-  };
-
-  const {
-    data: users,
-    error,
-    isLoading,
-  } = useSWR(
-    [key],
-    () => getAllUsers(page, rowPerPage, filters)
-  );
-
-  const isLoadingData = isLoading || isReloading;
-
-  if (isLoadingData) {
-    return (
-      <TableSkeleton
-        rows={10}
-        columns={9}
-        showHeader={true}
-        animated={true}
-      />
-    );
+  if (loading) {
+    return <TableSkeleton rows={10} columns={9} showHeader animated />;
   }
 
   if (!users?.data?.result) return null;
@@ -98,7 +71,7 @@ const UsersTable = ({ reload }: any) => {
         <TableActionButtons
           onEdit={() => toggle(row)}
           onBlock={() => handleAlert(row)}
-          stauts={row.status === 'active' ? false : true}
+          status={row.status === 'active' ? false : true}
         />
       ),
       width: '200px',
@@ -187,21 +160,13 @@ const UsersTable = ({ reload }: any) => {
         pagination
         paginationServer
         paginationTotalRows={users.data.totalCount}
-        progressPending={isLoadingData}
+        progressPending={loading}
         paginationDefaultPage={page ?? 1}
         paginationPerPage={rowPerPage ?? 10}
-        onChangePage={(page) => {
-          router.push({
-            pathname: router.pathname,
-            query: { ...router.query, page },
-          });
-        }}
-        onChangeRowsPerPage={(newPerPage) => {
-          router.push({
-            pathname: router.pathname,
-            query: { ...router.query, rowPerPage: newPerPage },
-          });
-        }}
+        onChangePage={(newPage) => setQueryStringValue('page', newPage, router)}
+        onChangeRowsPerPage={(newPerPage) =>
+          setQueryStringValue('rowPerPage', newPerPage, router)
+        }
         highlightOnHover
         selectableRows={false}
       />
@@ -210,11 +175,6 @@ const UsersTable = ({ reload }: any) => {
         toggle={toggle}
         data={selectedData}
       />
-      {/* <StudentDetail
-        isOpen={isOpenDetail}
-        toggle={toggleDetail}
-        data={selectedData}
-      /> */}
     </div>
   );
 };

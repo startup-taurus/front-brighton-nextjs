@@ -26,6 +26,23 @@ const ScheduleCalendar = ({ courses }: any) => {
           xs={12}
           lg={12}
         >
+           <FullCalendar
+           plugins={[timeGridPlugin]}
+            headerToolbar={{
+              left: '',
+              center: 'title',
+              right: '',
+            }}
+            initialView='timeGridWeek'
+            weekends={true}
+            expandRows={false}
+            allDaySlot={false}
+            nowIndicator={true}
+            initialEvents={daysOfClasses}
+            slotMinTime='07:00:00'
+            slotMaxTime='22:00:00'
+            height='auto'
+          />
         </Col>
       </Row>
     </div>

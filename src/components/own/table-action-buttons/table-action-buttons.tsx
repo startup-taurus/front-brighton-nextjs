@@ -24,29 +24,6 @@ const TableActionButtons = ({
 }: any) => {
   return (
     <>
-      <style jsx>{`
-        .mobile-action-buttons {
-          /* Estilos por defecto para PC */
-        }
-        
-        .mobile-action-buttons .btn {
-        }
-        
-        /* Estilos específicos para móvil */
-        @media (max-width: 768px) {
-          .mobile-action-buttons .btn {
-            font-size: 14px !important;
-            padding: 0.4rem 0.6rem !important;
-            min-width: 40px;
-            min-height: 40px;
-          }
-          
-          .mobile-action-buttons .btn svg {
-            width: 16px !important;
-            height: 16px !important;
-          }
-        }
-      `}</style>
       <div
         className='btn-group mobile-action-buttons'
         role='group'

@@ -1,0 +1,23 @@
+// Table Action Buttons Styles
+.mobile-action-buttons {
+  /* Estilos por defecto para PC */
+  
+  .btn {
+    // Estilos base para botones
+  }
+  
+  /* Estilos específicos para móvil */
+  @media (max-width: 768px) {
+    .btn {
+      font-size: 14px !important;
+      padding: 0.4rem 0.6rem !important;
+      min-width: 40px;
+      min-height: 40px;
+      
+      svg {
+        width: 16px !important;
+        height: 16px !important;
+      }
+    }
+  }
+}
