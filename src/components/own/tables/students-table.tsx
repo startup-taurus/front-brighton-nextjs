@@ -1,15 +1,15 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import useSWR, { mutate } from 'swr';
-import { useRouter } from 'next/router';
+import React, {useEffect, useMemo, useState} from 'react';
+import useSWR, {mutate} from 'swr';
+import {useRouter} from 'next/router';
 import Swal from 'sweetalert2';
 import DataTable from 'react-data-table-component';
-import { updateStatusStudent, deleteStudent } from 'helper/api-data/student';
+import {updateStatusStudent, deleteStudent} from 'helper/api-data/student';
 import TableActionButtons from '@/components/own/table-action-buttons/table-action-buttons';
 import StudentForm from '../form/student-form';
 import StudentDetail from '../student-detail/student-datail';
 import TableSkeleton from '@/components/own/common/table-skeleton/TableSkeleton';
 
-import { setQueryStringValue, clearQueryString } from '../../../../utils/utils';
+import {setQueryStringValue, clearQueryString} from '../../../../utils/utils';
 
 const StudentsTable = ({
   students,
@@ -52,8 +52,8 @@ const StudentsTable = ({
       if (response.statusCode === 200) {
         clearQueryString(router);
         mutate([
-      `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}&order=desc&orderBy=createdAt`,
-    ],);
+          `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}&order=desc&orderBy=createdAt`,
+        ]);
         clearSelections();
       }
     } catch (error) {
@@ -67,8 +67,8 @@ const StudentsTable = ({
       if (response.statusCode === 200) {
         clearQueryString(router);
         mutate([
-      `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}&order=desc&orderBy=createdAt`,
-    ],);
+          `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}&order=desc&orderBy=createdAt`,
+        ]);
         clearSelections();
       }
     } catch (error) {
@@ -109,14 +109,7 @@ const StudentsTable = ({
   };
 
   if (loading) {
-    return (
-      <TableSkeleton
-        rows={10}
-        columns={12}
-        showHeader
-        animated
-      />
-    );
+    return <TableSkeleton rows={10} columns={12} showHeader animated />;
   }
 
   if (!students?.data?.result) return null;
@@ -126,45 +119,53 @@ const StudentsTable = ({
       name: 'Actions',
       cell: (row: any) => {
         return (
-          <div className='d-flex align-items-center gap-2'>
+          <div className='d-flex align-items-center gap-2 justify-content-end'>
+            {' '}
             <TableActionButtons
               onView={() => toggleDetail(row)}
               onBlock={() => handleAlert(row)}
               onEdit={() => toggle(row)}
               onDelete={() => handleDeleteAlert(row)}
               status={row.status === 'active' ? false : true}
-            />
+            />{' '}
           </div>
         );
       },
-      minWidth: '240px',
+      width: '200px',
+      minWidth: '200px',
+      maxWidth: '200px',
       sortable: false,
-      center: false,
+      right: true,
+      center: true,
+
     },
     {
       name: 'ID',
       selector: (row: any) => row.cedula,
       sortable: true,
-      center: false,
+      center: true,
     },
     {
       name: 'Student name',
-      selector: (row: any) => row.user?.name ? row.user.name.toUpperCase() : '',
+      selector: (row: any) =>
+        row.user?.name ? row.user.name.toUpperCase() : '',
       sortable: true,
-      center: false,
+      center: true,
     },
     {
       name: 'Email',
       selector: (row: any) => row.user?.email,
       sortable: true,
-      center: false,
+      center: true,
     },
     {
       name: 'Phone',
       selector: (row: any) =>
-        row.phone_number?.trim() ? row.phone_number.toUpperCase() : 'NO PHONE NUMBER',
+        row.phone_number?.trim()
+          ? row.phone_number.toUpperCase()
+          : 'NO PHONE NUMBER',
       sortable: true,
-      center: false,
+      center: true,
     },
     {
       name: 'Status',
@@ -178,21 +179,25 @@ const StudentsTable = ({
         </span>
       ),
       sortable: true,
-      center: false,
+      center: true,
     },
     {
       name: 'Course',
       selector: (row: any) =>
-        row.course[0]?.course_name ? row.course[0].course_name.toUpperCase() : '',
+        row.course[0]?.course_name
+          ? row.course[0].course_name.toUpperCase()
+          : '',
       sortable: true,
-      center: false,
+      center: true,
     },
     {
       name: 'Course No',
       selector: (row: any) =>
-        row.course[0]?.course_number ? row.course[0].course_number.toUpperCase() : '',
+        row.course[0]?.course_number
+          ? row.course[0].course_number.toUpperCase()
+          : '',
       sortable: true,
-      center: false,
+      center: true,
     },
     {
       name: 'Level',
@@ -205,19 +210,21 @@ const StudentsTable = ({
         return '';
       },
       sortable: true,
-      center: false,
+      center: true,
     },
     {
       name: 'Promotion',
-      selector: (row: any) => row.promotion ? row.promotion.toUpperCase() : '',
+      selector: (row: any) =>
+        row.promotion ? row.promotion.toUpperCase() : '',
       sortable: true,
-      center: false,
+      center: true,
     },
     {
       name: 'Age Category',
-      selector: (row: any) => row.age_category ? row.age_category.toUpperCase() : '',
+      selector: (row: any) =>
+        row.age_category ? row.age_category.toUpperCase() : '',
       sortable: true,
-      center: false,
+      center: true,
     },
     {
       name: 'Status payment',
@@ -231,7 +238,7 @@ const StudentsTable = ({
         </span>
       ),
       sortable: true,
-      center: false,
+      center: true,
     },
   ];
 
@@ -263,8 +270,8 @@ const StudentsTable = ({
         onReload={() => {
           clearQueryString(router);
           mutate([
-      `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}&order=desc&orderBy=createdAt`,
-    ],);
+            `/student/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}&order=desc&orderBy=createdAt`,
+          ]);
           clearSelections();
         }}
       />

@@ -19,8 +19,8 @@ interface PaginatedProfessors {
 
 const ProfessorsTable: React.FC = () => {
   const router = useRouter();
-  const page = parseInt((router.query.page as string) || '1', 10);
-  const limit = parseInt((router.query.limit as string) || '10', 10);
+  const page = parseInt((router.query.professorPage as string) || '1', 10);
+  const limit = parseInt((router.query.professorLimit as string) || '10', 10);
 
   const key = `/professor/get-courses-and-students?page=${page}&limit=${limit}`;
   const { data: response, error } = useSWR<ApiResponse<PaginatedProfessors>>(
@@ -36,6 +36,7 @@ const ProfessorsTable: React.FC = () => {
     <Col
       xxl={6}
       md={7}
+      className='student-transfer-container'
     >
       <Card>
         <CommonHeader title='Professors' />
@@ -58,21 +59,25 @@ const ProfessorsTable: React.FC = () => {
                   name: '#',
                   selector: (_row, i: any) => (page - 1) * limit + i + 1,
                   width: '60px',
+                  center: true,
                 },
                 {
                   name: 'Professor',
                   selector: (row) => row.professorName.toUpperCase(),
                   sortable: true,
+                  center: true,
                 },
                 {
                   name: 'Total Courses',
                   selector: (row) => row.totalCourses,
                   sortable: true,
+                  center: true,
                 },
                 {
                   name: 'Total Students',
                   selector: (row) => row.totalStudents,
                   sortable: true,
+                  center: true,
                 },
               ]}
               data={professors}
@@ -83,11 +88,11 @@ const ProfessorsTable: React.FC = () => {
               paginationPerPage={limit}
               onChangePage={(newPage) => {
                 clearQueryString(router);
-                setQueryStringValue('page', newPage, router);
+                setQueryStringValue('professorPage', newPage, router);
               }}
               onChangeRowsPerPage={(newPerPage) => {
                 clearQueryString(router);
-                setQueryStringValue('limit', newPerPage, router);
+                setQueryStringValue('professorLimit', newPerPage, router);
               }}
               highlightOnHover
               striped

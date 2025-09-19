@@ -7,22 +7,36 @@ import { FiltersProps } from '../../../../Types/types';
 import { STATUS_FILTER, USER_ROLES } from '../../../../utils/constants';
 import TableFilters from '@/components/own/table-filters/table-filters';
 import { getAllUsers } from '../../../../helper/api-data/user';
-import useSWR from 'swr';
+import useSWR, { mutate } from 'swr';
 import { SelectOption } from 'Types/SelectType';
+import { useRouter } from 'next/router';
+import { getFiltersString } from '../../../../utils/utils';
 
 const Users = () => {
+  const router = useRouter();
   const [isOpenModal, setIsOpenModal] = useState(false);
-  const [reload, setReload] = useState(false);
-
+  const [isReloading, setIsReloading] = useState(false);
   const limit = 10;
-  const [userPage, setUserPage] = useState(1);
-  const [loadingMoreUsers, setLoadingMoreUsers] = useState(false);
-  const [hasMoreUsers, setHasMoreUsers] = useState(true);
+
+  const page = router.query.page ? Number(router.query.page) : 1;
+  const rowPerPage = router.query.rowPerPage ? Number(router.query.rowPerPage) : 10;
+  const filters = getFiltersString(router);
+
   const [userOptions, setUserOptions] = useState<
     Array<{ label: string; value: string }>
   >([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [nameFilter, setNameFilter] = useState<SelectOption | null>(null);
+
+  const key = `/user/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}`;
+  const { data: usersData, isLoading } = useSWR(
+    [key],
+    () => getAllUsers(page, rowPerPage, filters)
+  );
+
+  const [userPage, setUserPage] = useState(1);
+  const [loadingMoreUsers, setLoadingMoreUsers] = useState(false);
+  const [hasMoreUsers, setHasMoreUsers] = useState(true);
 
   useEffect(() => {
     setUserOptions([]);
@@ -30,8 +44,8 @@ const Users = () => {
     setHasMoreUsers(true);
   }, [searchTerm]);
 
-  const { data: usersData, isLoading } = useSWR(
-    ['/user/get-all', userPage, limit, searchTerm],
+  const { data: filterUsersData } = useSWR(
+    ['/user/get-all-filter', userPage, limit, searchTerm],
     () => getAllUsers(userPage, limit, searchTerm ? `name=${searchTerm}` : '')
   );
 
@@ -53,20 +67,20 @@ const Users = () => {
     if (
       !loadingMoreUsers &&
       hasMoreUsers &&
-      usersData?.data?.result?.length !== 0
+      filterUsersData?.data?.result?.length !== 0
     ) {
       setLoadingMoreUsers(true);
       setUserPage((prev) => prev + 1);
     }
-  }, [loadingMoreUsers, hasMoreUsers, usersData]);
+  }, [loadingMoreUsers, hasMoreUsers, filterUsersData]);
 
   useEffect(() => {
-    if (usersData) {
+    if (filterUsersData) {
       setLoadingMoreUsers(false);
 
-      const results = Array.isArray(usersData.data)
-        ? usersData.data
-        : usersData.data.result || [];
+      const results = Array.isArray(filterUsersData.data)
+        ? filterUsersData.data
+        : filterUsersData.data.result || [];
 
       if (results.length === 0) {
         setHasMoreUsers(false);
@@ -90,10 +104,19 @@ const Users = () => {
         });
       }
     }
-  }, [usersData, searchTerm, userPage]);
+  }, [filterUsersData, searchTerm, userPage]);
 
   const toggle = () => setIsOpenModal((prev) => !prev);
-  const handleReload = () => setReload((prev) => !prev);
+  const handleReload = async () => {
+    setIsReloading(true);
+    try {
+      await mutate([key]);
+    } finally {
+      setTimeout(() => {
+        setIsReloading(false);
+      }, 500);
+    }
+  };
 
   const selectFilters: FiltersProps[] = [
     {
@@ -145,7 +168,13 @@ const Users = () => {
               />
             </CardHeader>
             <div className='pb-4'>
-              <UsersTable reload={reload} />
+              <UsersTable 
+                users={usersData}
+                page={page}
+                rowPerPage={rowPerPage}
+                filters={filters}
+                loading={isLoading || isReloading}
+              />
             </div>
           </Card>
         </Row>

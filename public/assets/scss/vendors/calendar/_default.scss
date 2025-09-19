@@ -1,11 +1,11 @@
 @import "../../utils/variables";
 $color_1: $white;
 $color_2: var(--fc-button-text-color, #fff);
-$color_3: var(--fc-event-text-color, #fff);
+$color_3: var(--fc-event-text-color, #8B4513);
 $color_4: #808080;
 $color_5: var(--fc-neutral-text-color, #808080);
-$color_6: inherit;
-$color_7: var(--fc-more-link-text-color, inherit);
+$color_6: #8B4513;
+$color_7: var(--fc-more-link-text-color, #8B4513);
 $font-family_1: 'fcicons';
 $font-family_2: inherit;
 $background-color_1: transparent;
@@ -15,8 +15,8 @@ $background-color_4: $primary-color;
 $background-color_5: var(--fc-button-hover-bg-color, $primary-color);
 $background-color_6: $primary-color;
 $background-color_7: var(--fc-button-active-bg-color, $primary-color);
-$background-color_8: $primary-color;
-$background-color_9: var(--fc-event-bg-color, $primary-color);
+$background-color_8: #F5C698;
+$background-color_9: var(--fc-event-bg-color, #F5C698);
 $background-color_10: rgba(255, 220, 40, 0.15);
 $background-color_11: var(--fc-today-bg-color, rgba(255, 220, 40, 0.15));
 $background-color_12: rgba(208, 208, 208, 0.3);
@@ -828,6 +828,7 @@ A VERTICAL event
 	.fc-daygrid-event {
 		.fc-event-time {
 			margin-right: 3px;
+			color: rgb(255, 109, 109);
 		}
 	}
 	.fc-timegrid-slot-label-frame {
@@ -933,6 +934,7 @@ A VERTICAL event
 	.fc-daygrid-event {
 		.fc-event-time {
 			margin-left: 3px;
+			color: rgb(255, 109, 109);
 		}
 	}
 	.fc-timegrid-slot-label-frame {
@@ -1176,21 +1178,22 @@ a.fc-event {
 	}
 }
 .fc-h-event {
-	display: block;
-	border: 1px solid $primary-color;
-	border: 1px solid var(--fc-event-border-color, $primary-color);
-	background-color: $background-color_8;
-	background-color: $background-color_9;
-	.fc-event-main {
-		color: $color_1;
-		color: $color_3;
-	}
-	.fc-event-main-frame {
-		display: flex;
-	}
+		display: block;
+		border: 1px solid $primary-color;
+		border: 1px solid var(--fc-event-border-color, $primary-color);
+		background-color: $background-color_8;
+		background-color: $background-color_9;
+		.fc-event-main {
+			color: $color_3;
+		}
+		.fc-event-main-frame {
+			display: flex;
+			color: rgb(255, 109, 109);
+		}
 	.fc-event-time {
 		max-width: 100%;
 		overflow: hidden;
+		color: rgb(255, 109, 109);
 	}
 	.fc-event-title-container {
 		flex-grow: 1;
@@ -1328,15 +1331,17 @@ a.fc-event {
 		height: 100%;
 	}
 	.fc-event-main-frame {
-		height: 100%;
-		display: flex;
-		flex-direction: column;
-	}
+			height: 100%;
+			display: flex;
+			flex-direction: column;
+			color: rgb(255, 109, 109);
+		}
 	.fc-event-time {
 		flex-grow: 0;
 		flex-shrink: 0;
 		max-height: 100%;
 		overflow: hidden;
+		color: rgb(255, 109, 109);
 	}
 	.fc-event-title-container {
 		flex-grow: 1;
@@ -1492,10 +1497,11 @@ a.fc-event {
 	}
 }
 .fc-timegrid-event-short {
-	.fc-event-main-frame {
-		flex-direction: row;
-		overflow: hidden;
-	}
+		.fc-event-main-frame {
+			flex-direction: row;
+			overflow: hidden;
+			color: rgb(255, 109, 109);
+		}
 	.fc-event-time {
 		&:after {
 			content: '\00a0-\00a0';

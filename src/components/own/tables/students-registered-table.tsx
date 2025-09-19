@@ -124,7 +124,7 @@ const StudentsRegisteredTable = ({
 
   const columns = [
     {
-      name: 'Acción',
+      name: 'Actions',
       cell: (row: any) => (
         <TableActionButtons
           onView={() => toggleDetail(row)}
@@ -132,58 +132,68 @@ const StudentsRegisteredTable = ({
           onDelete={() => handleDelete(row)}
         />
       ),
-      width: '180px',
+      width: '160px',
+      minWidth: '160px',
+      maxWidth: '160px',
       sortable: false,
-      center: false,
+      center: true,
     },
     {
       name: 'ID',
       selector: (row: any) => `${row.id_number}`.toUpperCase(),
       sortable: true,
-      center: false,
+      center: true,
+      width: '120px',
+      minWidth: '120px',
     },
     {
       name: 'Student name',
       selector: (row: any) =>
         `${row.first_name} ${row.middle_name} ${row.last_name} ${row.second_last_name}`.toUpperCase(),
       sortable: true,
-      center: false,
+      center: true,
     },
     {
       name: 'Phone',
       selector: (row: any) => `${row.phone_number}`.toUpperCase(),
       sortable: true,
-      center: false,
+      center: true,
     },
     {
       name: 'Email',
       selector: (row: any) => `${row.email ?? ''}`,
       sortable: true,
-      center: false,
+      center: true,
     },
     {
       name: 'Level',
       selector: (row: any) => `${row.level?.name ?? ''}`.toUpperCase(),
       sortable: true,
-      center: false,
+      center: true,
     },
     {
       name: 'Emergency contact name',
-      selector: (row: any) => `${row.emergency_contact_name ?? ''}`.toUpperCase(),
       sortable: true,
-      center: false,
+      center: true,
+      wrap: true,
+      minWidth: '180px',
+      selector: (row: any) => row.emergency_contact_name,
     },
     {
       name: 'Emergency contact phone',
-      selector: (row: any) => `${row.emergency_contact_phone ?? ''}`.toUpperCase(),
       sortable: true,
-      center: false,
+      center: true,
+      wrap: true,
+      minWidth: '160px',
+      selector: (row: any) => row.emergency_contact_phone,
     },
     {
       name: 'Emergency contact relationship',
-      selector: (row: any) => `${row.emergency_contact_relationship ?? ''}`.toUpperCase(),
       sortable: true,
-      center: false,
+      center: true,
+      wrap: true,
+      minWidth: '200px',
+      selector: (row: any) => row.emergency_contact_relationship,
     },
   ];
 
