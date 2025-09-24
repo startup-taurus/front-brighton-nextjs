@@ -98,6 +98,7 @@ const EndingSoonCourses = () => {
                   <th>Professor</th>
                   <th>Student</th>
                   <th>Schedule</th>
+                  <th style={{ minWidth: '120px' }}>End Date</th>
                 </tr>
               </thead>
               <tbody>
@@ -108,6 +109,12 @@ const EndingSoonCourses = () => {
                     <td>{course.professor_name}</td>
                     <td>{course.student_count}</td>
                     <td>{course.classSchedule}</td>
+                    <td style={{ minWidth: '120px' }}>
+                      {course.end_date ? 
+                        new Date(course.end_date).toLocaleDateString('en-US') : 
+                        'N/A'
+                      }
+                    </td>
                   </tr>
                 ))}
               </tbody>

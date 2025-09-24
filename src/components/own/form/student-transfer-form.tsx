@@ -247,19 +247,19 @@ const StudentTransferForm: React.FC<Props> = ({
                   >
                     <div>
                       <strong>
-                        {student.user?.name || student.name || 'N/A'}
+                        {`${student.user?.name || student.name || 'N/A'}`.toUpperCase()}
                       </strong>
                       <div className="text-muted small">
                         Current Level:{' '}
-                        {student.level?.name || student.level || 'None'} |{' '}
+                        {`${student.level?.name || student.level || 'None'}`.toUpperCase()} |{' '}
                         Current Course:{' '}
-                        {student.course?.[0]?.course_number || 'None'}
+                        {`${student.course?.[0]?.course_number || 'None'}`.toUpperCase()}
                       </div>
                     </div>
                     <span
                       className={`badge bg-${student.status === 'active' ? 'success' : 'danger'}`}
                     >
-                      {student.status}
+                      {`${student.status}`.toUpperCase()}
                     </span>
                   </li>
                 ))}

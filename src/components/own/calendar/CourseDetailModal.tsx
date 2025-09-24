@@ -1,7 +1,7 @@
 import React from 'react';
 import { Modal, ModalBody, ModalHeader } from 'reactstrap';
 import Image from 'next/image';
-import { ImgPath } from 'utils/Constant';
+import { ImgPath, UrlImage } from 'utils/Constant';
 import { Course, CourseDetailModalProps } from 'Types/CalendarTypes';
 
 const CourseDetailModal: React.FC<CourseDetailModalProps> = ({
@@ -69,8 +69,12 @@ const CourseDetailModal: React.FC<CourseDetailModalProps> = ({
                   className='me-3 rounded-circle'
                   width={40}
                   height={40}
-                  src={`${ImgPath}/user/7.jpg`}
-                  alt='course image'
+                  src={
+                    selectedCourse.professor_image 
+                      ? `${UrlImage}/${selectedCourse.professor_image}` 
+                      : `${ImgPath}/user/7.jpg`
+                  }
+                  alt='professor image'
                 />
                 <div>
                   <h6 className="mb-0 text-dark">{selectedCourse.professor_name || 'Not assigned'}</h6>
@@ -97,7 +101,7 @@ const CourseDetailModal: React.FC<CourseDetailModalProps> = ({
                   <div className="detail-card p-3 border rounded">
                     <div className="d-flex align-items-center mb-2">
                       <i className="fa fa-users text-primary me-2"></i>
-                      <strong>Students</strong>
+                      <strong>Total Students</strong>
                     </div>
                     <span className="text-info fw-bold">
                       {selectedCourse.student_count || 0}

@@ -177,7 +177,7 @@ const StudentsRegisteredTable = ({
       center: true,
       wrap: true,
       minWidth: '180px',
-      selector: (row: any) => row.emergency_contact_name,
+      selector: (row: any) => `${row.emergency_contact_name || ''}`.toUpperCase(),
     },
     {
       name: 'Emergency contact phone',
@@ -185,7 +185,7 @@ const StudentsRegisteredTable = ({
       center: true,
       wrap: true,
       minWidth: '160px',
-      selector: (row: any) => row.emergency_contact_phone,
+      selector: (row: any) => `${row.emergency_contact_phone || ''}`.toUpperCase(),
     },
     {
       name: 'Emergency contact relationship',
@@ -193,7 +193,7 @@ const StudentsRegisteredTable = ({
       center: true,
       wrap: true,
       minWidth: '200px',
-      selector: (row: any) => row.emergency_contact_relationship,
+      selector: (row: any) => `${row.emergency_contact_relationship || ''}`.toUpperCase(),
     },
   ];
 

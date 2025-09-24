@@ -340,11 +340,17 @@ const { data: levels } = useSWR(
               data
                 ? {
                     ...data,
-                    name: data?.user?.name,
-                    lastName: data?.user?.lastName,
-                    username: data?.user?.username,
-                    email: data?.user?.email,
-                    phone_number: data?.phone_number || '',
+                    name: data?.user?.name?.toUpperCase() || '',
+                    lastName: data?.user?.lastName?.toUpperCase() || '',
+                    username: data?.user?.username?.toUpperCase() || '',
+                    email: data?.user?.email?.toUpperCase() || '',
+                    phone_number: data?.phone_number?.toUpperCase() || '',
+                    cedula: data?.cedula?.toUpperCase() || '',
+                    emergency_contact_name: data?.emergency_contact_name?.toUpperCase() || '',
+                    emergency_contact_phone: data?.emergency_contact_phone?.toUpperCase() || '',
+                    emergency_contact_relationship: data?.emergency_contact_relationship?.toUpperCase() || '',
+                    promotion: data?.promotion?.toUpperCase() || '',
+                    observations: data?.observations?.toUpperCase() || '',
 
                     courseId:
                       data?.course?.length > 0 ? data?.course[0]?.id : '',
