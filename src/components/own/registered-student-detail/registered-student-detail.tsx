@@ -91,7 +91,7 @@ const RegisteredStudentDetail = ({ data, isOpen, toggle }: any) => {
                 className='mb-3'
               >
                 <strong>Email:</strong>&nbsp;
-                {`${data.email}`.toUpperCase()}
+                {`${data.email}`}
               </Col>
               <Col
                 xs={12}

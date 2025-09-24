@@ -69,29 +69,22 @@ const update = async (values: any) => {
 
     const { id, image, ...rest } = values;
 
-    // Siempre usar FormData porque el backend espera este formato
     const formData = new FormData();
     
-    // Agregar todos los campos al FormData
     Object.entries(rest).forEach(([key, value]) => {
       formData.append(key, value as any);
     });
 
-    // Manejar la imagen
     if (image instanceof File) {
-      // Nueva imagen seleccionada
       formData.append('image', image);
     } else if (typeof image === 'string' && image) {
-      // Imagen existente (enviar el nombre del archivo)
       formData.append('image', image);
     }
-    // Si no hay imagen, no agregar el campo image
 
     const res = await updateProfessor(id, formData);
     if (res.statusCode === 200) {
       toast.success('Teacher updated successfully!');
       
-      // Forzar actualización de la imagen si se actualizó
       if (image instanceof File && res.data?.user?.image) {
         setImagePreview(`${UrlImage}/${res.data.user.image}?t=${new Date().getTime()}`);
       }

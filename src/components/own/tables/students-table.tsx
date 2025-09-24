@@ -3,7 +3,7 @@ import useSWR, {mutate} from 'swr';
 import {useRouter} from 'next/router';
 import Swal from 'sweetalert2';
 import DataTable from 'react-data-table-component';
-import {updateStatusStudent, deleteStudent} from 'helper/api-data/student';
+import {updateStatusStudent, deleteStudent, getStudent} from 'helper/api-data/student';
 import TableActionButtons from '@/components/own/table-action-buttons/table-action-buttons';
 import StudentForm from '../form/student-form';
 import StudentDetail from '../student-detail/student-datail';
@@ -23,6 +23,7 @@ const StudentsTable = ({
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenDetail, setIsOpenDetail] = useState(false);
   const [selectedData, setSelectedData] = useState<any>(null);
+  const [isLoadingStudent, setIsLoadingStudent] = useState(false);
 
   const [toggleClearRows, setToggleClearRows] = useState(false);
 
@@ -33,10 +34,29 @@ const StudentsTable = ({
     }
   };
 
-  const toggle = (data: any) => {
-    setSelectedData(data);
-    setIsOpen(!isOpen);
-    if (!isOpen) clearSelections();
+  const toggle = async (data: any) => {
+    try {
+      setIsLoadingStudent(true);
+      if (!data.id) {
+        setSelectedData(data);
+        setIsOpen(!isOpen);
+        if (!isOpen) clearSelections();
+        return;
+      }
+      
+      const response = await getStudent(data.id);
+      if (response.statusCode === 200) {
+        setSelectedData(response.data);
+        setIsOpen(!isOpen);
+        if (!isOpen) clearSelections();
+      }
+    } catch (error) {
+      setSelectedData(data);
+      setIsOpen(!isOpen);
+      if (!isOpen) clearSelections();
+    } finally {
+      setIsLoadingStudent(false);
+    }
   };
 
   const toggleDetail = (data: any) => {

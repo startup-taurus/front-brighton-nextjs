@@ -11,6 +11,10 @@ export const getAllStudent = (
   );
 };
 
+export const getStudent = (studentId: number) => {
+  return getFetcher(`/student/get-one/${studentId}`, false);
+};
+
 export const createStudent = (data: any) => {
   return postFetcher('/student/create', data);
 };

@@ -22,7 +22,10 @@ import * as Yup from 'yup';
 import { parse } from 'date-fns';
 
 const validations = Yup.object().shape({
-  name: Yup.string().required('The name is required'),
+  first_name: Yup.string().required('The first name is required'),
+  middle_name: Yup.string(),
+  last_name: Yup.string().required('The last name is required'),
+  second_last_name: Yup.string(),
   email: Yup.string().required('The email is required'),
   cedula: Yup.string()
     .min(10, 'Cédula must be more than 10 characters long')
@@ -35,8 +38,7 @@ const validations = Yup.object().shape({
   birth_date: Yup.date()
     .max(new Date(), 'Select a valid date')
     .transform((value, originalValue, schema) => {
-      if (schema.isType(value)) return value;
-      return parse(originalValue, 'dd-MM-yyyy', new Date());
+      return originalValue ? parse(originalValue, 'yyyy-MM-dd', new Date()) : value;
     })
     .typeError('Select a valid date')
     .required('The birthdate is required'),
@@ -114,8 +116,16 @@ const { data: levels } = useSWR(
     try {
       setIsLoading(true);
 
+      const fullName = [
+        row.first_name,
+        row.middle_name,
+        row.last_name,
+        row.second_last_name
+      ].filter(Boolean).join(' ').trim();
+
       const processedData = {
         ...row,
+        name: fullName, 
         book_given:
           typeof row.book_given === 'string'
             ? row.book_given === 'true'
@@ -144,9 +154,16 @@ const { data: levels } = useSWR(
   const update = async (data: any) => {
     try {
       setIsLoading(true);
+      const fullName = [
+        data.first_name,
+        data.middle_name,
+        data.last_name,
+        data.second_last_name
+      ].filter(Boolean).join(' ').trim();
 
       const processedData = {
         ...data,
+        name: fullName, 
         book_given:
           typeof data.book_given === 'string'
             ? data.book_given === 'true'
@@ -340,15 +357,17 @@ const { data: levels } = useSWR(
               data
                 ? {
                     ...data,
-                    name: data?.user?.name?.toUpperCase() || '',
-                    lastName: data?.user?.lastName?.toUpperCase() || '',
+                    first_name: data?.user?.first_name?.toUpperCase() || '',
+                    middle_name: data?.user?.middle_name?.toUpperCase() || '',
+                    last_name: data?.user?.last_name?.toUpperCase() || '',
+                    second_last_name: data?.user?.second_last_name?.toUpperCase() || '',
                     username: data?.user?.username?.toUpperCase() || '',
-                    email: data?.user?.email?.toUpperCase() || '',
-                    phone_number: data?.phone_number?.toUpperCase() || '',
-                    cedula: data?.cedula?.toUpperCase() || '',
+                    email: data?.user?.email|| '',
+                    phone_number: data?.phone_number|| '',
+                    cedula: data?.cedula || '',
                     emergency_contact_name: data?.emergency_contact_name?.toUpperCase() || '',
-                    emergency_contact_phone: data?.emergency_contact_phone?.toUpperCase() || '',
-                    emergency_contact_relationship: data?.emergency_contact_relationship?.toUpperCase() || '',
+                    emergency_contact_phone: data?.emergency_contact_phone || '',
+                    emergency_contact_relationship: data?.emergency_contact_relationship|| '',
                     promotion: data?.promotion?.toUpperCase() || '',
                     observations: data?.observations?.toUpperCase() || '',
 
@@ -357,13 +376,15 @@ const { data: levels } = useSWR(
                     level_id: data?.level_id || '',
                   }
                 : {
-                    name: '',
+                    first_name: '',
+                    middle_name: '',
+                    last_name: '',
+                    second_last_name: '',
                     username: '',
                     email: '',
                     password: '',
                     phone_number: '',
                     cedula: '',
-                    lastName: '',
                     courseId: '',
                     level_id: '',
                     status: 'active',
@@ -401,14 +422,50 @@ const { data: levels } = useSWR(
                   className={`row g-3`}
                 >
                   <Col xs={6}>
-                    <Label for='name'>Name</Label>
+                    <Label for='first_name'>First Name</Label>
                     <Field
-                      name='name'
+                      name='first_name'
                       as={Input}
-                      invalid={touched.name && !!errors.name}
+                      invalid={touched.first_name && !!errors.first_name}
                     />
                     <ErrorMessage
-                      name='name'
+                      name='first_name'
+                      component={FormFeedback}
+                    />
+                  </Col>
+                  <Col xs={6}>
+                    <Label for='middle_name'>Middle Name</Label>
+                    <Field
+                      name='middle_name'
+                      as={Input}
+                      invalid={touched.middle_name && !!errors.middle_name}
+                    />
+                    <ErrorMessage
+                      name='middle_name'
+                      component={FormFeedback}
+                    />
+                  </Col>
+                  <Col xs={6}>
+                    <Label for='last_name'>Last Name</Label>
+                    <Field
+                      name='last_name'
+                      as={Input}
+                      invalid={touched.last_name && !!errors.last_name}
+                    />
+                    <ErrorMessage
+                      name='last_name'
+                      component={FormFeedback}
+                    />
+                  </Col>
+                  <Col xs={6}>
+                    <Label for='second_last_name'>Second Last Name</Label>
+                    <Field
+                      name='second_last_name'
+                      as={Input}
+                      invalid={touched.second_last_name && !!errors.second_last_name}
+                    />
+                    <ErrorMessage
+                      name='second_last_name'
                       component={FormFeedback}
                     />
                   </Col>
