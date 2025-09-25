@@ -20,6 +20,7 @@ import { createStudent, updateStudent } from 'helper/api-data/student';
 import { toast } from 'react-toastify';
 import * as Yup from 'yup';
 import { parse } from 'date-fns';
+import { DATA_TYPE } from 'utils/constants';
 
 const validations = Yup.object().shape({
   first_name: Yup.string().required('The first name is required'),
@@ -127,8 +128,8 @@ const { data: levels } = useSWR(
         ...row,
         name: fullName, 
         book_given:
-          typeof row.book_given === 'string'
-            ? row.book_given === 'true'
+          typeof row.book_given === DATA_TYPE.STRING
+            ? row.book_given === DATA_TYPE.TRUE
             : Boolean(row.book_given),
       };
       
@@ -165,25 +166,31 @@ const { data: levels } = useSWR(
         ...data,
         name: fullName, 
         book_given:
-          typeof data.book_given === 'string'
-            ? data.book_given === 'true'
+          typeof data.book_given === DATA_TYPE.STRING
+            ? data.book_given === DATA_TYPE.TRUE
             : Boolean(data.book_given),
-      };
-      const response = await updateStudent(processedData.id, processedData);
-      if (response.statusCode === 200) {
-        toggle();
-        toast.success('Student updated successfull!');
+      pending_payments: 
+        typeof data.pendingPayments === DATA_TYPE.STRING
+          ? data.pendingPayments === DATA_TYPE.TRUE
+          : Boolean(data.pendingPayments),
+    };
+    delete processedData.pendingPayments;
+    
+    const response = await updateStudent(processedData.id, processedData);
+    if (response.statusCode === 200) {
+      toggle();
+      toast.success('Student updated successfull!');
 
-        if (onReload) {
-          onReload();
-        }
+      if (onReload) {
+        onReload();
       }
-    } catch (error) {
-      toast.error('Error updating student', error);
-    } finally {
-      setIsLoading(false);
     }
-  };
+  } catch (error) {
+    toast.error('Error updating student', error);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const onCourseScrollToBottom = () => {
     if (course?.data?.length != 0) {
@@ -277,12 +284,12 @@ const { data: levels } = useSWR(
         : levels.data?.result || [];
 
       const levelOpts = levelData.map((item: any) => {
-        if (typeof item === 'string') {
+        if (typeof item === DATA_TYPE.STRING) {
           return {
             value: item,
             label: item,
           };
-        } else if (item && typeof item === 'object') {
+        } else if (item && typeof item === DATA_TYPE.OBJECT) {
           const id = item.id || '';
           const label = item.full_level || item.name || item.level || '';
           return {
@@ -370,7 +377,7 @@ const { data: levels } = useSWR(
                     emergency_contact_relationship: data?.emergency_contact_relationship|| '',
                     promotion: data?.promotion?.toUpperCase() || '',
                     observations: data?.observations?.toUpperCase() || '',
-
+                    pendingPayments: data?.pending_payments || false,
                     courseId:
                       data?.course?.length > 0 ? data?.course[0]?.id : '',
                     level_id: data?.level_id || '',

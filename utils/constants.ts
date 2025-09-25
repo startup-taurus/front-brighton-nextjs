@@ -160,3 +160,9 @@ export const PRIVATE_COURSE_TYPES = {
   PRIVATE: 'private',
   PRIVATE_ONLINE: 'private - online'  
 };
+export const DATA_TYPE= {
+  STRING: 'string',
+  TRUE: 'true',
+  FALSE: 'false',
+  OBJECT: 'object',
+}
