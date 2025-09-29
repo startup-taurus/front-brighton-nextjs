@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import useSWR from 'swr';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
@@ -7,18 +7,12 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
 import { Card, CardBody, CardHeader } from 'reactstrap';
 import { getCoursesForCalendar } from 'helper/api-data/course';
-import { getProfessorsCoursesAndStudents } from 'helper/api-data/professor';
 import { generateCalendarEvents } from 'utils/utils';
 import { Course } from 'Types/CalendarTypes';
 import CourseDetailModal from './CourseDetailModal';
 
-type CourseWithStudents = Course & { 
-  student_count: number; 
-  professor_id: string;
-};
-
 const CoursesCalendar: React.FC = () => {
-  const [selectedCourse, setSelectedCourse] = useState<CourseWithStudents | null>(null);
+  const [selectedCourse, setSelectedCourse] = useState<Course | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   const courseDetail = useSWR(
@@ -26,38 +20,16 @@ const CoursesCalendar: React.FC = () => {
     () => getCoursesForCalendar()
   );
 
-  const professorsData = useSWR(
-    '/professor/get-courses-and-students?page=1&limit=1000',
-    () => getProfessorsCoursesAndStudents(1, 1000)
-  );
-
-  const coursesWithStudents = useMemo(() => {
-    if (!courseDetail?.data?.data || !professorsData?.data?.data?.result) {
-      return [];
-    }
-
-    const courses = courseDetail.data.data;
-    const professors = professorsData.data.data.result;
-
-    const professorStudentsMap = new Map();
-    professors.forEach((prof: any) => {
-      professorStudentsMap.set(prof.id, prof.totalStudents);
-    });
-
-    return courses.map((course: any): CourseWithStudents => ({
-      ...course,
-      student_count: professorStudentsMap.get(course.professor_id) || 0
-    }));
-  }, [courseDetail?.data?.data, professorsData?.data?.data?.result]);
-
   if (!courseDetail?.data?.data) return null;
 
-  const events = generateCalendarEvents(coursesWithStudents);
+  const courses = courseDetail.data.data;
+
+  const events = generateCalendarEvents(courses);
 
   const handleEventClick = (clickInfo: any) => {
     const eventId = clickInfo.event.id;
     const courseId = eventId.split('-')[0];
-    const course = coursesWithStudents.find((c: CourseWithStudents) => c.id.toString() === courseId);
+    const course = courses.find((c: Course) => c.id.toString() === courseId);
     
     if (course) {
       setSelectedCourse(course);

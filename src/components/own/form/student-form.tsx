@@ -20,9 +20,13 @@ import { createStudent, updateStudent } from 'helper/api-data/student';
 import { toast } from 'react-toastify';
 import * as Yup from 'yup';
 import { parse } from 'date-fns';
+import { DATA_TYPE } from 'utils/constants';
 
 const validations = Yup.object().shape({
-  name: Yup.string().required('The name is required'),
+  first_name: Yup.string().required('The first name is required'),
+  middle_name: Yup.string(),
+  last_name: Yup.string().required('The last name is required'),
+  second_last_name: Yup.string(),
   email: Yup.string().required('The email is required'),
   cedula: Yup.string()
     .min(10, 'Cédula must be more than 10 characters long')
@@ -35,8 +39,7 @@ const validations = Yup.object().shape({
   birth_date: Yup.date()
     .max(new Date(), 'Select a valid date')
     .transform((value, originalValue, schema) => {
-      if (schema.isType(value)) return value;
-      return parse(originalValue, 'dd-MM-yyyy', new Date());
+      return originalValue ? parse(originalValue, 'yyyy-MM-dd', new Date()) : value;
     })
     .typeError('Select a valid date')
     .required('The birthdate is required'),
@@ -114,11 +117,19 @@ const { data: levels } = useSWR(
     try {
       setIsLoading(true);
 
+      const fullName = [
+        row.first_name,
+        row.middle_name,
+        row.last_name,
+        row.second_last_name
+      ].filter(Boolean).join(' ').trim();
+
       const processedData = {
         ...row,
+        name: fullName, 
         book_given:
-          typeof row.book_given === 'string'
-            ? row.book_given === 'true'
+          typeof row.book_given === DATA_TYPE.STRING
+            ? row.book_given === DATA_TYPE.TRUE
             : Boolean(row.book_given),
       };
       
@@ -144,29 +155,42 @@ const { data: levels } = useSWR(
   const update = async (data: any) => {
     try {
       setIsLoading(true);
+      const fullName = [
+        data.first_name,
+        data.middle_name,
+        data.last_name,
+        data.second_last_name
+      ].filter(Boolean).join(' ').trim();
 
       const processedData = {
         ...data,
+        name: fullName, 
         book_given:
-          typeof data.book_given === 'string'
-            ? data.book_given === 'true'
+          typeof data.book_given === DATA_TYPE.STRING
+            ? data.book_given === DATA_TYPE.TRUE
             : Boolean(data.book_given),
-      };
-      const response = await updateStudent(processedData.id, processedData);
-      if (response.statusCode === 200) {
-        toggle();
-        toast.success('Student updated successfull!');
+      pending_payments: 
+        typeof data.pendingPayments === DATA_TYPE.STRING
+          ? data.pendingPayments === DATA_TYPE.TRUE
+          : Boolean(data.pendingPayments),
+    };
+    delete processedData.pendingPayments;
+    
+    const response = await updateStudent(processedData.id, processedData);
+    if (response.statusCode === 200) {
+      toggle();
+      toast.success('Student updated successfull!');
 
-        if (onReload) {
-          onReload();
-        }
+      if (onReload) {
+        onReload();
       }
-    } catch (error) {
-      toast.error('Error updating student', error);
-    } finally {
-      setIsLoading(false);
     }
-  };
+  } catch (error) {
+    toast.error('Error updating student', error);
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   const onCourseScrollToBottom = () => {
     if (course?.data?.length != 0) {
@@ -260,12 +284,12 @@ const { data: levels } = useSWR(
         : levels.data?.result || [];
 
       const levelOpts = levelData.map((item: any) => {
-        if (typeof item === 'string') {
+        if (typeof item === DATA_TYPE.STRING) {
           return {
             value: item,
             label: item,
           };
-        } else if (item && typeof item === 'object') {
+        } else if (item && typeof item === DATA_TYPE.OBJECT) {
           const id = item.id || '';
           const label = item.full_level || item.name || item.level || '';
           return {
@@ -340,24 +364,34 @@ const { data: levels } = useSWR(
               data
                 ? {
                     ...data,
-                    name: data?.user?.name,
-                    lastName: data?.user?.lastName,
-                    username: data?.user?.username,
-                    email: data?.user?.email,
-                    phone_number: data?.phone_number || '',
-
+                    first_name: data?.user?.first_name?.toUpperCase() || '',
+                    middle_name: data?.user?.middle_name?.toUpperCase() || '',
+                    last_name: data?.user?.last_name?.toUpperCase() || '',
+                    second_last_name: data?.user?.second_last_name?.toUpperCase() || '',
+                    username: data?.user?.username?.toUpperCase() || '',
+                    email: data?.user?.email|| '',
+                    phone_number: data?.phone_number|| '',
+                    cedula: data?.cedula || '',
+                    emergency_contact_name: data?.emergency_contact_name?.toUpperCase() || '',
+                    emergency_contact_phone: data?.emergency_contact_phone || '',
+                    emergency_contact_relationship: data?.emergency_contact_relationship|| '',
+                    promotion: data?.promotion?.toUpperCase() || '',
+                    observations: data?.observations?.toUpperCase() || '',
+                    pendingPayments: data?.pending_payments || false,
                     courseId:
                       data?.course?.length > 0 ? data?.course[0]?.id : '',
                     level_id: data?.level_id || '',
                   }
                 : {
-                    name: '',
+                    first_name: '',
+                    middle_name: '',
+                    last_name: '',
+                    second_last_name: '',
                     username: '',
                     email: '',
                     password: '',
                     phone_number: '',
                     cedula: '',
-                    lastName: '',
                     courseId: '',
                     level_id: '',
                     status: 'active',
@@ -395,14 +429,50 @@ const { data: levels } = useSWR(
                   className={`row g-3`}
                 >
                   <Col xs={6}>
-                    <Label for='name'>Name</Label>
+                    <Label for='first_name'>First Name</Label>
                     <Field
-                      name='name'
+                      name='first_name'
                       as={Input}
-                      invalid={touched.name && !!errors.name}
+                      invalid={touched.first_name && !!errors.first_name}
                     />
                     <ErrorMessage
-                      name='name'
+                      name='first_name'
+                      component={FormFeedback}
+                    />
+                  </Col>
+                  <Col xs={6}>
+                    <Label for='middle_name'>Middle Name</Label>
+                    <Field
+                      name='middle_name'
+                      as={Input}
+                      invalid={touched.middle_name && !!errors.middle_name}
+                    />
+                    <ErrorMessage
+                      name='middle_name'
+                      component={FormFeedback}
+                    />
+                  </Col>
+                  <Col xs={6}>
+                    <Label for='last_name'>Last Name</Label>
+                    <Field
+                      name='last_name'
+                      as={Input}
+                      invalid={touched.last_name && !!errors.last_name}
+                    />
+                    <ErrorMessage
+                      name='last_name'
+                      component={FormFeedback}
+                    />
+                  </Col>
+                  <Col xs={6}>
+                    <Label for='second_last_name'>Second Last Name</Label>
+                    <Field
+                      name='second_last_name'
+                      as={Input}
+                      invalid={touched.second_last_name && !!errors.second_last_name}
+                    />
+                    <ErrorMessage
+                      name='second_last_name'
                       component={FormFeedback}
                     />
                   </Col>

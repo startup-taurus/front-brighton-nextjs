@@ -31,7 +31,7 @@ const TeacherForm = ({ data, isOpen, toggle, onReload }: any) => {
     } else if (!isOpen) {
       setImagePreview(null);
     }
-  }, [isOpen, data]);
+  }, [isOpen, data, data?.user?.image]);
 
 const save = async (formValues: any) => {
   try {
@@ -69,31 +69,29 @@ const update = async (values: any) => {
 
     const { id, image, ...rest } = values;
 
-    let payload: any = rest;
-
-    if (
-      image &&
-      typeof image === 'object' &&
-      !(image instanceof File) &&
-      Object.keys(image).length === 0
-    ) {
-      rest.image = '';
-    }
+    const formData = new FormData();
+    
+    Object.entries(rest).forEach(([key, value]) => {
+      formData.append(key, value as any);
+    });
 
     if (image instanceof File) {
-      const fd = new FormData();
-      Object.entries(rest).forEach(([k, v]) => fd.append(k, v as any));
-      fd.append('image', image);
-      payload = fd;
+      formData.append('image', image);
+    } else if (typeof image === 'string' && image) {
+      formData.append('image', image);
     }
 
-    const res = await updateProfessor(id, payload);
+    const res = await updateProfessor(id, formData);
     if (res.statusCode === 200) {
       toast.success('Teacher updated successfully!');
+      
+      if (image instanceof File && res.data?.user?.image) {
+        setImagePreview(`${UrlImage}/${res.data.user.image}?t=${new Date().getTime()}`);
+      }
+      
       if (onReload) {
         onReload();
       }
-      setImagePreview(null);
       toggle(null, true);
     }
   } catch (error) {

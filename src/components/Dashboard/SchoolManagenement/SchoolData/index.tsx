@@ -209,7 +209,12 @@ const SchoolData = () => {
                     <td>{course.professor_name}</td>
                     <td>{course.student_count}</td>
                     <td>{course.classSchedule}</td>
-                    <td style={{ minWidth: '120px' }}>{course.end_date || 'N/A'}</td>
+                    <td style={{ minWidth: '120px' }}>
+                      {course.end_date ? 
+                        new Date(course.end_date).toLocaleDateString('en-US') : 
+                        'N/A'
+                      }
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -243,7 +248,7 @@ const SchoolData = () => {
                   <th>Professor</th>
                   <th>Student</th>
                   <th>Schedule</th>
-                  <th style={{ minWidth: '120px' }}>End Date</th>
+                  <th style={{ minWidth: '120px' }}>Start Date</th>
                 </tr>
               </thead>
               <tbody>
@@ -254,7 +259,12 @@ const SchoolData = () => {
                     <td>{course.professor_name}</td>
                     <td>{course.student_count}</td>
                     <td>{course.classSchedule}</td>
-                    <td style={{ minWidth: '120px' }}>{course.end_date || 'N/A'}</td>
+                    <td style={{ minWidth: '120px' }}>
+                      {course.start_date ? 
+                        new Date(course.start_date).toLocaleDateString('en-US') : 
+                        'N/A'
+                      }
+                    </td>
                   </tr>
                 ))}
               </tbody>

@@ -16,6 +16,8 @@ export interface Course {
   start_time: string;
   end_time: string;
   professor_name: string;
+  professor_image?: string;
+  student_count: number;
   level_name: string;
 }
 

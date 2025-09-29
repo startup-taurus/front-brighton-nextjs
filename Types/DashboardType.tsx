@@ -106,6 +106,7 @@ export interface Course {
   professor_name: string;
   student_count: number;
   classSchedule: string;
+  start_date?: string;
   end_date?: string;
   schedule: {
     day: string;

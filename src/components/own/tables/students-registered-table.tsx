@@ -33,7 +33,11 @@ const StudentsRegisteredTable = ({
     setSelectedStudent({
       user: {
         id: data?.id,
-        name: `${data?.first_name} ${data?.middle_name} ${data?.last_name} ${data?.second_last_name}`,
+        name: `${data?.first_name || ''} ${data?.middle_name || ''} ${data?.last_name || ''} ${data?.second_last_name || ''}`.trim(),
+        first_name: data?.first_name || '',
+        middle_name: data?.middle_name || '',
+        last_name: data?.last_name || '',
+        second_last_name: data?.second_last_name || '',
         lastName: '',
         email: data?.email,
       },
@@ -48,12 +52,11 @@ const StudentsRegisteredTable = ({
       pendingPayments: false,
       emergency_contact_name: data?.emergency_contact_name || '',
       emergency_contact_phone: data?.emergency_contact_phone || '',
-      emergency_contact_relationship:
-        data?.emergency_contact_relationship || '',
+      emergency_contact_relationship: data?.emergency_contact_relationship || '',
       promotion: 'Page',
       observations: '',
     });
-
+  
     setIsOpen(!isOpen);
     if (isOpen) {
       mutate(key);
@@ -177,7 +180,7 @@ const StudentsRegisteredTable = ({
       center: true,
       wrap: true,
       minWidth: '180px',
-      selector: (row: any) => row.emergency_contact_name,
+      selector: (row: any) => `${row.emergency_contact_name || ''}`.toUpperCase(),
     },
     {
       name: 'Emergency contact phone',
@@ -185,7 +188,7 @@ const StudentsRegisteredTable = ({
       center: true,
       wrap: true,
       minWidth: '160px',
-      selector: (row: any) => row.emergency_contact_phone,
+      selector: (row: any) => `${row.emergency_contact_phone || ''}`.toUpperCase(),
     },
     {
       name: 'Emergency contact relationship',
@@ -193,7 +196,7 @@ const StudentsRegisteredTable = ({
       center: true,
       wrap: true,
       minWidth: '200px',
-      selector: (row: any) => row.emergency_contact_relationship,
+      selector: (row: any) => `${row.emergency_contact_relationship || ''}`.toUpperCase(),
     },
   ];
 
