@@ -36,6 +36,17 @@ export const handleError = (
   stopRedirect?: boolean
 ) => {
   if (e?.response?.status === 403 && isBrowser()) {
+    const errorMessage = e?.response?.data?.message;
+    if (errorMessage && errorMessage.includes('Account has been locked')) {
+      Swal.fire({
+        title: "Account Locked",
+        text: errorMessage,
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+      return e;
+    }
+    
     Swal.fire({
       title: "Access Denied",
       text: "You don't have access to this section.",
@@ -628,7 +639,7 @@ export const countAttendance = (dates: any = {}, studentId: any) => {
   attendanceAverage = (attendanceTotal / datesValues.length) * 100;
 
   return {
-    attendanceCount: Math.floor(attendanceTotal),
+    attendanceCount: attendanceTotal,
     attendancePercentage: Number(Number(attendanceAverage).toFixed(2)),
   };
 };
@@ -645,7 +656,7 @@ export const countAbsences = (dates: any = {}, studentId: any) => {
   attendanceAverage = (attendanceTotal / datesValues.length) * 100;
 
   return {
-    attendanceCount: Math.floor(attendanceTotal),
+    attendanceCount: attendanceTotal,
     attendancePercentage: Number(Number(attendanceAverage).toFixed(2)),
   };
 };
@@ -719,87 +730,6 @@ export const formatExamParams = (result: any[], examType: string) => {
 
   return Object.assign({}, ...values);
 };
-
-export const formatReportUrl = ({
-  student,
-  ageGroup,
-  level,
-  assignments,
-  assignmentsTotal,
-  assignmentsStatus,
-  tests,
-  testsStatus,
-  exam,
-  reading = "0.00%",
-  readingStatus = "NOT REPORTED",
-  listening = "0.00%",
-  listeningStatus = "NOT REPORTED",
-  writing = "0.00%",
-  writingStatus = "NOT REPORTED",
-  speaking = "0.00%",
-  speakingStatus = "NOT REPORTED",
-  generalExamsTotal,
-  readingWriting = "0.00%",
-  readingWritingStatus = "NOT REPORTED",
-  listeningYLE = "0.00%",
-  listeningYLEStatus = "NOT REPORTED",
-  speakingYLE = "0.00%",
-  speakingYLEStatus = "NOT REPORTED",
-  yleTotal,
-  gpa,
-  final,
-}: any) => {
-  const baseUrl = new URL(
-    "https://chiispiitas.github.io/Brighton/Certificate%20Generator/index.html"
-  );
-
-  baseUrl.searchParams.append("student", student.toUpperCase());
-  baseUrl.searchParams.append(
-    "program",
-    ageGroup === "adult" ? "General English" : "Young Learners"
-  );
-  baseUrl.searchParams.append("level", level);
-  baseUrl.searchParams.append("short-level", level?.split(" ")[0]);
-  baseUrl.searchParams.append("assignments", assignments);
-  baseUrl.searchParams.append("assignments-total", assignmentsTotal);
-  baseUrl.searchParams.append("assignments-status", assignmentsStatus);
-  baseUrl.searchParams.append("tests", tests);
-  baseUrl.searchParams.append("tests-status", testsStatus);
-  baseUrl.searchParams.append("exam", exam);
-  baseUrl.searchParams.append("gpa", gpa);
-  baseUrl.searchParams.append("final", final);
-  baseUrl.searchParams.append("password", "Brighton1234@");
-
-  const normalizedExam = exam.replace(".", "");
-  const fourModuleExams = ["PRELIM", "FIRST"];
-  const threeModuleExams = ["STARTERS", "MOVERS", "FLYERS", "KEY"];
-
-  if (fourModuleExams.includes(normalizedExam)) {
-    baseUrl.searchParams.append("reading", reading);
-    baseUrl.searchParams.append("reading-status", readingStatus);
-    baseUrl.searchParams.append("listening", listening);
-    baseUrl.searchParams.append("listening-status", listeningStatus);
-    baseUrl.searchParams.append("writing", writing);
-    baseUrl.searchParams.append("writing-status", writingStatus);
-    baseUrl.searchParams.append("speaking", speaking);
-    baseUrl.searchParams.append("speaking-status", speakingStatus);
-    baseUrl.searchParams.append("general-exams-total", generalExamsTotal);
-  } else if (threeModuleExams.includes(normalizedExam)) {
-    baseUrl.searchParams.append("reading-and-writing", readingWriting);
-    baseUrl.searchParams.append(
-      "reading-and-writing-status",
-      readingWritingStatus
-    );
-    baseUrl.searchParams.append("listening-yle", listeningYLE);
-    baseUrl.searchParams.append("listening-yle-status", listeningYLEStatus);
-    baseUrl.searchParams.append("speaking-yle", speakingYLE);
-    baseUrl.searchParams.append("speaking-yle-status", speakingYLEStatus);
-    baseUrl.searchParams.append("yle-total", yleTotal);
-  }
-
-  return baseUrl;
-};
-
 export const getExamType = (level: string, ageGroup: string) => {
   const levelUpper = level.toUpperCase();
 

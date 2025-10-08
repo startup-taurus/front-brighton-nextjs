@@ -160,9 +160,137 @@ export const PRIVATE_COURSE_TYPES = {
   PRIVATE: 'private',
   PRIVATE_ONLINE: 'private - online'  
 };
-export const DATA_TYPE= {
+export const DATA_TYPE = {
   STRING: 'string',
   TRUE: 'true',
   FALSE: 'false',
   OBJECT: 'object',
-}
+};
+
+export const STUDENT_REPORT_CONSTANTS = {
+  COLUMNS: {
+    NO: 'NO.',
+    CRITERION: 'CRITERION',
+    LEVEL: 'LEVEL',
+    SCORE: 'SCORE',
+    GRADE: 'GRADE',
+    EXAM_PAPER: 'EXAM PAPER',
+    EXAM: 'EXAM',
+  },
+  EXAM_SKILLS: {
+    READING_AND_WRITING: 'READING AND WRITING',
+    READING_WRITING_ALT: 'READING & WRITING',
+    LISTENING: 'LISTENING',
+    SPEAKING: 'SPEAKING',
+    READING: 'READING',
+    WRITING: 'WRITING',
+  },
+  PROGRAMS: {
+    GENERAL_ENGLISH: 'General English',
+    YOUNG_LEARNERS: 'Young Learners',
+  },
+  STATUS: {
+    NOT_REPORTED: 'Not Reported',
+    NOT_RESULTED: 'NOT RESULTED',
+  },
+  DEFAULT_VALUES: {
+    ZERO: '0',
+    ZERO_DECIMAL: '0.00',
+  },
+  CSS_CLASSES: {
+    HIGHLIGHTED_COL: 'highlighted-col text-center',
+    MT_4: 'mt-4',
+    ATTENDANCE_RESUME: 'attendance-resume',
+    FIELD_DESCRIPTION: 'field-description',
+    FIELD_VALUE: 'field-value',
+    FLEX_COLUMN_MD_ROW: 'd-flex flex-column flex-md-row justify-content-between',
+    DOWNLOAD_CONTAINER: 'd-flex download-container gap-2 flex-column flex-md-row',
+    ALIGN_ITEMS_CENTER: 'd-flex align-items-center gap-2',
+    CHART_CONTAINER: 'chart-container',
+    WIDTH_100: '100%',
+  },
+  MESSAGES: {
+    GENERATING: 'Generating...',
+    DOWNLOAD_CERTIFICATE: 'Download Certificate',
+    DOWNLOAD_REPORT: 'Download Report',
+    CERTIFICATE_SUCCESS: 'Certificate downloaded successfully',
+    REPORT_SUCCESS: 'Report downloaded successfully',
+    CERTIFICATE_ERROR: 'Error generating certificate',
+    REPORT_ERROR: 'Error generating report',
+    NO_DATA_ERROR: 'No hay datos del estudiante o curso disponibles',
+    ATTENDANCE: 'ATTENDANCE',
+    GPA: 'GPA',
+  },
+  AGE_GROUP: {
+    ADULT: 'adult',
+  },
+  EXAM_TYPES: {
+    GENERAL: 'General',
+  },
+};
+
+export const PDF_GENERATOR_CONSTANTS = {
+  CERTIFICATE_POSITIONS: {
+    STUDENT_NAME: { y: 320, fontSize: 56 },
+    PASS_LINE_1: { y: 267, fontSize: 16 },
+    PASS_LINE_2: { y: 244, fontSize: 16 },
+    DATE: { y: 218, fontSize: 16 }
+  },
+  REPORT_POSITIONS: {
+    DATE: { x: 41, y: 690, fontSize: 11 },
+    OVERVIEW_START_Y: 626,
+    LINE_HEIGHT: 17,
+    LEFT_MARGIN: 41,
+    RIGHT_MARGIN: 41,
+    ASSIGNMENTS_SECTION: {
+      ROW_1: { y: 525 },
+      ROW_2: { y: 507 },
+      TOTAL: { y: 489 }
+    },
+    EXAM_SECTION: {
+      START_Y: 458,
+      ROW_HEIGHT: 18
+    },
+    COLUMNS: {
+      NUMBER: { x: 107 },
+      CRITERION: { x: 128 },
+      LEVEL: { x: 297 },
+      SCORE: { x: 356 },
+      STATUS: { x: 406 },
+      TOTAL: { x: 407 }
+    },
+    FINAL_GRADE: { x: 170, y: 333, fontSize: 11 }
+  },
+  COLORS: {
+    BLACK: [0, 0, 0],
+    GRAY_35: [0.35, 0.35, 0.35],
+    GRAY_50: [0.5, 0.5, 0.5]
+  },
+  API_ENDPOINTS: {
+    CERTIFICATE: '/api/certificate/Certificate.pdf',
+    REPORT: '/api/certificate/Report1.pdf',
+    FONTS: {
+      BRITTANY: '/api/certificate/assets/fonts/BrittanySignature.ttf',
+      POPPINS: '/api/certificate/assets/fonts/Poppins-Regular.ttf',
+      BOSTON_ANGEL: '/api/certificate/assets/fonts/BostonAngelBold.otf'
+    }
+  },
+  YLE_EXAMS: ['STARTERS', 'MOVERS', 'FLYERS', 'KEY'],
+  LEVEL_MAPPING: {
+    'A1.1': 'A1', 'A1.2': 'A1', 'A2.1': 'A2', 'A2.2': 'A2',
+    'B1.1': 'B1', 'B1.2': 'B1', 'B2.1': 'B2', 'B2.2': 'B2',
+    'PRE-A1': 'PRE-A1', 'A1': 'A1', 'A2': 'A2', 'B1': 'B1', 'B2': 'B2',
+    'A1 Beginner': 'A1',
+    'A2 Elementary': 'A2', 
+    'B1 Pre-Intermediate': 'B1',
+    'B1+ Intermediate': 'B1+',
+    'B1+': 'B1+',
+    'B2 Upper Intermediate': 'B2',
+    'B2 First Preparation': 'B2',
+    'Pre-A1 Starter': 'PRE-A1'
+  },
+  MONTHS: [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ]
+};

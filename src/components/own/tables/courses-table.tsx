@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import useSWR, { mutate } from 'swr';
 import { useRouter } from 'next/router';
 import {
@@ -11,9 +11,12 @@ import DataTable from 'react-data-table-component';
 import CourseForm from '../form/course-form';
 import { getFiltersString } from '../../../../utils/utils';
 import TableSkeleton from '../common/table-skeleton/TableSkeleton';
+import { UserContext } from 'helper/User';
+import { USER_TYPES } from '../../../../utils/constants';
 
 const CoursesTable = ({ reload, loading }: any) => {
   const router = useRouter();
+  const { user } = useContext(UserContext);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
   const page = router.query.page ? Number(router.query.page) : 1;
@@ -74,6 +77,13 @@ const CoursesTable = ({ reload, loading }: any) => {
     }
   };
 
+  const handleAttendance = (row: any) => {
+    router.push({
+      pathname: `/course/${row.id}/attendance`,
+      query: { professorId: row.professor?.user_id }
+    });
+  };
+
   const {
     data: courses,
     error,
@@ -107,6 +117,7 @@ const CoursesTable = ({ reload, loading }: any) => {
         <TableActionButtons
           onEdit={() => toggle(row)}
           onBlock={() => handleAlert(row)}
+          onAttendance={user?.role !== USER_TYPES.ADMIN ? () => handleAttendance(row) : undefined}
           stauts={row.status === 'active' ? false : true}
         />
       ),
