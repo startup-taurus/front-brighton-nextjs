@@ -139,7 +139,7 @@ const update = async (values: any) => {
                   name: data?.user?.name,
                   username: data?.user?.username,
                   email: data.email,
-                  password: data.password,
+                  password: '',
                   status: data.status,
                   cedula: data.cedula,
                   hourly_rate: data.hourly_rate,
