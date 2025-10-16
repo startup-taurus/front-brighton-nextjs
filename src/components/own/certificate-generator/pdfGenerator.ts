@@ -1,7 +1,6 @@
 import { PDF_GENERATOR_CONSTANTS, STUDENT_REPORT_CONSTANTS } from '../../../../utils/constants';
 import { StudentData } from '../../../../Types/ReportTypes';
 
-// PDF Library singleton
 class PDFLibLoader {
   private static instance: any = null;
 
@@ -13,7 +12,6 @@ class PDFLibLoader {
   }
 }
 
-// Text formatting utilities
 export const textFormatters = {
   formatStudentName: (fullName: string): string => {
     const formattedName = fullName.replace(
@@ -78,7 +76,6 @@ export const textFormatters = {
   }
 };
 
-// PDF utilities
 export const pdfUtils = {
   getBacksideFileName: (level: string): string => {
     const mappedLevel = (PDF_GENERATOR_CONSTANTS.LEVEL_MAPPING as Record<string, string>)[level];
@@ -112,7 +109,7 @@ export const pdfUtils = {
   },
 
   downloadPDF: (pdfBytes: Uint8Array, filename: string) => {
-    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+    const blob = new Blob([pdfBytes as any], { type: 'application/pdf' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     
@@ -125,7 +122,6 @@ export const pdfUtils = {
   }
 };
 
-// Drawing utilities
 export const drawingUtils = {
   drawText: (page: any, text: string, x: number, y: number, font: any, fontSize: number, color: number[]) => {
     const { rgb } = require('pdf-lib');
@@ -173,7 +169,6 @@ export const drawingUtils = {
   }
 };
 
-// PDF content generators
 export const contentGenerators = {
   drawCertificateContent: (page: any, studentData: StudentData, fonts: any) => {
     const { brittanyFont, poppinsFont, bostonAngelFont } = fonts;
@@ -217,21 +212,18 @@ export const contentGenerators = {
     
     const levelLabel = studentData.shortLevel || studentData.level?.split(' ')[0] || '';
 
-    // Row 1: Assignments
     drawingUtils.drawText(page, '1', NUMBER.x, ROW_1.y, font, 11, COLORS.BLACK);
     drawingUtils.drawText(page, 'ASSIGNMENTS', CRITERION.x, ROW_1.y, font, 11, COLORS.BLACK);
     drawingUtils.drawText(page, levelLabel, LEVEL.x, ROW_1.y, font, 11, COLORS.BLACK);
     drawingUtils.drawText(page, `${studentData.assignments}%`, SCORE.x, ROW_1.y, font, 11, COLORS.BLACK);
     drawingUtils.drawText(page, studentData.assignmentsStatus || STUDENT_REPORT_CONSTANTS.STATUS.NOT_REPORTED, STATUS.x, ROW_1.y, font, 11, COLORS.BLACK);
 
-    // Row 2: Progress Tests
     drawingUtils.drawText(page, '2', NUMBER.x, ROW_2.y, font, 11, COLORS.BLACK);
     drawingUtils.drawText(page, 'PROGRESS TESTS', CRITERION.x, ROW_2.y, font, 11, COLORS.BLACK);
     drawingUtils.drawText(page, levelLabel, LEVEL.x, ROW_2.y, font, 11, COLORS.BLACK);
     drawingUtils.drawText(page, `${studentData.progressTests || STUDENT_REPORT_CONSTANTS.DEFAULT_VALUES.ZERO_DECIMAL}%`, SCORE.x, ROW_2.y, font, 11, COLORS.BLACK);
     drawingUtils.drawText(page, studentData.progressTestsStatus || STUDENT_REPORT_CONSTANTS.STATUS.NOT_REPORTED, STATUS.x, ROW_2.y, font, 11, COLORS.BLACK);
 
-    // Total calculation
     const assignmentsScore = parseFloat(studentData.assignments) || 0;
     const progressTestsScore = parseFloat(studentData.progressTests || '0') || 0;
     const totalScore = !isNaN(parseFloat(studentData.assignmentsTotal)) 
@@ -251,7 +243,6 @@ export const contentGenerators = {
     const isYLEExam = YLE_EXAMS.includes(studentData.exam as any);
 
     if (isYLEExam) {
-      // YLE Exam format (3 modules)
       drawingUtils.drawText(page, '1', NUMBER.x, START_Y, font, 11, COLORS.BLACK);
       drawingUtils.drawText(page, STUDENT_REPORT_CONSTANTS.EXAM_SKILLS.READING_WRITING_ALT, CRITERION.x, START_Y - 1, font, 11, COLORS.BLACK);
       drawingUtils.drawText(page, examLabel, LEVEL.x, START_Y + 1, font, 10, COLORS.BLACK);
@@ -270,10 +261,8 @@ export const contentGenerators = {
       drawingUtils.drawText(page, `${studentData.speakingYLE || studentData.speaking}%`, SCORE.x, START_Y - ROW_HEIGHT * 2, font, 11, COLORS.BLACK);
       drawingUtils.drawText(page, studentData.speakingYLEStatus || studentData.speakingStatus, STATUS.x, START_Y - ROW_HEIGHT * 2, font, 11, COLORS.BLACK);
 
-      // YLE Total
       drawingUtils.drawText(page, `${studentData.yleTotal}%`, TOTAL.x, START_Y - ROW_HEIGHT * 3 - 15, font, 11, COLORS.BLACK);
     } else {
-      // General Exam format (4 modules)
       drawingUtils.drawText(page, '1', NUMBER.x, START_Y, font, 11, COLORS.BLACK);
       drawingUtils.drawText(page, STUDENT_REPORT_CONSTANTS.EXAM_SKILLS.READING, CRITERION.x, START_Y - 1, font, 11, COLORS.BLACK);
       drawingUtils.drawText(page, examLabel, LEVEL.x, START_Y + 1, font, 10, COLORS.BLACK);
@@ -298,7 +287,6 @@ export const contentGenerators = {
       drawingUtils.drawText(page, `${studentData.speaking}%`, SCORE.x, START_Y - ROW_HEIGHT * 3, font, 11, COLORS.BLACK);
       drawingUtils.drawText(page, studentData.speakingStatus, STATUS.x, START_Y - ROW_HEIGHT * 3, font, 11, COLORS.BLACK);
 
-      // General Total
       drawingUtils.drawText(page, `${studentData.generalExamsTotal}%`, TOTAL.x, START_Y - ROW_HEIGHT * 4 + 2, font, 11, COLORS.BLACK);
     }
   },
@@ -309,7 +297,6 @@ export const contentGenerators = {
   }
 };
 
-// Main PDF generation functions
 export const generateCertificatePDF = async (studentData: StudentData): Promise<void> => {
   try {
     const { PDFDocument } = await PDFLibLoader.load();
