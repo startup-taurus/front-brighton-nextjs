@@ -4,7 +4,7 @@ import ReportTable from "@/components/own/report-table/report-table";
 import ReportStatus from "@/components/own/report-status/report-status";
 import Link from "next/link";
 import { FaRegFilePdf, FaCertificate, FaFileAlt } from "react-icons/fa";
-import { generateCertificatePDF, generateReportPDF } from "../certificate-generator/pdfGenerator";
+import { generateCertificatePDF, generateReportPDF } from "../../../../utils/pdfGenerator";
 import { StudentData } from "../../../../Types/ReportTypes";
 import { toast } from "react-toastify";
 import { Bar } from "react-chartjs-2";
@@ -28,8 +28,8 @@ import { ComponentsGradebook } from "../../../../Types/GradingItem";
 import {
   DEFAULT_BAR_CHART_DATA,
   EXAMS_TYPE,
-  STUDENT_REPORT_CONSTANTS,
 } from "../../../../utils/constants";
+import { STUDENT_REPORT_CONSTANTS } from "../../../../utils/studentReportConstants";
 
 const assignmentsTestCols = [
   {
@@ -121,34 +121,34 @@ const StudentReportTable = ({
     rows?.find((r) => norm(r.criterion) === norm(name));
 
   const pickYLE = (examRows: any[]) => {
-    const rw = findRow(examRows, STUDENT_REPORT_CONSTANTS.EXAM_SKILLS.READING_WRITING_ALT) || 
-               findRow(examRows, STUDENT_REPORT_CONSTANTS.EXAM_SKILLS.READING_AND_WRITING);
-    const li = findRow(examRows, STUDENT_REPORT_CONSTANTS.EXAM_SKILLS.LISTENING);
-    const sp = findRow(examRows, STUDENT_REPORT_CONSTANTS.EXAM_SKILLS.SPEAKING);
+    const readingWriting = findRow(examRows, STUDENT_REPORT_CONSTANTS.EXAM_SKILLS.READING_WRITING_ALT) || 
+                          findRow(examRows, STUDENT_REPORT_CONSTANTS.EXAM_SKILLS.READING_AND_WRITING);
+    const listening = findRow(examRows, STUDENT_REPORT_CONSTANTS.EXAM_SKILLS.LISTENING);
+    const speaking = findRow(examRows, STUDENT_REPORT_CONSTANTS.EXAM_SKILLS.SPEAKING);
     return {
-      readingAndWriting: rw?.score?.toString() ?? STUDENT_REPORT_CONSTANTS.DEFAULT_VALUES.ZERO,
-      readingAndWritingStatus: rw?.grade ?? STUDENT_REPORT_CONSTANTS.STATUS.NOT_REPORTED,
-      listening: li?.score?.toString() ?? STUDENT_REPORT_CONSTANTS.DEFAULT_VALUES.ZERO,
-      listeningStatus: li?.grade ?? STUDENT_REPORT_CONSTANTS.STATUS.NOT_REPORTED,
-      speaking: sp?.score?.toString() ?? STUDENT_REPORT_CONSTANTS.DEFAULT_VALUES.ZERO,
-      speakingStatus: sp?.grade ?? STUDENT_REPORT_CONSTANTS.STATUS.NOT_REPORTED,
+      readingAndWriting: readingWriting?.score?.toString() ?? STUDENT_REPORT_CONSTANTS.DEFAULT_VALUES.ZERO,
+      readingAndWritingStatus: readingWriting?.grade ?? STUDENT_REPORT_CONSTANTS.STATUS.NOT_REPORTED,
+      listening: listening?.score?.toString() ?? STUDENT_REPORT_CONSTANTS.DEFAULT_VALUES.ZERO,
+      listeningStatus: listening?.grade ?? STUDENT_REPORT_CONSTANTS.STATUS.NOT_REPORTED,
+      speaking: speaking?.score?.toString() ?? STUDENT_REPORT_CONSTANTS.DEFAULT_VALUES.ZERO,
+      speakingStatus: speaking?.grade ?? STUDENT_REPORT_CONSTANTS.STATUS.NOT_REPORTED,
     };
   };
 
   const pickGeneral = (examRows: any[]) => {
-    const rd = findRow(examRows, STUDENT_REPORT_CONSTANTS.EXAM_SKILLS.READING);
-    const li = findRow(examRows, STUDENT_REPORT_CONSTANTS.EXAM_SKILLS.LISTENING);
-    const wr = findRow(examRows, STUDENT_REPORT_CONSTANTS.EXAM_SKILLS.WRITING);
-    const sp = findRow(examRows, STUDENT_REPORT_CONSTANTS.EXAM_SKILLS.SPEAKING);
+    const reading = findRow(examRows, STUDENT_REPORT_CONSTANTS.EXAM_SKILLS.READING);
+    const listening = findRow(examRows, STUDENT_REPORT_CONSTANTS.EXAM_SKILLS.LISTENING);
+    const writing = findRow(examRows, STUDENT_REPORT_CONSTANTS.EXAM_SKILLS.WRITING);
+    const speaking = findRow(examRows, STUDENT_REPORT_CONSTANTS.EXAM_SKILLS.SPEAKING);
     return {
-      reading: rd?.score?.toString() ?? STUDENT_REPORT_CONSTANTS.DEFAULT_VALUES.ZERO,
-      readingStatus: rd?.grade ?? STUDENT_REPORT_CONSTANTS.STATUS.NOT_REPORTED,
-      listening: li?.score?.toString() ?? STUDENT_REPORT_CONSTANTS.DEFAULT_VALUES.ZERO,
-      listeningStatus: li?.grade ?? STUDENT_REPORT_CONSTANTS.STATUS.NOT_REPORTED,
-      writing: wr?.score?.toString() ?? STUDENT_REPORT_CONSTANTS.DEFAULT_VALUES.ZERO,
-      writingStatus: wr?.grade ?? STUDENT_REPORT_CONSTANTS.STATUS.NOT_REPORTED,
-      speaking: sp?.score?.toString() ?? STUDENT_REPORT_CONSTANTS.DEFAULT_VALUES.ZERO,
-      speakingStatus: sp?.grade ?? STUDENT_REPORT_CONSTANTS.STATUS.NOT_REPORTED,
+      reading: reading?.score?.toString() ?? STUDENT_REPORT_CONSTANTS.DEFAULT_VALUES.ZERO,
+      readingStatus: reading?.grade ?? STUDENT_REPORT_CONSTANTS.STATUS.NOT_REPORTED,
+      listening: listening?.score?.toString() ?? STUDENT_REPORT_CONSTANTS.DEFAULT_VALUES.ZERO,
+      listeningStatus: listening?.grade ?? STUDENT_REPORT_CONSTANTS.STATUS.NOT_REPORTED,
+      writing: writing?.score?.toString() ?? STUDENT_REPORT_CONSTANTS.DEFAULT_VALUES.ZERO,
+      writingStatus: writing?.grade ?? STUDENT_REPORT_CONSTANTS.STATUS.NOT_REPORTED,
+      speaking: speaking?.score?.toString() ?? STUDENT_REPORT_CONSTANTS.DEFAULT_VALUES.ZERO,
+      speakingStatus: speaking?.grade ?? STUDENT_REPORT_CONSTANTS.STATUS.NOT_REPORTED,
     };
   };
 
@@ -161,8 +161,8 @@ const StudentReportTable = ({
       courseDetail?.syllabus?.exam_type ||
       getExamType(courseDetail?.course_name, courseDetail?.age_group);
 
-    const asg = assignmentsData?.[0];
-    const pts = assignmentsData?.[1];
+    const assignmentScore = assignmentsData?.[0];
+    const progressTestScore = assignmentsData?.[1];
 
     const base: StudentData = {
       student:
@@ -177,15 +177,15 @@ const StudentReportTable = ({
         courseDetail?.level?.short_name ||
         courseDetail?.level?.name?.split(" ")[0] ||
         '',
-      assignments: asg?.score?.toString() ?? STUDENT_REPORT_CONSTANTS.DEFAULT_VALUES.ZERO,
+      assignments: assignmentScore?.score?.toString() ?? STUDENT_REPORT_CONSTANTS.DEFAULT_VALUES.ZERO,
       assignmentsTotal: assignmentsAverage || STUDENT_REPORT_CONSTANTS.DEFAULT_VALUES.ZERO,
-      assignmentsStatus: asg?.grade ?? STUDENT_REPORT_CONSTANTS.STATUS.NOT_REPORTED,
+      assignmentsStatus: assignmentScore?.grade ?? STUDENT_REPORT_CONSTANTS.STATUS.NOT_REPORTED,
       ...(includeCertificateFields && {
-        assignmentsIndividual: asg?.score?.toString() ?? STUDENT_REPORT_CONSTANTS.DEFAULT_VALUES.ZERO,
-        assignmentsIndividualStatus: asg?.grade ?? STUDENT_REPORT_CONSTANTS.STATUS.NOT_REPORTED,
+        assignmentsIndividual: assignmentScore?.score?.toString() ?? STUDENT_REPORT_CONSTANTS.DEFAULT_VALUES.ZERO,
+        assignmentsIndividualStatus: assignmentScore?.grade ?? STUDENT_REPORT_CONSTANTS.STATUS.NOT_REPORTED,
       }),
-      progressTests: pts?.score?.toString() ?? STUDENT_REPORT_CONSTANTS.DEFAULT_VALUES.ZERO,
-      progressTestsStatus: pts?.grade ?? STUDENT_REPORT_CONSTANTS.STATUS.NOT_REPORTED,
+      progressTests: progressTestScore?.score?.toString() ?? STUDENT_REPORT_CONSTANTS.DEFAULT_VALUES.ZERO,
+      progressTestsStatus: progressTestScore?.grade ?? STUDENT_REPORT_CONSTANTS.STATUS.NOT_REPORTED,
       exam: currentExamType || STUDENT_REPORT_CONSTANTS.EXAM_TYPES.GENERAL,
       readingAndWriting: STUDENT_REPORT_CONSTANTS.DEFAULT_VALUES.ZERO,
       readingAndWritingStatus: STUDENT_REPORT_CONSTANTS.STATUS.NOT_REPORTED,
@@ -205,7 +205,7 @@ const StudentReportTable = ({
   };
 
   const handlePDFGeneration = async (
-    type: 'certificate' | 'report',
+    type: string,
     generateFunction: (data: StudentData) => Promise<void>
   ) => {
     if (!selectedStudent || !courseDetail) {
@@ -216,15 +216,15 @@ const StudentReportTable = ({
     try {
       setIsGenerating(true);
       
-      const studentData = generateStudentData(type === 'certificate');
+      const studentData = generateStudentData(type === STUDENT_REPORT_CONSTANTS.MESSAGES.CERTIFICATE);
       await generateFunction(studentData);
       
-      const successMessage = type === 'certificate' 
+      const successMessage = type === STUDENT_REPORT_CONSTANTS.MESSAGES.CERTIFICATE       
         ? STUDENT_REPORT_CONSTANTS.MESSAGES.CERTIFICATE_SUCCESS
         : STUDENT_REPORT_CONSTANTS.MESSAGES.REPORT_SUCCESS;
       toast.success(successMessage);
     } catch (error) {
-      const errorMessage = type === 'certificate' 
+      const errorMessage = type === STUDENT_REPORT_CONSTANTS.MESSAGES.CERTIFICATE 
         ? STUDENT_REPORT_CONSTANTS.MESSAGES.CERTIFICATE_ERROR
         : STUDENT_REPORT_CONSTANTS.MESSAGES.REPORT_ERROR;
       console.error(errorMessage, error);
@@ -235,11 +235,11 @@ const StudentReportTable = ({
   };
 
   const handleGenerateCertificate = async () => {
-    await handlePDFGeneration('certificate', generateCertificatePDF);
+    await handlePDFGeneration(STUDENT_REPORT_CONSTANTS.MESSAGES.CERTIFICATE, generateCertificatePDF);
   };
 
   const handleGenerateReport = async () => {
-    await handlePDFGeneration('report', generateReportPDF);
+    await handlePDFGeneration(STUDENT_REPORT_CONSTANTS.MESSAGES.REPORT, generateReportPDF);
   };
 
   const gradingGrade = useMemo(

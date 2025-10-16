@@ -1,5 +1,6 @@
-import { PDF_GENERATOR_CONSTANTS, STUDENT_REPORT_CONSTANTS } from '../../../../utils/constants';
-import { StudentData } from '../../../../Types/ReportTypes';
+import { PDF_GENERATOR_CONSTANTS } from './constants';
+import { STUDENT_REPORT_CONSTANTS } from './studentReportConstants';
+import { StudentData } from '../Types/ReportTypes';
 
 class PDFLibLoader {
   private static instance: any = null;
