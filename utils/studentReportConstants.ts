@@ -1,0 +1,63 @@
+export const STUDENT_REPORT_CONSTANTS = {
+  COLUMNS: {
+    NO: 'NO.',
+    CRITERION: 'CRITERION',
+    LEVEL: 'LEVEL',
+    SCORE: 'SCORE',
+    GRADE: 'GRADE',
+    EXAM_PAPER: 'EXAM PAPER',
+    EXAM: 'EXAM',
+  },
+  EXAM_SKILLS: {
+    READING_AND_WRITING: 'READING AND WRITING',
+    READING_WRITING_ALT: 'READING & WRITING',
+    LISTENING: 'LISTENING',
+    SPEAKING: 'SPEAKING',
+    READING: 'READING',
+    WRITING: 'WRITING',
+  },
+  PROGRAMS: {
+    GENERAL_ENGLISH: 'General English',
+    YOUNG_LEARNERS: 'Young Learners',
+  },
+  STATUS: {
+    NOT_REPORTED: 'Not Reported',
+    NOT_RESULTED: 'NOT RESULTED',
+  },
+  DEFAULT_VALUES: {
+    ZERO: '0',
+    ZERO_DECIMAL: '0.00',
+  },
+  CSS_CLASSES: {
+    HIGHLIGHTED_COL: 'highlighted-col text-center',
+    MT_4: 'mt-4',
+    ATTENDANCE_RESUME: 'attendance-resume',
+    FIELD_DESCRIPTION: 'field-description',
+    FIELD_VALUE: 'field-value',
+    FLEX_COLUMN_MD_ROW: 'd-flex flex-column flex-md-row justify-content-between',
+    DOWNLOAD_CONTAINER: 'd-flex download-container gap-2 flex-column flex-md-row',
+    ALIGN_ITEMS_CENTER: 'd-flex align-items-center gap-2',
+    CHART_CONTAINER: 'chart-container',
+    WIDTH_100: '100%',
+  },
+  MESSAGES: {
+    GENERATING: 'Generating...',
+    DOWNLOAD_CERTIFICATE: 'Download Certificate',
+    DOWNLOAD_REPORT: 'Download Report',
+    CERTIFICATE_SUCCESS: 'Certificate downloaded successfully',
+    REPORT_SUCCESS: 'Report downloaded successfully',
+    CERTIFICATE_ERROR: 'Error generating certificate',
+    REPORT_ERROR: 'Error generating report',
+    NO_DATA_ERROR: 'No hay datos del estudiante o curso disponibles',
+    ATTENDANCE: 'ATTENDANCE',
+    GPA: 'GPA',
+    CERTIFICATE: 'certificate',
+    REPORT: 'report',
+  },
+  AGE_GROUP: {
+    ADULT: 'adult',
+  },
+  EXAM_TYPES: {
+    GENERAL: 'General',
+  },
+};

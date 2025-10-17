@@ -16,6 +16,10 @@ export const updateStatusUser = (userId: number, status: string) => {
   return putFetcher(`/user/update-status/${userId}`, { status });
 };
 
+export const resetFailedAttempts = (userId: number) => {
+  return putFetcher(`/user/reset-failed-attempts/${userId}`, {});
+};
+
 export const getAllUsers = (page: number, limit: number, filters?: any) => {
   return getFetcher(
     `/user/get-all?page=${page}&limit=${limit}${filters ? `&${filters}` : ''}`,

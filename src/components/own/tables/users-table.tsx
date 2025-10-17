@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { mutate } from 'swr';
 import { useRouter } from 'next/router';
-import { updateStatusUser } from 'helper/api-data/user';
+import { updateStatusUser, resetFailedAttempts } from 'helper/api-data/user';
 import TableActionButtons from '@/components/own/table-action-buttons/table-action-buttons';
 import Swal from 'sweetalert2';
 import DataTable from 'react-data-table-component';
@@ -31,7 +31,15 @@ const UsersTable = ({
       const newStatus = data?.status === 'active' ? 'inactive' : 'active';
       const response = await updateStatusUser(data.id, newStatus);
       if (response.statusCode === 200) {
-        clearQueryString(router);
+        const currentUserType = router.query.user_type;
+        if (currentUserType) {
+          router.push({
+            pathname: router.pathname,
+            query: { user_type: currentUserType }
+          }, undefined, { shallow: true });
+        } else {
+          clearQueryString(router);
+        }
         mutate([
           `/user/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}`,
         ]);
@@ -41,21 +49,59 @@ const UsersTable = ({
     }
   };
 
-  const handleAlert = (row: any) => {
-    const status = row?.status === 'active' ? 'deactivate' : 'active';
-    Swal.fire({
-      title: 'Are you sure to ' + status + '?',
-      text: 'You are about to ' + status + ' this user',
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: 'Yes, ' + status + '!',
-      cancelButtonText: 'Cancel',
-      reverseButtons: true,
-    }).then((result) => {
-      if (result.isConfirmed) {
-        updateStatus(row);
+  const activateUser = async (data: any) => {
+    try {
+      const response = await resetFailedAttempts(data.id);
+      if (response.statusCode === 200) {
+        const currentUserType = router.query.user_type;
+        if (currentUserType) {
+          router.push({
+            pathname: router.pathname,
+            query: { user_type: currentUserType }
+          }, undefined, { shallow: true });
+        } else {
+          clearQueryString(router);
+        }
+        mutate([
+          `/user/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}`,
+        ]);
       }
-    });
+    } catch (error) {
+      console.error('Error al activar usuario:', error);
+    }
+  };
+
+  const handleAlert = (row: any) => {
+    if (row.status === 'inactive' && row.failed_attempts >= 5) {
+      Swal.fire({
+        title: 'Are you sure you want to unlock this user?',
+        text: 'This will activate the user and reset failed attempts ',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, unlock!',
+        cancelButtonText: 'Cancel',
+        reverseButtons: true,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          activateUser(row);
+        }
+      });
+    } else {
+      const status = row?.status === 'active' ? 'deactivate' : 'activate';
+      Swal.fire({
+        title: 'Are you sure to ' + status + '?',
+        text: 'You are about to ' + status + ' this user',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, ' + status + '!',
+        cancelButtonText: 'Cancel',
+        reverseButtons: true,
+      }).then((result) => {
+        if (result.isConfirmed) {
+          updateStatus(row);
+        }
+      });
+    }
   };
 
   if (loading) {

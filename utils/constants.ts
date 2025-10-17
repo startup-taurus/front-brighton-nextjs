@@ -160,9 +160,77 @@ export const PRIVATE_COURSE_TYPES = {
   PRIVATE: 'private',
   PRIVATE_ONLINE: 'private - online'  
 };
-export const DATA_TYPE= {
+export const DATA_TYPE = {
   STRING: 'string',
   TRUE: 'true',
   FALSE: 'false',
   OBJECT: 'object',
-}
+};
+
+
+
+export const PDF_GENERATOR_CONSTANTS = {
+  CERTIFICATE_POSITIONS: {
+    STUDENT_NAME: { y: 320, fontSize: 56 },
+    PASS_LINE_1: { y: 267, fontSize: 16 },
+    PASS_LINE_2: { y: 244, fontSize: 16 },
+    DATE: { y: 218, fontSize: 16 }
+  },
+  REPORT_POSITIONS: {
+    DATE: { x: 41, y: 690, fontSize: 11 },
+    OVERVIEW_START_Y: 626,
+    LINE_HEIGHT: 17,
+    LEFT_MARGIN: 41,
+    RIGHT_MARGIN: 41,
+    ASSIGNMENTS_SECTION: {
+      ROW_1: { y: 525 },
+      ROW_2: { y: 507 },
+      TOTAL: { y: 489 }
+    },
+    EXAM_SECTION: {
+      START_Y: 458,
+      ROW_HEIGHT: 18
+    },
+    COLUMNS: {
+      NUMBER: { x: 107 },
+      CRITERION: { x: 128 },
+      LEVEL: { x: 297 },
+      SCORE: { x: 356 },
+      STATUS: { x: 406 },
+      TOTAL: { x: 407 }
+    },
+    FINAL_GRADE: { x: 170, y: 333, fontSize: 11 }
+  },
+  COLORS: {
+    BLACK: [0, 0, 0],
+    GRAY_35: [0.35, 0.35, 0.35],
+    GRAY_50: [0.5, 0.5, 0.5]
+  },
+  API_ENDPOINTS: {
+    CERTIFICATE: '/api/certificate/Certificate.pdf',
+    REPORT: '/api/certificate/Report1.pdf',
+    FONTS: {
+      BRITTANY: '/api/certificate/assets/fonts/BrittanySignature.ttf',
+      POPPINS: '/api/certificate/assets/fonts/Poppins-Regular.ttf',
+      BOSTON_ANGEL: '/api/certificate/assets/fonts/BostonAngelBold.otf'
+    }
+  },
+  YLE_EXAMS: ['STARTERS', 'MOVERS', 'FLYERS', 'KEY'],
+  LEVEL_MAPPING: {
+    'A1.1': 'A1', 'A1.2': 'A1', 'A2.1': 'A2', 'A2.2': 'A2',
+    'B1.1': 'B1', 'B1.2': 'B1', 'B2.1': 'B2', 'B2.2': 'B2',
+    'PRE-A1': 'PRE-A1', 'A1': 'A1', 'A2': 'A2', 'B1': 'B1', 'B2': 'B2',
+    'A1 Beginner': 'A1',
+    'A2 Elementary': 'A2', 
+    'B1 Pre-Intermediate': 'B1',
+    'B1+ Intermediate': 'B1+',
+    'B1+': 'B1+',
+    'B2 Upper Intermediate': 'B2',
+    'B2 First Preparation': 'B2',
+    'Pre-A1 Starter': 'PRE-A1'
+  },
+  MONTHS: [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ]
+};

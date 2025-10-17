@@ -7,6 +7,8 @@ import {
   FaCheck,
   FaTrash,
   FaArrowRightArrowLeft,
+  FaClipboardList,
+  FaUnlock,
 } from 'react-icons/fa6';
 import { Tooltip } from 'react-tooltip';
 
@@ -18,6 +20,8 @@ const TableActionButtons = ({
   status,
   onCopy,
   onTransfer,
+  onAttendance,
+  onActivate,
   disabled = false,
   viewDisabled,
   blockButtonVariant = 'cancel',
@@ -38,6 +42,28 @@ const TableActionButtons = ({
             disabled={viewDisabled ?? disabled}
           >
             <FaMagnifyingGlass />
+          </button>
+        )}
+        {onAttendance && (
+          <button
+            type='button'
+            className='btn btn-info'
+            onClick={onAttendance}
+            data-tooltip-id='on-attendance'
+            disabled={disabled}
+          >
+            <FaClipboardList />
+          </button>
+        )}
+        {onActivate && (
+          <button
+            type='button'
+            className='btn btn-success'
+            onClick={onActivate}
+            data-tooltip-id='on-activate'
+            disabled={disabled}
+          >
+            <FaUnlock />
           </button>
         )}
         {onBlock && (
@@ -99,6 +125,16 @@ const TableActionButtons = ({
           id='on-view'
           place='top'
           content='View detail'
+        />
+        <Tooltip
+          id='on-attendance'
+          place='top-start'
+          content='View attendance'
+        />
+        <Tooltip
+          id='on-activate'
+          place='top'
+          content='Activate user and reset failed attempts'
         />
         <Tooltip
           id='on-block'

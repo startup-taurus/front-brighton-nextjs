@@ -1,9 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Col } from "reactstrap";
+import { Col, Button } from "reactstrap";
 import ReportTable from "@/components/own/report-table/report-table";
 import ReportStatus from "@/components/own/report-status/report-status";
 import Link from "next/link";
-import { FaRegFilePdf } from "react-icons/fa";
+import { FaRegFilePdf, FaCertificate, FaFileAlt } from "react-icons/fa";
+import { generateCertificatePDF, generateReportPDF } from "../../../../utils/pdfGenerator";
+import { StudentData } from "../../../../Types/ReportTypes";
+import { toast } from "react-toastify";
 import { Bar } from "react-chartjs-2";
 import { generateBarChartOptions } from "../../../../Data/Charts/ChartJsData";
 import {
@@ -16,7 +19,6 @@ import {
   formatExamParams,
   formatGradebookComponents,
   formatReportBarChartData,
-  formatReportUrl,
   formatStudentScoreAssignmentsGrades,
   formatStudentScoreExamGrades,
   getExamType, 
@@ -27,51 +29,52 @@ import {
   DEFAULT_BAR_CHART_DATA,
   EXAMS_TYPE,
 } from "../../../../utils/constants";
+import { STUDENT_REPORT_CONSTANTS } from "../../../../utils/studentReportConstants";
 
 const assignmentsTestCols = [
   {
-    name: "NO.",
-    className: "highlighted-col text-center",
+    name: STUDENT_REPORT_CONSTANTS.COLUMNS.NO,
+    className: STUDENT_REPORT_CONSTANTS.CSS_CLASSES.HIGHLIGHTED_COL,
     selector: (row: any) => row.id,
   },
   {
-    name: "CRITERION",
+    name: STUDENT_REPORT_CONSTANTS.COLUMNS.CRITERION,
     selector: (row: any) => row.criterion,
   },
   {
-    name: "LEVEL",
+    name: STUDENT_REPORT_CONSTANTS.COLUMNS.LEVEL,
     selector: (row: any) => row.level,
   },
   {
-    name: "SCORE",
+    name: STUDENT_REPORT_CONSTANTS.COLUMNS.SCORE,
     selector: (row: any) => `${row.score}%`,  
   },
   {
-    name: "GRADE",
+    name: STUDENT_REPORT_CONSTANTS.COLUMNS.GRADE,
     selector: (row: any) => row.grade,
   },
 ];
 
 const examPageCols = [
   {
-    name: "NO.",
-    className: "highlighted-col text-center",
+    name: STUDENT_REPORT_CONSTANTS.COLUMNS.NO,
+    className: STUDENT_REPORT_CONSTANTS.CSS_CLASSES.HIGHLIGHTED_COL,
     selector: (row: any) => row.id,
   },
   {
-    name: "EXAM PAPER",
+    name: STUDENT_REPORT_CONSTANTS.COLUMNS.EXAM_PAPER,
     selector: (row: any) => row.criterion,
   },
   {
-    name: "EXAM",
+    name: STUDENT_REPORT_CONSTANTS.COLUMNS.EXAM,
     selector: (row: any) => row.examType || row.level,
   },
   {
-    name: "SCORE",
+    name: STUDENT_REPORT_CONSTANTS.COLUMNS.SCORE,
     selector: (row: any) => `${row.score}%`,  
   },
   {
-    name: "GRADE",
+    name: STUDENT_REPORT_CONSTANTS.COLUMNS.GRADE,
     selector: (row: any) => row.grade,
   },
 ];
@@ -97,15 +100,147 @@ const StudentReportTable = ({
 
   const [assignmentsData, setAssignmentsData] = useState<any[]>([]);
   const [examData, setExamData] = useState<any[]>([]);
-  const [assignmentsAverage, setAssignmentsAverage] = useState("0");
-  const [examAverage, setExamAverage] = useState("0");
-  const [studentTotalAverage, setStudentTotalAverage] = useState("0");
+  const [assignmentsAverage, setAssignmentsAverage] = useState(STUDENT_REPORT_CONSTANTS.DEFAULT_VALUES.ZERO);
+  const [examAverage, setExamAverage] = useState(STUDENT_REPORT_CONSTANTS.DEFAULT_VALUES.ZERO);
+  const [studentTotalAverage, setStudentTotalAverage] = useState(STUDENT_REPORT_CONSTANTS.DEFAULT_VALUES.ZERO);
   const [examType, setExamType] = useState<string>(""); 
   const [reportChartData, setReportChartData] = useState<any>(
     DEFAULT_BAR_CHART_DATA,
   );
-  const [resultGPA, setResultGPA] = useState<string>("NOT RESULTED");
-  const [reportURL, setReportURL] = useState<string>("");
+  const [resultGPA, setResultGPA] = useState<string>(STUDENT_REPORT_CONSTANTS.STATUS.NOT_RESULTED);
+  const [isGenerating, setIsGenerating] = useState(false);
+
+  const norm = (s?: string) =>
+    (s || "")
+      .toUpperCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .trim();
+
+  const findRow = (rows: any[], name: string) =>
+    rows?.find((r) => norm(r.criterion) === norm(name));
+
+  const pickYLE = (examRows: any[]) => {
+    const readingWriting = findRow(examRows, STUDENT_REPORT_CONSTANTS.EXAM_SKILLS.READING_WRITING_ALT) || 
+                          findRow(examRows, STUDENT_REPORT_CONSTANTS.EXAM_SKILLS.READING_AND_WRITING);
+    const listening = findRow(examRows, STUDENT_REPORT_CONSTANTS.EXAM_SKILLS.LISTENING);
+    const speaking = findRow(examRows, STUDENT_REPORT_CONSTANTS.EXAM_SKILLS.SPEAKING);
+    return {
+      readingAndWriting: readingWriting?.score?.toString() ?? STUDENT_REPORT_CONSTANTS.DEFAULT_VALUES.ZERO,
+      readingAndWritingStatus: readingWriting?.grade ?? STUDENT_REPORT_CONSTANTS.STATUS.NOT_REPORTED,
+      listening: listening?.score?.toString() ?? STUDENT_REPORT_CONSTANTS.DEFAULT_VALUES.ZERO,
+      listeningStatus: listening?.grade ?? STUDENT_REPORT_CONSTANTS.STATUS.NOT_REPORTED,
+      speaking: speaking?.score?.toString() ?? STUDENT_REPORT_CONSTANTS.DEFAULT_VALUES.ZERO,
+      speakingStatus: speaking?.grade ?? STUDENT_REPORT_CONSTANTS.STATUS.NOT_REPORTED,
+    };
+  };
+
+  const pickGeneral = (examRows: any[]) => {
+    const reading = findRow(examRows, STUDENT_REPORT_CONSTANTS.EXAM_SKILLS.READING);
+    const listening = findRow(examRows, STUDENT_REPORT_CONSTANTS.EXAM_SKILLS.LISTENING);
+    const writing = findRow(examRows, STUDENT_REPORT_CONSTANTS.EXAM_SKILLS.WRITING);
+    const speaking = findRow(examRows, STUDENT_REPORT_CONSTANTS.EXAM_SKILLS.SPEAKING);
+    return {
+      reading: reading?.score?.toString() ?? STUDENT_REPORT_CONSTANTS.DEFAULT_VALUES.ZERO,
+      readingStatus: reading?.grade ?? STUDENT_REPORT_CONSTANTS.STATUS.NOT_REPORTED,
+      listening: listening?.score?.toString() ?? STUDENT_REPORT_CONSTANTS.DEFAULT_VALUES.ZERO,
+      listeningStatus: listening?.grade ?? STUDENT_REPORT_CONSTANTS.STATUS.NOT_REPORTED,
+      writing: writing?.score?.toString() ?? STUDENT_REPORT_CONSTANTS.DEFAULT_VALUES.ZERO,
+      writingStatus: writing?.grade ?? STUDENT_REPORT_CONSTANTS.STATUS.NOT_REPORTED,
+      speaking: speaking?.score?.toString() ?? STUDENT_REPORT_CONSTANTS.DEFAULT_VALUES.ZERO,
+      speakingStatus: speaking?.grade ?? STUDENT_REPORT_CONSTANTS.STATUS.NOT_REPORTED,
+    };
+  };
+
+  const isYLEorKEY = (t?: string) =>
+    [EXAMS_TYPE.STARTERS, EXAMS_TYPE.MOVERS, EXAMS_TYPE.FLYERS, EXAMS_TYPE.KEY]
+      .includes((t || "").toUpperCase());
+
+  const generateStudentData = (includeCertificateFields = false): StudentData => {
+    const currentExamType =
+      courseDetail?.syllabus?.exam_type ||
+      getExamType(courseDetail?.course_name, courseDetail?.age_group);
+
+    const assignmentScore = assignmentsData?.[0];
+    const progressTestScore = assignmentsData?.[1];
+
+    const base: StudentData = {
+      student:
+        selectedStudent.name ||
+        `${selectedStudent.first_name || ''} ${selectedStudent.last_name || ''}`.trim(),
+      date: new Date().toISOString().split('T')[0],
+      program: courseDetail?.age_group === STUDENT_REPORT_CONSTANTS.AGE_GROUP.ADULT ? 
+               STUDENT_REPORT_CONSTANTS.PROGRAMS.GENERAL_ENGLISH : 
+               STUDENT_REPORT_CONSTANTS.PROGRAMS.YOUNG_LEARNERS,
+      level: courseDetail?.level?.name || courseDetail?.course_name || '',
+      shortLevel:
+        courseDetail?.level?.short_name ||
+        courseDetail?.level?.name?.split(" ")[0] ||
+        '',
+      assignments: assignmentScore?.score?.toString() ?? STUDENT_REPORT_CONSTANTS.DEFAULT_VALUES.ZERO,
+      assignmentsTotal: assignmentsAverage || STUDENT_REPORT_CONSTANTS.DEFAULT_VALUES.ZERO,
+      assignmentsStatus: assignmentScore?.grade ?? STUDENT_REPORT_CONSTANTS.STATUS.NOT_REPORTED,
+      ...(includeCertificateFields && {
+        assignmentsIndividual: assignmentScore?.score?.toString() ?? STUDENT_REPORT_CONSTANTS.DEFAULT_VALUES.ZERO,
+        assignmentsIndividualStatus: assignmentScore?.grade ?? STUDENT_REPORT_CONSTANTS.STATUS.NOT_REPORTED,
+      }),
+      progressTests: progressTestScore?.score?.toString() ?? STUDENT_REPORT_CONSTANTS.DEFAULT_VALUES.ZERO,
+      progressTestsStatus: progressTestScore?.grade ?? STUDENT_REPORT_CONSTANTS.STATUS.NOT_REPORTED,
+      exam: currentExamType || STUDENT_REPORT_CONSTANTS.EXAM_TYPES.GENERAL,
+      readingAndWriting: STUDENT_REPORT_CONSTANTS.DEFAULT_VALUES.ZERO,
+      readingAndWritingStatus: STUDENT_REPORT_CONSTANTS.STATUS.NOT_REPORTED,
+      listening: STUDENT_REPORT_CONSTANTS.DEFAULT_VALUES.ZERO,
+      listeningStatus: STUDENT_REPORT_CONSTANTS.STATUS.NOT_REPORTED,
+      speaking: STUDENT_REPORT_CONSTANTS.DEFAULT_VALUES.ZERO,
+      speakingStatus: STUDENT_REPORT_CONSTANTS.STATUS.NOT_REPORTED,
+      yleTotal: examAverage || STUDENT_REPORT_CONSTANTS.DEFAULT_VALUES.ZERO,
+      generalExamsTotal: examAverage || STUDENT_REPORT_CONSTANTS.DEFAULT_VALUES.ZERO,
+      gpa: `${studentTotalAverage}% (${resultGPA})`,
+      final: resultGPA,
+    };
+
+    return isYLEorKEY(currentExamType)
+      ? { ...base, ...pickYLE(examData) }
+      : { ...base, ...pickGeneral(examData) };
+  };
+
+  const handlePDFGeneration = async (
+    type: string,
+    generateFunction: (data: StudentData) => Promise<void>
+  ) => {
+    if (!selectedStudent || !courseDetail) {
+      toast.error(STUDENT_REPORT_CONSTANTS.MESSAGES.NO_DATA_ERROR);
+      return;
+    }
+
+    try {
+      setIsGenerating(true);
+      
+      const studentData = generateStudentData(type === STUDENT_REPORT_CONSTANTS.MESSAGES.CERTIFICATE);
+      await generateFunction(studentData);
+      
+      const successMessage = type === STUDENT_REPORT_CONSTANTS.MESSAGES.CERTIFICATE       
+        ? STUDENT_REPORT_CONSTANTS.MESSAGES.CERTIFICATE_SUCCESS
+        : STUDENT_REPORT_CONSTANTS.MESSAGES.REPORT_SUCCESS;
+      toast.success(successMessage);
+    } catch (error) {
+      const errorMessage = type === STUDENT_REPORT_CONSTANTS.MESSAGES.CERTIFICATE 
+        ? STUDENT_REPORT_CONSTANTS.MESSAGES.CERTIFICATE_ERROR
+        : STUDENT_REPORT_CONSTANTS.MESSAGES.REPORT_ERROR;
+      console.error(errorMessage, error);
+      toast.error(errorMessage);
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  const handleGenerateCertificate = async () => {
+    await handlePDFGeneration(STUDENT_REPORT_CONSTANTS.MESSAGES.CERTIFICATE, generateCertificatePDF);
+  };
+
+  const handleGenerateReport = async () => {
+    await handlePDFGeneration(STUDENT_REPORT_CONSTANTS.MESSAGES.REPORT, generateReportPDF);
+  };
 
   const gradingGrade = useMemo(
     () =>
@@ -191,25 +326,6 @@ const StudentReportTable = ({
       studentAverage,
     );
 
-    const url = formatReportUrl({
-      student: selectedStudent?.name,
-      ageGroup: courseDetail?.age_group,
-      level: courseDetail?.course_name,
-      assignments: `${assignmentsFormatedData[0]?.score}%`,
-      assignmentsStatus: assignmentsFormatedData[0]?.grade,
-      assignmentsTotal: `${assignmentAverage}%`,  
-      tests: `${assignmentsFormatedData[1]?.score}%`,
-      testsStatus: assignmentsFormatedData[1]?.grade,
-      exam: examType,
-      generalExamsTotal: `${reportExamAverage}%`, 
-      yleTotal: `${reportExamAverage}%`, 
-      gpa: `${studentAverage}% (${gpaResult})`,
-      final: `${gpaResult}`,
-      ...examProps,
-    });
-
-    setReportURL(!!url ? url.href : "");
-
     setStudentTotalAverage(studentAverage);
 
     setAssignmentsAverage(assignmentAverage);
@@ -225,11 +341,11 @@ const StudentReportTable = ({
   return (
     <>
       <Col xs={12} sm={12} md={12} lg={8}>
-        <div className="mt-4">
-          <div className="attendance-resume">
-            <p className="field-description">ATTENDANCE</p>
-            <p className="field-value">
-              {studentAttendance?.attendancePercentage ? studentAttendance.attendancePercentage : "0.00"}%
+        <div className={STUDENT_REPORT_CONSTANTS.CSS_CLASSES.MT_4}>
+          <div className={STUDENT_REPORT_CONSTANTS.CSS_CLASSES.ATTENDANCE_RESUME}>
+            <p className={STUDENT_REPORT_CONSTANTS.CSS_CLASSES.FIELD_DESCRIPTION}>{STUDENT_REPORT_CONSTANTS.MESSAGES.ATTENDANCE}</p>
+            <p className={STUDENT_REPORT_CONSTANTS.CSS_CLASSES.FIELD_VALUE}>
+              {studentAttendance?.attendancePercentage ? studentAttendance.attendancePercentage : STUDENT_REPORT_CONSTANTS.DEFAULT_VALUES.ZERO_DECIMAL}%
             </p>
           </div>
         </div>
@@ -249,33 +365,43 @@ const StudentReportTable = ({
             finalPercentage={examAverage}
           />
         )}
-        <div className="d-flex flex-column flex-md-row justify-content-between">
+        <div className={STUDENT_REPORT_CONSTANTS.CSS_CLASSES.FLEX_COLUMN_MD_ROW}>
           <ReportStatus
-            field="GPA"
+            field={STUDENT_REPORT_CONSTANTS.MESSAGES.GPA}
             status={resultGPA}
             statusPercentage={`${studentTotalAverage}%`}
           />
-          <div className="d-flex download-container gap-2">
-            <Link
-              className="brighton-download-btn"
-              target="_blank"
-              href={reportURL}
+          <div className={STUDENT_REPORT_CONSTANTS.CSS_CLASSES.DOWNLOAD_CONTAINER}>
+            <Button
+              color="primary"
+              onClick={handleGenerateCertificate}
+              disabled={!selectedStudent || !courseDetail || isGenerating}
+              className={STUDENT_REPORT_CONSTANTS.CSS_CLASSES.ALIGN_ITEMS_CENTER}
             >
-              Download
-            </Link>
-            <FaRegFilePdf style={{ width: "40px", height: "40px" }} />
+              <FaCertificate />
+              {isGenerating ? STUDENT_REPORT_CONSTANTS.MESSAGES.GENERATING : STUDENT_REPORT_CONSTANTS.MESSAGES.DOWNLOAD_CERTIFICATE}
+            </Button>
+            <Button
+              color="secondary"
+              onClick={handleGenerateReport}
+              disabled={!selectedStudent || !courseDetail || isGenerating}
+              className={STUDENT_REPORT_CONSTANTS.CSS_CLASSES.ALIGN_ITEMS_CENTER}
+            >
+              <FaFileAlt />
+              {isGenerating ? STUDENT_REPORT_CONSTANTS.MESSAGES.GENERATING : STUDENT_REPORT_CONSTANTS.MESSAGES.DOWNLOAD_REPORT}
+            </Button>
           </div>
         </div>
       </Col>
       <Col xs={12} sm={12} md={12} lg={4}>
         {reportChartData && isBrowser() && (
-          <div className="chart-container">
+          <div className={STUDENT_REPORT_CONSTANTS.CSS_CLASSES.CHART_CONTAINER}>
             <Bar
               data={reportChartData}
               options={barChartOptions}
               width={778}
               height={400}
-              style={{ width: "100%" }}
+              style={{ width: STUDENT_REPORT_CONSTANTS.CSS_CLASSES.WIDTH_100 }}
             />
           </div>
         )}
