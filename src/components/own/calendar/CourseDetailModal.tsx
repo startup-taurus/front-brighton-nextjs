@@ -117,7 +117,7 @@ const CourseDetailModal: React.FC<CourseDetailModalProps> = ({
                     </div>
                     <span className="text-dark">
                       {selectedCourse.start_date ? 
-                        new Date(selectedCourse.start_date).toLocaleDateString('en-US') : 
+                        new Date(selectedCourse.start_date + 'T00:00:00').toLocaleDateString('en-US') : 
                         'Not available'
                       }
                     </span>

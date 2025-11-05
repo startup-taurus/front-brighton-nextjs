@@ -12,6 +12,7 @@ import {
   ModalHeader,
   ModalFooter,
   Row,
+  Input,
 } from 'reactstrap';
 import useSWR from 'swr';
 import { toast } from 'react-toastify';
@@ -64,6 +65,8 @@ const StudentTransferForm: React.FC<Props> = ({
   const [coursePage, setCoursePage] = useState(1);
   const [courseSearchTerm, setCourseSearchTerm] = useState('');
   const [hasMoreCourses, setHasMoreCourses] = useState(true);
+  const [selectedStudents, setSelectedStudents] = useState<Set<number>>(new Set());
+  const [selectAll, setSelectAll] = useState(false);
 
   const limit = 10;
 
@@ -164,6 +167,13 @@ const StudentTransferForm: React.FC<Props> = ({
     setCoursePage(1);
     setHasMoreCourses(true);
   };
+  useEffect(() => {
+    if (isOpen && students.length > 0) {
+      const allStudentIds = new Set(students.map(student => student.id));
+      setSelectedStudents(allStudentIds);
+      setSelectAll(true);
+    }
+  }, [isOpen, students]);
 
   const handleSubmit = async () => {
     if (!selectedCourse && !isViewOnly) {
