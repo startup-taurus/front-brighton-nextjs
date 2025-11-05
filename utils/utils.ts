@@ -37,14 +37,8 @@ export const handleError = (
 ) => {
   if (e?.response?.status === 403 && isBrowser()) {
     const errorMessage = e?.response?.data?.message;
-    if (errorMessage && errorMessage.includes('Account has been locked')) {
-      Swal.fire({
-        title: "Account Locked",
-        text: errorMessage,
-        icon: "error",
-        confirmButtonText: "OK",
-      });
-      return e;
+    if (errorMessage && (errorMessage.includes('Account has been locked') || errorMessage.includes('locked due to'))) {
+      throw e;
     }
     
     Swal.fire({
@@ -55,7 +49,7 @@ export const handleError = (
     }).then(() => {
       window.location.href = "/teachers";
     });
-    return e;
+    return e; 
   }
 
   if (
@@ -67,6 +61,18 @@ export const handleError = (
     Cookies.remove("token");
     window.location.replace("/authentication/login");
   }
+
+  const errorMessage = e?.response?.data?.message;
+  if (errorMessage && (
+    errorMessage.includes('Password incorrect') || 
+    errorMessage.includes('Failed attempts') ||
+    errorMessage.includes('User not found') ||
+    errorMessage.includes('Account has been locked') ||
+    errorMessage.includes('locked due to')
+  )) {
+    throw e;
+  }
+
   if (!hideError) {
     toast.error(e?.response?.data?.message ?? ERROR_MESSAGE);
   }
@@ -216,14 +222,112 @@ export const getAllCourseDays = (
   return daysOfClasses;
 };
 
-const getDateByDateAndDayName = (date: any, day: string) => {
+const isValidSchedule = (schedule: any): boolean => 
+  schedule && Array.isArray(schedule) && schedule.length > 0;
+
+const getClassDatesFromWeek = (
+  baseDate: Date, 
+  schedule: any[], 
+  filterFn: (classDate: Date) => boolean
+): Date[] => {
+  return schedule
+    .map(weekDay => getDateByDateAndDayName(baseDate, weekDay.day))
+    .filter(filterFn);
+};
+
+const findClassDateInWeek = (
+  baseDate: Date,
+  schedule: any[],
+  weekOffset: number,
+  filterFn: (classDate: Date) => boolean,
+  sortFn: (a: Date, b: Date) => number
+): Date => {
+  const targetWeek = addWeeks(baseDate, weekOffset);
+  const dates = getClassDatesFromWeek(targetWeek, schedule, filterFn);
+  return dates.sort(sortFn)[0];
+};
+
+export const getFirstClassDate = (startDate: any, schedule: any): string => {
+  const courseStartDate = new Date(startDate);
+  
+  if (!isValidSchedule(schedule)) {
+    return format(courseStartDate, "yyyy-MM-dd");
+  }
+
+  const currentWeekDates = getClassDatesFromWeek(
+    courseStartDate, 
+    schedule, 
+    date => date >= courseStartDate
+  );
+
+  const targetDate = currentWeekDates.length > 0
+    ? currentWeekDates.sort((a, b) => a.getTime() - b.getTime())[0]
+    : findClassDateInWeek(
+        courseStartDate, 
+        schedule, 
+        1, 
+        () => true, 
+        (a, b) => a.getTime() - b.getTime()
+      );
+
+  return format(targetDate, "yyyy-MM-dd");
+};
+
+export const getLastClassDate = (startDate: any, endDate: any, schedule: any): string => {
+  const courseEndDate = new Date(endDate);
+  
+  if (!isValidSchedule(schedule)) {
+    return format(courseEndDate, "yyyy-MM-dd");
+  }
+
+  const currentWeekDates = getClassDatesFromWeek(
+    courseEndDate, 
+    schedule, 
+    date => date <= courseEndDate
+  );
+
+  const targetDate = currentWeekDates.length > 0
+    ? currentWeekDates.sort((a, b) => b.getTime() - a.getTime())[0]
+    : findClassDateInWeek(
+        courseEndDate, 
+        schedule, 
+        -1, 
+        () => true, 
+        (a, b) => b.getTime() - a.getTime()
+      );
+
+  return format(targetDate, "yyyy-MM-dd");
+};
+
+const getDateByDateAndDayName = (date: Date, day: string): Date => {
   const dayNumber = getDayNumber(day);
   const weekStart = startOfWeek(date, { weekStartsOn: 0 });
   return addDays(weekStart, dayNumber);
 };
 
-export const formatDate = (date: string): string =>
-  format(parseISO(date), "EEE, MMM d");
+const parseDate = (date: string): Date => {
+  return date.includes('-') ? parseISO(date) : new Date(date);
+};
+
+const isValidDate = (date: Date): boolean => !isNaN(date.getTime());
+
+export const formatDate = (date: string): string => {
+  if (!date) return 'Invalid Date';
+  
+  try {
+    const parsedDate = parseDate(date);
+    
+    if (!isValidDate(parsedDate)) {
+      console.warn('Invalid date format:', date);
+      return 'Invalid Date';
+    }
+    
+    return format(parsedDate, "EEE, MMM d");
+  } catch (error) {
+    console.error('Error formatting date:', date, error);
+    return 'Invalid Date';
+  }
+};
 
 export const initializeAttendanceStructure = (
   courseSchedule: any,
@@ -909,4 +1013,46 @@ export const validateEmailFormat = (email: string): { isValid: boolean; message?
   }
 
   return { isValid: true };
+};
+
+export const formatEmailInput = (email: string): string => {
+  return email.trim();
+};
+
+export const validateAndFormatEmail = (email: string) => {
+  const formattedEmail = formatEmailInput(email);
+  const validation = validateEmailFormat(formattedEmail);
+  
+  return {
+    formattedEmail,
+    ...validation
+  };
+};
+
+export const formatUsernameWithBrighton = (username: string): string => {
+  const trimmedUsername = username.trim();
+  
+  if (!trimmedUsername) {
+    return '';
+  }
+  
+  const brightonSuffix = 'Brighton';
+  const lowerUsername = trimmedUsername.toLowerCase();
+  const lowerBrighton = brightonSuffix.toLowerCase();
+  
+  if (lowerUsername.endsWith(lowerBrighton)) {
+    return trimmedUsername;
+  }
+  
+  return trimmedUsername + brightonSuffix;
+};
+
+export const validateAndFormatUsername = (username: string) => {
+  const formattedUsername = formatUsernameWithBrighton(username);
+  
+  return {
+    formattedUsername,
+    isValid: formattedUsername.length > 0,
+    message: formattedUsername.length === 0 ? 'Username is required' : ''
+  };
 };
