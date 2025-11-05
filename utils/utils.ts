@@ -5,6 +5,7 @@ import {
   ERROR_MESSAGE,
   EXAMS_TYPE,
   USER_TYPES,
+  LOGIN_MESSAGES, 
 } from "./constants";
 import { NextRouter } from "next/router";
 import {
@@ -37,7 +38,11 @@ export const handleError = (
 ) => {
   if (e?.response?.status === 403 && isBrowser()) {
     const errorMessage = e?.response?.data?.message;
-    if (errorMessage && (errorMessage.includes('Account has been locked') || errorMessage.includes('locked due to'))) {
+    if (
+      errorMessage &&
+      (errorMessage.includes(LOGIN_MESSAGES.ACCOUNT_LOCKED) ||
+        errorMessage.includes(LOGIN_MESSAGES.LOCKED_DUE_TO))
+    ) {
       throw e;
     }
     
@@ -53,7 +58,7 @@ export const handleError = (
   }
 
   if (
-    (e?.response?.data?.message == "Not authorized, token not sent" ||
+    (e?.response?.data?.message == LOGIN_MESSAGES.NOT_AUTHORIZED_TOKEN_NOT_SENT ||
       e?.response?.status == 401) &&
     isBrowser() &&
     !stopRedirect
@@ -63,13 +68,16 @@ export const handleError = (
   }
 
   const errorMessage = e?.response?.data?.message;
-  if (errorMessage && (
-    errorMessage.includes('Password incorrect') || 
-    errorMessage.includes('Failed attempts') ||
-    errorMessage.includes('User not found') ||
-    errorMessage.includes('Account has been locked') ||
-    errorMessage.includes('locked due to')
-  )) {
+  if (
+    errorMessage &&
+    (
+      errorMessage.includes(LOGIN_MESSAGES.INCORRECT_PASSWORD) ||
+      errorMessage.includes(LOGIN_MESSAGES.FAILED_ATTEMPTS) ||
+      errorMessage.includes(LOGIN_MESSAGES.USER_NOT_FOUND) ||
+      errorMessage.includes(LOGIN_MESSAGES.ACCOUNT_LOCKED) ||
+      errorMessage.includes(LOGIN_MESSAGES.LOCKED_DUE_TO)
+    )
+  ) {
     throw e;
   }
 
@@ -221,112 +229,10 @@ export const getAllCourseDays = (
   daysOfClasses.push(format(new Date(endDate), "EEE, MMM d, yy"));
   return daysOfClasses;
 };
-
-const isValidSchedule = (schedule: any): boolean => 
-  schedule && Array.isArray(schedule) && schedule.length > 0;
-
-const getClassDatesFromWeek = (
-  baseDate: Date, 
-  schedule: any[], 
-  filterFn: (classDate: Date) => boolean
-): Date[] => {
-  return schedule
-    .map(weekDay => getDateByDateAndDayName(baseDate, weekDay.day))
-    .filter(filterFn);
-};
-
-const findClassDateInWeek = (
-  baseDate: Date,
-  schedule: any[],
-  weekOffset: number,
-  filterFn: (classDate: Date) => boolean,
-  sortFn: (a: Date, b: Date) => number
-): Date => {
-  const targetWeek = addWeeks(baseDate, weekOffset);
-  const dates = getClassDatesFromWeek(targetWeek, schedule, filterFn);
-  return dates.sort(sortFn)[0];
-};
-
-export const getFirstClassDate = (startDate: any, schedule: any): string => {
-  const courseStartDate = new Date(startDate);
-  
-  if (!isValidSchedule(schedule)) {
-    return format(courseStartDate, "yyyy-MM-dd");
-  }
-
-  const currentWeekDates = getClassDatesFromWeek(
-    courseStartDate, 
-    schedule, 
-    date => date >= courseStartDate
-  );
-
-  const targetDate = currentWeekDates.length > 0
-    ? currentWeekDates.sort((a, b) => a.getTime() - b.getTime())[0]
-    : findClassDateInWeek(
-        courseStartDate, 
-        schedule, 
-        1, 
-        () => true, 
-        (a, b) => a.getTime() - b.getTime()
-      );
-
-  return format(targetDate, "yyyy-MM-dd");
-};
-
-export const getLastClassDate = (startDate: any, endDate: any, schedule: any): string => {
-  const courseEndDate = new Date(endDate);
-  
-  if (!isValidSchedule(schedule)) {
-    return format(courseEndDate, "yyyy-MM-dd");
-  }
-
-  const currentWeekDates = getClassDatesFromWeek(
-    courseEndDate, 
-    schedule, 
-    date => date <= courseEndDate
-  );
-
-  const targetDate = currentWeekDates.length > 0
-    ? currentWeekDates.sort((a, b) => b.getTime() - a.getTime())[0]
-    : findClassDateInWeek(
-        courseEndDate, 
-        schedule, 
-        -1, 
-        () => true, 
-        (a, b) => b.getTime() - a.getTime()
-      );
-
-  return format(targetDate, "yyyy-MM-dd");
-};
-
 const getDateByDateAndDayName = (date: Date, day: string): Date => {
   const dayNumber = getDayNumber(day);
   const weekStart = startOfWeek(date, { weekStartsOn: 0 });
   return addDays(weekStart, dayNumber);
-};
-
-const parseDate = (date: string): Date => {
-  return date.includes('-') ? parseISO(date) : new Date(date);
-};
-
-const isValidDate = (date: Date): boolean => !isNaN(date.getTime());
-
-export const formatDate = (date: string): string => {
-  if (!date) return 'Invalid Date';
-  
-  try {
-    const parsedDate = parseDate(date);
-    
-    if (!isValidDate(parsedDate)) {
-      console.warn('Invalid date format:', date);
-      return 'Invalid Date';
-    }
-    
-    return format(parsedDate, "EEE, MMM d");
-  } catch (error) {
-    console.error('Error formatting date:', date, error);
-    return 'Invalid Date';
-  }
 };
 
 export const initializeAttendanceStructure = (

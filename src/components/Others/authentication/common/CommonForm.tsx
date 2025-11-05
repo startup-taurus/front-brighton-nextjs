@@ -19,12 +19,13 @@ import CommonLogo from './CommonLogo';
 import { useRouter } from 'next/router';
 import { postLogin } from 'helper/api-data/user';
 import { UserContext } from 'helper/User';
-import { USER_ROLES, USER_TYPES } from '../../../../../utils/constants';
+import { LOGIN_MESSAGES, USER_ROLES, USER_TYPES } from '../../../../../utils/constants';
 import { encrypt } from 'utils/encryption';
+import { showAccessDeniedAlert, showAccountLockedSupport, showIncorrectPasswordAutoClose, showInvalidUsernameFormatCF, showLoginErrorAlert, showLoginFailedAlert, showUserDeactivatedAlert, showUsernameTooShortCF, showUserNotFoundAlert } from '../../../../../utils/alertAuth';
 export interface commonFormPropsType {
   alignLogo?: string;
 }
-const CommonForm = ({ alignLogo }: commonFormPropsType) => {
+function CommonForm({ alignLogo }: commonFormPropsType) {
   const { login } = useContext(UserContext);
 
   const [showPassWord, setShowPassWord] = useState(false);
@@ -39,26 +40,20 @@ const CommonForm = ({ alignLogo }: commonFormPropsType) => {
   const handleUserValue = (event: ChangeEvent<HTMLInputElement>) => {
     setFormValues({ ...formValues, [event.target.name]: event.target.value });
   };
+  
+  const isEmail = (value: string) => /^\S+@\S+\.\S+$/.test(value);
+
   const formSubmitHandle = async (event: FormEvent) => {
     event.preventDefault();
     const trimmedUsername = username.trim();
-    if (!trimmedUsername.toLowerCase().endsWith('brighton')) {
-      Swal.fire({
-        title: 'Invalid Username Format',
-        text: 'Username must end with "Brighton". Please append "Brighton" to your username.',
-        icon: 'error',
-        confirmButtonText: 'Ok',
-      });
+    const isEmailInput = isEmail(trimmedUsername);
+    if (!isEmailInput && !trimmedUsername.toLowerCase().endsWith('brighton')) {
+      showInvalidUsernameFormatCF();
       return;
     }
 
-    if (trimmedUsername.length < 8) {
-      Swal.fire({
-        title: 'Username Too Short',
-        text: 'Username must be at least 8 characters long.',
-        icon: 'error',
-        confirmButtonText: 'Ok',
-      });
+    if (!isEmailInput && trimmedUsername.length < 8) {
+      showUsernameTooShortCF();
       return;
     }
 
@@ -67,14 +62,9 @@ const CommonForm = ({ alignLogo }: commonFormPropsType) => {
     try {
       const response = await postLogin({ username: trimmedUsername, password });
 
-      if (response?.status === 'success') {
-        if (response.data?.status === 'inactive') {
-          Swal.fire({
-            title: 'User Deactivated',
-            text: 'Your account has been deactivated. Please contact the administrator for more information.',
-            icon: 'error',
-            confirmButtonText: 'Ok',
-          });
+      if (response?.status === LOGIN_MESSAGES.SUCCESS) {
+        if (response.data?.status === LOGIN_MESSAGES.INACTIVE) {
+          showUserDeactivatedAlert();
           setIsLoading(false);
           return;
         }
@@ -96,58 +86,21 @@ const CommonForm = ({ alignLogo }: commonFormPropsType) => {
 
         const redirectPath = roleRedirectMap[response.data.role] || '/login';
         router.push(redirectPath);
-        toast.success('Login Success');
+        toast.success(LOGIN_MESSAGES.LOGIN_SUCCESS);
       } else {
-        const errorMessage = response?.message || 'Login failed';
-        if (errorMessage.includes('Password incorrect') && errorMessage.includes('Failed attempts')) {
+        const errorMessage = response?.message || LOGIN_MESSAGES.LOGIN_FAILED;
+        if (errorMessage.includes(LOGIN_MESSAGES.INCORRECT_PASSWORD) && errorMessage.includes(LOGIN_MESSAGES.FAILED_ATTEMPTS)) {
           const failedAttemptsMatch = errorMessage.match(/Failed attempts: (\d+)\/5/);
           const remainingAttemptsMatch = errorMessage.match(/Remaining attempts: (\d+)/);
           
           const failedAttempts = failedAttemptsMatch ? failedAttemptsMatch[1] : '0';
           const remainingAttempts = remainingAttemptsMatch ? remainingAttemptsMatch[1] : '0';
           
-          Swal.fire({
-            title: '🔐 Incorrect Password',
-            html: `
-              <div style="text-align: center;">
-                <p style="font-size: 16px; margin-bottom: 15px;">The password you entered is incorrect.</p>
-                <div style="background: #ffe6e6; border: 1px solid #ff9999; border-radius: 8px; padding: 15px; margin: 15px 0;">
-                  <p style="margin: 5px 0; color: #cc0000;"><strong>Failed Attempts:</strong> ${failedAttempts}/5</p>
-                  <p style="margin: 5px 0; color: #cc0000;"><strong>Remaining Attempts:</strong> ${remainingAttempts}</p>
-                </div>
-                <p style="font-size: 14px; color: #6c757d;">Your account will be locked after 5 failed attempts.</p>
-                <p style="font-size: 12px; color: #999; margin-top: 10px;">This message will close automatically in 4 seconds...</p>
-              </div>
-            `,
-            icon: 'error',
-            showConfirmButton: false,
-            timer: 4000,
-            timerProgressBar: true,
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-          });
-        } else if (errorMessage.includes('Account has been locked')) {
-          Swal.fire({
-            title: '🔒 Account Locked',
-            html: `
-              <div style="text-align: center;">
-                <p style="font-size: 16px; margin-bottom: 15px;">Your account has been locked due to multiple failed login attempts.</p>
-                <div style="background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 8px; padding: 15px; margin: 15px 0;">
-                  <p style="margin: 0; color: #721c24;"><strong>Please contact support to unlock your account.</strong></p>
-                </div>
-              </div>
-            `,
-            icon: 'error',
-            confirmButtonText: 'Contact Support',
-            confirmButtonColor: '#dc3545',
-          });
+          showIncorrectPasswordAutoClose(failedAttempts, remainingAttempts);
+        } else if (errorMessage.includes(LOGIN_MESSAGES.ACCOUNT_LOCKED)) {
+          showAccountLockedSupport();
         } else {
-          Swal.fire({
-            title: 'Login Error',
-            text: errorMessage,
-            icon: 'error',
-            confirmButtonText: 'Ok',
-          });
+          showLoginErrorAlert(errorMessage);
         }
       }
     } catch (error: any) {
@@ -155,100 +108,31 @@ const CommonForm = ({ alignLogo }: commonFormPropsType) => {
       if (error?.response?.status === 400 && error?.response?.data?.message) {
         const errorMessage = error.response.data.message;
         
-        if (errorMessage.includes('Password incorrect') && errorMessage.includes('Failed attempts')) {
+        if (errorMessage.includes(LOGIN_MESSAGES.INCORRECT_PASSWORD) && errorMessage.includes(LOGIN_MESSAGES.FAILED_ATTEMPTS)) {
           const failedAttemptsMatch = errorMessage.match(/Failed attempts: (\d+)\/5/);
           const remainingAttemptsMatch = errorMessage.match(/Remaining attempts: (\d+)/);
           
           const failedAttempts = failedAttemptsMatch ? failedAttemptsMatch[1] : '0';
           const remainingAttempts = remainingAttemptsMatch ? remainingAttemptsMatch[1] : '0';
           
-          Swal.fire({
-            title: '🔐 Incorrect Password',
-            html: `
-              <div style="text-align: center;">
-                <p style="font-size: 16px; margin-bottom: 15px;">The password you entered is incorrect.</p>
-                <div style="background: #ffe6e6; border: 1px solid #ff9999; border-radius: 8px; padding: 15px; margin: 15px 0;">
-                  <p style="margin: 5px 0; color: #cc0000;"><strong>Failed Attempts:</strong> ${failedAttempts}/5</p>
-                  <p style="margin: 5px 0; color: #cc0000;"><strong>Remaining Attempts:</strong> ${remainingAttempts}</p>
-                </div>
-                <p style="font-size: 14px; color: #6c757d;">Your account will be locked after 5 failed attempts.</p>
-                <p style="font-size: 12px; color: #999; margin-top: 10px;">This message will close automatically in 4 seconds...</p>
-              </div>
-            `,
-            icon: 'error',
-            showConfirmButton: false,
-            timer: 4000,
-            timerProgressBar: true,
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-          });
-        } else if (errorMessage.includes('Account has been locked')) {
-          Swal.fire({
-            title: '🔒 Account Locked',
-            html: `
-              <div style="text-align: center;">
-                <p style="font-size: 16px; margin-bottom: 15px;">Your account has been locked due to multiple failed login attempts.</p>
-                <div style="background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 8px; padding: 15px; margin: 15px 0;">
-                  <p style="margin: 0; color: #721c24;"><strong>Please contact support to unlock your account.</strong></p>
-                </div>
-              </div>
-            `,
-            icon: 'error',
-            confirmButtonText: 'Contact Support',
-            confirmButtonColor: '#dc3545',
-          });
+          showIncorrectPasswordAutoClose(failedAttempts, remainingAttempts);
+        } else if (errorMessage.includes(LOGIN_MESSAGES.ACCOUNT_LOCKED)) {
+          showAccountLockedSupport();
         } else {
-          Swal.fire({
-            title: 'Login Error',
-            text: errorMessage,
-            icon: 'error',
-            confirmButtonText: 'Ok',
-          });
+          showLoginErrorAlert(errorMessage);
         }
       } else if (error?.response?.status === 403) {
         const errorMessage = error?.response?.data?.message || '';
         
-        if (errorMessage.includes('Account has been locked') || errorMessage.includes('locked due to')) {
-          Swal.fire({
-            title: '🔒 Account Locked',
-            html: `
-              <div style="text-align: center;">
-                <p style="font-size: 16px; margin-bottom: 15px;">Your account has been locked due to multiple failed login attempts.</p>
-                <div style="background: #f8d7da; border: 1px solid #f5c6cb; border-radius: 8px; padding: 15px; margin: 15px 0;">
-                  <p style="margin: 0; color: #721c24;"><strong>Please contact support to unlock your account.</strong></p>
-                </div>
-                <p style="font-size: 12px; color: #999; margin-top: 10px;">This message will close automatically in 6 seconds...</p>
-              </div>
-            `,
-            icon: 'error',
-            showConfirmButton: false,
-            timer: 6000,
-            timerProgressBar: true,
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-          });
+        if (errorMessage.includes(LOGIN_MESSAGES.ACCOUNT_LOCKED) || errorMessage.includes(LOGIN_MESSAGES.LOCKED_DUE_TO)) {
+          showAccountLockedSupport();
         } else {
-          Swal.fire({
-            title: 'Access Denied',
-            text: errorMessage || 'You do not have permission to access this resource.',
-            icon: 'error',
-            confirmButtonText: 'Ok',
-          });
+          showAccessDeniedAlert(errorMessage);
         }
       } else if (error?.response?.status === 404) {
-        Swal.fire({
-          title: 'User Not Found',
-          text: 'The username or email you entered does not exist. Please check your credentials and try again.',
-          icon: 'error',
-          confirmButtonText: 'Ok',
-        });
+        showUserNotFoundAlert();
       } else {
-        Swal.fire({
-          title: 'Login Failed',
-          text: 'An unexpected error occurred. Please try again later.',
-          icon: 'error',
-          confirmButtonText: 'Ok',
-        });
+        showLoginFailedAlert();
       }
     }
     

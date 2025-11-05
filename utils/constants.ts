@@ -1,6 +1,29 @@
 export const ERROR_MESSAGE = 'Oops! Something went wrong!';
 export const SUCCESS_MESSAGE = 'Success!';
 
+export const LOGIN_ERROR_TYPES = {
+  INCORRECT_PASSWORD: 'incorrect-password',
+  LOCKED: 'locked',
+  ACCESS_DENIED: 'access-denied',
+  NOT_FOUND: 'not-found',
+  GENERIC: 'generic',
+} as const;
+
+export type LoginErrorType = typeof LOGIN_ERROR_TYPES[keyof typeof LOGIN_ERROR_TYPES];
+
+export const LOGIN_MESSAGES = {
+  INCORRECT_PASSWORD: 'Password incorrect',
+  FAILED_ATTEMPTS: 'Failed attempts',
+  USER_NOT_FOUND: 'User not found',
+  ACCOUNT_LOCKED: 'Account has been locked',
+  LOCKED_DUE_TO: 'locked due to',
+  NOT_AUTHORIZED_TOKEN_NOT_SENT: 'Not authorized, token not sent',
+  LOGIN_FAILED: 'Login Failed',
+  LOGIN_SUCCESS: 'Login succes',
+  SUCCESS: 'success',
+  INACTIVE: 'inactive',
+  REMAINING_ATTEMPTS: 'remaining attempts',
+};
 export const USER_TYPES = {
   ADMIN: 'admin_staff',
   PROFESSOR: 'professor',
