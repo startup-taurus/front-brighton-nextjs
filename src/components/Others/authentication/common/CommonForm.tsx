@@ -22,12 +22,12 @@ import { UserContext } from 'helper/User';
 import { LOGIN_MESSAGES, USER_ROLES, USER_TYPES } from '../../../../../utils/constants';
 import { encrypt } from 'utils/encryption';
 import { showAccessDeniedAlert, showAccountLockedSupport, showIncorrectPasswordAutoClose, showInvalidUsernameFormatCF, showLoginErrorAlert, showLoginFailedAlert, showUserDeactivatedAlert, showUsernameTooShortCF, showUserNotFoundAlert } from '../../../../../utils/alertAuth';
+import { validateEmailFormat } from 'utils/utils';
 export interface commonFormPropsType {
   alignLogo?: string;
 }
 function CommonForm({ alignLogo }: commonFormPropsType) {
   const { login } = useContext(UserContext);
-
   const [showPassWord, setShowPassWord] = useState(false);
   const [formValues, setFormValues] = useState({
     username: '',
@@ -40,13 +40,10 @@ function CommonForm({ alignLogo }: commonFormPropsType) {
   const handleUserValue = (event: ChangeEvent<HTMLInputElement>) => {
     setFormValues({ ...formValues, [event.target.name]: event.target.value });
   };
-  
-  const isEmail = (value: string) => /^\S+@\S+\.\S+$/.test(value);
-
   const formSubmitHandle = async (event: FormEvent) => {
     event.preventDefault();
     const trimmedUsername = username.trim();
-    const isEmailInput = isEmail(trimmedUsername);
+    const isEmailInput = validateEmailFormat(trimmedUsername).isValid;
     if (!isEmailInput && !trimmedUsername.toLowerCase().endsWith('brighton')) {
       showInvalidUsernameFormatCF();
       return;
