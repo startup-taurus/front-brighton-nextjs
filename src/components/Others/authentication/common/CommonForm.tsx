@@ -26,7 +26,7 @@ import { validateEmailFormat } from 'utils/utils';
 export interface commonFormPropsType {
   alignLogo?: string;
 }
-function CommonForm({ alignLogo }: commonFormPropsType) {
+const CommonForm = ({ alignLogo }: commonFormPropsType) => {
   const { login } = useContext(UserContext);
   const [showPassWord, setShowPassWord] = useState(false);
   const [formValues, setFormValues] = useState({
