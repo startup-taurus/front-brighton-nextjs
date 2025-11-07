@@ -173,6 +173,7 @@ const TransferStudentsTable = ({ reload }: { reload: boolean }) => {
                   blockButtonVariant='danger'
                   onBlock={() => handleRejectTransfer(row.id)}
                   onTransfer={() => handleOpenTransferDetail(row.id, false)}
+                  transferTooltip="Transfer to student"
                   onView={() => handleOpenTransferDetail(row.id, true)}
                   status={row.status_level_change === 'n/a'}
                   disabled={

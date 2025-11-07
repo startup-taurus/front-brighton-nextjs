@@ -22,9 +22,11 @@ const TableActionButtons = ({
   onTransfer,
   onAttendance,
   onActivate,
+  onTransferCourse,
   disabled = false,
   viewDisabled,
   blockButtonVariant = 'cancel',
+  transferTooltip = 'Transfer to course',
 }: any) => {
   return (
     <>
@@ -110,6 +112,17 @@ const TableActionButtons = ({
             <FaArrowRightArrowLeft />
           </button>
         )}
+        {onTransferCourse && (
+          <button
+            type='button'
+            className='btn btn-cancel'
+            onClick={onTransferCourse}
+            data-tooltip-id='on-transfer-course'
+            disabled={disabled}
+          >
+            <FaArrowRightArrowLeft />
+          </button>
+        )}
         {onDelete && (
           <button
             type='button'
@@ -154,7 +167,12 @@ const TableActionButtons = ({
         <Tooltip
           id='on-transfer'
           place='top'
-          content='Transfer to student'
+          content={transferTooltip}
+        />
+        <Tooltip
+          id='on-transfer-course'
+          place='top'
+          content='Transfer to course'
         />
         <Tooltip
           id='on-delete'
@@ -164,6 +182,6 @@ const TableActionButtons = ({
       </div>
     </>
   );
-};
+}
 
 export default TableActionButtons;

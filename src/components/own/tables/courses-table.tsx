@@ -35,11 +35,28 @@ const CoursesTable = ({ reload, loading }: any) => {
 
   const page = Number(router.query.page) || 1;
   const rowPerPage = Number(router.query.rowPerPage) || 10;
-  const filters = getFiltersString(router);
+  const statusQuery = typeof router.query.status === 'string' ? router.query.status : '';
 
-  const apiEndpoint = useMemo(() => 
-    `/course/get-all-with-professors?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}`,
-    [page, rowPerPage, filters]
+  const clientPagination = statusQuery === 'completed' || statusQuery === 'inactive' || statusQuery === 'active';
+
+  // Construir filtros y eliminar 'status' cuando sea 'completed' (se filtra en cliente)
+  const rawFilters = getFiltersString(router);
+  const filters =
+    statusQuery === 'completed'
+      ? rawFilters
+          .split('&')
+          .filter((kv) => !kv.startsWith('status='))
+          .join('&')
+      : rawFilters;
+
+  // En modo cliente, pedimos muchos registros al backend para calcular bien el total
+  const apiPage = clientPagination ? 1 : page;
+  const apiRowPerPage = clientPagination ? 1000 : rowPerPage;
+
+  const apiEndpoint = useMemo(
+    () =>
+      `/course/get-all-with-professors?page=${apiPage}&rowPerPage=${apiRowPerPage}${filters ? `&${filters}` : ''}`,
+    [apiPage, apiRowPerPage, filters]
   );
 
   const refreshData = useCallback(() => {
@@ -65,9 +82,11 @@ const CoursesTable = ({ reload, loading }: any) => {
   const showSuccessAlert = (action: string, count: number) => {
     Swal.fire({
       title: 'Download completed!',
-      text: `${action} for ${count} course(s) have been downloaded in a ZIP file.`,
+      text: `${action} for ${count} course(s) have been generated successfully. The ZIP file should start downloading automatically.`,
       icon: 'success',
-      confirmButtonText: 'Perfect'
+      confirmButtonText: 'Perfect',
+      showClass: { popup: '' },
+      hideClass: { popup: '' }
     });
   };
 
@@ -139,87 +158,50 @@ const CoursesTable = ({ reload, loading }: any) => {
     }
 
     setIsDownloading(true);
-    
-    // Mostrar alerta de progreso
-    const progressAlert = Swal.fire({
+
+    Swal.fire({
       title: `Generating ${actionName}...`,
-      html: `
-        <div style="text-align: left; margin: 20px 0;">
-          <p><strong>Processing ${selectedCourses.length} course(s)</strong></p>
-          <p>This may take several minutes depending on the number of students.</p>
-          <p style="color: #666; font-size: 14px;">Please keep this tab open and wait for completion.</p>
-        </div>
-        <div style="margin-top: 20px;">
-          <div class="spinner-border text-primary" role="status">
-            <span class="sr-only">Loading...</span>
-          </div>
-        </div>
-      `,
+      text: `Processing ${selectedCourses.length} course(s). This may take several minutes depending on the number of students. Please keep this tab open and wait for completion.`,
       allowOutsideClick: false,
       allowEscapeKey: false,
       showConfirmButton: false,
+      showClass: { popup: '' },
+      hideClass: { popup: '' },
       didOpen: () => {
-        Swal.showLoading();
+      Swal.showLoading();
       }
     });
-
+  
     try {
       const courseIds = selectedCourses.map(course => course.id);
-      console.log(`🚀 FRONTEND: Starting ${actionName.toLowerCase()} generation`);
-      console.log(`📊 FRONTEND: Selected courses count: ${selectedCourses.length}`);
-      console.log(`📋 FRONTEND: Selected courses:`, selectedCourses.map(c => ({ 
-        id: c.id, 
-        name: c.course_name, 
-        number: c.course_number 
-      })));
-      console.log(`🔢 FRONTEND: Course IDs to send:`, courseIds);
-      console.log(`🔍 FRONTEND: Course IDs type check:`, courseIds.map(id => ({ id, type: typeof id })));
-      
       await downloadFn(courseIds);
-      
-      // Cerrar alerta de progreso
+  
       Swal.close();
-      
-      // Mostrar alerta de éxito mejorada
+  
       Swal.fire({
         title: 'Download Completed!',
-        html: `
-          <div style="text-align: center;">
-            <i class="fas fa-check-circle" style="color: #28a745; font-size: 48px; margin-bottom: 15px;"></i>
-            <p><strong>${actionName} for ${selectedCourses.length} course(s) have been generated successfully!</strong></p>
-            <p style="color: #666;">The ZIP file should start downloading automatically.</p>
-          </div>
-        `,
+        text: `${actionName} for ${selectedCourses.length} course(s) have been generated successfully. The ZIP file should start downloading automatically.`,
         icon: 'success',
         confirmButtonText: 'Perfect',
-        confirmButtonColor: '#28a745'
+        confirmButtonColor: '#28a745',
+        showClass: { popup: '' },
+        hideClass: { popup: '' }
       });
-      
     } catch (error) {
       console.error(`Error downloading ${actionName.toLowerCase()}:`, error);
-      
-      // Cerrar alerta de progreso
+  
       Swal.close();
-      
-      // Mostrar alerta de error mejorada
       Swal.fire({
         title: 'Download Failed',
-        html: `
-          <div style="text-align: center;">
-            <i class="fas fa-exclamation-triangle" style="color: #dc3545; font-size: 48px; margin-bottom: 15px;"></i>
-            <p><strong>There was an error generating the ${actionName.toLowerCase()}.</strong></p>
-            <p style="color: #666;">Please check the browser console for detailed error information.</p>
-            <p style="color: #666; font-size: 14px;">You may try again or contact support if the problem persists.</p>
-          </div>
-        `,
+        text: `We couldn't generate ${actionName.toLowerCase()}. Please try again or contact support.`,
         icon: 'error',
         confirmButtonText: 'Understood',
-        confirmButtonColor: '#dc3545'
+        showClass: { popup: '' },
+        hideClass: { popup: '' }
       });
-      
-    } finally {
-      setIsDownloading(false);
     }
+    
+    setIsDownloading(false);
   };
 
   const handleBatchDownloadReports = useCallback(() => 
@@ -266,7 +248,20 @@ const CoursesTable = ({ reload, loading }: any) => {
     data: courses,
     error,
     isLoading,
-  } = useSWR([apiEndpoint], () => getCourseWithProfessors(page, rowPerPage, filters));
+  } = useSWR([apiEndpoint], () => getCourseWithProfessors(apiPage, apiRowPerPage, filters));
+
+  // Datos mostrados:
+  // - 'completed': solo cursos terminados
+  // - 'inactive': excluir terminados (solo inactivos manuales)
+  // - 'active': excluir terminados (solo activos actuales)
+  const displayedData =
+    statusQuery === 'completed' && courses?.data?.result
+      ? courses.data.result.filter(isCourseCompleted)
+      : statusQuery === 'inactive' && courses?.data?.result
+      ? courses.data.result.filter((row: any) => !isCourseCompleted(row))
+      : statusQuery === 'active' && courses?.data?.result
+      ? courses.data.result.filter((row: any) => !isCourseCompleted(row))
+      : courses?.data?.result || [];
 
   const showLoading = loading || isLoading;
 
@@ -323,8 +318,16 @@ const CoursesTable = ({ reload, loading }: any) => {
     {
       name: 'Status',
       cell: (row: any) => (
-        <span className={`badge ${row.status === 'active' ? 'badge-success' : 'badge-danger'}`}>
-          {formatText(row?.status)}
+        <span
+          className={`badge ${
+            isCourseCompleted(row)
+              ? 'badge-warning'
+              : row.status === 'active'
+              ? 'badge-success'
+              : 'badge-danger'
+          }`}
+        >
+          {isCourseCompleted(row) ? 'COMPLETED' : formatText(row?.status)}
         </span>
       ),
       sortable: true,
@@ -450,13 +453,13 @@ const CoursesTable = ({ reload, loading }: any) => {
 
       <DataTable
         columns={columns}
-        data={courses.data.result}
+        data={displayedData}
         progressPending={showLoading}
         paginationDefaultPage={page}
         paginationPerPage={rowPerPage}
         pagination
-        paginationServer
-        paginationTotalRows={courses.data.totalCount}
+        paginationServer={!clientPagination}
+        paginationTotalRows={clientPagination ? displayedData.length : courses.data.totalCount}
         onChangePage={handlePageChange}
         onChangeRowsPerPage={handleRowsPerPageChange}
         highlightOnHover

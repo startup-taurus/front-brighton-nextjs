@@ -13,6 +13,7 @@ export const USER_TYPES = {
 export const STATUS_FILTER = [
   { label: 'Active', value: 'active' },
   { label: 'Inactive', value: 'inactive' },
+  { label: 'Completed', value: 'completed' },
 ];
 
 export const LEVEL_FILTER = [
