@@ -5,6 +5,7 @@ import {
   ERROR_MESSAGE,
   EXAMS_TYPE,
   USER_TYPES,
+  LOGIN_MESSAGES, 
 } from "./constants";
 import { NextRouter } from "next/router";
 import {
@@ -37,14 +38,12 @@ export const handleError = (
 ) => {
   if (e?.response?.status === 403 && isBrowser()) {
     const errorMessage = e?.response?.data?.message;
-    if (errorMessage && errorMessage.includes('Account has been locked')) {
-      Swal.fire({
-        title: "Account Locked",
-        text: errorMessage,
-        icon: "error",
-        confirmButtonText: "OK",
-      });
-      return e;
+    if (
+      errorMessage &&
+      (errorMessage.includes(LOGIN_MESSAGES.ACCOUNT_LOCKED) ||
+        errorMessage.includes(LOGIN_MESSAGES.LOCKED_DUE_TO))
+    ) {
+      throw e;
     }
     
     Swal.fire({
@@ -55,11 +54,11 @@ export const handleError = (
     }).then(() => {
       window.location.href = "/teachers";
     });
-    return e;
+    return e; 
   }
 
   if (
-    (e?.response?.data?.message == "Not authorized, token not sent" ||
+    (e?.response?.data?.message == LOGIN_MESSAGES.NOT_AUTHORIZED_TOKEN_NOT_SENT ||
       e?.response?.status == 401) &&
     isBrowser() &&
     !stopRedirect
@@ -67,6 +66,21 @@ export const handleError = (
     Cookies.remove("token");
     window.location.replace("/authentication/login");
   }
+
+  const errorMessage = e?.response?.data?.message;
+  if (
+    errorMessage &&
+    (
+      errorMessage.includes(LOGIN_MESSAGES.INCORRECT_PASSWORD) ||
+      errorMessage.includes(LOGIN_MESSAGES.FAILED_ATTEMPTS) ||
+      errorMessage.includes(LOGIN_MESSAGES.USER_NOT_FOUND) ||
+      errorMessage.includes(LOGIN_MESSAGES.ACCOUNT_LOCKED) ||
+      errorMessage.includes(LOGIN_MESSAGES.LOCKED_DUE_TO)
+    )
+  ) {
+    throw e;
+  }
+
   if (!hideError) {
     toast.error(e?.response?.data?.message ?? ERROR_MESSAGE);
   }
@@ -215,15 +229,11 @@ export const getAllCourseDays = (
   daysOfClasses.push(format(new Date(endDate), "EEE, MMM d, yy"));
   return daysOfClasses;
 };
-
-const getDateByDateAndDayName = (date: any, day: string) => {
+const getDateByDateAndDayName = (date: Date, day: string): Date => {
   const dayNumber = getDayNumber(day);
   const weekStart = startOfWeek(date, { weekStartsOn: 0 });
   return addDays(weekStart, dayNumber);
 };
-
-export const formatDate = (date: string): string =>
-  format(parseISO(date), "EEE, MMM d");
 
 export const initializeAttendanceStructure = (
   courseSchedule: any,
@@ -909,4 +919,46 @@ export const validateEmailFormat = (email: string): { isValid: boolean; message?
   }
 
   return { isValid: true };
+};
+
+export const formatEmailInput = (email: string): string => {
+  return email.trim();
+};
+
+export const validateAndFormatEmail = (email: string) => {
+  const formattedEmail = formatEmailInput(email);
+  const validation = validateEmailFormat(formattedEmail);
+  
+  return {
+    formattedEmail,
+    ...validation
+  };
+};
+
+export const formatUsernameWithBrighton = (username: string): string => {
+  const trimmedUsername = username.trim();
+  
+  if (!trimmedUsername) {
+    return '';
+  }
+  
+  const brightonSuffix = 'Brighton';
+  const lowerUsername = trimmedUsername.toLowerCase();
+  const lowerBrighton = brightonSuffix.toLowerCase();
+  
+  if (lowerUsername.endsWith(lowerBrighton)) {
+    return trimmedUsername;
+  }
+  
+  return trimmedUsername + brightonSuffix;
+};
+
+export const validateAndFormatUsername = (username: string) => {
+  const formattedUsername = formatUsernameWithBrighton(username);
+  
+  return {
+    formattedUsername,
+    isValid: formattedUsername.length > 0,
+    message: formattedUsername.length === 0 ? 'Username is required' : ''
+  };
 };

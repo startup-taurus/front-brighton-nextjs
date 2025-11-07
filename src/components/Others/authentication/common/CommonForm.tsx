@@ -19,14 +19,15 @@ import CommonLogo from './CommonLogo';
 import { useRouter } from 'next/router';
 import { postLogin } from 'helper/api-data/user';
 import { UserContext } from 'helper/User';
-import { USER_ROLES, USER_TYPES } from '../../../../../utils/constants';
+import { LOGIN_MESSAGES, USER_ROLES, USER_TYPES } from '../../../../../utils/constants';
 import { encrypt } from 'utils/encryption';
+import { showAccessDeniedAlert, showAccountLockedSupport, showIncorrectPasswordAutoClose, showInvalidUsernameFormatCF, showLoginErrorAlert, showLoginFailedAlert, showUserDeactivatedAlert, showUsernameTooShortCF, showUserNotFoundAlert } from '../../../../../utils/alertAuth';
+import { validateEmailFormat } from 'utils/utils';
 export interface commonFormPropsType {
   alignLogo?: string;
 }
 const CommonForm = ({ alignLogo }: commonFormPropsType) => {
   const { login } = useContext(UserContext);
-
   const [showPassWord, setShowPassWord] = useState(false);
   const [formValues, setFormValues] = useState({
     username: '',
@@ -41,41 +42,97 @@ const CommonForm = ({ alignLogo }: commonFormPropsType) => {
   };
   const formSubmitHandle = async (event: FormEvent) => {
     event.preventDefault();
-    setIsLoading(true);
-    const response = await postLogin({ username, password });
-
-    if (response?.status === 'success') {
-      if (response.data?.status === 'inactive') {
-        Swal.fire({
-          title: 'User Deactivated',
-          text: 'Your account has been deactivated. Please contact the administrator for more information.',
-          icon: 'error',
-          confirmButtonText: 'Ok',
-        });
-        setIsLoading(false);
-        return;
-      }
-
-      Cookies.set('token', JSON.stringify(response?.data));
-      const encryptedId = encrypt(String(response?.data?.id));
-      Cookies.set('user_id', encryptedId);
-      localStorage.setItem('user_id', encryptedId);
-      login(response.data);
-
-      const roleRedirectMap = {
-        [USER_TYPES.ADMIN]: '/dashboard',
-        [USER_TYPES.PROFESSOR]: '/teachers',
-        [USER_TYPES.STUDENT]: '/dashboard/student',
-        [USER_TYPES.FINANCIAL]: '/dashboard/financial',
-        [USER_TYPES.COORDINATOR]: '/dashboard',
-        [USER_TYPES.RECEPTIONIST]: '/dashboard',
-      };
-
-      const redirectPath = roleRedirectMap[response.data.role] || '/login';
-      router.push(redirectPath);
-
-      toast.success('Login Success');
+    const trimmedUsername = username.trim();
+    const isEmailInput = validateEmailFormat(trimmedUsername).isValid;
+    if (!isEmailInput && !trimmedUsername.toLowerCase().endsWith('brighton')) {
+      showInvalidUsernameFormatCF();
+      return;
     }
+
+    if (!isEmailInput && trimmedUsername.length < 8) {
+      showUsernameTooShortCF();
+      return;
+    }
+
+    setIsLoading(true);
+    
+    try {
+      const response = await postLogin({ username: trimmedUsername, password });
+
+      if (response?.status === LOGIN_MESSAGES.SUCCESS) {
+        if (response.data?.status === LOGIN_MESSAGES.INACTIVE) {
+          showUserDeactivatedAlert();
+          setIsLoading(false);
+          return;
+        }
+
+        Cookies.set('token', JSON.stringify(response?.data));
+        const encryptedId = encrypt(String(response?.data?.id));
+        Cookies.set('user_id', encryptedId);
+        localStorage.setItem('user_id', encryptedId);
+        login(response.data);
+
+        const roleRedirectMap = {
+          [USER_TYPES.ADMIN]: '/dashboard',
+          [USER_TYPES.PROFESSOR]: '/teachers',
+          [USER_TYPES.STUDENT]: '/dashboard/student',
+          [USER_TYPES.FINANCIAL]: '/dashboard/financial',
+          [USER_TYPES.COORDINATOR]: '/dashboard',
+          [USER_TYPES.RECEPTIONIST]: '/dashboard',
+        };
+
+        const redirectPath = roleRedirectMap[response.data.role] || '/login';
+        router.push(redirectPath);
+        toast.success(LOGIN_MESSAGES.LOGIN_SUCCESS);
+      } else {
+        const errorMessage = response?.message || LOGIN_MESSAGES.LOGIN_FAILED;
+        if (errorMessage.includes(LOGIN_MESSAGES.INCORRECT_PASSWORD) && errorMessage.includes(LOGIN_MESSAGES.FAILED_ATTEMPTS)) {
+          const failedAttemptsMatch = errorMessage.match(/Failed attempts: (\d+)\/5/);
+          const remainingAttemptsMatch = errorMessage.match(/Remaining attempts: (\d+)/);
+          
+          const failedAttempts = failedAttemptsMatch ? failedAttemptsMatch[1] : '0';
+          const remainingAttempts = remainingAttemptsMatch ? remainingAttemptsMatch[1] : '0';
+          
+          showIncorrectPasswordAutoClose(failedAttempts, remainingAttempts);
+        } else if (errorMessage.includes(LOGIN_MESSAGES.ACCOUNT_LOCKED)) {
+          showAccountLockedSupport();
+        } else {
+          showLoginErrorAlert(errorMessage);
+        }
+      }
+    } catch (error: any) {
+      
+      if (error?.response?.status === 400 && error?.response?.data?.message) {
+        const errorMessage = error.response.data.message;
+        
+        if (errorMessage.includes(LOGIN_MESSAGES.INCORRECT_PASSWORD) && errorMessage.includes(LOGIN_MESSAGES.FAILED_ATTEMPTS)) {
+          const failedAttemptsMatch = errorMessage.match(/Failed attempts: (\d+)\/5/);
+          const remainingAttemptsMatch = errorMessage.match(/Remaining attempts: (\d+)/);
+          
+          const failedAttempts = failedAttemptsMatch ? failedAttemptsMatch[1] : '0';
+          const remainingAttempts = remainingAttemptsMatch ? remainingAttemptsMatch[1] : '0';
+          
+          showIncorrectPasswordAutoClose(failedAttempts, remainingAttempts);
+        } else if (errorMessage.includes(LOGIN_MESSAGES.ACCOUNT_LOCKED)) {
+          showAccountLockedSupport();
+        } else {
+          showLoginErrorAlert(errorMessage);
+        }
+      } else if (error?.response?.status === 403) {
+        const errorMessage = error?.response?.data?.message || '';
+        
+        if (errorMessage.includes(LOGIN_MESSAGES.ACCOUNT_LOCKED) || errorMessage.includes(LOGIN_MESSAGES.LOCKED_DUE_TO)) {
+          showAccountLockedSupport();
+        } else {
+          showAccessDeniedAlert(errorMessage);
+        }
+      } else if (error?.response?.status === 404) {
+        showUserNotFoundAlert();
+      } else {
+        showLoginFailedAlert();
+      }
+    }
+    
     setIsLoading(false);
   };
   return (
