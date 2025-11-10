@@ -34,13 +34,10 @@ export const showIncorrectPasswordAutoClose = (failedAttempts: string | number, 
           <p style="margin: 5px 0; color: #cc0000;"><strong>Remaining Attempts:</strong> ${remainingAttempts}</p>
         </div>
         <p style="font-size: 14px; color: #6c757d;">Your account will be locked after 5 failed attempts.</p>
-        <p style="font-size: 12px; color: #999; margin-top: 10px;">This message will close automatically in 4 seconds...</p>
       </div>
     `,
     icon: 'error',
-    showConfirmButton: false,
-    timer: 4000,
-    timerProgressBar: true,
+    confirmButtonText: 'OK',
     allowOutsideClick: false,
     allowEscapeKey: false,
   });

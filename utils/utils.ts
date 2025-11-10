@@ -248,6 +248,9 @@ export const initializeAttendanceStructure = (
   });
 };
 
+export const formatDate = (date: string): string =>
+  format(parseISO(date), "EEE, MMM d");
+
 export const buildAttendanceStructure = (
   courseSchedule: any,
   students: any,
