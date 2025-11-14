@@ -212,7 +212,6 @@ const TableAttendance: React.FC<TableAttendanceProps> = ({
 
   return (
     <div>
-      {/* Removed coordinator-only view alert to allow edits */}
       <Table responsive bordered className='main-table w-100'>
         <thead>
           <tr>

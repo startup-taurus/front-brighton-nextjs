@@ -232,8 +232,6 @@ const CoursesTable = ({ reload, loading }: any) => {
   );
 
   const handleBatchDownloadCertificates = useCallback(() => {
-    console.log(`🔍 CALLBACK: Selected courses before processing:`, selectedCourses);
-    console.log(`🔍 CALLBACK: Selected courses length:`, selectedCourses.length);
     return processBatchDownload(generateBatchCertificatesZIP, 'Certificates');
   }, [selectedCourses.length]);
 

@@ -181,12 +181,7 @@ export const pdfUtils = {
   },
 
 downloadZIP: (zipBytes: Uint8Array, filename: string) => {
-  console.log(`💾 DOWNLOAD: Starting ZIP download`);
-  console.log(`📁 DOWNLOAD: Filename: ${filename}`);
-  console.log(`📊 DOWNLOAD: ZIP size: ${zipBytes.length} bytes`);
-  
   const blob = new Blob([zipBytes as any], { type: 'application/zip' });
-  console.log(`📦 DOWNLOAD: Blob created, size: ${blob.size} bytes`);
   
   const url = URL.createObjectURL(blob);
   const link = document.createElement('a');
@@ -194,12 +189,10 @@ downloadZIP: (zipBytes: Uint8Array, filename: string) => {
   link.download = filename;
   document.body.appendChild(link);
   
-  console.log(`🔗 DOWNLOAD: Download link created and clicked`);
   link.click();
   
   document.body.removeChild(link);
   URL.revokeObjectURL(url);
-  console.log(`✅ DOWNLOAD: ZIP download initiated successfully`);
 },
 
   generatePDFBytes: async (studentData: StudentData, type: 'certificate' | 'report'): Promise<Uint8Array> => {
@@ -509,8 +502,6 @@ const generateRealStudentData = async (
   const studentName = student.name || `${student.first_name || ''} ${student.last_name || ''}`.trim();
   
   try {
-    console.log(`Generating data for student: ${studentName} (ID: ${student.id})`);
-    
     const [gradesResponse, gradingItemsResponse, gradingPercentageResponse, notesPercentagesResponse] = await withTimeout(
       Promise.all([
         getGradesByCourseAndStudent(courseData.id, student.id),
@@ -631,7 +622,6 @@ const generateRealStudentData = async (
       ? { ...base, ...pickYLE(examFormatedData) }
       : { ...base, ...pickGeneral(examFormatedData) };
 
-    console.log(`Successfully generated data for student: ${studentName}`);
     return finalStudentData;
 
   } catch (error) {
@@ -661,7 +651,6 @@ const generateRealStudentData = async (
       final: 'Not Resulted',
     };
     
-    console.log(`Using default data for student: ${studentName}`);
     return defaultData;
   }
 };
@@ -675,32 +664,21 @@ const processStudentsInBatchesForCertificates = async (
   courseFolder: any, 
   batchSize: number = 3
 ): Promise<{ processed: number; errors: number }> => {
-  console.log(`  🎓 Starting certificate processing for ${students.length} students in batches of ${batchSize}`);
   let processed = 0;
   let errors = 0;
 
   for (let i = 0; i < students.length; i += batchSize) {
     const batch = students.slice(i, i + batchSize);
-    const batchNumber = Math.floor(i / batchSize) + 1;
-    const totalBatches = Math.ceil(students.length / batchSize);
-    
-    console.log(`  📦 Processing batch ${batchNumber}/${totalBatches} (${batch.length} students)`);
-    
     const batchPromises = batch.map(async (student, index) => {
       const studentName = student.name || `${student.first_name || ''} ${student.last_name || ''}`.trim();
-      console.log(`    👤 Processing student ${i + index + 1}/${students.length}: ${studentName}`);
-      
       try {
         const studentData = await generateRealStudentData(student, courseData, true);
         const pdfBytes = await pdfUtils.generatePDFBytes(studentData, 'certificate');
         
         const fileName = `Certificate_${studentName.replace(/[^a-zA-Z0-9_-]/g, '_')}.pdf`;
         courseFolder?.file(fileName, pdfBytes);
-        
-        console.log(`    ✅ Certificate generated for: ${studentName}`);
         return { success: true, studentName };
       } catch (studentError) {
-        console.error(`    ❌ Error generating certificate for student ${studentName}:`, studentError);
         return { success: false, studentName, error: studentError };
       }
     });
@@ -719,15 +697,10 @@ const processStudentsInBatchesForCertificates = async (
         batchErrors++;
       }
     });
-
-    console.log(`  📊 Batch ${batchNumber} completed: ${batchProcessed} success, ${batchErrors} errors`);
-
     if (i + batchSize < students.length) {
       await new Promise(resolve => setTimeout(resolve, 100));
     }
   }
-
-  console.log(`  🏁 Certificate processing completed: ${processed} success, ${errors} errors`);
   return { processed, errors };
 };
 
@@ -760,38 +733,20 @@ export const generateBatchCertificatesZIP = async (courseIds: number[]): Promise
 
     for (let i = 0; i < courseIds.length; i++) {
       const courseId = courseIds[i];
-      console.log(`\n🔄 PROCESSING COURSE ${i + 1}/${courseIds.length}`);
-      console.log(`📌 Course ID: ${courseId} (type: ${typeof courseId})`);
-      
       try {
-        console.log(`📡 Fetching data for course ${courseId}...`);
         const [courseResponse, studentsResponse] = await Promise.all([
           getCourseById(courseId.toString()),
           getCourseWithStudents(courseId.toString())
         ]);
-        
-        console.log(`✅ Course data received:`, {
-          courseId,
-          courseName: courseResponse.data?.course_name,
-          courseNumber: courseResponse.data?.course_number,
-          studentsCount: studentsResponse.data?.students?.length || 0
-        });
-        
         const courseData = courseResponse.data;
         const studentsData = studentsResponse.data;
         
         const courseFolderName = `${courseData.course_name}_${courseData.course_number}`.replace(/[^a-zA-Z0-9_-]/g, '_');
         const courseFolder = certificatesFolder?.folder(courseFolderName);
-        
-        console.log(`📁 Created folder: ${courseFolderName}`);
-
         if (!studentsData?.students || studentsData.students.length === 0) {
           coursesProcessed++;
           continue;
         }
-        
-        console.log(`👥 Processing ${studentsData.students.length} students for course: ${courseData.course_name}`);
-        
         const { processed, errors } = await processStudentsInBatchesForCertificates(
           studentsData.students, 
           courseData, 
@@ -805,34 +760,17 @@ export const generateBatchCertificatesZIP = async (courseIds: number[]): Promise
         if (errors > 0) {
           coursesWithErrors++;
         }
-
-        console.log(`✅ Course ${courseData.course_name} completed: ${processed} certificates generated, ${errors} errors`);
-        console.log(`📊 Running totals: ${totalProcessed} certificates, ${totalErrors} errors, ${coursesProcessed} courses processed`);
-
       } catch (courseError) {
         coursesWithErrors++;
-        console.error(`❌ ERROR processing course ${courseId}:`, courseError);
         try {
           const courseResponse = await getCourseById(courseId.toString());
-          console.error(`💥 Failed course name: ${courseResponse.data?.course_name || 'Unknown'}`);
         } catch (nameError) {
-          console.error(`💥 Could not retrieve course name for ID: ${courseId}`);
         }
       }
     }
-
-    console.log(`\n🏁 BATCH PROCESSING COMPLETED:`);
-    console.log(`📈 Courses processed: ${coursesProcessed}/${courseIds.length}`);
-    console.log(`⚠️  Courses with errors: ${coursesWithErrors}`);
-    console.log(`📄 Total certificates generated: ${totalProcessed}`);
-    console.log(`❌ Total errors: ${totalErrors}`);
-
     if (totalProcessed === 0) {
-      console.error(`💥 CRITICAL: No certificates were generated successfully!`);
-      throw new Error('No certificates were generated successfully. Please check the console for detailed error information.');
+      throw new Error('No certificates were generated successfully. ');
     }
-
-    console.log(`📦 Generating ZIP file...`);
     const zipBytes = await zip.generateAsync({ 
       type: "uint8array",
       compression: "DEFLATE",
@@ -841,12 +779,7 @@ export const generateBatchCertificatesZIP = async (courseIds: number[]): Promise
     
     const timestamp = new Date().toISOString().split('T')[0];
     const fileName = `Certificates_Batch_${timestamp}_${totalProcessed}certificates.zip`;
-    
-    console.log(`💾 Downloading ZIP file: ${fileName}`);
     pdfUtils.downloadZIP(zipBytes, fileName);
-    
-    console.log(`🎉 ZIP file downloaded successfully: ${fileName}`);
-
   } catch (error) {
     console.error('💥 CRITICAL ERROR generating batch certificates ZIP:', error);
     throw error;
@@ -907,7 +840,6 @@ const processStudentsInBatches = async (
  * @param courseIds - Array de IDs de cursos seleccionados
  */
 export const generateBatchReportsZIP = async (courseIds: number[]): Promise<void> => {
-  console.log(`Starting batch reports generation for ${courseIds.length} courses:`, courseIds);
   
   try {
     const zip = new JSZip();
@@ -920,8 +852,6 @@ export const generateBatchReportsZIP = async (courseIds: number[]): Promise<void
 
     for (let i = 0; i < courseIds.length; i++) {
       const courseId = courseIds[i];
-      console.log(`Processing course ${i + 1}/${courseIds.length}: ${courseId}`);
-      
       try {
         const [courseResponse, studentsResponse] = await Promise.all([
           getCourseById(courseId.toString()),
@@ -935,22 +865,16 @@ export const generateBatchReportsZIP = async (courseIds: number[]): Promise<void
         const courseFolder = reportsFolder?.folder(courseFolderName);
 
         if (!studentsData?.students || studentsData.students.length === 0) {
-          console.warn(`No students found for course ${courseId} (${courseData?.course_name || 'Unknown'})`);
           
           const infoContent = `Course: ${courseData.course_name} (${courseData.course_number})
-Status: No students enrolled
-Date: ${new Date().toISOString().split('T')[0]}
-Note: This course has no students to generate reports for.`;
+            Status: No students enrolled
+            Date: ${new Date().toISOString().split('T')[0]}
+            Note: This course has no students to generate reports for.`;
           
           courseFolder?.file('Course_Info.txt', infoContent);
-          console.log(`Created info file for empty course: ${courseData.course_name}`);
-          
           coursesProcessed++;
           continue;
         }
-
-        console.log(`Processing ${studentsData.students.length} students for course: ${courseData.course_name}`);
-        
         const { processed, errors } = await processStudentsInBatches(
           studentsData.students, 
           courseData, 
@@ -964,9 +888,6 @@ Note: This course has no students to generate reports for.`;
         if (errors > 0) {
           coursesWithErrors++;
         }
-
-        console.log(`Course ${courseData.course_name} completed: ${processed} reports generated, ${errors} errors`);
-
       } catch (courseError) {
         coursesWithErrors++;
         console.error(`Error processing course ${courseId}:`, courseError);
@@ -978,19 +899,10 @@ Note: This course has no students to generate reports for.`;
         }
       }
     }
-
-    console.log(`Batch processing completed:`);
-    console.log(`- Courses processed: ${coursesProcessed}/${courseIds.length}`);
-    console.log(`- Courses with errors: ${coursesWithErrors}`);
-    console.log(`- Total reports generated: ${totalProcessed}`);
-    console.log(`- Total errors: ${totalErrors}`);
-
     if (totalProcessed === 0) {
-      throw new Error('No reports were generated successfully. Please check the console for detailed error information.');
+      throw new Error('No reports were generated successfully. ');
     }
 
-    console.log('Generating ZIP file...');
-    
     const zipBytes = await zip.generateAsync({ 
       type: "uint8array",
       compression: "DEFLATE",
@@ -1002,7 +914,6 @@ Note: This course has no students to generate reports for.`;
     
     pdfUtils.downloadZIP(zipBytes, fileName);
     
-    console.log(`ZIP file downloaded successfully: ${fileName}`);
 
   } catch (error) {
     console.error('Error generating batch reports ZIP:', error);
