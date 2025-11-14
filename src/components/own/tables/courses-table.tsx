@@ -15,7 +15,7 @@ import StudentTransferForm from '../form/student-transfer-form';
 import { getFiltersString } from '../../../../utils/utils';
 import TableSkeleton from '../common/table-skeleton/TableSkeleton';
 import { UserContext } from 'helper/User';
-import { USER_TYPES } from '../../../../utils/constants';
+import { USER_TYPES, STATUS } from '../../../../utils/constants';
 import { FaCertificate, FaFileAlt } from 'react-icons/fa';
 import { generateBatchCertificatesZIP, generateBatchReportsZIP } from '../../../../utils/pdfGenerator';
 import { toast } from 'react-toastify';
@@ -32,14 +32,17 @@ const CoursesTable = ({ reload, loading }: any) => {
   const [studentsToTransfer, setStudentsToTransfer] = useState([]);
   const [isDuplicateModalOpen, setIsDuplicateModalOpen] = useState(false);
   const [courseToDuplicate, setCourseToDuplicate] = useState(null);
+  const [lastTransferredCourseId, setLastTransferredCourseId] = useState<number | null>(null);
 
   const page = Number(router.query.page) || 1;
   const rowPerPage = Number(router.query.rowPerPage) || 10;
   const statusQuery = typeof router.query.status === 'string' ? router.query.status : '';
 
-  const clientPagination = statusQuery === 'completed' || statusQuery === 'inactive' || statusQuery === 'active';
+  const clientPagination =
+    statusQuery === 'completed' ||
+    statusQuery === 'inactive' ||
+    statusQuery === 'active';
 
-  // Construir filtros y eliminar 'status' cuando sea 'completed' (se filtra en cliente)
   const rawFilters = getFiltersString(router);
   const filters =
     statusQuery === 'completed'
@@ -49,7 +52,6 @@ const CoursesTable = ({ reload, loading }: any) => {
           .join('&')
       : rawFilters;
 
-  // En modo cliente, pedimos muchos registros al backend para calcular bien el total
   const apiPage = clientPagination ? 1 : page;
   const apiRowPerPage = clientPagination ? 1000 : rowPerPage;
 
@@ -99,8 +101,21 @@ const CoursesTable = ({ reload, loading }: any) => {
     });
   };
 
-  const isCourseCompleted = (row: any) => 
-    row.last_class_date && new Date(row.last_class_date) < new Date();
+  const isCourseCompleted = (row: any) =>
+    !(
+      typeof row.status === 'string' &&
+      row.status.toLowerCase() === STATUS.TRANSFERRED
+    ) &&
+    row.last_class_date &&
+    new Date(row.last_class_date) < new Date();
+  
+  const isCourseTransferred = (row: any) =>
+    typeof row.status === 'string' && row.status.toLowerCase() === STATUS.TRANSFERRED;
+  
+  const hasActiveStudents = (row: any) =>
+    typeof row.active_student_count === 'number' && row.active_student_count > 0;
+
+  const isTransferredView = statusQuery === 'transferred';
 
   const toggle = useCallback((data: any) => {
     setSelectedData(data);
@@ -143,6 +158,13 @@ const CoursesTable = ({ reload, loading }: any) => {
   const handleAttendance = useCallback((row: any) => {
     router.push({
       pathname: `/course/${row.id}/attendance`,
+      query: { professorId: row.professor?.user_id }
+    });
+  }, [router]);
+
+  const handleGradebook = useCallback((row: any) => {
+    router.push({
+      pathname: `/course/${row.id}/gradebook`,
       query: { professorId: row.professor?.user_id }
     });
   }, [router]);
@@ -221,18 +243,25 @@ const CoursesTable = ({ reload, loading }: any) => {
   };
   const handleTransferCourseWithStudents = useCallback(async (row: any) => {
     try {
-      const students = await fetchCourseStudents(row.id);
-
-      if (students.length === 0) {
-        toast.error('No students found in this course to transfer');
+      if (isCourseTransferred(row)) {
+        toast.info('This course is already transferred. Transfer is disabled.');
         return;
       }
-
+      const students = await fetchCourseStudents(row.id);
+      const activeStudents = (students || []).filter(
+        (s: any) => s?.status?.toLowerCase() === 'active' && !s?.is_retired
+      );
+  
+      if (activeStudents.length === 0) {
+        toast.error('No hay estudiantes activos para transferir (inactivos/retirados excluidos).');
+        return;
+      }
+  
       const courseWithDuplicateInfo = {
         ...row,
         duplicateInfo: {
-          students,
-          studentsCount: students.length,
+          students: activeStudents,
+          studentsCount: activeStudents.length,
           sourceCourse: row,
           isTransfer: true
         }
@@ -250,19 +279,35 @@ const CoursesTable = ({ reload, loading }: any) => {
     isLoading,
   } = useSWR([apiEndpoint], () => getCourseWithProfessors(apiPage, apiRowPerPage, filters));
 
-  // Datos mostrados:
-  // - 'completed': solo cursos terminados
-  // - 'inactive': excluir terminados (solo inactivos manuales)
-  // - 'active': excluir terminados (solo activos actuales)
-  const displayedData =
-    statusQuery === 'completed' && courses?.data?.result
-      ? courses.data.result.filter(isCourseCompleted)
-      : statusQuery === 'inactive' && courses?.data?.result
-      ? courses.data.result.filter((row: any) => !isCourseCompleted(row))
-      : statusQuery === 'active' && courses?.data?.result
-      ? courses.data.result.filter((row: any) => !isCourseCompleted(row))
-      : courses?.data?.result || [];
+  const baseData = courses?.data?.result || [];
+  const preFilteredData = baseData;
+  const statusPredicateMap: Record<string, (row: any) => boolean> = {
+    completed: (row: any) => isCourseCompleted(row),
+    inactive: (row: any) => !isCourseCompleted(row) && row.status?.toLowerCase() === STATUS.INACTIVE,
+    active: (row: any) => !isCourseCompleted(row) && row.status?.toLowerCase() === STATUS.ACTIVE,
+    transferred: (row: any) => isCourseTransferred(row),
+  };
 
+  const displayedData = useMemo(() => {
+    const predicate = statusQuery ? statusPredicateMap[statusQuery] : undefined;
+    return preFilteredData.filter(predicate ?? (() => true));
+  }, [preFilteredData, statusQuery]);
+  const getTransferredSortKey = (row: any) => {
+    const last = row.last_class_date ? new Date(row.last_class_date).getTime() : 0;
+    const end = row.end_date ? new Date(row.end_date).getTime() : 0;
+    return last || end;
+  };
+
+  const sortedData = useMemo(() => {
+    if (!isTransferredView) return displayedData;
+    return [...displayedData].sort((a: any, b: any) => {
+      if (lastTransferredCourseId) {
+        if (a.id === lastTransferredCourseId) return -1;
+        if (b.id === lastTransferredCourseId) return 1;
+      }
+      return getTransferredSortKey(b) - getTransferredSortKey(a) || (b.id || 0) - (a.id || 0);
+    });
+  }, [displayedData, isTransferredView, lastTransferredCourseId]);
   const showLoading = loading || isLoading;
 
   const formatDate = (date: string) => date ? new Date(date).toLocaleDateString('en-US') : '';
@@ -270,18 +315,39 @@ const CoursesTable = ({ reload, loading }: any) => {
   const getStartDate = (row: any) => formatDate(row.first_class_date || row.start_date);
   const getEndDate = (row: any) => formatDate(row.last_class_date || row.end_date);
 
+  const getStatusBadgeClass = (row: any) => {
+    if (isCourseTransferred(row)) return 'badge-info';
+    if (isCourseCompleted(row)) return 'badge-warning';
+    const status = row.status?.toLowerCase();
+    return status === STATUS.ACTIVE ? 'badge-success' : 'badge-danger';
+  };
+
+  const getStatusBadgeLabel = (row: any) => {
+    if (isCourseTransferred(row)) return 'TRANSFERRED';
+    if (isCourseCompleted(row)) return 'COMPLETED';
+    return formatText(row?.status);
+  };
+
   const columns = useMemo(() => [
     {
       name: 'Actions',
-      cell: (row: any) => (
-        <TableActionButtons
-          onEdit={() => toggle(row)}
-          onBlock={() => handleAlert(row)}
-          onAttendance={user?.role !== USER_TYPES.ADMIN ? () => handleAttendance(row) : undefined}
-          onTransfer={isCourseCompleted(row) ? () => handleTransferCourseWithStudents(row) : undefined}
-          stauts={row.status !== 'active'}
-        />
-      ),
+      cell: (row: any) => {
+        const transferred = isCourseTransferred(row);
+        return (
+          <TableActionButtons
+            onEdit={transferred ? undefined : () => toggle(row)}
+            onBlock={transferred ? undefined : () => handleAlert(row)}
+            onAttendance={user?.role !== USER_TYPES.ADMIN ? () => handleAttendance(row) : undefined}
+            onGradebook={transferred && user?.role !== USER_TYPES.ADMIN ? () => handleGradebook(row) : undefined}
+            onTransfer={
+              !transferred && isCourseCompleted(row) && hasActiveStudents(row)
+                ? () => handleTransferCourseWithStudents(row)
+                : undefined
+            }
+            stauts={row.status !== 'active'}
+          />
+        );
+      },
       width: '200px',
       sortable: false,
     },
@@ -318,16 +384,8 @@ const CoursesTable = ({ reload, loading }: any) => {
     {
       name: 'Status',
       cell: (row: any) => (
-        <span
-          className={`badge ${
-            isCourseCompleted(row)
-              ? 'badge-warning'
-              : row.status === 'active'
-              ? 'badge-success'
-              : 'badge-danger'
-          }`}
-        >
-          {isCourseCompleted(row) ? 'COMPLETED' : formatText(row?.status)}
+        <span className={`badge ${getStatusBadgeClass(row)}`}>
+          {getStatusBadgeLabel(row)}
         </span>
       ),
       sortable: true,
@@ -377,16 +435,23 @@ const CoursesTable = ({ reload, loading }: any) => {
       
       if (students.length > 0 && newCourseData?.id && isTransfer) {
         const studentIds = students.map((student: any) => student.id);
+        const levelIdFromSource = (courseToDuplicate as any)?.duplicateInfo?.sourceCourse?.syllabus?.level?.id ?? null;
         const transferResponse = await transferAndProgressStudents(
           studentIds,
           newCourseData.id.toString(),
-          null
+          levelIdFromSource
         );
+        if (transferResponse.statusCode === 200) {
+          const sourceCourseId = (courseToDuplicate as any)?.duplicateInfo?.sourceCourse?.id;
+          if (sourceCourseId) {
+            await updateStatusCourse(sourceCourseId, STATUS.TRANSFERRED);
+            setLastTransferredCourseId(sourceCourseId);
+          }
+        }
         
         const message = transferResponse.statusCode === 200
           ? `Course created successfully and ${students.length} students transferred!`
           : 'Course created but error transferring students';
-          
         toast[transferResponse.statusCode === 200 ? 'success' : 'error'](message);
       } else {
         const action = isTransfer ? 'created' : 'duplicated';
@@ -403,9 +468,12 @@ const CoursesTable = ({ reload, loading }: any) => {
 
   const handleTransferSuccess = useCallback(() => {
     toast.success('Students transferred successfully!');
+    if ((courseToTransfer as any)?.id) {
+      setLastTransferredCourseId((courseToTransfer as any).id);
+    }
     resetTransferModal();
     refreshData();
-  }, [resetTransferModal, refreshData]);
+  }, [courseToTransfer, resetTransferModal, refreshData]);
 
   if (showLoading) {
     return (
@@ -453,13 +521,13 @@ const CoursesTable = ({ reload, loading }: any) => {
 
       <DataTable
         columns={columns}
-        data={displayedData}
+        data={sortedData}
         progressPending={showLoading}
         paginationDefaultPage={page}
         paginationPerPage={rowPerPage}
         pagination
         paginationServer={!clientPagination}
-        paginationTotalRows={clientPagination ? displayedData.length : courses.data.totalCount}
+        paginationTotalRows={clientPagination ? sortedData.length : courses.data.totalCount}
         onChangePage={handlePageChange}
         onChangeRowsPerPage={handleRowsPerPageChange}
         highlightOnHover

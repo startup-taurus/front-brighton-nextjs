@@ -16,6 +16,7 @@ import Select from 'react-select';
 import {createCourse, updateCourse, getAllCourses} from 'helper/api-data/course';
 import {getActiveProfessors} from 'helper/api-data/professor';
 import {getAllSyllabus} from 'helper/api-data/syllabus';
+
 import {toast} from 'react-toastify';
 import Swal from 'sweetalert2';
 import {PRIVATE_COURSE_TYPES} from '../../../../utils/constants';
@@ -35,73 +36,74 @@ const CourseForm = ({data, isOpen, toggle, onSuccess, isTransferMode = false, tr
         (c.course_name?.toLowerCase() === courseData.course_name?.toLowerCase() || 
          c.course_number?.toLowerCase() === courseData.course_number?.toLowerCase())
       );
-
       if (duplicateCourse) {
-        const duplicateType = duplicateCourse.course_name?.toLowerCase() === courseData.course_name?.toLowerCase() 
-          ? 'name' : 'number';
-        return {
-          hasConflict: true,
-          message: `A course with the same ${duplicateType} already exists:<br>
+        const duplicateType = duplicateCourse.course_name?.toLowerCase() === courseData.course_name?.toLowerCase() ? 'name' : 'number';
+        return { hasConflict: true, type: 'duplicate', message: `A course with the same ${duplicateType} already exists:<br>
                    Existing course: ${duplicateCourse.course_name} (${duplicateCourse.course_number})<br>
                    Professor: ${duplicateCourse.professor_name || 'Not assigned'}<br>
-                   Please use a different ${duplicateType} for the course.`
-        };
+                   Please use a different ${duplicateType} for the course.` };
       }
-
-      if (courseData.course_type === PRIVATE_COURSE_TYPES.PRIVATE || 
-          courseData.course_type === PRIVATE_COURSE_TYPES.PRIVATE_ONLINE) {
+      if (courseData.course_type === PRIVATE_COURSE_TYPES.PRIVATE || courseData.course_type === PRIVATE_COURSE_TYPES.PRIVATE_ONLINE) {
         return { hasConflict: false };
       }
-
+      const newSchedule = formatSchedule(courseData.schedules);
+      const [newDays, newTime] = newSchedule.split(' ');
+      const newEndDate = courseData.end_date ? new Date(courseData.end_date) : null;
+      const startEffective = new Date(courseData.start_date);
+      const selectedProfessorId = String(courseData.professor_id ?? (courseData.professor?.value ?? courseData.professor ?? ''));
       const activeCourses = courses?.filter((c: any) => 
         c.status === 'active' && 
-        c.professor_id === courseData.professor_id &&
+        String(c.professor_id) === selectedProfessorId &&
         c.schedule &&
         (data ? c.id !== data.id : true)
       ) || [];
-
-      const newSchedule = formatSchedule(courseData.schedules);
-      const [newDays, newTime] = newSchedule.split(' ');
-      const newStartDate = new Date(courseData.start_date);
-      const newEndDate = courseData.end_date ? new Date(courseData.end_date) : null;
-
-      for (const existing of activeCourses) {
-        const [existingDays, existingTime] = existing.schedule.split(' ');
-        const existingStartDate = new Date(existing.start_date);
-        const existingEndDate = existing.end_date ? new Date(existing.end_date) : null;
-
-        const datesOverlap = () => {
-          if (!existingEndDate && !newEndDate) return true;
-          if (!existingEndDate) return newStartDate <= existingStartDate || (newEndDate && newEndDate >= existingStartDate);
-          if (!newEndDate) return newStartDate <= existingEndDate;
-          return newStartDate <= existingEndDate && newEndDate >= existingStartDate;
-        };
-
-        if (datesOverlap()) {
-          const commonDays = existingDays.split('-').some((day: string) => newDays.split('-').includes(day));
-          
-          if (commonDays) {
-            const [existingStart, existingEnd] = existingTime.split('-');
-            const [newStart, newEnd] = newTime.split('-');
-            
-            const timesOverlap = new Date(`2000-01-01T${newStart}:00`) < new Date(`2000-01-01T${existingEnd}:00`) &&
-                               new Date(`2000-01-01T${newEnd}:00`) > new Date(`2000-01-01T${existingStart}:00`);
-
-            if (timesOverlap) {
-              return {
-                hasConflict: true,
-                message: `Schedule conflict with "${existing.course_name}" (${existing.course_number}).<br>
-                         Existing: ${existing.schedule}<br>
-                         New: ${newSchedule}`
-              };
-            }
+      const classroomCourses = courses?.filter((c: any) => 
+        c.status === 'active' &&
+        c.classroom === courseData.classroom &&
+        c.schedule &&
+        (data ? c.id !== data.id : true)
+      ) || [];
+      const dateRangesOverlap = (aStart: Date, aEnd: Date | null, bStart: Date, bEnd: Date | null) => {
+        const aEndTime = aEnd ? aEnd.getTime() : Infinity;
+        const bEndTime = bEnd ? bEnd.getTime() : Infinity;
+        return aStart.getTime() <= bEndTime && bStart.getTime() <= aEndTime;
+      };
+      const scan = (list: any[], type: 'schedule' | 'classroom') => {
+        for (const existing of list) {
+          const [existingDays, existingTime] = existing.schedule.split(' ');
+          const existingStartDate = new Date(existing.start_date);
+          const finalEndDate = existing.last_class_date ? new Date(existing.last_class_date) : (existing.end_date ? new Date(existing.end_date) : null);
+          if (finalEndDate && startEffective.getTime() > finalEndDate.getTime()) continue;
+          const commonDays = existingDays.split('-').some((d: string) => newDays.split('-').includes(d));
+          if (!commonDays) continue;
+          if (!dateRangesOverlap(existingStartDate, finalEndDate, startEffective, newEndDate)) continue;
+          const [existingStart, existingEnd] = existingTime.split('-');
+          const [newStart, newEnd] = newTime.split('-');
+          const timesOverlap = new Date(`2000-01-01T${newStart}:00`) < new Date(`2000-01-01T${existingEnd}:00`) &&
+            new Date(`2000-01-01T${newEnd}:00`) > new Date(`2000-01-01T${existingStart}:00`);
+          if (timesOverlap) {
+            const exactMatch = existingDays === newDays && existingTime === newTime;
+            return {
+              hasConflict: true,
+              type,
+              message: exactMatch
+                ? (type === 'classroom'
+                    ? `This classroom ("${existing.classroom}") already has a course at the same schedule.<br>Existing: ${existing.course_name} (${existing.course_number}) — ${existing.schedule}<br>New: ${newSchedule}`
+                    : `This professor already has a course at the same schedule.<br>Existing: ${existing.course_name} (${existing.course_number}) — ${existing.schedule}<br>New: ${newSchedule}`)
+                : (type === 'classroom'
+                    ? `Classroom conflict: "${existing.classroom}" is already booked by "${existing.course_name}" (${existing.course_number}).<br>Existing: ${existing.schedule}<br>New: ${newSchedule}`
+                    : `Schedule conflict with "${existing.course_name}" (${existing.course_number}).<br>Existing: ${existing.schedule}<br>New: ${newSchedule}`)
+            };
           }
         }
-      }
-
+        return { hasConflict: false };
+      };
+      const profResult = scan(activeCourses, 'schedule');
+      if (profResult.hasConflict) return profResult;
+      const roomResult = scan(classroomCourses, 'classroom');
+      if (roomResult.hasConflict) return roomResult;
       return { hasConflict: false };
     } catch (error) {
-      console.error('Error validating schedule conflicts:', error);
       return { hasConflict: false };
     }
   };
@@ -111,7 +113,11 @@ const CourseForm = ({data, isOpen, toggle, onSuccess, isTransferMode = false, tr
       const conflictValidation = await validateScheduleConflicts(formData);
       if (conflictValidation.hasConflict) {
         await Swal.fire({
-          title: 'Schedule Conflict Detected',
+          title: conflictValidation.type === 'classroom'
+            ? 'Classroom Conflict Detected'
+            : conflictValidation.type === 'duplicate'
+            ? 'Duplicate Course Detected'
+            : 'Schedule Conflict Detected',
           html: conflictValidation.message,
           icon: 'error',
           confirmButtonText: 'OK',
@@ -148,10 +154,12 @@ const CourseForm = ({data, isOpen, toggle, onSuccess, isTransferMode = false, tr
         payload.schedule = formatSchedule(formData.schedules);
       }
       if (isDuplicateMode && duplicateInfo?.students) {
-        payload.students = duplicateInfo.students.map((student: any) => ({
-          student_id: student.id,
-          enrollment_date: new Date().toISOString().split('T')[0],
-        }));
+        payload.students = duplicateInfo.students
+          .filter((student: any) => student?.status?.toLowerCase() === 'active' && !student?.is_retired)
+          .map((student: any) => ({
+            student_id: student.id,
+            enrollment_date: new Date().toISOString().split('T')[0],
+          }));
       }
 
       const response = isUpdate 
@@ -214,7 +222,7 @@ const CourseForm = ({data, isOpen, toggle, onSuccess, isTransferMode = false, tr
         {isTransferMode 
           ? `Create New Course for Transfer (${transferInfo?.studentsCount || 0} students)` 
           : isDuplicateMode
-          ? `Duplicate Course: ${duplicateInfo?.sourceCourse?.course_name || ''} (${duplicateInfo?.studentsCount || 0} students)`
+          ? `Transfer Course: ${duplicateInfo?.sourceCourse?.course_name || ''} (${duplicateInfo?.studentsCount || 0} students)`
           : data ? 'Edit Course' : 'Add New Course'
         }
       </ModalHeader>
@@ -226,7 +234,7 @@ const CourseForm = ({data, isOpen, toggle, onSuccess, isTransferMode = false, tr
         )}
         {isDuplicateMode && duplicateInfo && (
           <div className="alert alert-success mb-3">
-            <strong>Duplicate Mode:</strong> Creating a copy of "{duplicateInfo.sourceCourse?.course_name}" ({duplicateInfo.sourceCourse?.course_number}) with {duplicateInfo.studentsCount} students
+             <strong>Transfer Mode:</strong> Transferring {duplicateInfo.studentsCount} students from "{duplicateInfo.sourceCourse?.course_name}" ({duplicateInfo.sourceCourse?.course_number}) with {duplicateInfo.studentsCount} students
           </div>
         )}
         <Formik
@@ -686,8 +694,8 @@ const CourseForm = ({data, isOpen, toggle, onSuccess, isTransferMode = false, tr
                             props.values.schedules[0].endTime
                           ))
                     }
-                    loadingText={isTransferMode ? 'Creating & Transferring...' : isDuplicateMode ? 'Duplicating...' : data ? 'Updating...' : 'Saving...'}
-                    defaultText={isTransferMode ? 'Create & Transfer Students' : isDuplicateMode ? 'Duplicate Course' : data ? 'Update' : 'Save'}
+                    loadingText={isTransferMode ? 'Creating & Transferring...' : isDuplicateMode ? 'Transferring...' : data ? 'Updating...' : 'Saving...'}
+                    defaultText={isTransferMode ? 'Create & Transfer Students' : isDuplicateMode ? 'Transfer Course' : data ? 'Update' : 'Save'}
                   />
                 </Col>
               </form>

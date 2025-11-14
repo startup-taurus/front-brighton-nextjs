@@ -14,6 +14,7 @@ export const STATUS_FILTER = [
   { label: 'Active', value: 'active' },
   { label: 'Inactive', value: 'inactive' },
   { label: 'Completed', value: 'completed' },
+  { label: 'Transferred', value: 'transferred' },
 ];
 
 export const LEVEL_FILTER = [
@@ -140,6 +141,7 @@ export const EXAM_TYPE_OPTIONS = [
 export const STATUS = {
   ACTIVE: 'active',
   INACTIVE: 'inactive',
+  TRANSFERRED: 'transferred'
 };
 export const GROUP_MINIMUM = 2;
 

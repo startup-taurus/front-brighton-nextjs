@@ -9,6 +9,7 @@ import {
   FaArrowRightArrowLeft,
   FaClipboardList,
   FaUnlock,
+  FaBookOpen,
 } from 'react-icons/fa6';
 import { Tooltip } from 'react-tooltip';
 
@@ -21,6 +22,7 @@ const TableActionButtons = ({
   onCopy,
   onTransfer,
   onAttendance,
+  onGradebook,
   onActivate,
   onTransferCourse,
   disabled = false,
@@ -55,6 +57,17 @@ const TableActionButtons = ({
             disabled={disabled}
           >
             <FaClipboardList />
+          </button>
+        )}
+        {onGradebook && (
+          <button
+            type='button'
+            className='btn btn-primary'
+            onClick={onGradebook}
+            data-tooltip-id='on-gradebook'
+            disabled={disabled}
+          >
+            <FaBookOpen />
           </button>
         )}
         {onActivate && (
@@ -143,6 +156,11 @@ const TableActionButtons = ({
           id='on-attendance'
           place='top-start'
           content='View attendance'
+        />
+        <Tooltip
+          id='on-gradebook'
+          place='top-start'
+          content='View gradebook'
         />
         <Tooltip
           id='on-activate'

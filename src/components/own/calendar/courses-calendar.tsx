@@ -61,6 +61,7 @@ const CoursesCalendar: React.FC = () => {
                 center: 'title',
                 right: 'dayGridMonth,timeGridWeek,timeGridDay'
               }}
+              nowIndicator={true}
               events={events.map(event => ({
                 id: event.id,
                 title: event.title,
@@ -78,7 +79,7 @@ const CoursesCalendar: React.FC = () => {
               slotMinTime="07:00:00"
               slotMaxTime="22:00:00"
               allDaySlot={false}
-              dayMaxEvents={false} 
+              dayMaxEvents={false}
               eventClick={handleEventClick}
               eventDisplay="block"
               eventTextColor="#ffffff"

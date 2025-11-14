@@ -108,6 +108,7 @@ const Gradebook: NextPageWithLayout = () => {
               gradingPercentages={gradingPercentage?.data?.data}
               notesPercentages={notesPercentages?.data?.data}
               syllabusId={courseDetail?.data?.data?.syllabus_id}
+              courseStatus={courseDetail?.data?.data?.status}
             />
           )}
       </CardBody>

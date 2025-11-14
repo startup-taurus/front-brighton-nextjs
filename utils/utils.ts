@@ -172,20 +172,27 @@ export const getDayOfClassesOfWeek = (courses: any): any[] => {
   const today = new Date();
   const weekStart = startOfWeek(today, { weekStartsOn: 0 });
   const formattedCourse = courses.map((course: any) => {
-    return course?.schedule?.map((item: any, index: number) => {
+    return course?.schedule?.map((item: any, idx: number) => {
       const dayNumber = getDayNumber(item.day);
       const date = addDays(weekStart, dayNumber);
-      const startDateTime = `${format(date, "yyyy-MM-dd")}T${item.startTime}:00`;
-      const endDateTime = `${format(date, "yyyy-MM-dd")}T${item.endTime}:00`;
-
+      const startBound = course?.start_date
+        ? new Date(typeof course.start_date === 'string' ? `${course.start_date}T00:00:00` : course.start_date)
+        : null;
+      const endBound = course?.end_date
+        ? new Date(typeof course.end_date === 'string' ? `${course.end_date}` : course.end_date)
+        : null;
+      if (startBound && date < startBound) return null;
+      if (endBound && date > endBound) return null;
+      const startDateTime = `${format(date, 'yyyy-MM-dd')}T${item.startTime}:00`;
+      const endDateTime = `${format(date, 'yyyy-MM-dd')}T${item.endTime}:00`;
       return {
-        id: index,
+        id: idx,
         title: course?.course_number,
         start: startDateTime,
         end: endDateTime,
         url: `course/${course.course_id}/home`,
       };
-    });
+    }).filter(Boolean);
   });
 
   return formattedCourse.flat().map((event: any, index: number) => ({
