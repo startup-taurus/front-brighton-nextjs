@@ -187,12 +187,13 @@ const TableAttendance: React.FC<TableAttendanceProps> = ({
         <td key={scheduleItemIndex} className='td-attendance'>
           <Input
             type='select'
-            className={`td-input attendance-input bg-transparent text-dark ${isReceptionist ? 'cursor-no-allowed' : ''}`}
+            className={`td-input attendance-input bg-transparent text-dark ${isCoordinator || isReceptionist ? 'cursor-no-allowed' : ''}`}
             value={dates[scheduleItem.id]?.[student.id] || ''}
             onChange={(e: any) =>
               changeAttendance(e, scheduleItem.id, student.id, student.is_retired)
             }
             disabled={
+              isCoordinator ||
               isReceptionist ||
               student.is_retired ||
               student.status === STATUS.INACTIVE

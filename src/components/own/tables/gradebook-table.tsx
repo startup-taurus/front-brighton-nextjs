@@ -71,6 +71,7 @@ const GradebookTable = ({
 
   const isInputDisabled = (student: any) => {
     return (
+      isCoordinator ||
       isReceptionist ||
       student?.is_retired ||
       student?.status === STATUS.INACTIVE
@@ -309,7 +310,7 @@ const GradebookTable = ({
                 <Button
                   className='add-col-btn'
                   onClick={(e) => addAssignmentCol()}
-                  disabled={ isReceptionist}
+                  disabled={isCoordinator || isReceptionist}
                 >
                   <FaPlus />
                 </Button>
@@ -335,7 +336,7 @@ const GradebookTable = ({
             {componentsGradebook?.assignments?.map(
               (item: any, index: number) => (
                 <td
-                  className={`col-vertical border-bottom text-center text-dark ${ isReceptionist ? 'cursor-no-allowed' : ''}`}
+                  className={`col-vertical border-bottom text-center text-dark ${ isCoordinator || isReceptionist ? 'cursor-no-allowed' : ''}`}
                   key={`assignments-title-${item.item_id}`}
                 >
                   <Input
@@ -345,7 +346,7 @@ const GradebookTable = ({
                       onChangeAssignmentCol(e, item.item_id, index)
                     }
                     value={item.item_name ?? ''}
-                    disabled={isReceptionist}
+                    disabled={isCoordinator || isReceptionist}
                   />
                 </td>
               )
@@ -410,7 +411,7 @@ const GradebookTable = ({
                     key={`grade-note-${j}`}
                   >
                     <Input
-                      className={`td-input input-percentage bg-transparent text-black ${ isReceptionist ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark cursor-no-allowed'}`}
+                      className={`td-input input-percentage bg-transparent text-black ${isCoordinator || isReceptionist ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark cursor-no-allowed'}`}
                       onChange={(event) =>
                         onChangeGrades(
                           event,
@@ -428,7 +429,7 @@ const GradebookTable = ({
                   </td>
                 ))}
                 <td
-                  className={`text-black ${isReceptionist || student?.is_retired ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark cursor-no-allowed'}`}
+                  className={`text-black ${isCoordinator || isReceptionist || student?.is_retired ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark cursor-no-allowed'}`}
                 >
                   {calculateAverage(
                     grades,
@@ -443,7 +444,7 @@ const GradebookTable = ({
                     key={`grade-note-progressTest-${j}`}
                   >
                     <Input
-                      className={`td-input input-percentage bg-transparent text-black ${isReceptionist ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark cursor-no-allowed'}`}
+                      className={`td-input input-percentage bg-transparent text-black ${isCoordinator || isReceptionist ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark cursor-no-allowed'}`}
                       onChange={(event) =>
                         onChangeGrades(
                           event,
@@ -476,7 +477,7 @@ const GradebookTable = ({
                     key={`grade-note-progressTest-${j}`}
                   >
                     <Input
-                      className={`td-input input-percentage bg-transparent text-black ${isReceptionist || student?.is_retired ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark'}`}
+                      className={`td-input input-percentage bg-transparent text-black ${isCoordinator || isReceptionist || student?.is_retired ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark'}`}
                       onChange={(event) =>
                         onChangeGrades(
                           event,
@@ -494,7 +495,7 @@ const GradebookTable = ({
                   </td>
                 ))}
                 <td
-                  className={`text-black ${ isReceptionist || student?.is_retired ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark'}`}
+                  className={`text-black ${isCoordinator || isReceptionist || student?.is_retired ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark'}`}
                 >
                   {calculateAverage(
                     grades,
@@ -571,7 +572,7 @@ const GradebookTable = ({
                   key={`grade-note-inactive-${j}`}
                 >
                   <Input
-                    className={`td-input input-percentage bg-transparent text-black ${ isReceptionist ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark cursor-no-allowed'}`}
+                    className={`td-input input-percentage bg-transparent text-black ${ isCoordinator || isReceptionist ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark cursor-no-allowed'}`}
                     onChange={(event) =>
                       onChangeGrades(
                         event,
@@ -589,7 +590,7 @@ const GradebookTable = ({
                 </td>
               ))}
               <td
-                className={`text-black ${isReceptionist || student?.is_retired ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark cursor-no-allowed'}`}
+                className={`text-black ${isCoordinator || isReceptionist || student?.is_retired ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark cursor-no-allowed'}`}
               >
                 {calculateAverage(
                   grades,
@@ -604,7 +605,7 @@ const GradebookTable = ({
                   key={`grade-note-progressTest-inactive-${j}`}
                 >
                   <Input
-                    className={`td-input input-percentage bg-transparent text-black ${ isReceptionist ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark cursor-no-allowed'}`}
+                    className={`td-input input-percentage bg-transparent text-black ${isCoordinator || isReceptionist || student?.is_retired ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark cursor-no-allowed'}`}
                     onChange={(event) =>
                       onChangeGrades(
                         event,
@@ -637,7 +638,7 @@ const GradebookTable = ({
                   key={`grade-note-progressTest-inactive-${j}`}
                 >
                   <Input
-                    className={`td-input input-percentage bg-transparent text-black ${isReceptionist || student?.is_retired ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark'}`}
+                    className={`td-input input-percentage bg-transparent text-black ${isCoordinator || isReceptionist || student?.is_retired ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark'}`}
                     onChange={(event) =>
                       onChangeGrades(
                         event,
@@ -655,7 +656,7 @@ const GradebookTable = ({
                 </td>
               ))}
               <td
-                className={`text-black ${ isReceptionist || student?.is_retired ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark'}`}
+                className={`text-black ${isCoordinator || isReceptionist || student?.is_retired ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark'}`}
               >
                 {calculateAverage(
                   grades,

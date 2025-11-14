@@ -15,33 +15,49 @@ import { getAllProfessors } from 'helper/api-data/professor';
 import CardSkeleton from '@/components/own/common/card-skeleton';
 import { Teacher } from 'Types/TeacherType';
 import useSWR from 'swr';
+import AsyncSelect from 'react-select/async';
 import TableFilters from '@/components/own/table-filters/table-filters';
 import { FiltersProps } from 'Types/types';
 import { useRouter } from 'next/router';
 import { STATUS_FILTER } from '../../../../utils/constants';
+import { getSimpleFiltersString } from '../../../../utils/utils';
 
 const CoordinatorDashboard = () => {
   const router = useRouter();
   const limit = 12;
   const [page, setPage] = useState(1);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
+  
   const [teachers, setTeachers] = useState<Teacher[]>([]);
-  const [professorOptions, setProfessorOptions] = useState<
-    Array<{ label: string; value: string }>
-  >([]);
+  const [teacherOptions, setTeacherOptions] = useState<Array<{ label: string; value: string }>>([]);
+  const [teacherPage, setTeacherPage] = useState(1);
+  const [teacherSearch, setTeacherSearch] = useState('');
+  const [teacherHasMore, setTeacherHasMore] = useState(true);
+  const [teacherLoading, setTeacherLoading] = useState(false);
+
   const [hasMore, setHasMore] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
+  const apiFilters = {
+    name: String(router.query.teacher_name || ''),
+    status: String(router.query.status || ''),
+  };
+  const filtersString = getSimpleFiltersString(apiFilters);
 
   const { data: response, error } = useSWR(
-    ['professors', page, limit, searchTerm],
-    () => getAllProfessors(page, limit, searchTerm),
+    ['professors', page, limit, filtersString],
+    () => getAllProfessors(page, limit, filtersString),
     {
       revalidateOnFocus: false,
     }
   );
+
+  useEffect(() => {
+    setPage(1);
+    setTeachers([]);
+    setHasMore(true);
+    setIsLoadingMore(false);
+  }, [filtersString]);
 
   const loading = !response && !error;
 
@@ -92,18 +108,7 @@ const CoordinatorDashboard = () => {
       }
       setIsLoadingMore(false);
 
-      const options = professorsData.map((professor: any) => ({
-        label: professor.user?.name || 'No name',
-        value: professor.user?.name || 'No name',
-      }));
 
-      setProfessorOptions((prevOptions) => {
-        const combined = [...prevOptions, ...options];
-        return combined.filter(
-          (option, index, self) =>
-            self.findIndex((o) => o.value === option.value) === index
-        );
-      });
     } else {
       if (page === 1) {
         setTeachers([]);
@@ -113,18 +118,6 @@ const CoordinatorDashboard = () => {
     }
   }, [response, page]);
 
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      if (searchTerm.length >= 2 || searchTerm.length === 0) {
-        setDebouncedSearchTerm(searchTerm);
-        setPage(1);
-        setHasMore(true);
-        setIsLoadingMore(false);
-      }
-    }, 300);
-
-    return () => clearTimeout(handler);
-  }, [searchTerm]);
 
   useEffect(() => {
     if (!router.query.status && router.isReady) {
@@ -140,19 +133,15 @@ const CoordinatorDashboard = () => {
   }, [router.isReady]);
 
   const filteredTeachers = teachers.filter((teacher) => {
-    const nameMatch = teacher.name
-      .toLowerCase()
-      .includes(debouncedSearchTerm.toLowerCase());
-
     const teacherNameFilter = router.query.teacher_name as string;
     const teacherNameMatch =
       !teacherNameFilter ||
       teacher.name.toLowerCase().includes(teacherNameFilter.toLowerCase());
 
     const statusFilter = router.query.status as string;
-    const statusMatch = !statusFilter || teacher.status === statusFilter;
+    const statusMatch = !statusFilter || String(teacher.status || '').toLowerCase() === statusFilter.toLowerCase();
 
-    return nameMatch && teacherNameMatch && statusMatch;
+    return teacherNameMatch && statusMatch;
   });
 
   useEffect(() => {
@@ -160,6 +149,26 @@ const CoordinatorDashboard = () => {
       console.error('Error when obtaining teachers:', error);
     }
   }, [error]);
+
+  useEffect(() => {
+    setTeacherOptions([]);
+    setTeacherPage(1);
+    setTeacherHasMore(true);
+    setTeacherSearch('');
+    setTeacherLoading(true);
+    const statusParam = String(router.query.status || '').trim();
+    const filters = getSimpleFiltersString({ status: statusParam });
+    getAllProfessors(1, 10, filters)
+      .then((res) => {
+        const data = res?.data?.result || res?.data || [];
+        const opts = Array.isArray(data)
+          ? data.map((prof: any) => ({ label: prof.user?.name || 'No name', value: prof.user?.name || 'No name' }))
+          : [];
+        setTeacherOptions(opts);
+        setTeacherHasMore(opts.length === 10);
+      })
+      .finally(() => setTeacherLoading(false));
+  }, [router.query.status]);
 
   const loadMoreCallback = useCallback(
     (entries: IntersectionObserverEntry[]) => {
@@ -197,13 +206,55 @@ const CoordinatorDashboard = () => {
     {
       labelName: 'Teacher',
       name: 'teacher_name',
-      type: 'select',
-      items: professorOptions,
-      placeholder: 'Select a teacher',
-      onInputChange: (inputValue: string) => {
-        setSearchTerm(inputValue);
-      },
-      onMenuScrollToBottom: onProfessorScrollBottom,
+      type: 'async-select',
+      asyncComponent: ({ field, form }: any) => (
+        <AsyncSelect
+          cacheOptions
+          defaultOptions={teacherOptions}
+          loadOptions={async (inputValue: string) => {
+            const q = String(inputValue || '').trim();
+            setTeacherSearch(q);
+            const statusParam = String(router.query.status || '').trim();
+            const filters = getSimpleFiltersString({ name: q, status: statusParam });
+            const res = await getAllProfessors(1, 10, filters);
+            const data = res?.data?.result || res?.data || [];
+            const opts = Array.isArray(data)
+              ? data.map((prof: any) => ({ label: prof.user?.name || 'No name', value: prof.user?.name || 'No name' }))
+              : [];
+            setTeacherOptions(opts);
+            setTeacherPage(1);
+            setTeacherHasMore(opts.length === 10);
+            return opts;
+          }}
+          onMenuScrollToBottom={async () => {
+            if (teacherLoading || !teacherHasMore) return;
+            setTeacherLoading(true);
+            const nextPage = teacherPage + 1;
+            const statusParam = String(router.query.status || '').trim();
+            const filters = getSimpleFiltersString({ name: teacherSearch, status: statusParam });
+            const res = await getAllProfessors(nextPage, 10, filters);
+            const data = res?.data?.result || res?.data || [];
+            const more = Array.isArray(data)
+              ? data.map((prof: any) => ({ label: prof.user?.name || 'No name', value: prof.user?.name || 'No name' }))
+              : [];
+            setTeacherOptions((prev) => {
+              const combined = [...prev, ...more];
+              return combined.filter((opt, i, arr) => arr.findIndex((o) => o.value === opt.value) === i);
+            });
+            setTeacherPage(nextPage);
+            setTeacherHasMore(more.length === 10);
+            setTeacherLoading(false);
+          }}
+          value={field.value ? { label: String(field.value), value: String(field.value) } : null}
+          onChange={(selectedOption: any) => {
+            const value = selectedOption ? selectedOption.value : '';
+            form.setFieldValue('teacher_name', value, false);
+          }}
+          placeholder='Select a teacher'
+          classNamePrefix='select'
+          styles={{ menu: (provided: any) => ({ ...provided, zIndex: 9999 }) }}
+        />
+      ),
     },
     {
       labelName: 'Status',

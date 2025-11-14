@@ -36,10 +36,13 @@ export const USER_TYPES = {
 export const STATUS_FILTER = [
   { label: 'Active', value: 'active' },
   { label: 'Inactive', value: 'inactive' },
-  { label: 'Completed', value: 'completed' },
-  { label: 'Transferred', value: 'transferred' },
 ];
-
+export const STATUS_FILTER_COURSE = [
+  { label: 'Active', value: 'active' },
+  { label: 'Inactive', value: 'inactive' },
+  { label: 'Transferred', value: 'transferred' },
+  { label: 'Completed', value: 'completed' },
+];
 export const LEVEL_FILTER = [
   { label: 'Graduate', value: 'Graduate' },
   { label: 'Undergraduate', value: 'Undergraduate' },
