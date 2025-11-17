@@ -19,7 +19,7 @@ import AsyncSelect from 'react-select/async';
 import TableFilters from '@/components/own/table-filters/table-filters';
 import { FiltersProps } from 'Types/types';
 import { useRouter } from 'next/router';
-import { STATUS_FILTER } from '../../../../utils/constants';
+import { STATUS, STATUS_FILTER, DEFAULT_LABELS } from '../../../../utils/constants';
 import { getSimpleFiltersString } from '../../../../utils/utils';
 
 const CoordinatorDashboard = () => {
@@ -80,17 +80,17 @@ const CoordinatorDashboard = () => {
     if (Array.isArray(professorsData)) {
       const formattedTeachers = professorsData.map((professor: any) => ({
         id: professor.id,
-        name: professor.user?.name || 'No name',
+        name: professor.user?.name || DEFAULT_LABELS.NO_NAME,
         image: professor.user?.image || '',
-        role: professor.user?.role || 'No role',
+        role: professor.user?.role || DEFAULT_LABELS.NO_ROLE,
         students: professor.students_count || 0,
         courses: professor.courses?.length || 0,
-        status: professor.status || 'active',
+        status: professor.status || STATUS.ACTIVE,
         coursesList: Array.isArray(professor.courses)
           ? professor.courses.map((course: any) => ({
-              code: course.code || 'N/A',
-              name: course.name || 'No name',
-              schedule: course.schedule || 'Hours not available',
+              code: course.code || DEFAULT_LABELS.NA,
+              name: course.name || DEFAULT_LABELS.NO_NAME,
+              schedule: course.schedule || DEFAULT_LABELS.HOURS_NOT_AVAILABLE,
             }))
           : [],
         user: {
@@ -124,7 +124,7 @@ const CoordinatorDashboard = () => {
       router.push(
         {
           pathname: router.pathname,
-          query: { ...router.query, status: 'active' },
+          query: { ...router.query, status: STATUS.ACTIVE },
         },
         undefined,
         { shallow: true }
@@ -150,25 +150,30 @@ const CoordinatorDashboard = () => {
     }
   }, [error]);
 
+  const statusParam = String(router.query.status || '').trim();
+  const teacherOptionsFilters = getSimpleFiltersString({ status: statusParam });
+  const { data: teacherOptionsResponse } = useSWR(
+    router.query.status ? ['teacher-options', statusParam] : null,
+    () => getAllProfessors(1, 10, teacherOptionsFilters),
+    { revalidateOnFocus: false }
+  );
+
   useEffect(() => {
     setTeacherOptions([]);
     setTeacherPage(1);
     setTeacherHasMore(true);
     setTeacherSearch('');
-    setTeacherLoading(true);
-    const statusParam = String(router.query.status || '').trim();
-    const filters = getSimpleFiltersString({ status: statusParam });
-    getAllProfessors(1, 10, filters)
-      .then((res) => {
-        const data = res?.data?.result || res?.data || [];
-        const opts = Array.isArray(data)
-          ? data.map((prof: any) => ({ label: prof.user?.name || 'No name', value: prof.user?.name || 'No name' }))
-          : [];
-        setTeacherOptions(opts);
-        setTeacherHasMore(opts.length === 10);
-      })
-      .finally(() => setTeacherLoading(false));
   }, [router.query.status]);
+
+  useEffect(() => {
+    if (!teacherOptionsResponse) return;
+    const data = teacherOptionsResponse?.data?.result || teacherOptionsResponse?.data || [];
+    const opts = Array.isArray(data)
+      ? data.map((prof: any) => ({ label: prof.user?.name || DEFAULT_LABELS.NO_NAME, value: prof.user?.name || DEFAULT_LABELS.NO_NAME }))
+      : [];
+    setTeacherOptions(opts);
+    setTeacherHasMore(opts.length === 10);
+  }, [teacherOptionsResponse]);
 
   const loadMoreCallback = useCallback(
     (entries: IntersectionObserverEntry[]) => {
@@ -202,6 +207,25 @@ const CoordinatorDashboard = () => {
     };
   }, [loadMoreCallback, hasMore]);
 
+  const onTeacherOptionsScrollBottom = async () => {
+    if (teacherLoading || !teacherHasMore) return;
+    setTeacherLoading(true);
+    const nextPage = teacherPage + 1;
+    const filters = getSimpleFiltersString({ name: teacherSearch, status: statusParam });
+    const res = await getAllProfessors(nextPage, 10, filters);
+    const data = res?.data?.result || res?.data || [];
+    const more = Array.isArray(data)
+      ? data.map((prof: any) => ({ label: prof.user?.name || DEFAULT_LABELS.NO_NAME, value: prof.user?.name || DEFAULT_LABELS.NO_NAME }))
+      : [];
+    setTeacherOptions((prev) => {
+      const combined = [...prev, ...more];
+      return combined.filter((opt, i, arr) => arr.findIndex((o) => o.value === opt.value) === i);
+    });
+    setTeacherPage(nextPage);
+    setTeacherHasMore(more.length === 10);
+    setTeacherLoading(false);
+  };
+
   const selectFilters: FiltersProps[] = [
     {
       labelName: 'Teacher',
@@ -219,32 +243,14 @@ const CoordinatorDashboard = () => {
             const res = await getAllProfessors(1, 10, filters);
             const data = res?.data?.result || res?.data || [];
             const opts = Array.isArray(data)
-              ? data.map((prof: any) => ({ label: prof.user?.name || 'No name', value: prof.user?.name || 'No name' }))
+              ? data.map((prof: any) => ({ label: prof.user?.name || DEFAULT_LABELS.NO_NAME, value: prof.user?.name || DEFAULT_LABELS.NO_NAME }))
               : [];
             setTeacherOptions(opts);
             setTeacherPage(1);
             setTeacherHasMore(opts.length === 10);
             return opts;
           }}
-          onMenuScrollToBottom={async () => {
-            if (teacherLoading || !teacherHasMore) return;
-            setTeacherLoading(true);
-            const nextPage = teacherPage + 1;
-            const statusParam = String(router.query.status || '').trim();
-            const filters = getSimpleFiltersString({ name: teacherSearch, status: statusParam });
-            const res = await getAllProfessors(nextPage, 10, filters);
-            const data = res?.data?.result || res?.data || [];
-            const more = Array.isArray(data)
-              ? data.map((prof: any) => ({ label: prof.user?.name || 'No name', value: prof.user?.name || 'No name' }))
-              : [];
-            setTeacherOptions((prev) => {
-              const combined = [...prev, ...more];
-              return combined.filter((opt, i, arr) => arr.findIndex((o) => o.value === opt.value) === i);
-            });
-            setTeacherPage(nextPage);
-            setTeacherHasMore(more.length === 10);
-            setTeacherLoading(false);
-          }}
+          onMenuScrollToBottom={onTeacherOptionsScrollBottom}
           value={field.value ? { label: String(field.value), value: String(field.value) } : null}
           onChange={(selectedOption: any) => {
             const value = selectedOption ? selectedOption.value : '';

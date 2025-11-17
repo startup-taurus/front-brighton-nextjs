@@ -15,7 +15,7 @@ import StudentTransferForm from '../form/student-transfer-form';
 import { getFiltersString } from '../../../../utils/utils';
 import TableSkeleton from '../common/table-skeleton/TableSkeleton';
 import { UserContext } from 'helper/User';
-import { USER_TYPES, STATUS } from '../../../../utils/constants';
+import { USER_TYPES, STATUS, COURSE_CLIENT_PAGINATION_STATUSES } from '../../../../utils/constants';
 import { FaCertificate, FaFileAlt } from 'react-icons/fa';
 import { generateBatchCertificatesZIP, generateBatchReportsZIP } from '../../../../utils/pdfGenerator';
 import { toast } from 'react-toastify';
@@ -39,13 +39,13 @@ const CoursesTable = ({ reload, loading }: any) => {
   const statusQuery = typeof router.query.status === 'string' ? router.query.status : '';
 
   const clientPagination =
-    statusQuery === 'completed' ||
-    statusQuery === 'inactive' ||
-    statusQuery === 'active';
+    statusQuery === STATUS.COMPLETED ||
+    statusQuery === STATUS.INACTIVE ||
+    statusQuery === STATUS.ACTIVE;
 
   const rawFilters = getFiltersString(router);
   const filters =
-    statusQuery === 'completed'
+    statusQuery === STATUS.COMPLETED
       ? rawFilters
           .split('&')
           .filter((kv) => !kv.startsWith('status='))
@@ -69,7 +69,7 @@ const CoursesTable = ({ reload, loading }: any) => {
     refreshData();
   }, [reload, refreshData]);
 
-  const getNewStatus = (currentStatus: string) => currentStatus === 'active' ? 'inactive' : 'active';
+  const getNewStatus = (currentStatus: string) => currentStatus === STATUS.ACTIVE ? STATUS.INACTIVE : STATUS.ACTIVE;
   const getStatusAction = (currentStatus: string) => currentStatus === 'active' ? 'deactivate' : 'active';
 
   const showNoSelectionAlert = (action: string) => {
@@ -115,7 +115,7 @@ const CoursesTable = ({ reload, loading }: any) => {
   const hasActiveStudents = (row: any) =>
     typeof row.active_student_count === 'number' && row.active_student_count > 0;
 
-  const isTransferredView = statusQuery === 'transferred';
+  const isTransferredView = statusQuery === STATUS.TRANSFERRED;
 
   const toggle = useCallback((data: any) => {
     setSelectedData(data);
@@ -247,7 +247,7 @@ const CoursesTable = ({ reload, loading }: any) => {
       }
       const students = await fetchCourseStudents(row.id);
       const activeStudents = (students || []).filter(
-        (s: any) => s?.status?.toLowerCase() === 'active' && !s?.is_retired
+        (s: any) => s?.status?.toLowerCase() === STATUS.ACTIVE && !s?.is_retired
       );
   
       if (activeStudents.length === 0) {
@@ -280,10 +280,10 @@ const CoursesTable = ({ reload, loading }: any) => {
   const baseData = courses?.data?.result || [];
   const preFilteredData = baseData;
   const statusPredicateMap: Record<string, (row: any) => boolean> = {
-    completed: (row: any) => isCourseCompleted(row),
-    inactive: (row: any) => !isCourseCompleted(row) && row.status?.toLowerCase() === STATUS.INACTIVE,
-    active: (row: any) => !isCourseCompleted(row) && row.status?.toLowerCase() === STATUS.ACTIVE,
-    transferred: (row: any) => isCourseTransferred(row),
+    [STATUS.COMPLETED]: (row: any) => isCourseCompleted(row),
+    [STATUS.INACTIVE]: (row: any) => !isCourseCompleted(row) && row.status?.toLowerCase() === STATUS.INACTIVE,
+    [STATUS.ACTIVE]: (row: any) => !isCourseCompleted(row) && row.status?.toLowerCase() === STATUS.ACTIVE,
+    [STATUS.TRANSFERRED]: (row: any) => isCourseTransferred(row),
   };
 
   const displayedData = useMemo(() => {

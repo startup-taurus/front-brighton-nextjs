@@ -73,16 +73,15 @@ const TeacherDashboard = ({
   const displayUser =
     isCoordinator || isReceptionist ? userData?.data?.data || {} : user;
 
-  // Fallback seguro: si el endpoint de calendario viene vacío, usamos cursos normales filtrando finalizados
   const rawCalendarCourses = calendarCourses?.data?.data?.courses || [];
   const fallbackCourses = courses?.data?.data?.courses || [];
   const today = new Date(); today.setHours(0, 0, 0, 0);
 
-  const onlyActive = (list: any[]) =>
-    list.filter((c: any) => {
-      const end = c?.end_date ? new Date(c.end_date) : null;
+  const onlyActive = (courses: any[]) =>
+    courses.filter((course: any) => {
+      const end = course?.end_date ? new Date(course.end_date) : null;
       const endedByDate = end ? (end.setHours(0,0,0,0), end < today) : false;
-      const endedByFlag = Boolean(c?.options?.isAlreadyEnd || c?.options?.isAreadyEnd);
+      const endedByFlag = Boolean(course?.options?.isAlreadyEnd || course?.options?.isAreadyEnd);
       return !(endedByDate || endedByFlag);
     });
 

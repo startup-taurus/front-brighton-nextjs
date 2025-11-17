@@ -167,8 +167,11 @@ export const EXAM_TYPE_OPTIONS = [
 export const STATUS = {
   ACTIVE: 'active',
   INACTIVE: 'inactive',
-  TRANSFERRED: 'transferred'
+  TRANSFERRED: 'transferred',
+  COMPLETED: 'completed'
 };
+
+export const COURSE_CLIENT_PAGINATION_STATUSES = [STATUS.COMPLETED, STATUS.INACTIVE, STATUS.ACTIVE] as const;
 export const GROUP_MINIMUM = 2;
 
 export const EXAM_MODULES = {
@@ -263,3 +266,18 @@ export const PDF_GENERATOR_CONSTANTS = {
     'July', 'August', 'September', 'October', 'November', 'December'
   ]
 };
+
+export const CONFLICT_TYPES = {
+  SCHEDULE: 'schedule',
+  CLASSROOM: 'classroom',
+  DUPLICATE: 'duplicate'
+} as const;
+export type ConflictType = typeof CONFLICT_TYPES[keyof typeof CONFLICT_TYPES];
+
+export const DEFAULT_LABELS = {
+  NO_NAME: 'No name',
+  NO_ROLE: 'No role',
+  NA: 'N/A',
+  NOT_AVAILABLE: 'Not available',
+  HOURS_NOT_AVAILABLE: 'Hours not available',
+} as const;

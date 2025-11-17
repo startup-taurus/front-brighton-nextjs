@@ -19,7 +19,8 @@ import {getAllSyllabus} from 'helper/api-data/syllabus';
 
 import {toast} from 'react-toastify';
 import Swal from 'sweetalert2';
-import {PRIVATE_COURSE_TYPES} from '../../../../utils/constants';
+import {PRIVATE_COURSE_TYPES, CONFLICT_TYPES, ConflictType, STATUS} from '../../../../utils/constants';
+import { formatScheduleLinear, scanScheduleConflicts } from '../../../../utils/utils';
 const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const CourseForm = ({data, isOpen, toggle, onSuccess, isTransferMode = false, transferInfo, isDuplicateMode = false, duplicateInfo}: any) => {
   const limit = 1000;
@@ -31,14 +32,14 @@ const CourseForm = ({data, isOpen, toggle, onSuccess, isTransferMode = false, tr
     try {
       const { data: { result: courses } } = await getAllCourses();
       const duplicateCourse = courses?.find((c: any) => 
-        c.status === 'active' && 
+        c.status === STATUS.ACTIVE && 
         (data ? c.id !== data.id : true) &&
         (c.course_name?.toLowerCase() === courseData.course_name?.toLowerCase() || 
          c.course_number?.toLowerCase() === courseData.course_number?.toLowerCase())
       );
       if (duplicateCourse) {
         const duplicateType = duplicateCourse.course_name?.toLowerCase() === courseData.course_name?.toLowerCase() ? 'name' : 'number';
-        return { hasConflict: true, type: 'duplicate', message: `A course with the same ${duplicateType} already exists:<br>
+        return { hasConflict: true, type: CONFLICT_TYPES.DUPLICATE, message: `A course with the same ${duplicateType} already exists:<br>
                    Existing course: ${duplicateCourse.course_name} (${duplicateCourse.course_number})<br>
                    Professor: ${duplicateCourse.professor_name || 'Not assigned'}<br>
                    Please use a different ${duplicateType} for the course.` };
@@ -46,61 +47,28 @@ const CourseForm = ({data, isOpen, toggle, onSuccess, isTransferMode = false, tr
       if (courseData.course_type === PRIVATE_COURSE_TYPES.PRIVATE || courseData.course_type === PRIVATE_COURSE_TYPES.PRIVATE_ONLINE) {
         return { hasConflict: false };
       }
-      const newSchedule = formatSchedule(courseData.schedules);
+      const newSchedule = formatScheduleLinear(courseData.schedules);
       const [newDays, newTime] = newSchedule.split(' ');
       const newEndDate = courseData.end_date ? new Date(courseData.end_date) : null;
       const startEffective = new Date(courseData.start_date);
       const selectedProfessorId = String(courseData.professor_id ?? (courseData.professor?.value ?? courseData.professor ?? ''));
       const activeCourses = courses?.filter((c: any) => 
-        c.status === 'active' && 
+        c.status === STATUS.ACTIVE && 
         String(c.professor_id) === selectedProfessorId &&
         c.schedule &&
         (data ? c.id !== data.id : true)
       ) || [];
       const classroomCourses = courses?.filter((c: any) => 
-        c.status === 'active' &&
+        c.status === STATUS.ACTIVE &&
         c.classroom === courseData.classroom &&
         c.schedule &&
         (data ? c.id !== data.id : true)
       ) || [];
-      const dateRangesOverlap = (aStart: Date, aEnd: Date | null, bStart: Date, bEnd: Date | null) => {
-        const aEndTime = aEnd ? aEnd.getTime() : Infinity;
-        const bEndTime = bEnd ? bEnd.getTime() : Infinity;
-        return aStart.getTime() <= bEndTime && bStart.getTime() <= aEndTime;
-      };
-      const scan = (list: any[], type: 'schedule' | 'classroom') => {
-        for (const existing of list) {
-          const [existingDays, existingTime] = existing.schedule.split(' ');
-          const existingStartDate = new Date(existing.start_date);
-          const finalEndDate = existing.last_class_date ? new Date(existing.last_class_date) : (existing.end_date ? new Date(existing.end_date) : null);
-          if (finalEndDate && startEffective.getTime() > finalEndDate.getTime()) continue;
-          const commonDays = existingDays.split('-').some((d: string) => newDays.split('-').includes(d));
-          if (!commonDays) continue;
-          if (!dateRangesOverlap(existingStartDate, finalEndDate, startEffective, newEndDate)) continue;
-          const [existingStart, existingEnd] = existingTime.split('-');
-          const [newStart, newEnd] = newTime.split('-');
-          const timesOverlap = new Date(`2000-01-01T${newStart}:00`) < new Date(`2000-01-01T${existingEnd}:00`) &&
-            new Date(`2000-01-01T${newEnd}:00`) > new Date(`2000-01-01T${existingStart}:00`);
-          if (timesOverlap) {
-            const exactMatch = existingDays === newDays && existingTime === newTime;
-            return {
-              hasConflict: true,
-              type,
-              message: exactMatch
-                ? (type === 'classroom'
-                    ? `This classroom ("${existing.classroom}") already has a course at the same schedule.<br>Existing: ${existing.course_name} (${existing.course_number}) — ${existing.schedule}<br>New: ${newSchedule}`
-                    : `This professor already has a course at the same schedule.<br>Existing: ${existing.course_name} (${existing.course_number}) — ${existing.schedule}<br>New: ${newSchedule}`)
-                : (type === 'classroom'
-                    ? `Classroom conflict: "${existing.classroom}" is already booked by "${existing.course_name}" (${existing.course_number}).<br>Existing: ${existing.schedule}<br>New: ${newSchedule}`
-                    : `Schedule conflict with "${existing.course_name}" (${existing.course_number}).<br>Existing: ${existing.schedule}<br>New: ${newSchedule}`)
-            };
-          }
-        }
-        return { hasConflict: false };
-      };
-      const profResult = scan(activeCourses, 'schedule');
+
+
+      const profResult = scanScheduleConflicts(activeCourses, CONFLICT_TYPES.SCHEDULE, newDays, newTime, startEffective, newEndDate, newSchedule);
       if (profResult.hasConflict) return profResult;
-      const roomResult = scan(classroomCourses, 'classroom');
+      const roomResult = scanScheduleConflicts(classroomCourses, CONFLICT_TYPES.CLASSROOM, newDays, newTime, startEffective, newEndDate, newSchedule);
       if (roomResult.hasConflict) return roomResult;
       return { hasConflict: false };
     } catch (error) {
@@ -113,9 +81,9 @@ const CourseForm = ({data, isOpen, toggle, onSuccess, isTransferMode = false, tr
       const conflictValidation = await validateScheduleConflicts(formData);
       if (conflictValidation.hasConflict) {
         await Swal.fire({
-          title: conflictValidation.type === 'classroom'
+          title: conflictValidation.type === CONFLICT_TYPES.CLASSROOM
             ? 'Classroom Conflict Detected'
-            : conflictValidation.type === 'duplicate'
+            : conflictValidation.type === CONFLICT_TYPES.DUPLICATE
             ? 'Duplicate Course Detected'
             : 'Schedule Conflict Detected',
           html: conflictValidation.message,
@@ -151,11 +119,11 @@ const CourseForm = ({data, isOpen, toggle, onSuccess, isTransferMode = false, tr
         payload.classroom = null;
         payload.schedule = null;
       } else {
-        payload.schedule = formatSchedule(formData.schedules);
+        payload.schedule = formatScheduleLinear(formData.schedules);
       }
       if (isDuplicateMode && duplicateInfo?.students) {
         payload.students = duplicateInfo.students
-          .filter((student: any) => student?.status?.toLowerCase() === 'active' && !student?.is_retired)
+          .filter((student: any) => student?.status?.toLowerCase() === STATUS.ACTIVE && !student?.is_retired)
           .map((student: any) => ({
             student_id: student.id,
             enrollment_date: new Date().toISOString().split('T')[0],
@@ -187,8 +155,7 @@ const CourseForm = ({data, isOpen, toggle, onSuccess, isTransferMode = false, tr
   const save = (data: any) => handleSubmit(data, false);
   const update = (data: any) => handleSubmit(data, true);
 
-  const formatSchedule = (schedules: any) => 
-    schedules?.map((s: any) => `${s.days.join('-')} ${s.startTime}-${s.endTime}`).join(', ') || '';
+
 
   const {data: course, isLoading: isLoadingCourse} = useSWR(
     ['/course/get-active', page, limit],

@@ -2,6 +2,7 @@ import React from 'react';
 import { Modal, ModalBody, ModalHeader } from 'reactstrap';
 import Image from 'next/image';
 import { ImgPath, UrlImage } from 'utils/Constant';
+import { formatDateLocale } from 'utils/utils';
 import { Course, CourseDetailModalProps } from 'Types/CalendarTypes';
 
 const CourseDetailModal: React.FC<CourseDetailModalProps> = ({
@@ -117,7 +118,7 @@ const CourseDetailModal: React.FC<CourseDetailModalProps> = ({
                     </div>
                     <span className="text-dark">
                       {selectedCourse.start_date ? 
-                        new Date(selectedCourse.start_date + 'T00:00:00').toLocaleDateString('en-US') : 
+                        formatDateLocale(selectedCourse.start_date, 'en-US') : 
                         'Not available'
                       }
                     </span>
@@ -132,7 +133,7 @@ const CourseDetailModal: React.FC<CourseDetailModalProps> = ({
                     </div>
                     <span className="text-dark">
                       {selectedCourse.end_date ? 
-                        new Date(selectedCourse.end_date).toLocaleDateString('en-US') : 
+                        formatDateLocale(selectedCourse.end_date, 'en-US') : 
                         'Not available'
                       }
                     </span>
