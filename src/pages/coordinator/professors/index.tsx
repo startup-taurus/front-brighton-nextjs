@@ -160,17 +160,17 @@ const CoordinatorDashboard = () => {
     setTeacherSearch('');
   }, [router.query.status]);
 
-  const initialTeacherOptions = useMemo(() => {
-    const professorsData = response?.data?.result || response?.data;
-    if (!Array.isArray(professorsData)) return [];
-    const opts = professorsData.map((prof: any) => ({ label: prof.user?.name || DEFAULT_LABELS.NO_NAME, value: prof.user?.name || DEFAULT_LABELS.NO_NAME }));
-    return opts.filter((opt, i, arr) => arr.findIndex((o) => o.value === opt.value) === i).slice(0, 10);
-  }, [response]);
+  const teacherOptionPool = useMemo(() => {
+    const opts = teachers.map((t: any) => ({ label: t.name || DEFAULT_LABELS.NO_NAME, value: t.name || DEFAULT_LABELS.NO_NAME }));
+    return opts.filter((opt, i, arr) => arr.findIndex((o) => o.value === opt.value) === i);
+  }, [teachers]);
 
   useEffect(() => {
-    setTeacherOptions(initialTeacherOptions);
-    setTeacherHasMore(initialTeacherOptions.length === 10);
-  }, [initialTeacherOptions]);
+    const sliceCount = Math.max(1, teacherPage) * 10;
+    const nextOptions = teacherOptionPool.slice(0, sliceCount);
+    setTeacherOptions(nextOptions);
+    setTeacherHasMore(teacherOptionPool.length > nextOptions.length);
+  }, [teacherOptionPool, teacherPage]);
 
   const loadMoreCallback = useCallback(
     (entries: IntersectionObserverEntry[]) => {
@@ -204,23 +204,14 @@ const CoordinatorDashboard = () => {
     };
   }, [loadMoreCallback, hasMore]);
 
-  const onTeacherOptionsScrollBottom = async () => {
-    if (teacherLoading || !teacherHasMore) return;
-    setTeacherLoading(true);
-    const nextPage = teacherPage + 1;
-    const filters = getSimpleFiltersString({ name: teacherSearch, status: statusParam });
-    const res = await getAllProfessors(nextPage, 10, filters);
-    const data = res?.data?.result || res?.data || [];
-    const more = Array.isArray(data)
-      ? data.map((prof: any) => ({ label: prof.user?.name || DEFAULT_LABELS.NO_NAME, value: prof.user?.name || DEFAULT_LABELS.NO_NAME }))
-      : [];
-    setTeacherOptions((prev) => {
-      const combined = [...prev, ...more];
-      return combined.filter((opt, i, arr) => arr.findIndex((o) => o.value === opt.value) === i);
-    });
-    setTeacherPage(nextPage);
-    setTeacherHasMore(more.length === 10);
-    setTeacherLoading(false);
+  const onTeacherOptionsScrollBottom = () => {
+    if (teacherHasMore) {
+      setTeacherPage(teacherPage + 1);
+      return;
+    }
+    if (hasMore && !loading && !isLoadingMore) {
+      setPage(page + 1);
+    }
   };
 
   const selectFilters: FiltersProps[] = [
