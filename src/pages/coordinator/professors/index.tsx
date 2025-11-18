@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
   Container,
   Row,
@@ -151,12 +151,7 @@ const CoordinatorDashboard = () => {
   }, [error]);
 
   const statusParam = String(router.query.status || '').trim();
-  const teacherOptionsFilters = getSimpleFiltersString({ status: statusParam });
-  const { data: teacherOptionsResponse } = useSWR(
-    router.query.status ? ['teacher-options', statusParam] : null,
-    () => getAllProfessors(1, 10, teacherOptionsFilters),
-    { revalidateOnFocus: false }
-  );
+
 
   useEffect(() => {
     setTeacherOptions([]);
@@ -165,15 +160,17 @@ const CoordinatorDashboard = () => {
     setTeacherSearch('');
   }, [router.query.status]);
 
+  const initialTeacherOptions = useMemo(() => {
+    const professorsData = response?.data?.result || response?.data;
+    if (!Array.isArray(professorsData)) return [];
+    const opts = professorsData.map((prof: any) => ({ label: prof.user?.name || DEFAULT_LABELS.NO_NAME, value: prof.user?.name || DEFAULT_LABELS.NO_NAME }));
+    return opts.filter((opt, i, arr) => arr.findIndex((o) => o.value === opt.value) === i).slice(0, 10);
+  }, [response]);
+
   useEffect(() => {
-    if (!teacherOptionsResponse) return;
-    const data = teacherOptionsResponse?.data?.result || teacherOptionsResponse?.data || [];
-    const opts = Array.isArray(data)
-      ? data.map((prof: any) => ({ label: prof.user?.name || DEFAULT_LABELS.NO_NAME, value: prof.user?.name || DEFAULT_LABELS.NO_NAME }))
-      : [];
-    setTeacherOptions(opts);
-    setTeacherHasMore(opts.length === 10);
-  }, [teacherOptionsResponse]);
+    setTeacherOptions(initialTeacherOptions);
+    setTeacherHasMore(initialTeacherOptions.length === 10);
+  }, [initialTeacherOptions]);
 
   const loadMoreCallback = useCallback(
     (entries: IntersectionObserverEntry[]) => {
