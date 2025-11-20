@@ -11,23 +11,18 @@ const ScheduleCalendar = ({ courses }: any) => {
   const calendarRef = useRef<FullCalendar>(null);
 
   useEffect(() => {
-    const schedule = getDayOfClassesOfWeek(courses);
+    const safeCourses = Array.isArray(courses) ? courses : [];
+    const schedule = getDayOfClassesOfWeek(safeCourses);
     setDayOfClasses(schedule);
   }, [courses]);
-
-  if (!courses || courses?.length === 0) return null;
-  if (!daysOfClasses || daysOfClasses?.length === 0) return null;
 
   return (
     <div>
       <h2 className='main-title mb-4'>Calendar</h2>
       <Row>
-        <Col
-          xs={12}
-          lg={12}
-        >
-           <FullCalendar
-           plugins={[timeGridPlugin]}
+        <Col xs={12} lg={12}>
+          <FullCalendar
+            plugins={[timeGridPlugin]}
             headerToolbar={{
               left: '',
               center: 'title',
@@ -38,7 +33,7 @@ const ScheduleCalendar = ({ courses }: any) => {
             expandRows={false}
             allDaySlot={false}
             nowIndicator={true}
-            initialEvents={daysOfClasses}
+            events={daysOfClasses || []}
             slotMinTime='07:00:00'
             slotMaxTime='22:00:00'
             height='auto'

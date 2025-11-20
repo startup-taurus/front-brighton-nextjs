@@ -3,6 +3,9 @@ import { getFetcher, postFetcher, putFetcher } from '../api';
 export const getProfessorCourses = (userId: number) => {
   return getFetcher(`/professor/${userId}/courses`, false);
 };
+export const getProfessorActiveCoursesForCalendar = (userId: number) => {
+  return getFetcher(`/professor/${userId}/courses/calendar`, false);
+};
 
 export const getAllProfessors = (
   page: number,

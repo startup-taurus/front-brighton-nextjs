@@ -45,6 +45,7 @@ const GradebookTable = ({
   gradingPercentages,
   syllabusId,
   notesPercentages,
+  courseStatus,
 }: any) => {
   const router = useRouter();
   const courseId = router.query.id as string;
@@ -54,6 +55,10 @@ const GradebookTable = ({
   const isReceptionist = user?.role === USER_TYPES.RECEPTIONIST;
   const canAddGrades = can(PERMISSIONS.ADD_GRADES);
   const canEditGrades = can(PERMISSIONS.EDIT_GRADES);
+
+  const isTransferredCourse =
+    typeof courseStatus === 'string' &&
+    courseStatus.toLowerCase() === STATUS.TRANSFERRED;
 
   const [grades, setGrades] = useState<any>({});
   const [showInactive, setShowInactive] = useState(false);
@@ -91,9 +96,9 @@ const GradebookTable = ({
     event: any,
     gradingItemId: any,
     studentId: any,
-    isRetied: boolean
+    isRetired: boolean
   ) => {
-    if (isCoordinator || isRetied) {
+    if (isRetired) {
       return;
     }
 
@@ -146,10 +151,6 @@ const GradebookTable = ({
     gradingItemId: any,
     studentId: any
   ) => {
-    if (isCoordinator) {
-      toast.error('Coordinators do not have permission to add or edit grades');
-      return;
-    }
 
     if (event.key === 'Backspace') {
       event.preventDefault();
@@ -193,11 +194,6 @@ const GradebookTable = ({
   );
 
   const addAssignmentCol = () => {
-    if (isCoordinator) {
-      toast.error('Coordinators do not have permission to add assignments');
-      return;
-    }
-
     Swal.fire({
       title: 'Are you sure you want to add a new assignment?',
       text: 'This action cannot be reversed',
@@ -222,11 +218,6 @@ const GradebookTable = ({
   };
 
   const onChangeAssignmentCol = (e: ChangeEvent, id: any, index: number) => {
-    if (isCoordinator) {
-      toast.error('Coordinators do not have permission to edit assignments');
-      return;
-    }
-
     const value = (e.target as HTMLInputElement).value;
     let assignments = componentsGradebook.assignments;
     assignments[index].item_name = value;
@@ -274,35 +265,34 @@ const GradebookTable = ({
 
   const active = useMemo(
     () =>
-      students.filter(
-        (student: any) =>
-          !student.is_retired && student.status !== STATUS.INACTIVE
-      ),
-    [students]
+      isTransferredCourse
+        ? students.filter(
+            (student: any) => student.status !== STATUS.INACTIVE
+          )
+        : students.filter(
+            (student: any) =>
+              !student.is_retired && student.status !== STATUS.INACTIVE
+          ),
+    [students, isTransferredCourse]
   );
 
   const inactive = useMemo(
     () =>
-      students.filter(
-        (student: any) =>
-          student.is_retired || student.status === STATUS.INACTIVE
-      ),
-    [students]
+      isTransferredCourse
+        ? students.filter(
+            (student: any) => student.status === STATUS.INACTIVE
+          )
+        : students.filter(
+            (student: any) =>
+              student.is_retired || student.status === STATUS.INACTIVE
+          ),
+    [students, isTransferredCourse]
   );
 
   const toggleInactive = () => setShowInactive((p) => !p);
 
   return (
     <>
-      {isCoordinator && (
-        <Alert
-          color='warning'
-          className='mb-3'
-        >
-          As a coordinator, you can only view the ratings but cannot modify them
-          or add assignments.
-        </Alert>
-      )}
       <Table
         responsive
         bordered
@@ -346,7 +336,7 @@ const GradebookTable = ({
             {componentsGradebook?.assignments?.map(
               (item: any, index: number) => (
                 <td
-                  className={`col-vertical border-bottom text-center text-dark ${isCoordinator || isReceptionist ? 'cursor-no-allowed' : ''}`}
+                  className={`col-vertical border-bottom text-center text-dark ${ isCoordinator || isReceptionist ? 'cursor-no-allowed' : ''}`}
                   key={`assignments-title-${item.item_id}`}
                 >
                   <Input
@@ -472,7 +462,7 @@ const GradebookTable = ({
                   </td>
                 ))}
                 <td
-                  className={`text-black ${isCoordinator || student?.is_retired ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark'}`}
+                  className={`text-black ${student?.is_retired ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark'}`}
                 >
                   {calculateAverage(
                     grades,
@@ -523,7 +513,7 @@ const GradebookTable = ({
               </tr>
             ))}
 
-          {inactive.length > 0 && (
+          {inactive.length > 0 &&(
             <tr>
               <td
                 colSpan={35}
@@ -531,11 +521,10 @@ const GradebookTable = ({
                 onClick={toggleInactive}
               >
                 <span className='text-dark'>
-                  {showInactive ? 'Hide ' : 'Show '}
-                  inactive/retired students ({inactive.length})
+                  {showInactive ? 'Hide' : 'Show'} {isTransferredCourse ? 'inactive' : 'inactive/retired'} students ({inactive.length})
                 </span>
                 <span
-                  className={`toggle-icon ${isCoordinator || isReceptionist ? 'toggle-icon no-professor' : ''}`}
+                  className={`toggle-icon  ${isCoordinator || isReceptionist ? 'toggle-icon no-professor ' : ''}  `}
                 >
                   {showInactive ? <FaChevronUp /> : <FaChevronDown />}
                 </span>
@@ -571,6 +560,8 @@ const GradebookTable = ({
                   >
                     {student?.status === STATUS.INACTIVE
                       ? 'Inactive'
+                      : isTransferredCourse
+                      ? 'Transferred'
                       : 'Retired'}
                   </Badge>
                 )}
@@ -581,7 +572,7 @@ const GradebookTable = ({
                   key={`grade-note-inactive-${j}`}
                 >
                   <Input
-                    className={`td-input input-percentage bg-transparent text-black ${isCoordinator || isReceptionist ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark cursor-no-allowed'}`}
+                    className={`td-input input-percentage bg-transparent text-black ${ isCoordinator || isReceptionist ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark cursor-no-allowed'}`}
                     onChange={(event) =>
                       onChangeGrades(
                         event,
@@ -614,7 +605,7 @@ const GradebookTable = ({
                   key={`grade-note-progressTest-inactive-${j}`}
                 >
                   <Input
-                    className={`td-input input-percentage bg-transparent text-black ${isCoordinator || isReceptionist ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark cursor-no-allowed'}`}
+                    className={`td-input input-percentage bg-transparent text-black ${isCoordinator || isReceptionist || student?.is_retired ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark cursor-no-allowed'}`}
                     onChange={(event) =>
                       onChangeGrades(
                         event,
@@ -632,7 +623,7 @@ const GradebookTable = ({
                 </td>
               ))}
               <td
-                className={`text-black ${isCoordinator || student?.is_retired ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark'}`}
+                className={`text-black ${ student?.is_retired ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark'}`}
               >
                 {calculateAverage(
                   grades,

@@ -4,7 +4,7 @@ import TableHeaderActions from '@/components/own/table-header-actions/table-head
 import CoursesTable from '@/components/own/tables/courses-table';
 import CourseForm from '@/components/own/form/course-form';
 import { FiltersProps } from '../../../../Types/types';
-import { COURSE_TYPE_FILTER, STATUS_FILTER } from '../../../../utils/constants';
+import { COURSE_TYPE_FILTER, STATUS_FILTER, STATUS_FILTER_COURSE } from '../../../../utils/constants';
 import TableFilters from '@/components/own/table-filters/table-filters';
 import {
   getActiveProfessors,
@@ -123,7 +123,7 @@ const Students = () => {
       labelName: 'Status',
       name: 'status',
       type: 'select',
-      items: STATUS_FILTER,
+      items: STATUS_FILTER_COURSE,
       value: statusFilter,
       onChange: (selectedOption: any) => {
         setStatusFilter(selectedOption);

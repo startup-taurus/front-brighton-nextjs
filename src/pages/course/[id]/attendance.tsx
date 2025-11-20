@@ -21,6 +21,7 @@ import { USER_TYPES } from 'utils/constants';
 
 const tabsName = 'ATTENDANCE';
 
+// TeachersAttendance (componente de página)
 const TeachersAttendance: NextPageWithLayout = () => {
   const router = useRouter();
   const courseId = router.query.id as string;
@@ -59,6 +60,7 @@ const TeachersAttendance: NextPageWithLayout = () => {
 
   const { course_number } = courseDetail?.data?.data;
   const studentsAttendance = courseAttendance?.data?.data;
+  const courseStatus = courseDetail?.data?.data?.status;
   const students = courseStudents?.data?.data?.students;
   const courseSchedule = schedule?.data?.data;
 
@@ -83,6 +85,7 @@ const TeachersAttendance: NextPageWithLayout = () => {
             courseSchedule={courseSchedule}
             studentsAttendance={studentsAttendance}
             students={students}
+            courseStatus={courseStatus}
           />
         )}
         <AttendanceHelpBox />

@@ -8,7 +8,7 @@ import CoursesList from '@/components/own/courses-list/courses-list';
 import QuickLinksList from '@/components/own/quick-links-list/quick-links-list';
 import ScheduleCalendar from '@/components/own/schedule-calendar/schedule-calendar';
 import useSWR from 'swr';
-import { getProfessorCourses } from 'helper/api-data/professor';
+import { getProfessorActiveCoursesForCalendar, getProfessorCourses } from 'helper/api-data/professor';
 import { getFetcher } from 'helper/api';
 import { UserContext } from 'helper/User';
 
@@ -63,10 +63,30 @@ const TeacherDashboard = ({
     () => getProfessorCourses(professorId)
   );
 
+  const calendarCourses = useSWR(
+    professorId ? `/professor/${professorId}/courses/calendar` : null,
+    () => getProfessorActiveCoursesForCalendar(professorId)
+  );
+
   if (!courses?.data?.data?.courses) return null;
 
   const displayUser =
     isCoordinator || isReceptionist ? userData?.data?.data || {} : user;
+
+  const rawCalendarCourses = calendarCourses?.data?.data?.courses || [];
+  const fallbackCourses = courses?.data?.data?.courses || [];
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+
+  const onlyActive = (courses: any[]) =>
+    courses.filter((course: any) => {
+      const end = course?.end_date ? new Date(course.end_date) : null;
+      const endedByDate = end ? (end.setHours(0,0,0,0), end < today) : false;
+      const endedByFlag = Boolean(course?.options?.isAlreadyEnd || course?.options?.isAreadyEnd);
+      return !(endedByDate || endedByFlag);
+    });
+
+  const calendarSource =
+    rawCalendarCourses.length > 0 ? rawCalendarCourses : onlyActive(fallbackCourses);
 
   return (
     <div className='page-body pt-2'>
@@ -104,7 +124,7 @@ const TeacherDashboard = ({
             />
           </div>
           <div className='divider'></div>
-          <ScheduleCalendar courses={courses?.data?.data?.courses} />
+          <ScheduleCalendar courses={calendarSource} />
         </CardBody>
       </Card>
     </div>

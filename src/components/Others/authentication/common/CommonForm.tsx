@@ -53,19 +53,16 @@ const CommonForm = ({ alignLogo }: commonFormPropsType) => {
       showUsernameTooShortCF();
       return;
     }
-
     setIsLoading(true);
     
     try {
       const response = await postLogin({ username: trimmedUsername, password });
-
       if (response?.status === LOGIN_MESSAGES.SUCCESS) {
         if (response.data?.status === LOGIN_MESSAGES.INACTIVE) {
           showUserDeactivatedAlert();
           setIsLoading(false);
           return;
         }
-
         Cookies.set('token', JSON.stringify(response?.data));
         const encryptedId = encrypt(String(response?.data?.id));
         Cookies.set('user_id', encryptedId);
@@ -80,7 +77,6 @@ const CommonForm = ({ alignLogo }: commonFormPropsType) => {
           [USER_TYPES.COORDINATOR]: '/dashboard',
           [USER_TYPES.RECEPTIONIST]: '/dashboard',
         };
-
         const redirectPath = roleRedirectMap[response.data.role] || '/login';
         router.push(redirectPath);
         toast.success(LOGIN_MESSAGES.LOGIN_SUCCESS);
@@ -132,7 +128,6 @@ const CommonForm = ({ alignLogo }: commonFormPropsType) => {
         showLoginFailedAlert();
       }
     }
-    
     setIsLoading(false);
   };
   return (

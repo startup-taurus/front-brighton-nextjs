@@ -27,6 +27,7 @@ type TableAttendanceProps = {
   courseSchedule: any;
   studentsAttendance: Record<number, Record<number, string>>;
   students: Array<any>;
+  courseStatus?: string;
 };
 
 type AttendanceStatistics = {
@@ -38,6 +39,7 @@ const TableAttendance: React.FC<TableAttendanceProps> = ({
   courseSchedule = [],
   studentsAttendance,
   students = [],
+  courseStatus,
 }) => {
   const [dates, setDates] = useState(studentsAttendance);
   const [scheduleItems, setScheduleItems] = useState(courseSchedule);
@@ -49,16 +51,16 @@ const TableAttendance: React.FC<TableAttendanceProps> = ({
   useEffect(() => setDates(studentsAttendance), [studentsAttendance]);
   useEffect(() => setScheduleItems(courseSchedule), [courseSchedule]);
 
+  const isTransferredCourse =
+    typeof courseStatus === 'string' &&
+    courseStatus.toLowerCase() === STATUS.TRANSFERRED;
+
   const changeAttendance = async (
     e: ChangeEvent<HTMLSelectElement>,
     scheduleId: number,
     studentId: number,
     isRetired: boolean
   ) => {
-    if (isCoordinator) {
-      toast.error('Coordinators do not have permission to mark attendance');
-      return;
-    }
     if (isRetired) {
       toast.error('Cannot mark attendance for retired students');
       return;
@@ -88,10 +90,6 @@ const TableAttendance: React.FC<TableAttendanceProps> = ({
     lessonId: number,
     scheduleIndex: number
   ) => {
-    if (isCoordinator) {
-      toast.error('Coordinators do not have permission to update lessons');
-      return;
-    }
     const value = e.target.value;
     setScheduleItems((prevScheduleItems: any) =>
       prevScheduleItems.map((scheduleItem: any, itemIndex: any) =>
@@ -135,17 +133,22 @@ const TableAttendance: React.FC<TableAttendanceProps> = ({
 
   const active = useMemo(
     () =>
-      students.filter(
-        (student) => !student.is_retired && student.status !== STATUS.INACTIVE
-      ),
-    [students]
+      isTransferredCourse
+        ? students.filter((student) => student.status !== STATUS.INACTIVE)
+        : students.filter(
+            (student) =>
+              !student.is_retired && student.status !== STATUS.INACTIVE
+          ),
+    [students, isTransferredCourse]
   );
   const inactive = useMemo(
     () =>
-      students.filter(
-        (student) => student.is_retired || student.status === STATUS.INACTIVE
-      ),
-    [students]
+      isTransferredCourse
+        ? students.filter((student) => student.status === STATUS.INACTIVE)
+        : students.filter(
+            (student) => student.is_retired || student.status === STATUS.INACTIVE
+          ),
+    [students, isTransferredCourse]
   );
   const toggleInactive = () => setShowInactive((p) => !p);
 
@@ -155,42 +158,39 @@ const TableAttendance: React.FC<TableAttendanceProps> = ({
     <tr
       key={index}
       className={
-        student.is_retired || student.status === STATUS.INACTIVE
+        student.status === STATUS.INACTIVE ||
+        (student.is_retired && !isTransferredCourse)
           ? 'bg-light'
           : ''
       }
     >
       <td
-        className={`student-col ${student.is_retired || student.status === STATUS.INACTIVE ? 'd-flex  align-items-start align-md-center justify-center-start ' : ''}`}
+        className={`student-col ${
+          student.status === STATUS.INACTIVE ||
+          (student.is_retired && !isTransferredCourse)
+            ? 'd-flex  align-items-start align-md-center justify-center-start '
+            : ''
+        }`}
       >
         {student.name.toUpperCase()}
         {(student.is_retired || student.status === STATUS.INACTIVE) && (
-          <Badge
-            color='primary'
-            pill
-            size='sm'
-            className='mt-2 mt-md-0 ms-md-2'
-          >
-            {student.status === STATUS.INACTIVE ? 'INACTIVE' : 'RETIRED'}
+          <Badge color='primary' pill size='sm' className='mt-2 mt-md-0 ms-md-2'>
+            {student.status === STATUS.INACTIVE
+              ? 'INACTIVE'
+              : isTransferredCourse
+              ? 'TRANSFERRED'
+              : 'RETIRED'}
           </Badge>
         )}
       </td>
       {scheduleItems.map((scheduleItem: any, scheduleItemIndex: number) => (
-        <td
-          key={scheduleItemIndex}
-          className='td-attendance'
-        >
+        <td key={scheduleItemIndex} className='td-attendance'>
           <Input
             type='select'
             className={`td-input attendance-input bg-transparent text-dark ${isCoordinator || isReceptionist ? 'cursor-no-allowed' : ''}`}
             value={dates[scheduleItem.id]?.[student.id] || ''}
             onChange={(e: any) =>
-              changeAttendance(
-                e,
-                scheduleItem.id,
-                student.id,
-                student.is_retired
-              )
+              changeAttendance(e, scheduleItem.id, student.id, student.is_retired)
             }
             disabled={
               isCoordinator ||
@@ -213,19 +213,7 @@ const TableAttendance: React.FC<TableAttendanceProps> = ({
 
   return (
     <div>
-      {isCoordinator && (
-        <Alert
-          color='warning'
-          className='mb-3'
-        >
-          As a coordinator, you can only view attendance but cannot modify it.
-        </Alert>
-      )}
-      <Table
-        responsive
-        bordered
-        className='main-table w-100'
-      >
+      <Table responsive bordered className='main-table w-100'>
         <thead>
           <tr>
             <th className='main-col-title'>STUDENT</th>
@@ -272,8 +260,7 @@ const TableAttendance: React.FC<TableAttendanceProps> = ({
                 onClick={toggleInactive}
               >
                 <span className='text-dark'>
-                  {showInactive ? 'Hide' : 'Show'} inactive/retired students (
-                  {inactive.length})
+                  {showInactive ? 'Hide' : 'Show'} {isTransferredCourse ? 'inactive' : 'inactive/retired'} students ({inactive.length})
                 </span>
                 <span
                   className={`toggle-icon  ${isCoordinator || isReceptionist ? 'toggle-icon no-professor ' : ''}  `}

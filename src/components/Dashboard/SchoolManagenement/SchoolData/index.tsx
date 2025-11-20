@@ -16,6 +16,7 @@ import { useState, useEffect } from 'react';
 import { getProfessorsCourses } from 'helper/api-data/professor';
 import { Clock, Calendar } from 'react-feather';
 import { Course, Professor } from 'Types/DashboardType';
+import { formatDateLocale } from 'utils/utils';
 
 const SchoolData = () => {
   const { data: schoolCardData } = useSWR([`/get-dashboard-data/get-all`], () =>
@@ -211,7 +212,7 @@ const SchoolData = () => {
                     <td>{course.classSchedule}</td>
                     <td style={{ minWidth: '120px' }}>
                       {course.end_date ? 
-                        new Date(course.end_date).toLocaleDateString('en-US') : 
+                        formatDateLocale(course.end_date, 'en-US') : 
                         'N/A'
                       }
                     </td>
@@ -261,7 +262,7 @@ const SchoolData = () => {
                     <td>{course.classSchedule}</td>
                     <td style={{ minWidth: '120px' }}>
                       {course.start_date ? 
-                        new Date(course.start_date).toLocaleDateString('en-US') : 
+                        formatDateLocale(course.start_date, 'en-US') : 
                         'N/A'
                       }
                     </td>

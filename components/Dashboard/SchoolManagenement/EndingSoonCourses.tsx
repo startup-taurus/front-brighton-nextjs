@@ -111,7 +111,7 @@ const EndingSoonCourses = () => {
                     <td>{course.classSchedule}</td>
                     <td style={{ minWidth: '120px' }}>
                       {course.end_date ? 
-                        new Date(course.end_date).toLocaleDateString('en-US') : 
+                        new Date(course.end_date + 'T00:00:00').toLocaleDateString('en-US') : 
                         'N/A'
                       }
                     </td>

@@ -13,138 +13,149 @@ import {
 import LoadingButton from '../common/loading-button/LoadingButton';
 import useSWR, {mutate} from 'swr';
 import Select from 'react-select';
-import {createCourse, updateCourse} from 'helper/api-data/course';
+import {createCourse, updateCourse, getAllCourses} from 'helper/api-data/course';
 import {getActiveProfessors} from 'helper/api-data/professor';
 import {getAllSyllabus} from 'helper/api-data/syllabus';
+
 import {toast} from 'react-toastify';
 import Swal from 'sweetalert2';
-import {PRIVATE_COURSE_TYPES} from '../../../../utils/constants';
+import {PRIVATE_COURSE_TYPES, CONFLICT_TYPES, ConflictType, STATUS} from '../../../../utils/constants';
+import { formatScheduleLinear, scanScheduleConflicts } from '../../../../utils/utils';
 const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-const CourseForm = ({data, isOpen, toggle}: any) => {
+const CourseForm = ({data, isOpen, toggle, onSuccess, isTransferMode = false, transferInfo, isDuplicateMode = false, duplicateInfo}: any) => {
   const limit = 1000;
   const page = 1;
   const [searchTermSyllabus, setSearchTermSyllabus] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const save = async (data: any) => {
+  const validateScheduleConflicts = async (courseData: any) => {
     try {
-      if (
-        !data.course_type ||
-        (data.course_type !== PRIVATE_COURSE_TYPES.PRIVATE &&
-          data.course_type !== PRIVATE_COURSE_TYPES.PRIVATE_ONLINE)
-      ) {
+      const { data: { result: courses } } = await getAllCourses();
+      const duplicateCourse = courses?.find((c: any) => 
+        c.status === STATUS.ACTIVE && 
+        (data ? c.id !== data.id : true) &&
+        (c.course_name?.toLowerCase() === courseData.course_name?.toLowerCase() || 
+         c.course_number?.toLowerCase() === courseData.course_number?.toLowerCase())
+      );
+      if (duplicateCourse) {
+        const duplicateType = duplicateCourse.course_name?.toLowerCase() === courseData.course_name?.toLowerCase() ? 'name' : 'number';
+        return { hasConflict: true, type: CONFLICT_TYPES.DUPLICATE, message: `A course with the same ${duplicateType} already exists:<br>
+                   Existing course: ${duplicateCourse.course_name} (${duplicateCourse.course_number})<br>
+                   Professor: ${duplicateCourse.professor_name || 'Not assigned'}<br>
+                   Please use a different ${duplicateType} for the course.` };
+      }
+      if (courseData.course_type === PRIVATE_COURSE_TYPES.PRIVATE || courseData.course_type === PRIVATE_COURSE_TYPES.PRIVATE_ONLINE) {
+        return { hasConflict: false };
+      }
+      const newSchedule = formatScheduleLinear(courseData.schedules);
+      const [newDays, newTime] = newSchedule.split(' ');
+      const newEndDate = courseData.end_date ? new Date(courseData.end_date) : null;
+      const startEffective = new Date(courseData.start_date);
+      const selectedProfessorId = String(courseData.professor_id ?? (courseData.professor?.value ?? courseData.professor ?? ''));
+      const activeCourses = courses?.filter((c: any) => 
+        c.status === STATUS.ACTIVE && 
+        String(c.professor_id) === selectedProfessorId &&
+        c.schedule &&
+        (data ? c.id !== data.id : true)
+      ) || [];
+      const classroomCourses = courses?.filter((c: any) => 
+        c.status === STATUS.ACTIVE &&
+        c.classroom === courseData.classroom &&
+        c.schedule &&
+        (data ? c.id !== data.id : true)
+      ) || [];
+
+
+      const profResult = scanScheduleConflicts(activeCourses, CONFLICT_TYPES.SCHEDULE, newDays, newTime, startEffective, newEndDate, newSchedule);
+      if (profResult.hasConflict) return profResult;
+      const roomResult = scanScheduleConflicts(classroomCourses, CONFLICT_TYPES.CLASSROOM, newDays, newTime, startEffective, newEndDate, newSchedule);
+      if (roomResult.hasConflict) return roomResult;
+      return { hasConflict: false };
+    } catch (error) {
+      return { hasConflict: false };
+    }
+  };
+
+  const handleSubmit = async (formData: any, isUpdate = false) => {
+    try {
+      const conflictValidation = await validateScheduleConflicts(formData);
+      if (conflictValidation.hasConflict) {
+        await Swal.fire({
+          title: conflictValidation.type === CONFLICT_TYPES.CLASSROOM
+            ? 'Classroom Conflict Detected'
+            : conflictValidation.type === CONFLICT_TYPES.DUPLICATE
+            ? 'Duplicate Course Detected'
+            : 'Schedule Conflict Detected',
+          html: conflictValidation.message,
+          icon: 'error',
+          confirmButtonText: 'OK',
+          confirmButtonColor: '#d33',
+        });
+        return;
+      }
+
+      if (!isUpdate && ![PRIVATE_COURSE_TYPES.PRIVATE, PRIVATE_COURSE_TYPES.PRIVATE_ONLINE].includes(formData.course_type)) {
         const result = await Swal.fire({
           title: 'Important Notice',
-          html:
-            '<b>Please note:</b> Once a course is created, the following fields cannot be modified later:<br><br>' +
-            '• Course type <br>' +
-            '• Start Date<br>' +
-            '• Schedule (days of week)<br>' +
-            '• Start and End Times',
+          html: '<b>Please note:</b> Once created, these fields cannot be modified:<br>• Course type<br>• Start Date<br>• Schedule<br>• Times',
           icon: 'warning',
           showCancelButton: true,
           confirmButtonText: 'Proceed',
           cancelButtonText: 'Cancel',
-          confirmButtonColor: '#3085d6',
-          cancelButtonColor: '#d33',
         });
-
-        if (!result.isConfirmed) {
-          return;
-        }
+        if (!result.isConfirmed) return;
       }
-
       setIsLoading(true);
-
-      mutate(
-        [`/course/get-all-with-professors?page=1&rowPerPage=10`],
-        undefined,
-        {revalidate: true}
-      );
-
-      let payload = {...data};
-
-      if (
-        data.course_type === PRIVATE_COURSE_TYPES.PRIVATE ||
-        data.course_type === PRIVATE_COURSE_TYPES.PRIVATE_ONLINE
-      ) {
-        if (!data.start_date) {
-          const today = new Date().toISOString().split('T')[0];
-          payload.start_date = today;
-        }
+      const payload = { ...formData };
+      if (isDuplicateMode && payload.id) {
+        delete payload.id;
+      }
+      
+      const isPrivate = [PRIVATE_COURSE_TYPES.PRIVATE, PRIVATE_COURSE_TYPES.PRIVATE_ONLINE].includes(formData.course_type);
+      
+      if (isPrivate) {
+        payload.start_date = formData.start_date || new Date().toISOString().split('T')[0];
         payload.syllabus_id = null;
         payload.classroom = null;
         payload.schedule = null;
       } else {
-        const formattedSchedule = formatSchedule(data.schedules);
-        payload.schedule = formattedSchedule;
+        payload.schedule = formatScheduleLinear(formData.schedules);
+      }
+      if (isDuplicateMode && duplicateInfo?.students) {
+        payload.students = duplicateInfo.students
+          .filter((student: any) => student?.status?.toLowerCase() === STATUS.ACTIVE && !student?.is_retired)
+          .map((student: any) => ({
+            student_id: student.id,
+            enrollment_date: new Date().toISOString().split('T')[0],
+          }));
       }
 
-      const response = await createCourse(payload);
-      if (response.statusCode === 200) {
-        toast.success('Course created successfully!');
-        mutate([`/course/get-all-with-professors?page=1&rowPerPage=10`]);
-        toggle();
+      const response = isUpdate 
+        ? await updateCourse(formData.id, payload)
+        : await createCourse(payload);
+
+      if (response.statusCode === 200 || response.statusCode === 201) {
+        if (isTransferMode && onSuccess) {
+          onSuccess(payload);
+        } else if (isDuplicateMode && onSuccess) {
+          onSuccess(response.data);
+        } else {
+          toast.success(`Course ${isUpdate ? 'updated' : 'created'} successfully!`);
+          mutate([`/course/get-all-with-professors?page=1&rowPerPage=10`]);
+          toggle();
+        }
       }
     } catch (error) {
-      console.error('Error creating course:', error);
-      toast.error('Error creating course. Please try again.');
+      toast.error(`Error ${isUpdate ? 'updating' : 'creating'} course. Please try again.`);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const update = async (data: any) => {
-    try {
-      setIsLoading(true);
+  const save = (data: any) => handleSubmit(data, false);
+  const update = (data: any) => handleSubmit(data, true);
 
-      mutate(
-        [`/course/get-all-with-professors?page=1&rowPerPage=10`],
-        undefined,
-        {revalidate: true}
-      );
 
-      let payload = {...data};
-
-      if (
-        data.course_type === PRIVATE_COURSE_TYPES.PRIVATE ||
-        data.course_type === PRIVATE_COURSE_TYPES.PRIVATE_ONLINE
-      ) {
-        if (!data.start_date) {
-          const today = new Date().toISOString().split('T')[0];
-          payload.start_date = today;
-        }
-        payload.syllabus_id = null;
-        payload.classroom = null;
-        payload.schedule = null;
-      } else {
-        const formattedSchedule = formatSchedule(data.schedules);
-        payload.schedule = formattedSchedule;
-      }
-
-      const response = await updateCourse(data.id, payload);
-      if (response.statusCode === 200) {
-        toast.success('Course updated successfully!');
-        mutate([`/course/get-all-with-professors?page=1&rowPerPage=10`]);
-        toggle();
-      }
-    } catch (error) {
-      console.error('Error updating course:', error);
-      toast.error('Error updating course. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const formatSchedule = (schedules: any) => {
-    return schedules
-      .map((schedule: any) => {
-        const days = schedule.days.join('-');
-        const timeRange = `${schedule.startTime}-${schedule.endTime}`;
-        return `${days} ${timeRange}`;
-      })
-      .join(', ');
-  };
 
   const {data: course, isLoading: isLoadingCourse} = useSWR(
     ['/course/get-active', page, limit],
@@ -175,18 +186,33 @@ const CourseForm = ({data, isOpen, toggle}: any) => {
   return (
     <Modal isOpen={isOpen} toggle={toggle} size='lg'>
       <ModalHeader toggle={toggle}>
-        {data ? 'Edit Course' : 'Add New Course'}
+        {isTransferMode 
+          ? `Create New Course for Transfer (${transferInfo?.studentsCount || 0} students)` 
+          : isDuplicateMode
+          ? `Transfer Course: ${duplicateInfo?.sourceCourse?.course_name || ''} (${duplicateInfo?.studentsCount || 0} students)`
+          : data ? 'Edit Course' : 'Add New Course'
+        }
       </ModalHeader>
       <ModalBody>
+        {isTransferMode && transferInfo && (
+          <div className="alert alert-info mb-3">
+            <strong>Transfer Mode:</strong> Creating a new course to transfer {transferInfo.studentsCount} students from "{transferInfo.sourceCourse?.course_name}" ({transferInfo.sourceCourse?.course_number})
+          </div>
+        )}
+        {isDuplicateMode && duplicateInfo && (
+          <div className="alert alert-success mb-3">
+             <strong>Transfer Mode:</strong> Transferring {duplicateInfo.studentsCount} students from "{duplicateInfo.sourceCourse?.course_name}" ({duplicateInfo.sourceCourse?.course_number}) with {duplicateInfo.studentsCount} students
+          </div>
+        )}
         <Formik
           initialValues={
             data
               ? {
                   ...data,
-                  course_name: data.course_name,
-                  course_number: data.course_number,
-                  start_date: data.start_date,
-                  end_date: data.end_date,
+                  course_name: isDuplicateMode ? `${data.course_name} - Copy` : data.course_name,
+                  course_number: isDuplicateMode ? `${data.course_number}-COPY` : data.course_number,
+                  start_date: isDuplicateMode ? '' : data.start_date,
+                  end_date: isDuplicateMode ? '' : data.end_date,
                   comment: data.comment,
                   status: data.status,
                   course_type: data.course_type,
@@ -223,7 +249,7 @@ const CourseForm = ({data, isOpen, toggle}: any) => {
                   syllabus_id: '',
                 }
           }
-          onSubmit={(info) => (data ? update(info) : save(info))}
+          onSubmit={(info) => (data && !isDuplicateMode ? update(info) : save(info))}
         >
           {(props) => {
             const onChangeCourseType = (e: any) => {
@@ -265,8 +291,8 @@ const CourseForm = ({data, isOpen, toggle}: any) => {
                     name='course_type'
                     as={Input}
                     type='select'
-                    disabled={data ? true : false}
-                    className={data ? 'bg-light text-muted' : ''}
+                    disabled={data && !isDuplicateMode ? true : false}
+                    className={data && !isDuplicateMode ? 'bg-light text-muted' : ''}
                     onChange={onChangeCourseType}
                   >
                     <option value='' disabled>
@@ -290,8 +316,8 @@ const CourseForm = ({data, isOpen, toggle}: any) => {
                       name='start_date'
                       as={Input}
                       type='date'
-                      disabled={data ? true : false}
-                      className={data ? 'bg-light text-muted' : ''}
+                      disabled={data && !isDuplicateMode ? true : false}
+                      className={data && !isDuplicateMode ? 'bg-light text-muted' : ''}
                     />
                     <ErrorMessage name='start_date' component={FormFeedback} />
                   </Col>
@@ -316,19 +342,18 @@ const CourseForm = ({data, isOpen, toggle}: any) => {
                                 <Col xs={10}>
                                   <div className='m-checkbox-inline custom-radio-ml '>
                                     {daysOfWeek.map((day) => (
-                                      <div className='checkbox px-1'>
+                                      <div key={`${index}-${day}`} className='checkbox px-1'>
                                         <Field
                                           type='checkbox'
                                           id={index + day}
                                           className='form-check-input'
                                           name={`schedules[${index}].days`}
                                           value={day}
-                                          disabled={data ? true : false}
+                                          disabled={data && !isDuplicateMode ? true : false}
                                         />
                                         <label
                                           htmlFor={index + day}
                                           className='form-label'
-                                          key={day}
                                         >
                                           {day}
                                         </label>
@@ -345,9 +370,9 @@ const CourseForm = ({data, isOpen, toggle}: any) => {
                                     name={`schedules[${index}].startTime`}
                                     as={Input}
                                     type='time'
-                                    disabled={data ? true : false}
+                                    disabled={data && !isDuplicateMode ? true : false}
                                     className={
-                                      data ? 'bg-light text-muted' : ''
+                                      data && !isDuplicateMode ? 'bg-light text-muted' : ''
                                     }
                                   />
                                   <ErrorMessage
@@ -363,9 +388,9 @@ const CourseForm = ({data, isOpen, toggle}: any) => {
                                     name={`schedules[${index}].endTime`}
                                     as={Input}
                                     type='time'
-                                    disabled={data ? true : false}
+                                    disabled={data && !isDuplicateMode ? true : false}
                                     className={
-                                      data ? 'bg-light text-muted' : ''
+                                      data && !isDuplicateMode ? 'bg-light text-muted' : ''
                                     }
                                   />
                                   <ErrorMessage
@@ -408,8 +433,8 @@ const CourseForm = ({data, isOpen, toggle}: any) => {
                 ) && (
                   <Col xs={4}>
                     <Label for='classroom'>Classroom</Label>
-                    <Field name='classroom' as={Input} type='select'>
-                      <option value='' selected disabled>
+                    <Field name='classroom' as={Input} type='select' defaultValue=''>
+                      <option value='' disabled>
                         Select clasrroom
                       </option>
                       <option value='cambrige'>Cambrige</option>
@@ -430,8 +455,8 @@ const CourseForm = ({data, isOpen, toggle}: any) => {
                   }
                 >
                   <Label for='age_group'>Age Group</Label>
-                  <Field name='age_group' as={Input} type='select'>
-                    <option value='' selected disabled>
+                  <Field name='age_group' as={Input} type='select' defaultValue=''>
+                    <option value='' disabled>
                       Select age group
                     </option>
                     <option value='adult'>Adult</option>
@@ -636,8 +661,8 @@ const CourseForm = ({data, isOpen, toggle}: any) => {
                             props.values.schedules[0].endTime
                           ))
                     }
-                    loadingText={data ? 'Updating...' : 'Saving...'}
-                    defaultText={data ? 'Update' : 'Save'}
+                    loadingText={isTransferMode ? 'Creating & Transferring...' : isDuplicateMode ? 'Transferring...' : data ? 'Updating...' : 'Saving...'}
+                    defaultText={isTransferMode ? 'Create & Transfer Students' : isDuplicateMode ? 'Transfer Course' : data ? 'Update' : 'Save'}
                   />
                 </Col>
               </form>

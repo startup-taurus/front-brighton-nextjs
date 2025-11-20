@@ -6,6 +6,8 @@ import {
   EXAMS_TYPE,
   USER_TYPES,
   LOGIN_MESSAGES, 
+  CONFLICT_TYPES,
+  ConflictType,
 } from "./constants";
 import { NextRouter } from "next/router";
 import {
@@ -186,20 +188,27 @@ export const getDayOfClassesOfWeek = (courses: any): any[] => {
   const today = new Date();
   const weekStart = startOfWeek(today, { weekStartsOn: 0 });
   const formattedCourse = courses.map((course: any) => {
-    return course?.schedule?.map((item: any, index: number) => {
+    return course?.schedule?.map((item: any, idx: number) => {
       const dayNumber = getDayNumber(item.day);
       const date = addDays(weekStart, dayNumber);
-      const startDateTime = `${format(date, "yyyy-MM-dd")}T${item.startTime}:00`;
-      const endDateTime = `${format(date, "yyyy-MM-dd")}T${item.endTime}:00`;
-
+      const startBound = course?.start_date
+        ? new Date(typeof course.start_date === 'string' ? `${course.start_date}T00:00:00` : course.start_date)
+        : null;
+      const endBound = course?.end_date
+        ? new Date(typeof course.end_date === 'string' ? `${course.end_date}T00:00:00` : course.end_date)
+        : null;
+      if (startBound && date < startBound) return null;
+      if (endBound && date > endBound) return null;
+      const startDateTime = `${format(date, 'yyyy-MM-dd')}T${item.startTime}:00`;
+      const endDateTime = `${format(date, 'yyyy-MM-dd')}T${item.endTime}:00`;
       return {
-        id: index,
+        id: idx,
         title: course?.course_number,
         start: startDateTime,
         end: endDateTime,
         url: `course/${course.course_id}/home`,
       };
-    });
+    }).filter(Boolean);
   });
 
   return formattedCourse.flat().map((event: any, index: number) => ({
@@ -251,6 +260,15 @@ export const initializeAttendanceStructure = (
 export const formatDate = (date: string): string =>
   format(parseISO(date), "EEE, MMM d");
 
+export const formatDateLocale = (date: string | Date, locale = 'en-US') => {
+  if (!date) return '';
+  const d = typeof date === 'string'
+    ? new Date(date.includes('T') ? date : `${date}T00:00:00`)
+    : date;
+  if (isNaN(d.getTime())) return '';
+  return d.toLocaleDateString(locale);
+};
+
 export const buildAttendanceStructure = (
   courseSchedule: any,
   students: any,
@@ -288,6 +306,59 @@ export const formatGradebookComponents = (data: any = []) => {
     progressTest: progressTest,
     moversExam: moversExam,
   };
+};
+
+export const formatScheduleLinear = (schedules: any) =>
+  schedules?.map((s: any) => `${s.days.join('-')} ${s.startTime}-${s.endTime}`).join(', ') || '';
+
+export const dateRangesOverlap = (
+  aStart: Date,
+  aEnd: Date | null,
+  bStart: Date,
+  bEnd: Date | null
+) => {
+  const aEndTime = aEnd ? aEnd.getTime() : Infinity;
+  const bEndTime = bEnd ? bEnd.getTime() : Infinity;
+  return aStart.getTime() <= bEndTime && bStart.getTime() <= aEndTime;
+};
+
+export const scanScheduleConflicts = (
+  list: any[],
+  type: ConflictType,
+  newDays: string,
+  newTime: string,
+  startEffective: Date,
+  newEndDate: Date | null,
+  newSchedule: string
+): { hasConflict: boolean; type?: ConflictType; message?: string } => {
+  for (const existing of list) {
+    const [existingDays, existingTime] = existing.schedule.split(' ');
+    const existingStartDate = new Date(existing.start_date);
+    const finalEndDate = existing.last_class_date ? new Date(existing.last_class_date) : (existing.end_date ? new Date(existing.end_date) : null);
+    if (finalEndDate && startEffective.getTime() > finalEndDate.getTime()) continue;
+    const commonDays = existingDays.split('-').some((d: string) => newDays.split('-').includes(d));
+    if (!commonDays) continue;
+    if (!dateRangesOverlap(existingStartDate, finalEndDate, startEffective, newEndDate)) continue;
+    const [existingStart, existingEnd] = existingTime.split('-');
+    const [newStart, newEnd] = newTime.split('-');
+    const timesOverlap = new Date(`2000-01-01T${newStart}:00`) < new Date(`2000-01-01T${existingEnd}:00`) &&
+      new Date(`2000-01-01T${newEnd}:00`) > new Date(`2000-01-01T${existingStart}:00`);
+    if (timesOverlap) {
+      const exactMatch = existingDays === newDays && existingTime === newTime;
+      return {
+        hasConflict: true,
+        type,
+        message: exactMatch
+          ? (type === CONFLICT_TYPES.CLASSROOM
+              ? `This classroom ("${existing.classroom}") already has a course at the same schedule.<br>Existing: ${existing.course_name} (${existing.course_number}) — ${existing.schedule}<br>New: ${newSchedule}`
+              : `This professor already has a course at the same schedule.<br>Existing: ${existing.course_name} (${existing.course_number}) — ${existing.schedule}<br>New: ${newSchedule}`)
+          : (type === CONFLICT_TYPES.CLASSROOM
+              ? `Classroom conflict: "${existing.classroom}" is already booked by "${existing.course_name}" (${existing.course_number}).<br>Existing: ${existing.schedule}<br>New: ${newSchedule}`
+              : `Schedule conflict with "${existing.course_name}" (${existing.course_number}).<br>Existing: ${existing.schedule}<br>New: ${newSchedule}`)
+      };
+    }
+  }
+  return { hasConflict: false };
 };
 
 export const initializeGradebookStructure = (
