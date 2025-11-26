@@ -103,16 +103,21 @@ const StudentTransferForm: React.FC<Props> = ({
   useEffect(() => {
     if (coursesData?.data) {
       const opts = coursesData.data
-        .filter((course: any) => course.syllabus?.level) 
-        .map(
-          (course: any) =>
-            ({
-              value: course.id,
-              label: `${course.course_number} - ${course.course_name} - ${course.syllabus.level.full_level}`,
-              levelId: course.syllabus.level.id,
-              levelLabel: course.syllabus.level.full_level,
-            }) as any
-        );
+        .filter((course: any) => course.syllabus?.level)
+        .map((course: any) => {
+          const name = (course.course_name || '').trim();
+          const level = (course.syllabus.level.full_level || '').trim();
+          const base = `${course.course_number} - ${name}`;
+          const label = name.toUpperCase() === level.toUpperCase()
+            ? base
+            : `${base} - ${level}`;
+          return {
+            value: course.id,
+            label,
+            levelId: course.syllabus.level.id,
+            levelLabel: course.syllabus.level.full_level,
+          } as any;
+        });
 
       if (coursePage === 1) {
         setCourseOptions(opts as Option[]);
