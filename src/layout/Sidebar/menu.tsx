@@ -183,13 +183,25 @@ export const AdminMenuList: sidebarMenuType[] = [
         path: 'admin/teachers',
       },
       {
-        title: 'Users',
-        id: 6,
-        pathSlice: 'users',
-        type: 'link',
+        title: 'User Management',
+        id: 11,
+        pathSlice: 'admin/user-management',
+        type: 'sub',
         icon: 'user',
-        badge: 'badge badge-light-primary',
-        path: 'admin/users',
+        children: [
+          {
+            title: 'Users',
+            type: 'link',
+            path: 'admin/users',
+            pathSlice: 'users'
+          },
+          {
+            title: 'Roles And Permissions',
+            type: 'link',
+            path: 'admin/roles-permissions',
+            pathSlice: 'admin/roles-permissions'
+          }
+        ]
       },
       {
         title: 'Holidays',
