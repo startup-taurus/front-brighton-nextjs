@@ -15,7 +15,7 @@ import StudentTransferForm from '../form/student-transfer-form';
 import { getFiltersString } from '../../../../utils/utils';
 import TableSkeleton from '../common/table-skeleton/TableSkeleton';
 import { UserContext } from 'helper/User';
-import { USER_TYPES, STATUS, COURSE_CLIENT_PAGINATION_STATUSES } from '../../../../utils/constants';
+import { USER_TYPES, STATUS, COURSE_CLIENT_PAGINATION_STATUSES, COURSE_TYPES } from '../../../../utils/constants';
 import { FaCertificate, FaFileAlt } from 'react-icons/fa';
 import { generateBatchCertificatesZIP, generateBatchReportsZIP } from '../../../../utils/pdfGenerator';
 import { toast } from 'react-toastify';
@@ -335,14 +335,15 @@ const CoursesTable = ({ reload, loading }: any) => {
           <TableActionButtons
             onEdit={transferred ? undefined : () => toggle(row)}
             onBlock={transferred ? undefined : () => handleAlert(row)}
-            onAttendance={user?.role !== USER_TYPES.ADMIN ? () => handleAttendance(row) : undefined}
-            onGradebook={transferred && user?.role !== USER_TYPES.ADMIN ? () => handleGradebook(row) : undefined}
+            onAttendance={!transferred ? () => handleAttendance(row) : undefined}
+            onGradebook={transferred ? () => handleGradebook(row) : undefined}
             onTransfer={
               !transferred && isCourseCompleted(row) && hasActiveStudents(row)
                 ? () => handleTransferCourseWithStudents(row)
                 : undefined
             }
             stauts={row.status !== 'active'}
+            module={'Courses'}
           />
         );
       },
@@ -366,7 +367,14 @@ const CoursesTable = ({ reload, loading }: any) => {
     },
     {
       name: 'Classroom',
-      selector: (row: any) => formatText(row.classroom),
+      selector: (row: any) => {
+        const primary = formatText(row.classroom);
+        if (primary) return primary;
+        if (row.course_type === COURSE_TYPES.ONLINE) return 'ONLINE';
+        if (row.course_type === COURSE_TYPES.PRIVATE) return 'PRIVATE';
+        if (row.course_type === COURSE_TYPES.PRIVATE_ONLINE) return 'PRIVATE - ONLINE';
+        return '';
+      },
       sortable: true,
     },
     {

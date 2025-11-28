@@ -5,6 +5,8 @@ import layoutContext from "helper/Layout";
 import { useRouter } from "next/router";
 import { useContext } from "react";
 import { useTranslation } from "react-i18next";
+import usePermission from "../../../../hooks/usePermission";
+import { PERMISSIONS } from "../../../../utils/permissions";
 
 type menuListType = {
   MENUITEMS: sidebarItemType[];
@@ -18,6 +20,17 @@ type menuListType = {
 };
 const Menulist = ({setActive,handleActive,active,MENUITEMS,level,activeLink,setActiveLink}: menuListType) => {
   const { pinedMenu, setPinedMenu } = useContext(layoutContext);
+  const { can } = usePermission();
+  const REQUIRED: Record<string, string> = {
+    Dashboard: PERMISSIONS.VIEW_DASHBOARD,
+    Students: PERMISSIONS.VIEW_STUDENTS,
+    "Transfer Students": PERMISSIONS.VIEW_TRANSFER_STUDENTS,
+    Syllabus: PERMISSIONS.VIEW_SYLLABUS,
+    Courses: PERMISSIONS.VIEW_COURSES,
+    Professors: PERMISSIONS.VIEW_TEACHERS,
+    Holidays: PERMISSIONS.VIEW_HOLIDAYS,
+    Users: PERMISSIONS.VIEW_USERS,
+  };
   const handlePined = (value: string | undefined) => {
     if (!pinedMenu.includes(value || "")) {
       setPinedMenu((data) => [...data, value || ""]);
@@ -32,7 +45,10 @@ const Menulist = ({setActive,handleActive,active,MENUITEMS,level,activeLink,setA
 
   return (
     <>
-      {MENUITEMS.map((item, i) => (
+      {MENUITEMS.filter((item) => {
+        const req = item.title ? REQUIRED[item.title] : undefined;
+        return !req || can(req);
+      }).map((item, i) => (
         <li key={i} className={`${pinedMenu.includes(item.title || "") ? "pined" : ""} ${level == 0 ? "sidebar-list" : ""}  `} >
           {/*{level === 0 && ( <i className="fa fa-thumb-tack" onClick={() => handlePined(item.title)}></i>)}*/}
           <a

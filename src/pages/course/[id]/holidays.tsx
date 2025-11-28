@@ -44,9 +44,9 @@ const TeachersHolidays: NextPageWithLayout = () => {
   const { can } = usePermission();
   const isCoordinator = user?.role === USER_TYPES.COORDINATOR;
   const isReceptionist = user?.role === USER_TYPES.RECEPTIONIST;
-  const canCreateHoliday = can(PERMISSIONS.CREATE_HOLIDAY);
-  const canEditHoliday = can(PERMISSIONS.EDIT_HOLIDAY);
-  const canDeleteHoliday = can(PERMISSIONS.DELETE_HOLIDAY);
+  const canCreateCancelled = can(PERMISSIONS.CREATE_CANCELLED_LESSON);
+  const canEditCancelled = can(PERMISSIONS.EDIT_CANCELLED_LESSON);
+  const canDeleteCancelled = can(PERMISSIONS.DELETE_CANCELLED_LESSON);
 
   const courseDetail = useSWR(
     courseId ? `/course/get-one/${courseId}` : null,
@@ -101,7 +101,7 @@ const TeachersHolidays: NextPageWithLayout = () => {
   ];
 
   const toggleModal = () => {
-    if ((isCoordinator || isReceptionist) && !canCreateHoliday) {
+    if ((isCoordinator || isReceptionist) && !canCreateCancelled) {
       toast.error(
         'You do not have permission to create cancelled lessons'
       );
@@ -116,7 +116,7 @@ const TeachersHolidays: NextPageWithLayout = () => {
   // };
 
   const deleteRow = (row: any) => {
-    if ((isCoordinator || isReceptionist) && !canDeleteHoliday) {
+    if ((isCoordinator || isReceptionist) && !canDeleteCancelled) {
       toast.error(
         'You do not have permission to delete cancelled lessons'
       );

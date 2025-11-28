@@ -17,8 +17,11 @@ import { getProfessorsCourses } from 'helper/api-data/professor';
 import { Clock, Calendar } from 'react-feather';
 import { Course, Professor } from 'Types/DashboardType';
 import { formatDateLocale } from 'utils/utils';
+import usePermission from 'hooks/usePermission';
+import { PERMISSIONS } from 'utils/permissions';
 
 const SchoolData = () => {
+  const { can } = usePermission();
   const { data: schoolCardData } = useSWR([`/get-dashboard-data/get-all`], () =>
     getDashboardData()
   );
@@ -87,7 +90,15 @@ const SchoolData = () => {
 
   return (
     <>
-      {schoolCardData?.data?.map((schoolCardItem: any) => (
+      {schoolCardData?.data
+        ?.filter((schoolCardItem: any) => {
+          const title = String(schoolCardItem?.header || '').trim().toLowerCase();
+          if (title === 'total teachers') return can(PERMISSIONS.VIEW_DASHBOARD_TOTAL_TEACHERS);
+          if (title === 'total students') return can(PERMISSIONS.VIEW_DASHBOARD_TOTAL_STUDENTS);
+          if (title === 'total courses') return can(PERMISSIONS.VIEW_DASHBOARD_TOTAL_COURSES);
+          return can(PERMISSIONS.VIEW_DASHBOARD);
+        })
+        .map((schoolCardItem: any) => (
         <Col
           md={3}
           className={schoolCardItem.smallScreenClass ? 'col-sm-6' : ''}
@@ -126,6 +137,7 @@ const SchoolData = () => {
         </Col>
       ))}
 
+      {can(PERMISSIONS.VIEW_DASHBOARD_COURSES_TO_BE_COMPLETED) && (
       <Col md={3}>
         <Card className='widget-hover overflow-hidden'>
           <DashboardHead
@@ -151,7 +163,9 @@ const SchoolData = () => {
           </CardBody>
         </Card>
       </Col>
+      )}
 
+      {can(PERMISSIONS.VIEW_DASHBOARD_COURSES_STARTING_SOON) && (
       <Col md={3}>
         <Card className='widget-hover overflow-hidden'>
           <DashboardHead
@@ -177,6 +191,7 @@ const SchoolData = () => {
           </CardBody>
         </Card>
       </Col>
+      )}
 
       <Modal
         isOpen={isOpen}

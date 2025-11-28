@@ -13,12 +13,15 @@ import {
 import { getAllCourses } from '../../../../helper/api-data/course';
 import useSWR, { mutate } from 'swr';
 import { SelectOption } from 'Types/SelectType';
+import usePermission from '../../../../hooks/usePermission';
+import { PERMISSIONS } from '../../../../utils/permissions';
 
 const Students = () => {
   const limit = 10;
   const [page, setPage] = useState(1);
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [reload, setReload] = useState(false);
+  const { can } = usePermission();
 
   const [professorOptions, setProfessorOptions] = useState<
     Array<{ label: string; value: string }>
@@ -185,10 +188,14 @@ const Students = () => {
             <CardHeader className='d-flex justify-content-end'>
               <TableHeaderActions
                 onReload={handleReload}
-                addButton={{
-                  title: 'Create Course',
-                  onClick: () => toggle(),
-                }}
+                addButton={
+                  can(PERMISSIONS.CREATE_COURSE)
+                    ? {
+                        title: 'Create Course',
+                        onClick: () => toggle(),
+                      }
+                    : undefined
+                }
               />
             </CardHeader>
             <div className='pb-4'>

@@ -45,8 +45,9 @@ const TableAttendance: React.FC<TableAttendanceProps> = ({
   const [scheduleItems, setScheduleItems] = useState(courseSchedule);
   const [showInactive, setShowInactive] = useState(false);
   const { user } = useContext(UserContext);
-  const isCoordinator = user?.role === USER_TYPES.COORDINATOR;
-  const isReceptionist = user?.role === USER_TYPES.RECEPTIONIST;
+  const { can } = usePermission();
+  const canMarkAttendance = can(PERMISSIONS.MARK_ATTENDANCE);
+  const canEditAttendance = can(PERMISSIONS.EDIT_ATTENDANCE);
 
   useEffect(() => setDates(studentsAttendance), [studentsAttendance]);
   useEffect(() => setScheduleItems(courseSchedule), [courseSchedule]);
@@ -187,14 +188,13 @@ const TableAttendance: React.FC<TableAttendanceProps> = ({
         <td key={scheduleItemIndex} className='td-attendance'>
           <Input
             type='select'
-            className={`td-input attendance-input bg-transparent text-dark ${isCoordinator || isReceptionist ? 'cursor-no-allowed' : ''}`}
+              className={`td-input attendance-input bg-transparent text-dark ${!(canMarkAttendance || canEditAttendance) ? 'cursor-no-allowed' : ''}`}
             value={dates[scheduleItem.id]?.[student.id] || ''}
             onChange={(e: any) =>
               changeAttendance(e, scheduleItem.id, student.id, student.is_retired)
             }
             disabled={
-              isCoordinator ||
-              isReceptionist ||
+              !(canMarkAttendance || canEditAttendance) ||
               student.is_retired ||
               student.status === STATUS.INACTIVE
             }
@@ -263,7 +263,7 @@ const TableAttendance: React.FC<TableAttendanceProps> = ({
                   {showInactive ? 'Hide' : 'Show'} {isTransferredCourse ? 'inactive' : 'inactive/retired'} students ({inactive.length})
                 </span>
                 <span
-                  className={`toggle-icon  ${isCoordinator || isReceptionist ? 'toggle-icon no-professor ' : ''}  `}
+                  className={`toggle-icon  ${!(canMarkAttendance || canEditAttendance) ? 'toggle-icon no-professor ' : ''}  `}
                 >
                   {showInactive ? <FaChevronUp /> : <FaChevronDown />}
                 </span>
@@ -291,12 +291,12 @@ const TableAttendance: React.FC<TableAttendanceProps> = ({
               >
                 <Input
                   type='text'
-                  className={`attendance-input bg-white text-black ${isCoordinator || isReceptionist ? 'cursor-no-allowed' : ''}`}
+                  className={`attendance-input bg-white text-black ${!(canMarkAttendance || canEditAttendance) ? 'cursor-no-allowed' : ''}`}
                   onChange={(e) =>
                     updateScheduleItem(e, scheduleItem.id, scheduleIndex)
                   }
                   value={scheduleItem.lesson_taught ?? ''}
-                  disabled={isCoordinator || isReceptionist}
+                  disabled={!(canMarkAttendance || canEditAttendance)}
                 />
               </td>
             ))}

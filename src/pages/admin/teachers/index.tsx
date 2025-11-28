@@ -12,6 +12,8 @@ import { getAllProfessors } from '../../../../helper/api-data/professor';
 import { SelectOption } from 'Types/SelectType';
 import { mutate } from 'swr';
 import { getFiltersString } from '../../../../utils/utils';
+import usePermission from '../../../../hooks/usePermission';
+import { PERMISSIONS } from '../../../../utils/permissions';
 
 const Teachers = () => {
   const limit = 10;
@@ -19,6 +21,7 @@ const Teachers = () => {
   const [page, setPage] = useState(1);
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [reload, setReload] = useState(false);
+  const { can } = usePermission();
   const rowPerPage = router.query.rowPerPage ? Number(router.query.rowPerPage) : 10;
   const filters = getFiltersString(router);
   const [professorOptions, setProfessorOptions] = useState<
@@ -119,10 +122,14 @@ const Teachers = () => {
             <CardHeader className='d-flex justify-content-end'>
               <TableHeaderActions
                 onReload={handleReload}
-                addButton={{
-                  title: 'Create Teacher',
-                  onClick: () => toggle(),
-                }}
+                addButton={
+                  can(PERMISSIONS.CREATE_TEACHER)
+                    ? {
+                        title: 'Create Teacher',
+                        onClick: () => toggle(),
+                      }
+                    : undefined
+                }
               />
             </CardHeader>
             <div className='pb-4'>

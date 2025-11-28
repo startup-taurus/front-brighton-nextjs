@@ -3,18 +3,29 @@ import { Card, CardHeader, CardBody, Container, Row } from 'reactstrap';
 import TableHeaderActions from '@/components/own/table-header-actions/table-header-actions';
 import TableFilters from '@/components/own/table-filters/table-filters';
 import RolesPermissionsTable from '../../../components/own/tables/roles-permissions-table';
+import RolePermissionsForm from '../../../components/own/form/role-permissions-form';
+import { getPermissionsByRole, updatePermissionsByRole } from '../../../../helper/api-data/permissions';
+import useSWR, { mutate } from 'swr';
 import { STATUS_FILTER, USER_ROLES } from '../../../../utils/constants';
 import { SelectOption } from 'Types/SelectType';
 import { FiltersProps } from '../../../../Types/types';
 
-const mockRoles = [
-  { id: 1, name: 'coordinator', status: 'active', created_at: '2025-11-14T13:59:50', last_login: '2025-11-19T19:00:00' },
-  { id: 2, name: 'receptionist', status: 'active', created_at: '2025-11-12T16:52:40', last_login: '1999-12-31T07:00:00' },
-];
+const STATIC_ROLES = USER_ROLES.map((r, idx) => ({ id: idx + 1, name: r.value, status: 'active' }));
 
 const PageRolesPermissions = () => {
+  const [isOpen, setIsOpen] = useState(false);
   const [selectedRoleOpt, setSelectedRoleOpt] = useState<SelectOption | null>(null);
   const [selectedStatusOpt, setSelectedStatusOpt] = useState<SelectOption | null>(null);
+  const [editingRole, setEditingRole] = useState<string | null>(null);
+
+  const { data: rolePerms } = useSWR(editingRole ? ['/permissions/by-role', editingRole] : null, () => getPermissionsByRole(editingRole!));
+
+  const handleCreate = async (payload: any) => {
+    if (!payload?.role_name) { setIsOpen(false); return; }
+    await updatePermissionsByRole(payload.role_name, payload.permissions || []);
+    mutate(['/permissions/me']);
+    setIsOpen(false);
+  };
 
   const roleOptions: SelectOption[] = useMemo(
     () => USER_ROLES.map((r) => ({ value: r.value, label: r.label.toUpperCase() })),
@@ -22,7 +33,7 @@ const PageRolesPermissions = () => {
   );
 
   const filtered = useMemo(() => {
-    return mockRoles.filter((r) => {
+    return STATIC_ROLES.filter((r) => {
       const matchRole = selectedRoleOpt
         ? r.name.toUpperCase() === selectedRoleOpt.label.toUpperCase()
         : true;
@@ -63,20 +74,21 @@ const PageRolesPermissions = () => {
             <CardHeader className='d-flex justify-content-end'>
               <TableHeaderActions
                 onReload={() => {}}
-                addButton={{ title: 'create role and permissions', onClick: () => {} }}
+                addButton={{ title: 'create role and permissions', onClick: () => setIsOpen(true) }}
               />
             </CardHeader>
             <CardBody>
               <RolesPermissionsTable
                 data={filtered}
                 loading={false}
-                onView={() => {}}
-                onEdit={() => {}}
+                onView={(row: { name: string }) => { setEditingRole(row.name); setIsOpen(true); }}
+                onEdit={(row: { name: string }) => { setEditingRole(row.name); setIsOpen(true); }}
               />
             </CardBody>
           </Card>
         </Row>
       </Container>
+      <RolePermissionsForm isOpen={isOpen} toggle={() => setIsOpen(false)} onSubmit={handleCreate} data={editingRole ? { role_name: editingRole, status: 'active', permissions: (rolePerms?.data || []) } : null} />
     </div>
   );
 };

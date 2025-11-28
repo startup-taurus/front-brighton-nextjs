@@ -118,6 +118,7 @@ const UsersTable = ({
           onEdit={() => toggle(row)}
           onBlock={() => handleAlert(row)}
           status={row.status === 'active' ? false : true}
+          module={'Users'}
         />
       ),
       width: '200px',

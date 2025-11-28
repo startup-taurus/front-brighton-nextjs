@@ -12,6 +12,8 @@ import {
   FaBookOpen,
 } from 'react-icons/fa6';
 import { Tooltip } from 'react-tooltip';
+import usePermission from '../../../../hooks/usePermission';
+import { ACTION_PERMISSIONS } from '../../../../utils/permissions';
 
 const TableActionButtons = ({
   onView,
@@ -29,7 +31,15 @@ const TableActionButtons = ({
   viewDisabled,
   blockButtonVariant = 'cancel',
   transferTooltip = 'Transfer to course',
+  module,
 }: any) => {
+  const { can } = usePermission();
+  const canAction = (action: string): boolean => {
+    if (!module) return true;
+    const required = ACTION_PERMISSIONS[module]?.[action];
+    if (!required) return true;
+    return can(required);
+  };
   return (
     <>
       <div
@@ -37,7 +47,7 @@ const TableActionButtons = ({
         role='group'
         aria-label='Basic example'
       >
-        {onView && (
+        {onView && canAction('view') && (
           <button
             type='button'
             className='btn btn-light'
@@ -48,7 +58,7 @@ const TableActionButtons = ({
             <FaMagnifyingGlass />
           </button>
         )}
-        {onAttendance && (
+        {onAttendance && canAction('attendance') && (
           <button
             type='button'
             className='btn btn-info'
@@ -59,7 +69,7 @@ const TableActionButtons = ({
             <FaClipboardList />
           </button>
         )}
-        {onGradebook && (
+        {onGradebook && canAction('gradebook') && (
           <button
             type='button'
             className='btn btn-primary'
@@ -70,7 +80,7 @@ const TableActionButtons = ({
             <FaBookOpen />
           </button>
         )}
-        {onActivate && (
+        {onActivate && canAction('activate') && (
           <button
             type='button'
             className='btn btn-success'
@@ -81,7 +91,7 @@ const TableActionButtons = ({
             <FaUnlock />
           </button>
         )}
-        {onBlock && (
+        {onBlock && canAction('block') && (
           <button
             type='button'
             className={`btn btn-${blockButtonVariant}`}
@@ -92,7 +102,7 @@ const TableActionButtons = ({
             {!status ? <FaBan /> : <FaCheck />}
           </button>
         )}
-        {onEdit && (
+        {onEdit && canAction('edit') && (
           <button
             type='button'
             className='btn btn-save'
@@ -103,7 +113,7 @@ const TableActionButtons = ({
             <FaPenToSquare />
           </button>
         )}
-        {onCopy && (
+        {onCopy && canAction('copy') && (
           <button
             type='button'
             className='btn btn-cancel'
@@ -114,7 +124,7 @@ const TableActionButtons = ({
             <FaCopy />
           </button>
         )}
-        {onTransfer && (
+        {onTransfer && canAction('transfer') && (
           <button
             type='button'
             className='btn btn-cancel'
@@ -125,7 +135,7 @@ const TableActionButtons = ({
             <FaArrowRightArrowLeft />
           </button>
         )}
-        {onTransferCourse && (
+        {onTransferCourse && canAction('transfer_course') && (
           <button
             type='button'
             className='btn btn-cancel'
@@ -136,7 +146,7 @@ const TableActionButtons = ({
             <FaArrowRightArrowLeft />
           </button>
         )}
-        {onDelete && (
+        {onDelete && canAction('delete') && (
           <button
             type='button'
             className='btn btn-danger'

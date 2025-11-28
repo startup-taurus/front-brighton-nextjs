@@ -11,9 +11,19 @@ import useSWR, { mutate } from 'swr';
 import { getAllSyllabus } from '../../../../helper/api-data/syllabus';
 import { getAllLevels } from '../../../../helper/api-data/level';
 import { SelectOption } from 'Types/SelectType';
+import usePermission from '../../../../hooks/usePermission';
+import { PERMISSIONS } from '../../../../utils/permissions';
 
 const Syllabus = () => {
+  const { userRole, permissionSet, can } = usePermission();
   const router = useRouter();
+  const allowed = can(PERMISSIONS.VIEW_SYLLABUS);
+
+  useEffect(() => {
+    if ((userRole || permissionSet) && !allowed) {
+      router.replace('/dashboard');
+    }
+  }, [allowed, router, userRole, permissionSet]);
   const [isOpenModal, setIsOpenModal] = useState(false);
   const page = router.query.page ? Number(router.query.page) : 1;
   const rowPerPage = router.query.rowPerPage
@@ -106,7 +116,10 @@ const Syllabus = () => {
     ]);
   };
 
+  if (!userRole && !permissionSet) return null;
+
   return (
+    allowed ? (
     <div className='page-body'>
       <Container
         className='basic_table'
@@ -121,10 +134,14 @@ const Syllabus = () => {
               <div className='d-flex align-items-center'>
                 <TableHeaderActions
                   onReload={handleReload}
-                  addButton={{
-                    title: 'Create Syllabus',
-                    onClick: () => toggle(),
-                  }}
+                  addButton={
+                    can(PERMISSIONS.CREATE_SYLLABUS)
+                      ? {
+                          title: 'Create Syllabus',
+                          onClick: () => toggle(),
+                        }
+                      : undefined
+                  }
                 />
               </div>
             </CardHeader>
@@ -147,6 +164,7 @@ const Syllabus = () => {
         onReload={handleReload}
       />
     </div>
+    ) : null
   );
 };
 

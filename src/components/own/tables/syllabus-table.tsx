@@ -105,6 +105,7 @@ const SyllabusTable = ({
           onView={() => toggle(row)}
           onEdit={() => toggleDetail(row)}
           onCopy={() => handleCopy(row)}
+          module={'Syllabus'}
         />
       ),
       width: '220px',
