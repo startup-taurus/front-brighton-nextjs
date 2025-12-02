@@ -263,11 +263,17 @@ const StudentTransferForm: React.FC<Props> = ({
   };
 
   const destinationCourseLabel = useMemo(() => {
+
     if (selectedCourse?.label) return selectedCourse.label;
+
     const initial = initialTransferData?.selected_course;
+
     const found = initial ? courseOptions.find((o) => o.value === initial.value) : null;
+
     if (found?.label) return found.label;
+
     const course = courseByIdData?.data;
+    
     if (course) {
       return formatCourseLabel(course);
     }

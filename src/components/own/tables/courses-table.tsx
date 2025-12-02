@@ -16,6 +16,7 @@ import { getFiltersString } from '../../../../utils/utils';
 import TableSkeleton from '../common/table-skeleton/TableSkeleton';
 import { UserContext } from 'helper/User';
 import { USER_TYPES, STATUS, COURSE_CLIENT_PAGINATION_STATUSES, COURSE_TYPES, PRIVATE_COURSE_TYPES } from '../../../../utils/constants';
+import { getClassroomLabel } from '../../../../utils/courseUtils';
 import { FaCertificate, FaFileAlt } from 'react-icons/fa';
 import { generateBatchCertificatesZIP, generateBatchReportsZIP } from '../../../../utils/pdfGenerator';
 import { toast } from 'react-toastify';
@@ -310,13 +311,7 @@ const CoursesTable = ({ reload, loading }: any) => {
 
   const formatDate = (date: string) => date ? new Date(date).toLocaleDateString('en-US') : '';
   const formatText = (text: string) => text ? text.toUpperCase() : '';
-  const getClassroomLabel = (row: any) => {
-    const type = String(row.course_type || '').toLowerCase();
-    if (type === COURSE_TYPES.ONLINE) return COURSE_TYPES.ONLINE;
-    if (type === PRIVATE_COURSE_TYPES.PRIVATE) return PRIVATE_COURSE_TYPES.PRIVATE;
-    if (type === PRIVATE_COURSE_TYPES.PRIVATE_ONLINE) return PRIVATE_COURSE_TYPES.PRIVATE_ONLINE;
-    return formatText(row.classroom);
-  };
+  
   const getStartDate = (row: any) => formatDate(row.first_class_date || row.start_date);
   const getEndDate = (row: any) => formatDate(row.last_class_date || row.end_date);
 
