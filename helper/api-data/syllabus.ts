@@ -12,7 +12,7 @@ export const getAllSyllabus = (
 };
 
 export const getSyllabusById = (id: number) => {
-  return getFetcher(`/syllabus/${id}`, false);
+  return getFetcher(`/syllabus/get-one/${id}`, false);
 };
 
 export const createSyllabus = (data: any) => {

@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useMemo} from 'react';
 import {ErrorMessage, Field, Formik, FieldArray} from 'formik';
 import {
   Button,
@@ -11,19 +11,22 @@ import {
   FormFeedback,
   Row,
 } from 'reactstrap';
-import {FaTrash} from 'react-icons/fa';
+import {FaTrash, FaMinus} from 'react-icons/fa';
 import * as Yup from 'yup';
 import Swal from 'sweetalert2';
 import {toast} from 'react-toastify';
 
 import LoadingButton from '../common/loading-button/LoadingButton';
-import {createSyllabus, updateSyllabus} from 'helper/api-data/syllabus';
+import { debounce } from 'lodash';
+import {createSyllabus, updateSyllabus, getSyllabusById} from 'helper/api-data/syllabus';
+import { deleteCourseAssignmentItem, upsertCourseAssignmentItem } from 'helper/api-data/course';
 import Select from 'react-select';
-import useSWR from 'swr';
+import useSWR, { mutate } from 'swr';
 import {getAllLevels} from 'helper/api-data/level';
 import {EXAMS_TYPE, EXAM_TYPE_OPTIONS} from 'utils/constants';
 import {getExamTypeByLevelId, getModulesByExamType} from 'utils/utils';
 import {getAllSyllabus} from 'helper/api-data/syllabus';
+import { useRouter } from 'next/router';
 
 const EXAMS_LIST = [
   {
@@ -85,6 +88,9 @@ const SyllabusForm = ({data, isOpen, toggle, isCopy, onReload}: any) => {
   const [page, setPage] = useState(1);
   const [levelSearchTerm, setLevelSearchTerm] = useState('');
   const [levelOptions, setLevelOptions] = useState<any[]>([]);
+  const [pendingTeacherDeletes, setPendingTeacherDeletes] = useState<Array<{ course_id: number, item_id: number }>>([]);
+  const [pendingDeleteIds, setPendingDeleteIds] = useState<Set<number>>(new Set());
+  const router = useRouter();
 
   const {data: levels} = useSWR(
     ['/level/get-all', page, limit, levelSearchTerm],
@@ -100,6 +106,23 @@ const SyllabusForm = ({data, isOpen, toggle, isCopy, onReload}: any) => {
       setExistingSyllabi(allSyllabi.data.results);
     }
   }, [allSyllabi]);
+
+  const filterName = typeof router.query?.syllabus_name === 'string' ? router.query.syllabus_name : '';
+  const selectedSyllabusId = React.useMemo(() => {
+    const list = Array.isArray(existingSyllabi) ? existingSyllabi : [];
+    if (filterName) {
+      const match = list.find(
+        (s: any) => String(s?.syllabus_name || '')
+          .toLowerCase()
+          .trim() === String(filterName).toLowerCase().trim()
+      );
+      return match?.id ?? data?.id ?? null;
+    }
+    return data?.id ?? null;
+  }, [existingSyllabi, filterName, data]);
+
+  const syllabusIdNum = typeof selectedSyllabusId === 'number' ? selectedSyllabusId : Number(selectedSyllabusId);
+  const { data: teacherData } = useSWR(Number.isFinite(syllabusIdNum) && syllabusIdNum > 0 ? [`/syllabus/get-one/${syllabusIdNum}`] : null, () => getSyllabusById(syllabusIdNum));
 
   const validateArrayNotEmpty = (
     array: string[] | undefined,
@@ -268,7 +291,26 @@ const SyllabusForm = ({data, isOpen, toggle, isCopy, onReload}: any) => {
     try {
       const response = await updateSyllabus(syllabus.id, syllabus);
       if (response.statusCode === 200) {
+        if (pendingTeacherDeletes.length > 0) {
+          try {
+            await Promise.all(
+              pendingTeacherDeletes.map((d) =>
+                deleteCourseAssignmentItem(String(d.course_id), d.item_id)
+              )
+            );
+            setPendingTeacherDeletes([]);
+            setPendingDeleteIds(new Set());
+          } catch (e) {
+            toast.error('Error applying teacher assignment deletions');
+          }
+        }
         toast.success("Syllabus updated successfully");
+        try {
+          if (Number.isFinite(syllabusIdNum) && syllabusIdNum > 0) {
+            await mutate(`/syllabus/get-one/${syllabusIdNum}`);
+          }
+          await mutate('/syllabus/get-all-for-validation');
+        } catch {}
         setSubmitting(false);
         toggle();
         if (onReload) {
@@ -361,10 +403,15 @@ const SyllabusForm = ({data, isOpen, toggle, isCopy, onReload}: any) => {
                   exam_percentage: data?.percentages?.exam_percentage || 0,
                   assig_percentage: data?.percentages?.assig_percentage || 0,
                   assignments:
-                    data?.assignments?.length > 0 ? data.assignments : [],
+                    (teacherData?.data?.assignments && teacherData?.data?.assignments.length > 0)
+                      ? teacherData.data.assignments
+                      : (data?.assignments?.length > 0 ? data.assignments : []),
                   progress_tests:
-                    data?.progress_tests?.length > 0 ? data.progress_tests : [],
+                    (teacherData?.data?.progress_tests && teacherData?.data?.progress_tests.length > 0)
+                      ? teacherData.data.progress_tests
+                      : (data?.progress_tests?.length > 0 ? data.progress_tests : []),
                   exam_modules:
+                    teacherData?.data?.exam_modules ||
                     data?.exam_modules ||
                     data?.movers_exam ||
                     getModulesByExamType(data?.exam_type || EXAMS_TYPE.PRELIM),
@@ -404,6 +451,43 @@ const SyllabusForm = ({data, isOpen, toggle, isCopy, onReload}: any) => {
               touched,
               dirty,
             } = props;
+
+            const teacherGroups = (teacherData?.data?.teacher_assignments || []) as Array<{ professor_name: string, course_id: number, items: Array<{ id: number, name: string }> }>;
+            const teacherItemNames = useMemo(() => {
+              const names: string[] = [];
+              teacherGroups.forEach((grp) => grp.items.forEach((it) => names.push(String(it.name || '').toLowerCase().trim())));
+              return new Set(names);
+            }, [teacherGroups]);
+
+            useEffect(() => {
+              const current = Array.isArray(values.assignments) ? values.assignments : [];
+              const filtered = current.filter((n) => !teacherItemNames.has(String(n || '').toLowerCase().trim()));
+              if (filtered.length !== current.length) {
+                setFieldValue('assignments', filtered);
+              }
+            }, [teacherItemNames, values.assignments, setFieldValue]);
+
+            useEffect(() => {
+              const arr = Array.isArray(values.assignments) ? values.assignments : [];
+              const seen = new Set<string>();
+              const normalized = (s: any) => String(s || '').toLowerCase().trim();
+              const next: string[] = [];
+              for (const n of arr) {
+                const key = normalized(n);
+                if (key === '') {
+                  next.push(n as string);
+                  continue;
+                }
+                if (seen.has(key)) {
+                  continue;
+                }
+                seen.add(key);
+                next.push(n as string);
+              }
+              if (next.length !== arr.length) {
+                setFieldValue('assignments', next);
+              }
+            }, [values.assignments, setFieldValue]);
 
             const renderArrayField = (name: string, label: string) => {
               const fieldValue = values[
@@ -469,6 +553,52 @@ const SyllabusForm = ({data, isOpen, toggle, isCopy, onReload}: any) => {
                       </>
                     )}
                   />
+                </Col>
+              );
+            };
+
+            const renderTeacherAssignments = () => {
+              const groups = (teacherData?.data?.teacher_assignments || []) as Array<{ professor_name: string, course_id: number, items: Array<{ id: number, name: string }> }>;
+              if (!groups.length) return null;
+              const renameDebounced = debounce((cid: string, itemId: number, name: string) => {
+                upsertCourseAssignmentItem(cid, { itemId, name }).then((res: any) => {
+                  if (res?.statusCode === 200 || res?.statusCode === 201) {
+                    toast.success('Assignment renamed');
+                  } else {
+                    toast.error(res?.message || 'Unable to rename assignment');
+                  }
+                });
+              }, 600);
+              return (
+                <Col xs={12} className='mt-4'>
+                  <Label>Assignments — Teachers</Label>
+                  <div className='syllabus-container'>
+                    {groups.map((grp, gi) => (
+                      <div key={`teacher-assignment-${gi}`} className='mb-3'>
+                        <strong className='d-block mb-2'>{grp.professor_name || 'Professor'}</strong>
+                        <Row className='mb-2'>
+                          {grp.items.filter((it) => !pendingDeleteIds.has(it.id)).map((it, idx) => (
+                            <Col key={it.id} xs={6} className='d-flex align-items-center mb-2'>
+                              <Input defaultValue={it.name} className='me-2 syllabus-input' onChange={(e) => {
+                                const newName = (e.target as HTMLInputElement).value;
+                                renameDebounced(String(grp.course_id), it.id, newName);
+                              }} />
+                              <Button
+                                type='button'
+                                color='danger'
+                                onClick={() => {
+                                  setPendingTeacherDeletes((prev) => [...prev, { course_id: grp.course_id, item_id: it.id }]);
+                                  setPendingDeleteIds((prev) => new Set(Array.from(prev).concat(it.id)));
+                                }}
+                              >
+                                <FaTrash />
+                              </Button>
+                            </Col>
+                          ))}
+                        </Row>
+                      </div>
+                    ))}
+                  </div>
                 </Col>
               );
             };
@@ -706,7 +836,8 @@ const SyllabusForm = ({data, isOpen, toggle, isCopy, onReload}: any) => {
                   />
                 </Col>
                 <hr className='my-4' />
-                {renderArrayField('assignments', 'Assignments')}
+                {renderArrayField('assignments', 'Assignments (Global)')}
+                {renderTeacherAssignments()}
                 <hr className='my-4' />
                 {renderArrayField('progress_tests', 'Progress Tests')}
                 <hr className='my-4' />

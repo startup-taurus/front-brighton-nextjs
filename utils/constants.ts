@@ -198,7 +198,12 @@ export const DATA_TYPE = {
   FALSE: 'false',
   OBJECT: 'object',
 };
-
+export const COURSE_TYPES = {
+  ONLINE: 'online',
+  ON_SITE: 'on-site',
+  PRIVATE: 'private',
+  PRIVATE_ONLINE: 'private - online'
+};
 
 
 export const PDF_GENERATOR_CONSTANTS = {
