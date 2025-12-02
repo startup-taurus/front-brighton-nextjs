@@ -123,26 +123,37 @@ const StudentTransferForm: React.FC<Props> = ({
 
   useEffect(() => {
     if (coursesData?.data) {
-      const opts: Option[] = coursesData.data.map((course: any) => ({
-        value: course.id,
-        label: formatCourseLabel(course),
-        levelId: extractLevel(course).value,
-        levelLabel: extractLevel(course).label,
-      }));
+
+      const opts = coursesData.data
+        .filter((course: any) => course.syllabus?.level)
+        .map((course: any) => {
+          const name = (course.course_name || '').trim();
+          const level = (course.syllabus.level.full_level || '').trim();
+          const base = `${course.course_number} - ${name}`;
+          const label = name.toUpperCase() === level.toUpperCase()
+            ? base
+            : `${base} - ${level}`;
+          return {
+            value: course.id,
+            label,
+            levelId: course.syllabus.level.id,
+            levelLabel: course.syllabus.level.full_level,
+          } as any;
+        });
 
       if (coursePage === 1) {
         setCourseOptions(opts);
       } else {
         setCourseOptions((prevOpts: Option[]) => {
           const existingValues = new Set(prevOpts.map((opt) => opt.value));
-          const filteredNewOpts = opts.filter((opt) => !existingValues.has(opt.value));
+          const filteredNewOpts = opts.filter((opt: Option) => !existingValues.has(opt.value));
           return [...prevOpts, ...filteredNewOpts];
         });
       }
       setHasMoreCourses(opts.length === limit);
 
       if (initialTransferData?.selected_course) {
-        const foundCourse = opts.find((o) => o.value === initialTransferData.selected_course!.value);
+        const foundCourse = opts.find((o: Option) => o.value === initialTransferData.selected_course!.value);
         if (foundCourse) {
           setSelectedCourse(foundCourse);
         } else if (!selectedCourse && initialTransferData.selected_course) {
