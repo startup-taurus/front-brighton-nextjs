@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Modal, ModalHeader, ModalBody, Row, Col, Label, Input, Button } from 'reactstrap';
 import { Formik } from 'formik';
-import Swal from 'sweetalert2';
+import { toast } from 'react-toastify';
 import LoadingButton from '../common/loading-button/LoadingButton';
 import { STATUS } from 'utils/constants';
 import { PERMISSION_MODULES } from 'utils/permissions';
@@ -9,7 +9,7 @@ import { PERMISSION_MODULES } from 'utils/permissions';
 type Props = {
   isOpen: boolean;
   toggle: () => void;
-  onSubmit: (data: any) => void;
+  onSubmit: (data: any) => Promise<void> | void;
   data?: { role_name: string; status: string; permissions: string[] } | null;
 };
 
@@ -60,26 +60,42 @@ const RolePermissionsForm = ({ isOpen, toggle, onSubmit, data }: Props) => {
     setCollapsed((prev) => ({ ...prev, [module]: !prev[module] }));
 
   return (
-    <Modal isOpen={isOpen} toggle={toggle} size="lg">
-      <ModalHeader toggle={toggle}>{data ? 'Edit role and permissions' : 'Add role and permissions'}</ModalHeader>
+    <Modal isOpen={isOpen} toggle={toggle} size="lg" centered>
+      <ModalHeader toggle={toggle}>
+        {data ? 'Edit role and permissions' : 'Add role and permissions'}
+      </ModalHeader>
       <ModalBody>
         <Formik
           enableReinitialize
           initialValues={initialValues}
           validate={validate}
-          onSubmit={(values, helpers) => {
+          onSubmit={async (values, helpers) => {
             if (!values.role_name || !values.status) {
-              Swal.fire({ icon: 'error', title: 'Validation Error', text: 'Please fill in the required fields' });
+              toast.error('Please fill in the required fields');
               helpers.setSubmitting(false);
               return;
             }
-            onSubmit({
-              role_name: values.role_name.trim(),
-              status: values.status,
-              permissions: values.selected_permissions,
-            });
-            helpers.setSubmitting(false);
-            toggle();
+
+            try {
+              await onSubmit({
+                role_name: values.role_name.trim(),
+                status: values.status,
+                permissions: values.selected_permissions,
+              });
+
+              toast.success(
+                data
+                  ? 'Role permissions updated successfully'
+                  : 'New role created successfully'
+              );
+
+              toggle();
+            } catch (error) {
+              console.error(error);
+              toast.error('Error saving role permissions');
+            } finally {
+              helpers.setSubmitting(false);
+            }
           }}
         >
           {(props) => {
@@ -89,7 +105,7 @@ const RolePermissionsForm = ({ isOpen, toggle, onSubmit, data }: Props) => {
               <form noValidate onSubmit={handleSubmit}>
                 <Row className="mb-3">
                   <Col md={6}>
-                    <Label>Role Name</Label>
+                    <Label className="fw-bold fs-6">Role Name</Label>
                     <Input
                       value={values.role_name}
                       onChange={(e) => setFieldValue('role_name', e.target.value)}
@@ -98,7 +114,8 @@ const RolePermissionsForm = ({ isOpen, toggle, onSubmit, data }: Props) => {
                     />
                   </Col>
                   <Col md={6}>
-                    <Label>Status</Label>
+                    {/* CAMBIO: Clases fw-bold y fs-5 */}
+                    <Label className="fw-bold fs-6">Status</Label>
                     <Input
                       type="select"
                       value={values.status}
@@ -110,7 +127,8 @@ const RolePermissionsForm = ({ isOpen, toggle, onSubmit, data }: Props) => {
                   </Col>
                 </Row>
 
-                <Label className="mt-2">Permissions</Label>
+                <Label className="mt-2 fw-bold fs-6">Permissions</Label>
+                
                 <Row className="mt-2">
                   {modules.map((module) => {
                     const perms = PERMISSION_MODULES[module] || [];
@@ -128,7 +146,15 @@ const RolePermissionsForm = ({ isOpen, toggle, onSubmit, data }: Props) => {
                                 checked={allSelected}
                                 onChange={() => toggleModuleSelectAll(values, setFieldValue, module)}
                               />
-                              <Button size="sm" color="light" onClick={() => toggleCollapse(module)}>
+                              
+                              {/* CAMBIO: Botón limpio (color="link") sin bordes, solo la flecha */}
+                              <Button
+                                size="sm"
+                                color="link" 
+                                className="text-decoration-none text-dark p-0"
+                                style={{ fontSize: '1.2rem', lineHeight: 1, width: '24px' }}
+                                onClick={() => toggleCollapse(module)}
+                              >
                                 {collapsedModule ? '▸' : '▾'}
                               </Button>
                             </div>
@@ -159,7 +185,10 @@ const RolePermissionsForm = ({ isOpen, toggle, onSubmit, data }: Props) => {
                                         }
                                       }}
                                     />
-                                    <Label className="form-check-label" htmlFor={`${module}-${perm}`}>
+                                    <Label
+                                      className="form-check-label"
+                                      htmlFor={`${module}-${perm}`}
+                                    >
                                       {formatPermissionLabel(perm)}
                                     </Label>
                                   </div>
@@ -174,7 +203,7 @@ const RolePermissionsForm = ({ isOpen, toggle, onSubmit, data }: Props) => {
                 </Row>
 
                 <div className="d-flex justify-content-end mt-4">
-                  <Button color="secondary" onClick={toggle}>
+                  <Button color="secondary" onClick={toggle} disabled={isSubmitting}>
                     Cancel
                   </Button>
                   &nbsp;&nbsp;

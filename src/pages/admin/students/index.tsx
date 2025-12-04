@@ -20,9 +20,12 @@ import {
   STATUS_LEVEL_CHANGE,
 } from '../../../../utils/constants';
 import { SelectOption } from 'Types/SelectType';
+import usePermission from '../../../../hooks/usePermission';
+import { PERMISSIONS } from '../../../../utils/permissions';
 
 const Students = () => {
   const router = useRouter();
+  const { can } = usePermission();
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [selectedStudentsCount, setSelectedStudentsCount] = useState(0);
   const transferButtonRef = useRef(null);
@@ -211,10 +214,14 @@ const Students = () => {
                 ></div>
                 <TableHeaderActions
                   onReload={handleReload}
-                  addButton={{
-                    title: 'Create Student',
-                    onClick: () => toggle(),
-                  }}
+                  {...(can(PERMISSIONS.CREATE_STUDENT)
+                    ? {
+                        addButton: {
+                          title: 'Create Student',
+                          onClick: () => toggle(),
+                        },
+                      }
+                    : {})}
                 />
               </div>
             </CardHeader>
