@@ -11,11 +11,8 @@ import useSWR, { mutate } from 'swr';
 import { SelectOption } from 'Types/SelectType';
 import { useRouter } from 'next/router';
 import { getFiltersString } from '../../../../utils/utils';
-import usePermission from '../../../../hooks/usePermission';
-import { PERMISSIONS } from '../../../../utils/permissions';
 
 const Users = () => {
-  const { can } = usePermission();
   const router = useRouter();
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [isReloading, setIsReloading] = useState(false);
@@ -167,11 +164,7 @@ const Users = () => {
             <CardHeader className='d-flex justify-content-end'>
               <TableHeaderActions
                 onReload={handleReload}
-                addButton={
-                  can(PERMISSIONS.CREATE_USER)
-                    ? { title: 'Create User', onClick: toggle }
-                    : undefined
-                }
+                addButton={{ title: 'Create User', onClick: toggle }}
               />
             </CardHeader>
             <div className='pb-4'>

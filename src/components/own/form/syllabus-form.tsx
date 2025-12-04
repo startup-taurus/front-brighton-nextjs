@@ -1,5 +1,5 @@
 import React, {useEffect, useState, useMemo} from 'react';
-import {ErrorMessage, Field, Formik, FieldArray} from 'formik';
+import {ErrorMessage, Field, Formik} from 'formik';
 import {
   Button,
   Col,
@@ -11,13 +11,13 @@ import {
   FormFeedback,
   Row,
 } from 'reactstrap';
-import {FaTrash, FaMinus} from 'react-icons/fa';
 import * as Yup from 'yup';
 import Swal from 'sweetalert2';
 import {toast} from 'react-toastify';
 
-import LoadingButton from '../common/loading-button/LoadingButton';
-import TeacherAssignments from './teacher-assignments';
+  import LoadingButton from '../common/loading-button/LoadingButton';
+  import TeacherAssignments from './teacher-assignments';
+  import { ArrayStringField, PercentagesField, AssignmentsSanitizer } from './form-fields';
 import {
   createSyllabus,
   updateSyllabus,
@@ -479,225 +479,7 @@ const SyllabusForm = ({data, isOpen, toggle, isCopy, onReload}: any) => {
               dirty,
             } = props;
 
-            const teacherGroups = (teacherData?.data?.teacher_assignments ||
-              []) as Array<{
-              professor_name: string;
-              course_id: number;
-              items: Array<{id: number; name: string}>;
-            }>;
-            const teacherItemNames = useMemo(() => {
-              const names: string[] = [];
-              teacherGroups.forEach((grp) =>
-                grp.items.forEach((it) =>
-                  names.push(
-                    String(it.name || '')
-                      .toLowerCase()
-                      .trim()
-                  )
-                )
-              );
-              return new Set(names);
-            }, [teacherGroups]);
-
-            useEffect(() => {
-              const current = Array.isArray(values.assignments)
-                ? values.assignments
-                : [];
-              const filtered = current.filter(
-                (n) =>
-                  !teacherItemNames.has(
-                    String(n || '')
-                      .toLowerCase()
-                      .trim()
-                  )
-              );
-              if (filtered.length !== current.length) {
-                setFieldValue('assignments', filtered);
-              }
-            }, [teacherItemNames, values.assignments, setFieldValue]);
-
-            useEffect(() => {
-              const arr = Array.isArray(values.assignments)
-                ? values.assignments
-                : [];
-              const seen = new Set<string>();
-              const normalized = (s: any) =>
-                String(s || '')
-                  .toLowerCase()
-                  .trim();
-              const next: string[] = [];
-              for (const n of arr) {
-                const key = normalized(n);
-                if (key === '') {
-                  next.push(n as string);
-                  continue;
-                }
-                if (seen.has(key)) {
-                  continue;
-                }
-                seen.add(key);
-                next.push(n as string);
-              }
-              if (next.length !== arr.length) {
-                setFieldValue('assignments', next);
-              }
-            }, [values.assignments, setFieldValue]);
-
-            const renderArrayField = (name: string, label: string) => {
-              const fieldValue = values[
-                name as keyof typeof values
-              ] as string[];
-              const safeArray =
-                Array.isArray(fieldValue) && fieldValue.length > 0
-                  ? fieldValue
-                  : [''];
-
-              return (
-                <Col xs={12} className='mt-3'>
-                  <Label>{label}</Label>
-                  <FieldArray
-                    name={name}
-                    render={(arrayHelpers) => (
-                      <>
-                        <div className='d-flex justify-content-start my-2'>
-                          <Button
-                            type='button'
-                            color='primary'
-                            onClick={() => arrayHelpers.push('')}
-                          >
-                            Add Item
-                          </Button>
-                        </div>
-                        <div className='syllabus-container'>
-                          <Row className='mb-2'>
-                            {safeArray.map((item, index) => (
-                              <Col
-                                key={index}
-                                xs={6}
-                                className='d-flex align-items-center mb-2'
-                              >
-                                <Input
-                                  value={item}
-                                  onChange={(e) =>
-                                    setFieldValue(
-                                      `${name}[${index}]`,
-                                      e.target.value
-                                    )
-                                  }
-                                  placeholder={`Item ${index + 1}`}
-                                  className='me-2 syllabus-input'
-                                />
-                                <Button
-                                  type='button'
-                                  color='danger'
-                                  onClick={() => {
-                                    if (safeArray.length === 1) {
-                                      setFieldValue(`${name}[0]`, '');
-                                    } else {
-                                      arrayHelpers.remove(index);
-                                    }
-                                  }}
-                                >
-                                  <FaTrash />
-                                </Button>
-                              </Col>
-                            ))}
-                          </Row>
-                        </div>
-                      </>
-                    )}
-                  />
-                </Col>
-              );
-            };
-
             
-
-            const renderPercentagesField = (
-              name: string,
-              label: string,
-              values: any,
-              setFieldValue: (field: string, value: any) => void
-            ) => (
-              <Col xs={12} className='mt-3'>
-                <Label>{label}</Label>
-                <FieldArray
-                  name={name}
-                  render={(arrayHelpers) => (
-                    <>
-                      <div className='d-flex justify-content-start my-2'>
-                        <Button
-                          type='button'
-                          color='primary'
-                          onClick={() =>
-                            arrayHelpers.push({name: '', min: 0, max: 0})
-                          }
-                        >
-                          Add Percentage
-                        </Button>
-                      </div>
-                      <div className='syllabus-container'>
-                        {values[name].map((percentage: any, index: number) => (
-                          <Row key={index} className='mb-2 align-items-center'>
-                            <Col md={4}>
-                              <Label>Name</Label>
-                              <Input
-                                type='text'
-                                value={percentage.name}
-                                onChange={(e) =>
-                                  setFieldValue(
-                                    `${name}[${index}].name`,
-                                    e.target.value
-                                  )
-                                }
-                                className='syllabus-input'
-                              />
-                            </Col>
-                            <Col md={3}>
-                              <Label>Min %</Label>
-                              <Input
-                                type='number'
-                                value={percentage.min}
-                                onChange={(e) =>
-                                  setFieldValue(
-                                    `${name}[${index}].min`,
-                                    e.target.value
-                                  )
-                                }
-                                className='syllabus-input'
-                              />
-                            </Col>
-                            <Col md={3}>
-                              <Label>Max %</Label>
-                              <Input
-                                type='number'
-                                value={percentage.max}
-                                onChange={(e) =>
-                                  setFieldValue(
-                                    `${name}[${index}].max`,
-                                    e.target.value
-                                  )
-                                }
-                                className='syllabus-input'
-                              />
-                            </Col>
-                            <Col md={2} className='d-flex align-items-end'>
-                              <Button
-                                type='button'
-                                color='danger'
-                                onClick={() => arrayHelpers.remove(index)}
-                              >
-                                <FaTrash />
-                              </Button>
-                            </Col>
-                          </Row>
-                        ))}
-                      </div>
-                    </>
-                  )}
-                />
-              </Col>
-            );
 
             return (
               <form
@@ -804,7 +586,7 @@ const SyllabusForm = ({data, isOpen, toggle, isCopy, onReload}: any) => {
                   )}
                 </Col>
 
-                {renderArrayField('items', 'Items')}
+                <ArrayStringField name='items' label='Items' values={values} setFieldValue={setFieldValue} />
 
                 <Col md={4}>
                   <Label for='assig_percentage'>Assignment Percentage %</Label>
@@ -846,7 +628,8 @@ const SyllabusForm = ({data, isOpen, toggle, isCopy, onReload}: any) => {
                   />
                 </Col>
                 <hr className='my-4' />
-                {renderArrayField('assignments', 'Assignments (Global)')}
+                <AssignmentsSanitizer teacherGroups={(teacherData?.data?.teacher_assignments || []) as any} assignments={values.assignments || []} setFieldValue={setFieldValue} />
+                <ArrayStringField name='assignments' label='Assignments (Global)' values={values} setFieldValue={setFieldValue} />
                 <TeacherAssignments
                   groups={(teacherData?.data?.teacher_assignments || []) as any}
                   pendingDeleteIds={pendingDeleteIds}
@@ -854,25 +637,17 @@ const SyllabusForm = ({data, isOpen, toggle, isCopy, onReload}: any) => {
                   setPendingDeleteIds={setPendingDeleteIds}
                 />
                 <hr className='my-4' />
-                {renderArrayField('progress_tests', 'Progress Tests')}
+                <ArrayStringField name='progress_tests' label='Progress Tests' values={values} setFieldValue={setFieldValue} />
                 <hr className='my-4' />
 
                 {values.exam_type && (
                   <>
                     <hr className='my-4' />
-                    {renderArrayField(
-                      'exam_modules',
-                      `Exam Modules - ${values.exam_type}`
-                    )}
+                    <ArrayStringField name='exam_modules' label={`Exam Modules - ${values.exam_type}`} values={values} setFieldValue={setFieldValue} />
                   </>
                 )}
                 <hr className='my-4' />
-                {renderPercentagesField(
-                  'percentages',
-                  'Custom Percentages',
-                  values,
-                  setFieldValue
-                )}
+                <PercentagesField name='percentages' label='Custom Percentages' values={values} setFieldValue={setFieldValue} />
 
                 <Col xs={12} className='d-flex justify-content-end mt-5'>
                   <Button color='secondary' onClick={toggle}>
