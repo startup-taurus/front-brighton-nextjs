@@ -15,9 +15,11 @@ import * as Yup from 'yup';
 import Swal from 'sweetalert2';
 import {toast} from 'react-toastify';
 
-  import LoadingButton from '../common/loading-button/LoadingButton';
-  import TeacherAssignments from './teacher-assignments';
-  import { ArrayStringField, PercentagesField, AssignmentsSanitizer } from './form-fields';
+import LoadingButton from '../common/loading-button/LoadingButton';
+import TeacherAssignments from './teacher-assignments';
+import { ArrayStringField } from './form-fields';
+import { AssignmentsSanitizer } from './assignments-sanitizer';
+import { PercentagesField } from './percentages-field';
 import {
   createSyllabus,
   updateSyllabus,
