@@ -11,7 +11,7 @@ import TableSkeleton from '@/components/own/common/table-skeleton/TableSkeleton'
 import { Badge } from 'reactstrap';
 import StudentTransferForm from '@/components/own/form/student-transfer-form';
 import { getStudentTransfersByTransferDataId } from 'helper/api-data/student-transfer';
-import { getActiveCourses } from 'helper/api-data/course';
+import { getActiveCourses, getCourseById } from 'helper/api-data/course';
 import { getAllLevels } from 'helper/api-data/level';
 import TableActionButtons from '../table-action-buttons/table-action-buttons';
 import Swal from 'sweetalert2';
@@ -76,6 +76,23 @@ const TransferStudentsTable = ({ reload }: { reload: boolean }) => {
         (option: any) => option.value === transferData.selected_level_id
       );
 
+      let hydratedCourseLabel: string | undefined =
+        selectedCourseOption?.label ||
+        transferData.selected_course?.label ||
+        (transferData.selected_course?.course_name || transferData.selected_course?.course_number
+          ? `${transferData.selected_course?.course_number || ''} - ${transferData.selected_course?.course_name || ''}`
+          : undefined);
+
+      if (transferData.selected_course_id) {
+        try {
+          const courseRes = await getCourseById(String(transferData.selected_course_id));
+          const c = courseRes?.data;
+          hydratedCourseLabel = c?.course_number && c?.course_name
+            ? `${c.course_number} - ${c.course_name}`
+            : c?.course_name || hydratedCourseLabel || `ID ${transferData.selected_course_id}`;
+        } catch {}
+      }
+
       const initialData = {
         id: transferData?.id || null,
         description: transferData?.description || '',
@@ -83,9 +100,7 @@ const TransferStudentsTable = ({ reload }: { reload: boolean }) => {
         selected_course: transferData.selected_course_id
           ? selectedCourseOption || {
               value: transferData.selected_course_id,
-              label:
-                transferData.selected_course?.course_name ||
-                `${transferData.selected_course?.course_number} - ${transferData.selected_course?.course_name || ''}`,
+              label: hydratedCourseLabel || `ID ${transferData.selected_course_id}`,
             }
           : null,
         selected_level: transferData.selected_level_id
@@ -210,7 +225,11 @@ const TransferStudentsTable = ({ reload }: { reload: boolean }) => {
     },
     {
       name: 'Course',
-      selector: (row: any) => row.selected_course?.course_name,
+      selector: (row: any) =>
+        row.selected_course?.course_name ||
+        (row.selected_course?.course_name || row.selected_course?.course_number
+          ? `${row.selected_course?.course_number || ''} - ${row.selected_course?.course_name || ''}`
+          : row.selected_course?.label || (row.selected_course_id ? `ID ${row.selected_course_id}` : '-')),
       sortable: true,
     },
     {

@@ -7,6 +7,7 @@ import React, {
   useContext,
 } from 'react';
 import { Button, Input, Table, Alert, Badge, Collapse } from 'reactstrap';
+import { FaTrash } from 'react-icons/fa';
 import {
   COMPONENTS_GRADEBOOK,
   STATUS,
@@ -20,16 +21,13 @@ import {
   formatGradebookComponents,
   calculateFinalGradingStatus,
 } from '../../../../utils/utils';
-import { debounce } from 'lodash';
+import { debounce, throttle } from 'lodash';
 import { useRouter } from 'next/router';
 import { updateStudentGrade } from '../../../../helper/api-data/student-grades';
 import { ComponentsGradebook } from '../../../../Types/GradingItem';
 import { FaPlus } from 'react-icons/fa6';
 import { FaChevronUp, FaChevronDown } from 'react-icons/fa';
-import {
-  createAssignmentGradingItem,
-  updateAssignmentGradingItem,
-} from '../../../../helper/api-data/syllabus';
+import { upsertCourseAssignmentItem, deleteCourseAssignmentItem } from '../../../../helper/api-data/course';
 import { mutate } from 'swr';
 import Swal from 'sweetalert2';
 import { deleteRegisteredStudent } from '../../../../helper/api-data/registered-student';
@@ -119,11 +117,14 @@ const GradebookTable = ({
 
     const last5digits = newRawDigits.slice(-5);
     const paddedDigits = last5digits.padStart(5, '0');
-    const finalGrade = paddedDigits.slice(0, -2) + '.' + paddedDigits.slice(-2);
-    const numericGrade = Number(finalGrade);
+    let finalGrade = paddedDigits.slice(0, -2) + '.' + paddedDigits.slice(-2);
+    let numericGrade = Number(finalGrade);
+
+    const prev = grades[gradingItemId]?.[studentId];
 
     if (numericGrade > 100) {
-      return;
+      numericGrade = 100;
+      finalGrade = '100.00';
     }
 
     setGrades((grades: any) => ({
@@ -173,19 +174,22 @@ const GradebookTable = ({
         },
       }));
 
+      const numeric = Number(finalGrade);
+      const clamped = numeric > 100 ? 100 : numeric;
       onSaveGrade({
         course_id: courseId,
         student_id: studentId,
         grading_item_id: gradingItemId,
-        grade: Number(finalGrade),
+        grade: clamped,
       });
     }
   };
 
-  const onSaveGrade = useCallback(
-    debounce(async (data: any) => {
-      await updateStudentGrade(data);
-    }, 600),
+  const onSaveGrade = useMemo(
+    () =>
+      throttle(async (data: any) => {
+        await updateStudentGrade(data);
+      }, 250, { leading: true, trailing: true }),
     []
   );
 
@@ -202,11 +206,7 @@ const GradebookTable = ({
       if (result.isConfirmed) {
         const assignmentNumber = componentsGradebook?.assignments.length + 1;
         const assignmentName = `Assignment ${assignmentNumber}`;
-        createAssignmentGradingItem({
-          syllabus_id: syllabusId,
-          course_id: courseId,
-          name: assignmentName,
-        }).then(() => {
+        upsertCourseAssignmentItem(courseId, { name: assignmentName }).then(() => {
           mutate(`/course/get-grading-items/${courseId}`);
         });
       }
@@ -222,12 +222,13 @@ const GradebookTable = ({
       ...componentsGradebook,
       assignments,
     });
-    onUpdateAssignmentGradingItem({ id, name: value });
+    renameAssignmentDebounced(courseId, id, value);
   };
 
-  const onUpdateAssignmentGradingItem = useCallback(
-    debounce(async (data: any) => {
-      await updateAssignmentGradingItem(data);
+  const renameAssignmentDebounced = useCallback(
+    debounce(async (cid: string, itemId: any, name: string) => {
+      await upsertCourseAssignmentItem(cid, { itemId, name });
+      mutate(`/course/get-grading-items/${cid}`);
     }, 600),
     []
   );
@@ -303,6 +304,9 @@ const GradebookTable = ({
             >
               <div className='d-flex justify-content-between gap-2 '>
                 {COMPONENTS_GRADEBOOK.ASSIGNMENTS}
+                <span className='ms-2 small text-muted'>
+                  {componentsGradebook?.assignments?.some((a: any) => a.origin === 'course') ? '' : ''}
+                </span>
                 <Button
                   className='add-col-btn'
                   onClick={(e) => addAssignmentCol()}
@@ -342,7 +346,7 @@ const GradebookTable = ({
                       onChangeAssignmentCol(e, item.item_id, index)
                     }
                     value={item.item_name ?? ''}
-                    disabled={!canEditGrades}
+                    disabled={!canEditGrades || item.origin === 'syllabus'}
                   />
                 </td>
               )
