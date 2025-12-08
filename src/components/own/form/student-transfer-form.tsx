@@ -17,19 +17,21 @@ import {
 import useSWR from 'swr';
 import { toast } from 'react-toastify';
 import LoadingButton from '../common/loading-button/LoadingButton';
-import { getActiveCourses } from 'helper/api-data/course';
+import { getActiveCourses, getCourseById } from 'helper/api-data/course';
 import {
   createTransferData,
   approveTransfer,
   updateTransferData,
 } from 'helper/api-data/transfer-data';
-import { USER_TYPES } from 'utils/constants';
+import { DEFAULT_LABELS, USER_TYPES } from 'utils/constants';
 import { getUserRoleFromLocalStorage } from 'utils/auth';
 import { decrypt } from 'utils/encryption';
 
 interface Option {
   label: string;
   value: number;
+  levelId?: number | null;
+  levelLabel?: string;
 }
 
 interface Props {
@@ -75,6 +77,25 @@ const StudentTransferForm: React.FC<Props> = ({
     () => getActiveCourses(coursePage, limit, courseSearchTerm),
     { revalidateOnFocus: false }
   );
+  const formatCourseLabel = (c: any) => {
+    const courseNumber = c?.course_number ?? DEFAULT_LABELS.NO_NAME;
+    const courseName = c?.course_name ?? DEFAULT_LABELS.NO_NAME;
+    return `${courseNumber} - ${courseName}`;
+  };
+
+  const extractLevel = (c: any) => ({
+    value: c?.syllabus?.level?.id ?? null,
+    label: c?.syllabus?.level?.full_level ?? String(c?.course_type || '').toUpperCase(),
+  });
+
+
+  const selectedCourseId = initialTransferData?.selected_course?.value;
+
+  const { data: courseByIdData } = useSWR(
+    selectedCourseId ? [`/course/get-one/${selectedCourseId}`] : null,
+    () => getCourseById(String(selectedCourseId)),
+    { revalidateOnFocus: false }
+  );
 
   const currentCourseId = useMemo(() => {
     const ids = students.flatMap((student) => {
@@ -102,6 +123,7 @@ const StudentTransferForm: React.FC<Props> = ({
 
   useEffect(() => {
     if (coursesData?.data) {
+
       const opts = coursesData.data
         .filter((course: any) => course.syllabus?.level)
         .map((course: any) => {
@@ -120,35 +142,43 @@ const StudentTransferForm: React.FC<Props> = ({
         });
 
       if (coursePage === 1) {
-        setCourseOptions(opts as Option[]);
+        setCourseOptions(opts);
       } else {
-        setCourseOptions((prevOpts) => {
+        setCourseOptions((prevOpts: Option[]) => {
           const existingValues = new Set(prevOpts.map((opt) => opt.value));
-          const filteredNewOpts = opts.filter(
-            (opt: any) => !existingValues.has(opt.value)
-          );
+          const filteredNewOpts = opts.filter((opt: Option) => !existingValues.has(opt.value));
           return [...prevOpts, ...filteredNewOpts];
         });
       }
       setHasMoreCourses(opts.length === limit);
 
       if (initialTransferData?.selected_course) {
-        const foundCourse = opts.find(
-          (o: any) => o.value === initialTransferData.selected_course!.value
-        );
-        const courseOpt = foundCourse || initialTransferData.selected_course!;
-        setSelectedCourse(courseOpt as Option);
+        const foundCourse = opts.find((o: Option) => o.value === initialTransferData.selected_course!.value);
+        if (foundCourse) {
+          setSelectedCourse(foundCourse);
+        } else if (!selectedCourse && initialTransferData.selected_course) {
+          setSelectedCourse(initialTransferData.selected_course);
+        }
 
         const lvl = initialTransferData.selected_level
           ? initialTransferData.selected_level
           : {
-              label: (foundCourse as any)?.levelLabel,
-              value: (foundCourse as any)?.levelId,
-            };
-        setSelectedLevel(lvl as Option);
+            label: (foundCourse as any)?.levelLabel,
+            value: (foundCourse as any)?.levelId,
+          };
+        setSelectedLevel(lvl as any);
       }
     }
-  }, [coursesData, initialTransferData, coursePage, limit]);
+  }, [coursesData, initialTransferData, coursePage, limit, selectedCourse]);
+
+  useEffect(() => {
+    if (courseByIdData?.data && initialTransferData?.selected_course && !selectedCourse) {
+      const c = courseByIdData.data;
+      setSelectedCourse({ value: c.id, label: formatCourseLabel(c) });
+      const lvl = extractLevel(c);
+      setSelectedLevel({ value: (lvl.value as any), label: lvl.label } as any);
+    }
+  }, [courseByIdData, initialTransferData, selectedCourse]);
 
   const userRole = getUserRoleFromLocalStorage();
 
@@ -232,11 +262,29 @@ const StudentTransferForm: React.FC<Props> = ({
     }
   };
 
+  const destinationCourseLabel = useMemo(() => {
+
+    if (selectedCourse?.label) return selectedCourse.label;
+
+    const initial = initialTransferData?.selected_course;
+
+    const found = initial ? courseOptions.find((o) => o.value === initial.value) : null;
+
+    if (found?.label) return found.label;
+
+    const course = courseByIdData?.data;
+    
+    if (course) {
+      return formatCourseLabel(course);
+    }
+    return '';
+  }, [selectedCourse, initialTransferData, courseOptions, courseByIdData]);
+
   const renderReadOnly = (label: string, value?: string) => (
     <FormGroup>
       <Label>{label}</Label>
       <p className="form-control-static bg-light p-2 rounded text-dark">
-        {value || 'None'}
+        {value && !value.toLowerCase().startsWith('undefined') ? value : ''}
       </p>
     </FormGroup>
   );
@@ -288,7 +336,7 @@ const StudentTransferForm: React.FC<Props> = ({
               )}
 
             {isViewOnly ? (
-              <>{renderReadOnly('Destination Course', selectedCourse?.label)}</>
+              <>{renderReadOnly('Destination Course', destinationCourseLabel)}</>
             ) : (
               <>
                 <Col md="12">
@@ -344,4 +392,6 @@ const StudentTransferForm: React.FC<Props> = ({
   );
 };
 
+
 export default StudentTransferForm;
+ 

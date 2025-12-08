@@ -241,6 +241,17 @@ th {
   }
 }
 
+.delete-col-btn {
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  margin-top: 4px;
+}
+
 .table-xs {
   th,
   td {

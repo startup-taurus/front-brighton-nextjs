@@ -1,4 +1,4 @@
-import { getFetcher, postFetcher, putFetcher } from '../api';
+import { getFetcher, postFetcher, putFetcher, patchFetcher, deleteFetcher } from '../api';
 
 export const getCourseById = (courseId: string) => {
   return getFetcher(`/course/get-one/${courseId}`, false);
@@ -62,4 +62,19 @@ export const updateCourse = (curseId: number, data: any) => {
 
 export const updateStatusCourse = (courseId: number, status: string) => {
   return putFetcher(`/course/update-status/${courseId}`, { status });
+};
+
+export const upsertCourseAssignmentItem = (courseId: string, payload: { itemId?: number | string, name: string }) => {
+  return putFetcher(`/course/${courseId}/assignment`, payload);
+};
+
+export const deleteCourseAssignmentItem = (
+  courseId: string,
+  itemId: number | string
+) => {
+  return deleteFetcher(`/course/${courseId}/assignment/${itemId}`);
+};
+
+export const deleteCourseAssignmentsBatch = (payload: { deletes: Array<{ course_id: number | string, item_id: number | string }> }) => {
+  return postFetcher(`/course/assignment/delete-batch`, payload);
 };

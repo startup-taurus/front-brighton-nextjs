@@ -19,7 +19,7 @@ import {getAllSyllabus} from 'helper/api-data/syllabus';
 
 import {toast} from 'react-toastify';
 import Swal from 'sweetalert2';
-import {PRIVATE_COURSE_TYPES, CONFLICT_TYPES, ConflictType, STATUS} from '../../../../utils/constants';
+import {PRIVATE_COURSE_TYPES, CONFLICT_TYPES, ConflictType, STATUS, COURSE_TYPES} from '../../../../utils/constants';
 import { formatScheduleLinear, scanScheduleConflicts } from '../../../../utils/utils';
 const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const CourseForm = ({data, isOpen, toggle, onSuccess, isTransferMode = false, transferInfo, isDuplicateMode = false, duplicateInfo}: any) => {
@@ -34,15 +34,13 @@ const CourseForm = ({data, isOpen, toggle, onSuccess, isTransferMode = false, tr
       const duplicateCourse = courses?.find((c: any) => 
         c.status === STATUS.ACTIVE && 
         (data ? c.id !== data.id : true) &&
-        (c.course_name?.toLowerCase() === courseData.course_name?.toLowerCase() || 
-         c.course_number?.toLowerCase() === courseData.course_number?.toLowerCase())
+        c.course_number?.toLowerCase() === courseData.course_number?.toLowerCase()
       );
       if (duplicateCourse) {
-        const duplicateType = duplicateCourse.course_name?.toLowerCase() === courseData.course_name?.toLowerCase() ? 'name' : 'number';
-        return { hasConflict: true, type: CONFLICT_TYPES.DUPLICATE, message: `A course with the same ${duplicateType} already exists:<br>
+        return { hasConflict: true, type: CONFLICT_TYPES.DUPLICATE, message: `A course with the same number already exists:<br>
                    Existing course: ${duplicateCourse.course_name} (${duplicateCourse.course_number})<br>
                    Professor: ${duplicateCourse.professor_name || 'Not assigned'}<br>
-                   Please use a different ${duplicateType} for the course.` };
+                   Please use a different course number.` };
       }
       if (courseData.course_type === PRIVATE_COURSE_TYPES.PRIVATE || courseData.course_type === PRIVATE_COURSE_TYPES.PRIVATE_ONLINE) {
         return { hasConflict: false };
@@ -68,8 +66,10 @@ const CourseForm = ({data, isOpen, toggle, onSuccess, isTransferMode = false, tr
 
       const profResult = scanScheduleConflicts(activeCourses, CONFLICT_TYPES.SCHEDULE, newDays, newTime, startEffective, newEndDate, newSchedule);
       if (profResult.hasConflict) return profResult;
-      const roomResult = scanScheduleConflicts(classroomCourses, CONFLICT_TYPES.CLASSROOM, newDays, newTime, startEffective, newEndDate, newSchedule);
-      if (roomResult.hasConflict) return roomResult;
+      if (courseData.course_type === COURSE_TYPES.ON_SITE) {
+        const roomResult = scanScheduleConflicts(classroomCourses, CONFLICT_TYPES.CLASSROOM, newDays, newTime, startEffective, newEndDate, newSchedule);
+        if (roomResult.hasConflict) return roomResult;
+      }
       return { hasConflict: false };
     } catch (error) {
       return { hasConflict: false };
@@ -107,6 +107,12 @@ const CourseForm = ({data, isOpen, toggle, onSuccess, isTransferMode = false, tr
       }
       setIsLoading(true);
       const payload = { ...formData };
+      if (!isUpdate) {
+        const num = String(payload.course_number || '').trim();
+        if (num && !num.endsWith('°')) {
+          payload.course_number = `${num}°`;
+        }
+      }
       if (isDuplicateMode && payload.id) {
         delete payload.id;
       }
@@ -409,11 +415,12 @@ const CourseForm = ({data, isOpen, toggle, onSuccess, isTransferMode = false, tr
 
                 <Col
                   xs={
-                    props.values.course_type === PRIVATE_COURSE_TYPES.PRIVATE ||
-                    props.values.course_type ===
-                      PRIVATE_COURSE_TYPES.PRIVATE_ONLINE
+                    props.values.course_type === COURSE_TYPES.ONLINE
                       ? 6
-                      : 4
+                      : (props.values.course_type === PRIVATE_COURSE_TYPES.PRIVATE ||
+                         props.values.course_type === PRIVATE_COURSE_TYPES.PRIVATE_ONLINE
+                         ? 6
+                         : 4)
                   }
                 >
                   <Label for='status'>Status</Label>
@@ -429,16 +436,17 @@ const CourseForm = ({data, isOpen, toggle, onSuccess, isTransferMode = false, tr
                 {!(
                   props.values.course_type === PRIVATE_COURSE_TYPES.PRIVATE ||
                   props.values.course_type ===
-                    PRIVATE_COURSE_TYPES.PRIVATE_ONLINE
+                    PRIVATE_COURSE_TYPES.PRIVATE_ONLINE ||
+                  props.values.course_type === COURSE_TYPES.ONLINE
                 ) && (
                   <Col xs={4}>
                     <Label for='classroom'>Classroom</Label>
                     <Field name='classroom' as={Input} type='select' defaultValue=''>
                       <option value='' disabled>
-                        Select clasrroom
+                        Select classroom
                       </option>
                       <option value='cambrige'>Cambrige</option>
-                      <option value='oxford'>Oxord</option>
+                      <option value='oxford'>Oxford</option>
                       <option value='brighton'>Brighton</option>
                       <option value='hardvard'>Hardvard</option>
                     </Field>
@@ -447,11 +455,12 @@ const CourseForm = ({data, isOpen, toggle, onSuccess, isTransferMode = false, tr
                 )}
                 <Col
                   xs={
-                    props.values.course_type === PRIVATE_COURSE_TYPES.PRIVATE ||
-                    props.values.course_type ===
-                      PRIVATE_COURSE_TYPES.PRIVATE_ONLINE
+                    props.values.course_type === COURSE_TYPES.ONLINE
                       ? 6
-                      : 4
+                      : (props.values.course_type === PRIVATE_COURSE_TYPES.PRIVATE ||
+                         props.values.course_type === PRIVATE_COURSE_TYPES.PRIVATE_ONLINE
+                         ? 6
+                         : 4)
                   }
                 >
                   <Label for='age_group'>Age Group</Label>
@@ -646,21 +655,35 @@ const CourseForm = ({data, isOpen, toggle, onSuccess, isTransferMode = false, tr
                             props.values.age_group &&
                             props.values.professor_id
                           )
-                        : !(
-                            props.values.course_name &&
-                            props.values.course_number &&
-                            props.values.course_type &&
-                            props.values.start_date &&
-                            props.values.status &&
-                            props.values.classroom &&
-                            props.values.age_group &&
-                            props.values.professor_id &&
-                            props.values.syllabus_id &&
-                            props.values.schedules[0].days.length > 0 &&
-                            props.values.schedules[0].startTime &&
-                            props.values.schedules[0].endTime
-                          ))
-                    }
+                        : (props.values.course_type === COURSE_TYPES.ONLINE
+                            ? !(
+                                props.values.course_name &&
+                                props.values.course_number &&
+                                props.values.course_type &&
+                                props.values.start_date &&
+                                props.values.status &&
+                                props.values.age_group &&
+                                props.values.professor_id &&
+                                props.values.syllabus_id &&
+                                props.values.schedules[0].days.length > 0 &&
+                                props.values.schedules[0].startTime &&
+                                props.values.schedules[0].endTime
+                              )
+                            : !(
+                                props.values.course_name &&
+                                props.values.course_number &&
+                                props.values.course_type &&
+                                props.values.start_date &&
+                                props.values.status &&
+                                props.values.classroom &&
+                                props.values.age_group &&
+                                props.values.professor_id &&
+                                props.values.syllabus_id &&
+                                props.values.schedules[0].days.length > 0 &&
+                                props.values.schedules[0].startTime &&
+                                props.values.schedules[0].endTime
+                              ))
+                            )}
                     loadingText={isTransferMode ? 'Creating & Transferring...' : isDuplicateMode ? 'Transferring...' : data ? 'Updating...' : 'Saving...'}
                     defaultText={isTransferMode ? 'Create & Transfer Students' : isDuplicateMode ? 'Transfer Course' : data ? 'Update' : 'Save'}
                   />
