@@ -337,15 +337,14 @@ const CoursesTable = ({ reload, loading }: any) => {
           <TableActionButtons
             onEdit={transferred ? undefined : () => toggle(row)}
             onBlock={transferred ? undefined : () => handleAlert(row)}
-            onAttendance={!transferred ? () => handleAttendance(row) : undefined}
-            onGradebook={transferred ? () => handleGradebook(row) : undefined}
+            onAttendance={user?.role !== USER_TYPES.ADMIN ? () => handleAttendance(row) : undefined}
+            onGradebook={transferred && user?.role !== USER_TYPES.ADMIN ? () => handleGradebook(row) : undefined}
             onTransfer={
               !transferred && isCourseCompleted(row) && hasActiveStudents(row)
                 ? () => handleTransferCourseWithStudents(row)
                 : undefined
             }
             stauts={row.status !== 'active'}
-            module={'Courses'}
           />
         );
       },

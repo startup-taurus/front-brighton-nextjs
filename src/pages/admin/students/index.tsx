@@ -20,12 +20,9 @@ import {
   STATUS_LEVEL_CHANGE,
 } from '../../../../utils/constants';
 import { SelectOption } from 'Types/SelectType';
-import usePermission from '../../../../hooks/usePermission';
-import { PERMISSIONS } from '../../../../utils/permissions';
 
 const Students = () => {
   const router = useRouter();
-  const { userRole, permissionSet, can } = usePermission();
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [selectedStudentsCount, setSelectedStudentsCount] = useState(0);
   const transferButtonRef = useRef(null);
@@ -72,13 +69,6 @@ const Students = () => {
     ['/level/get-all', levelPage, limit, levelSearchTerm],
     () => getAllLevels(levelPage, limit, levelSearchTerm)
   );
-
-  const allowed = can(PERMISSIONS.VIEW_STUDENTS);
-  useEffect(() => {
-    if ((userRole || permissionSet) && !allowed) {
-      router.replace('/dashboard');
-    }
-  }, [allowed, router, userRole, permissionSet]);
 
   const onCourseScrollToBottom = () => {
     if (course?.data?.length !== 0) {
@@ -202,9 +192,7 @@ const Students = () => {
     ]);
   };
 
-  if (!userRole && !permissionSet) return null;
-
-  return allowed ? (
+  return (
     <div className='page-body'>
       <Container
         className='basic_table'
@@ -223,14 +211,10 @@ const Students = () => {
                 ></div>
                 <TableHeaderActions
                   onReload={handleReload}
-                  {...(can(PERMISSIONS.CREATE_STUDENT)
-                    ? {
-                        addButton: {
-                          title: 'Create Student',
-                          onClick: () => toggle(),
-                        },
-                      }
-                    : {})}
+                  addButton={{
+                    title: 'Create Student',
+                    onClick: () => toggle(),
+                  }}
                 />
               </div>
             </CardHeader>
@@ -254,7 +238,7 @@ const Students = () => {
         onReload={handleReload}
       />
     </div>
-  ) : null;
+  );
 };
 
 export default Students;

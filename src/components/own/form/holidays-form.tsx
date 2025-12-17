@@ -22,6 +22,7 @@ const HolidayForm = ({data, isOpen, toggle, onReload}: any) => {
   const {user} = useContext(UserContext);
   const {can} = usePermission();
   const [isLoading, setIsLoading] = useState(false);
+  const isCoordinator = user?.role === USER_TYPES.COORDINATOR;
   const canCreateHoliday = can(PERMISSIONS.CREATE_HOLIDAY);
   const canEditHoliday = can(PERMISSIONS.EDIT_HOLIDAY);
 
@@ -154,7 +155,7 @@ const HolidayForm = ({data, isOpen, toggle, onReload}: any) => {
                     color='primary'
                     type='submit'
                     isLoading={isSubmitting || isLoading}
-                    disabled={(data && !dirty) || isLoading || !(data ? canEditHoliday : canCreateHoliday)}
+                    disabled={(data && !dirty) || isLoading}
                     loadingText={data ? 'Updating...' : 'Saving...'}
                     defaultText={data ? 'Update' : 'Save'}
                   />

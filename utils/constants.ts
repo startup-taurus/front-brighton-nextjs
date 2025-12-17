@@ -192,18 +192,17 @@ export const PRIVATE_COURSE_TYPES = {
   PRIVATE: 'private',
   PRIVATE_ONLINE: 'private - online'  
 };
-
-export const COURSE_TYPES = {
-  ONLINE: 'online',
-  ON_SITE: 'on-site',
-  PRIVATE: 'private',
-  PRIVATE_ONLINE: 'private - online'
-};
 export const DATA_TYPE = {
   STRING: 'string',
   TRUE: 'true',
   FALSE: 'false',
   OBJECT: 'object',
+};
+export const COURSE_TYPES = {
+  ONLINE: 'online',
+  ON_SITE: 'on-site',
+  PRIVATE: 'private',
+  PRIVATE_ONLINE: 'private - online'
 };
 
 

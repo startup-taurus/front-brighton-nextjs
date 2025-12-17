@@ -42,6 +42,9 @@ const CancelledLessonsForm = ({
   const router = useRouter();
   const { user } = useContext(UserContext);
   const { can } = usePermission();
+  const isCoordinator = user?.role === USER_TYPES.COORDINATOR;
+  const canCreateHoliday = can(PERMISSIONS.CREATE_HOLIDAY);
+  const canEditHoliday = can(PERMISSIONS.EDIT_HOLIDAY);
 
   const validations = Yup.object().shape({
     cancel_reason: Yup.string()
@@ -60,10 +63,10 @@ const CancelledLessonsForm = ({
   });
 
   const onSubmit = (body: any, { setSubmitting }: any) => {
-    const required = data ? PERMISSIONS.EDIT_CANCELLED_LESSON : PERMISSIONS.CREATE_CANCELLED_LESSON;
-    if (!can(required)) {
-      toast.error('You do not have permission to perform this action');
-      setSubmitting(false);
+    if (isCoordinator) {
+      toast.error(
+        'Coordinators do not have permission to add or edit cancelled lessons'
+      );
       return;
     }
     setSubmitting(true);
@@ -159,7 +162,6 @@ const CancelledLessonsForm = ({
                     isLoading={isSubmitting}
                     loadingText={data ? 'Updating...' : 'Saving...'}
                     defaultText={data ? 'Edit' : 'Save'}
-                    disabled={!can(data ? PERMISSIONS.EDIT_CANCELLED_LESSON : PERMISSIONS.CREATE_CANCELLED_LESSON)}
                   />
                 </Col>
               </form>
