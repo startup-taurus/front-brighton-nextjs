@@ -38,12 +38,15 @@ const Holidays = () => {
     : 10;
   const filters = getFiltersString(router);
 
+  const hasFilters = !!filters;
+  const effectivePage = hasFilters ? 1 : page;
+  const effectiveRowPerPage = hasFilters ? 1000 : rowPerPage;
   const {
     data: holidays,
     isLoading,
     isValidating,
-  } = useSWR([`/holidays/get-all`, page, rowPerPage, filters], () =>
-    getAllHolidays(page, rowPerPage, filters || undefined)
+  } = useSWR([`/holidays/get-all`, effectivePage, effectiveRowPerPage, filters], () =>
+    getAllHolidays(effectivePage, effectiveRowPerPage, filters || undefined)
   );
 
   const selectFilters: FiltersProps[] = [
@@ -65,14 +68,25 @@ const Holidays = () => {
 
   const handleReload = () => {
     setIsReloading(true);
-    mutate([`/holidays/get-all`, page, rowPerPage, filters]).finally(() => {
+    mutate([`/holidays/get-all`, effectivePage, effectiveRowPerPage, filters]).finally(() => {
       setTimeout(() => setIsReloading(false), 500);
     });
   };
 
 
 
-  const filteredHolidays = holidays?.data;
+  const startDateParam = typeof router.query.start_date === 'string' ? router.query.start_date : undefined;
+  const endDateParam = typeof router.query.end_date === 'string' ? router.query.end_date : undefined;
+  const list = holidays?.data?.result || [];
+  const filteredList = startDateParam || endDateParam
+    ? list.filter((h: any) => {
+        const d = h?.holiday_date;
+        return (!startDateParam || d >= startDateParam) && (!endDateParam || d <= endDateParam);
+      })
+    : list;
+  const filteredHolidays = holidays
+    ? { result: filteredList, totalCount: filteredList.length }
+    : undefined;
 
   if (!userRole && !permissionSet) return null;
 
