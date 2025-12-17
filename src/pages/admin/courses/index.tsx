@@ -15,13 +15,21 @@ import useSWR, { mutate } from 'swr';
 import { SelectOption } from 'Types/SelectType';
 import usePermission from '../../../../hooks/usePermission';
 import { PERMISSIONS } from '../../../../utils/permissions';
+import { useRouter } from 'next/router';
 
 const Students = () => {
   const limit = 10;
+  const router = useRouter();
   const [page, setPage] = useState(1);
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [reload, setReload] = useState(false);
-  const { can } = usePermission();
+  const { can, permissionSet } = usePermission();
+  
+  useEffect(() => {
+    if (permissionSet && !permissionSet.has(PERMISSIONS.VIEW_COURSES)) {
+      router.replace('/dashboard');
+    }
+  }, [permissionSet, router]);
 
   const [professorOptions, setProfessorOptions] = useState<
     Array<{ label: string; value: string }>

@@ -18,6 +18,8 @@ import { getCourseScheduleDates } from '../../../../helper/api-data/course-sched
 import { decrypt } from 'utils/encryption';
 import { UserContext } from 'helper/User';
 import { USER_TYPES } from 'utils/constants';
+import usePermission from '../../../../hooks/usePermission';
+import { PERMISSIONS } from '../../../../utils/permissions';
 
 const tabsName = 'ATTENDANCE';
 
@@ -28,6 +30,8 @@ const TeachersAttendance: NextPageWithLayout = () => {
   const [studentId, setStudentId] = useState<string | number | null>(null);
   const { user } = useContext(UserContext);
   const isProfessor = user?.role === USER_TYPES.PROFESSOR;
+  const { can, userRole, permissionSet } = usePermission();
+  const canViewAttendance = can(PERMISSIONS.VIEW_ATTENDANCE);
 
   useEffect(() => {
     const encrypted = localStorage.getItem('studentDetailId');
@@ -56,7 +60,15 @@ const TeachersAttendance: NextPageWithLayout = () => {
     () => getCourseScheduleDates(courseId!.toString())
   );
 
+  useEffect(() => {
+    if ((userRole || permissionSet) && !canViewAttendance) {
+      router.replace('/dashboard');
+    }
+  }, [canViewAttendance, router, userRole, permissionSet]);
+
   if (!courseDetail?.data?.data) return null;
+  if (!userRole && !permissionSet) return null;
+  if (!canViewAttendance) return null;
 
   const { course_number } = courseDetail?.data?.data;
   const studentsAttendance = courseAttendance?.data?.data;

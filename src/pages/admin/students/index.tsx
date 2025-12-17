@@ -25,7 +25,7 @@ import { PERMISSIONS } from '../../../../utils/permissions';
 
 const Students = () => {
   const router = useRouter();
-  const { can } = usePermission();
+  const { userRole, permissionSet, can } = usePermission();
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [selectedStudentsCount, setSelectedStudentsCount] = useState(0);
   const transferButtonRef = useRef(null);
@@ -72,6 +72,13 @@ const Students = () => {
     ['/level/get-all', levelPage, limit, levelSearchTerm],
     () => getAllLevels(levelPage, limit, levelSearchTerm)
   );
+
+  const allowed = can(PERMISSIONS.VIEW_STUDENTS);
+  useEffect(() => {
+    if ((userRole || permissionSet) && !allowed) {
+      router.replace('/dashboard');
+    }
+  }, [allowed, router, userRole, permissionSet]);
 
   const onCourseScrollToBottom = () => {
     if (course?.data?.length !== 0) {
@@ -195,7 +202,9 @@ const Students = () => {
     ]);
   };
 
-  return (
+  if (!userRole && !permissionSet) return null;
+
+  return allowed ? (
     <div className='page-body'>
       <Container
         className='basic_table'
@@ -245,7 +254,7 @@ const Students = () => {
         onReload={handleReload}
       />
     </div>
-  );
+  ) : null;
 };
 
 export default Students;

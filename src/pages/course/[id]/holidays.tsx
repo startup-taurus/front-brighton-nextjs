@@ -46,7 +46,8 @@ const TeachersHolidays: NextPageWithLayout = () => {
   const isReceptionist = user?.role === USER_TYPES.RECEPTIONIST;
   const canCreateCancelled = can(PERMISSIONS.CREATE_CANCELLED_LESSON);
   const canEditCancelled = can(PERMISSIONS.EDIT_CANCELLED_LESSON);
-  const canDeleteCancelled = can(PERMISSIONS.DELETE_CANCELLED_LESSON);
+  const canDeleteCancelled = can(PERMISSIONS.VIEW_CANCELLED_LESSONS);
+  const canViewHolidays = can(PERMISSIONS.VIEW_HOLIDAYS);
 
   const courseDetail = useSWR(
     courseId ? `/course/get-one/${courseId}` : null,
@@ -86,12 +87,11 @@ const TeachersHolidays: NextPageWithLayout = () => {
       name: 'ACTIONS',
       cell: (row: any) => (
         <ButtonGroup>
-          {/*<Button color="primary" onClick={() => onRowSelected(row)}>*/}
-          {/*  <FaPencil />*/}
-          {/*</Button>*/}
           <Button
             color='danger'
             onClick={() => deleteRow(row)}
+            disabled={!canDeleteCancelled}
+            title={!canDeleteCancelled ? 'No permission to delete' : 'Delete cancelled lesson'}
           >
             <FaTrash />
           </Button>
@@ -116,7 +116,7 @@ const TeachersHolidays: NextPageWithLayout = () => {
   // };
 
   const deleteRow = (row: any) => {
-    if ((isCoordinator || isReceptionist) && !canDeleteCancelled) {
+    if (!canDeleteCancelled) {
       toast.error(
         'You do not have permission to delete cancelled lessons'
       );
@@ -137,7 +137,7 @@ const TeachersHolidays: NextPageWithLayout = () => {
     });
   };
 
-  if (!courseDetail?.data?.data) return null;
+  if (!canViewHolidays || !courseDetail?.data?.data) return null;
   const { course_number } = courseDetail?.data?.data;
 
   return (
@@ -174,7 +174,7 @@ const TeachersHolidays: NextPageWithLayout = () => {
                 <h3>CANCELED LESSONS</h3>
                 <Button
                   onClick={toggleModal}
-                  disabled={(isCoordinator || isReceptionist) && !canCreateHoliday}
+                  disabled={(isCoordinator || isReceptionist) && !canCreateCancelled}
                 >
                   <FaPlus />
                 </Button>

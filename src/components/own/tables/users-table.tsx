@@ -9,6 +9,8 @@ import UserForm from '../form/user-form';
 import TableSkeleton from '@/components/own/common/table-skeleton/TableSkeleton';
 import { USER_TYPES } from 'utils/constants';
 import { setQueryStringValue, clearQueryString } from '../../../../utils/utils';
+import usePermission from '../../../../hooks/usePermission';
+import { PERMISSIONS } from '../../../../utils/permissions';
 
 const UsersTable = ({
   users,
@@ -20,6 +22,7 @@ const UsersTable = ({
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
+  const { can } = usePermission();
 
   const toggle = (data: any) => {
     setSelectedData(data);
@@ -31,6 +34,20 @@ const UsersTable = ({
       const newStatus = data?.status === 'active' ? 'inactive' : 'active';
       const response = await updateStatusUser(data.id, newStatus);
       if (response.statusCode === 200) {
+        const updated = {
+          ...users,
+          data: {
+            ...users.data,
+            result: users.data.result.map((u: any) =>
+              u.id === data.id ? { ...u, status: newStatus } : u
+            ),
+          },
+        };
+        mutate(
+          [`/user/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}`],
+          updated,
+          false
+        );
         const currentUserType = router.query.user_type;
         if (currentUserType) {
           router.push({
@@ -115,8 +132,17 @@ const UsersTable = ({
       name: 'Actions',
       cell: (row: any) => (
         <TableActionButtons
-          onEdit={() => toggle(row)}
-          onBlock={() => handleAlert(row)}
+          onEdit={can(PERMISSIONS.EDIT_USER) ? () => toggle(row) : undefined}
+          onBlock={
+            can(PERMISSIONS.EDIT_USER) && can(PERMISSIONS.ACTIVATE_USER)
+              ? () => handleAlert(row)
+              : undefined
+          }
+          onActivate={
+            can(PERMISSIONS.ACTIVATE_USER) && row.status === 'inactive' && (row.failed_attempts ?? 0) >= 5
+              ? () => activateUser(row)
+              : undefined
+          }
           status={row.status === 'active' ? false : true}
           module={'Users'}
         />

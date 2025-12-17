@@ -10,15 +10,16 @@ import CustomizerContext from 'helper/Customizer';
 import layoutContext from 'helper/Layout';
 import { UserContext } from '../../../helper/User';
 import { ImgPath } from 'utils/Constant';
-import { USER_TYPES } from 'utils/constants';
-import { getPrincipalRoute } from 'utils/utils';
+import usePermission from '../../../hooks/usePermission';
+import { PERMISSIONS } from 'utils/permissions';
 
 const Sidebar = ({ menuList }: { menuList: sidebarMenuType[] }) => {
   const { sidebarIconType } = useContext(CustomizerContext);
   const { sideBarToggle } = useContext(layoutContext);
   const { user } = useContext(UserContext);
+  const { can } = usePermission();
 
-  const mainLink = getPrincipalRoute(user?.role);
+  const mainLink = can(PERMISSIONS.VIEW_DASHBOARD) ? '/dashboard' : '/teachers';
   const IconType = sidebarIconType || ConfigDB.data.settings.sidebar.iconType;
 
   return (

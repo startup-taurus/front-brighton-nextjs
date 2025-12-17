@@ -4,12 +4,15 @@ import FeatherIconCom from "../../../../CommonElements/Icons/FeatherIconCom";
 import layoutContext from "helper/Layout";
 import { useContext } from "react";
 import { UserContext } from "../../../../helper/User";
+import usePermission from "../../../../hooks/usePermission";
+import { PERMISSIONS } from "../../../../utils/permissions";
 
 const SidebarLogo = () => {
   const { setSideBarToggle, sideBarToggle } = useContext(layoutContext);
   const { user } = useContext(UserContext);
+  const { can } = usePermission();
 
-  const mainLink = user?.role === "admin_staff" ? "/dashboard" : "/teachers";
+  const mainLink = can(PERMISSIONS.VIEW_DASHBOARD) ? "/dashboard" : "/teachers";
 
   return (
     <div className="logo-wrapper">
@@ -28,15 +31,6 @@ const SidebarLogo = () => {
       >
         <i className="fa fa-angle-left" />
       </div>
-      {/*<div*/}
-      {/*  className="toggle-sidebar"*/}
-      {/*  onClick={() => setSideBarToggle(!sideBarToggle)}*/}
-      {/*>*/}
-      {/*  <FeatherIconCom*/}
-      {/*    iconName={"Grid"}*/}
-      {/*    className="status_toggle middle sidebar-toggle"*/}
-      {/*  />*/}
-      {/*</div>*/}
     </div>
   );
 };

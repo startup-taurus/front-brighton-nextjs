@@ -21,7 +21,7 @@ const Teachers = () => {
   const [page, setPage] = useState(1);
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [reload, setReload] = useState(false);
-  const { can } = usePermission();
+  const { userRole, permissionSet, can } = usePermission();
   const rowPerPage = router.query.rowPerPage ? Number(router.query.rowPerPage) : 10;
   const filters = getFiltersString(router);
   const [professorOptions, setProfessorOptions] = useState<
@@ -39,6 +39,13 @@ const Teachers = () => {
       revalidateOnFocus: false,
     }
   );
+
+  const allowed = can(PERMISSIONS.VIEW_TEACHERS);
+  useEffect(() => {
+    if ((userRole || permissionSet) && !allowed) {
+      router.replace('/dashboard');
+    }
+  }, [allowed, router, userRole, permissionSet]);
 
   const onProfessorScrollBottom = () => {
     if (
@@ -108,7 +115,9 @@ const Teachers = () => {
     },
   ];
 
-  return (
+  if (!userRole && !permissionSet) return null;
+
+  return allowed ? (
     <div className='page-body'>
       <Container
         className='basic_table'
@@ -145,7 +154,7 @@ const Teachers = () => {
         onReload={handleReload}
       />
     </div>
-  );
+  ) : null;
 };
 
 export default Teachers;

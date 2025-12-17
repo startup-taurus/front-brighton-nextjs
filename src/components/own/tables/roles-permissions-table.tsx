@@ -2,8 +2,12 @@ import React from 'react';
 import DataTable, { TableColumn } from 'react-data-table-component';
 import TableActionButtons from '../table-action-buttons/table-action-buttons';
 import { formatDateLocale } from '../../../../utils/utils';
+import TableSkeleton from '@/components/own/common/table-skeleton/TableSkeleton';
 
 const RolesPermissionsTable = ({ data = [], loading = false, onView, onEdit }: any) => {
+  if (loading) {
+    return <TableSkeleton rows={10} columns={5} showHeader animated />;
+  }
   const columns: TableColumn<any>[] = [
     {
       name: 'Actions',
@@ -56,7 +60,6 @@ const RolesPermissionsTable = ({ data = [], loading = false, onView, onEdit }: a
       <DataTable
         data={Array.isArray(data) ? data : []}
         columns={columns}
-        progressPending={loading}
         highlightOnHover
         pagination
       />

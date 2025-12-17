@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Modal, ModalHeader, ModalBody, Row, Col, Label, Input, Button } from 'reactstrap';
+import { Modal, ModalHeader, ModalBody, Row, Col, Label, Input, Button, AccordionItem, AccordionHeader, AccordionBody, UncontrolledAccordion } from 'reactstrap';
 import { Formik } from 'formik';
 import { toast } from 'react-toastify';
 import LoadingButton from '../common/loading-button/LoadingButton';
@@ -11,14 +11,20 @@ type Props = {
   toggle: () => void;
   onSubmit: (data: any) => Promise<void> | void;
   data?: { role_name: string; status: string; permissions: string[] } | null;
+  readOnly?: boolean;
 };
 
-const RolePermissionsForm = ({ isOpen, toggle, onSubmit, data }: Props) => {
+const RolePermissionsForm = ({ isOpen, toggle, onSubmit, data, readOnly = false }: Props) => {
   const modules = useMemo(() => Object.keys(PERMISSION_MODULES), []);
-  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
 
-  const formatPermissionLabel = (key: string) =>
-    key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+  const formatPermissionLabel = (key: string) => {
+    const overrides: Record<string, string> = {
+      transfer_student: 'Create Transfer Students',
+      add_grades: 'Add Assignments',
+    };
+    if (overrides[key]) return overrides[key];
+    return key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+  };
 
   const initialValues = {
     role_name: data?.role_name || '',
@@ -28,6 +34,7 @@ const RolePermissionsForm = ({ isOpen, toggle, onSubmit, data }: Props) => {
 
   const validate = (values: any) => {
     const errors: any = {};
+    if (readOnly) return errors;
     if (!values.role_name || String(values.role_name).trim() === '') {
       errors.role_name = 'Role name is required';
     }
@@ -37,14 +44,15 @@ const RolePermissionsForm = ({ isOpen, toggle, onSubmit, data }: Props) => {
     return errors;
   };
 
-  const isModuleAllSelected = (values: any, module: string) => {
-    const perms = PERMISSION_MODULES[module] || [];
+  const isModuleAllSelected = (values: any, module: string, visiblePerms: string[]) => {
+    const perms = visiblePerms || [];
     return perms.length > 0 && perms.every((p) => values.selected_permissions.includes(p));
   };
 
-  const toggleModuleSelectAll = (values: any, setFieldValue: any, module: string) => {
-    const perms = PERMISSION_MODULES[module] || [];
-    const allSelected = isModuleAllSelected(values, module);
+  const toggleModuleSelectAll = (values: any, setFieldValue: any, module: string, visiblePerms: string[]) => {
+    if (readOnly) return;
+    const perms = visiblePerms || [];
+    const allSelected = isModuleAllSelected(values, module, perms);
     if (allSelected) {
       setFieldValue(
         'selected_permissions',
@@ -56,13 +64,35 @@ const RolePermissionsForm = ({ isOpen, toggle, onSubmit, data }: Props) => {
     }
   };
 
-  const toggleCollapse = (module: string) =>
-    setCollapsed((prev) => ({ ...prev, [module]: !prev[module] }));
+  const toggleAccordion = (_id: string) => {};
+
+  const getVisiblePermsForModule = (roleName: string, module: string) => {
+    const rn = String(roleName || '').trim().toLowerCase();
+    const isProfessor = rn === 'professor';
+    const base = PERMISSION_MODULES[module] || [];
+    const allowedProf = new Set<string>([
+      'view_dashboard',
+      'view_courses',
+      'view_syllabus',
+      'view_attendance',
+      'mark_attendance',
+      'view_gradebook',
+      'add_grades',
+      'edit_grades',
+      'view_holidays',
+      'view_cancelled_lessons',
+      'create_cancelled_lesson',
+      'view_student_reports',
+      'create_student_report',
+      'edit_student_report',
+    ]);
+    return isProfessor ? base.filter((p) => allowedProf.has(p)) : base;
+  };
 
   return (
     <Modal isOpen={isOpen} toggle={toggle} size="lg" centered>
       <ModalHeader toggle={toggle}>
-        {data ? 'Edit role and permissions' : 'Add role and permissions'}
+        {data ? (readOnly ? 'View role and permissions' : 'Edit role and permissions') : 'Add role and permissions'}
       </ModalHeader>
       <ModalBody>
         <Formik
@@ -70,6 +100,10 @@ const RolePermissionsForm = ({ isOpen, toggle, onSubmit, data }: Props) => {
           initialValues={initialValues}
           validate={validate}
           onSubmit={async (values, helpers) => {
+            if (readOnly) {
+              helpers.setSubmitting(false);
+              return;
+            }
             if (!values.role_name || !values.status) {
               toast.error('Please fill in the required fields');
               helpers.setSubmitting(false);
@@ -108,6 +142,7 @@ const RolePermissionsForm = ({ isOpen, toggle, onSubmit, data }: Props) => {
                     <Label className="fw-bold fs-6">Role Name</Label>
                     <Input
                       value={values.role_name}
+                      disabled={readOnly}
                       onChange={(e) => setFieldValue('role_name', e.target.value)}
                       invalid={touched.role_name && !!errors.role_name}
                       placeholder="Enter role name"
@@ -119,6 +154,7 @@ const RolePermissionsForm = ({ isOpen, toggle, onSubmit, data }: Props) => {
                     <Input
                       type="select"
                       value={values.status}
+                      disabled={readOnly}
                       onChange={(e) => setFieldValue('status', e.target.value)}
                     >
                       <option value={STATUS.ACTIVE}>Active</option>
@@ -130,76 +166,82 @@ const RolePermissionsForm = ({ isOpen, toggle, onSubmit, data }: Props) => {
                 <Label className="mt-2 fw-bold fs-6">Permissions</Label>
                 
                 <Row className="mt-2">
-                  {modules.map((module) => {
-                    const perms = PERMISSION_MODULES[module] || [];
-                    const collapsedModule = !!collapsed[module];
-                    const allSelected = isModuleAllSelected(values, module);
+                  {(() => {
+                    const filteredModules = modules.filter((module) => {
+                      const rn = String(values.role_name || '').trim().toLowerCase();
+                      const isProfessor = rn === 'professor';
+                      if (isProfessor && module === 'Courses') return false;
+                      const visible = getVisiblePermsForModule(values.role_name, module);
+                      return visible.length > 0;
+                    });
+                    const mid = Math.ceil(filteredModules.length / 2);
+                    const left = filteredModules.slice(0, mid);
+                    const right = filteredModules.slice(mid);
+
+                    const renderAccordionCol = (list: string[]) => (
+                      <UncontrolledAccordion stayOpen className="w-100">
+                        {list.map((module) => {
+                          const visiblePerms = getVisiblePermsForModule(values.role_name, module);
+                          const allSelected = isModuleAllSelected(values, module, visiblePerms);
+                          return (
+                            <AccordionItem key={module}>
+                              <AccordionHeader targetId={module}>
+                                <div className="d-flex justify-content-between align-items-center w-100">
+                                  <strong>{module}</strong>
+                                  <Input
+                                    type="checkbox"
+                                    disabled={readOnly}
+                                    checked={allSelected}
+                                    onChange={() => toggleModuleSelectAll(values, setFieldValue, module, visiblePerms)}
+                                  />
+                                </div>
+                              </AccordionHeader>
+                              <AccordionBody accordionId={module}>
+                                {visiblePerms.map((perm) => {
+                                  const checked = values.selected_permissions.includes(perm);
+                                  return (
+                                    <div key={perm} className="form-check mb-1">
+                                      <Input
+                                        type="checkbox"
+                                        className="form-check-input"
+                                        id={`${module}-${perm}`}
+                                        checked={checked}
+                                        disabled={readOnly}
+                                        onChange={() => {
+                                          if (readOnly) return;
+                                          if (checked) {
+                                            setFieldValue(
+                                              'selected_permissions',
+                                              values.selected_permissions.filter((p: string) => p !== perm)
+                                            );
+                                          } else {
+                                            setFieldValue('selected_permissions', [
+                                              ...values.selected_permissions,
+                                              perm,
+                                            ]);
+                                          }
+                                        }}
+                                      />
+                                      <Label className="form-check-label" htmlFor={`${module}-${perm}`}>
+                                        {formatPermissionLabel(perm)}
+                                      </Label>
+                                    </div>
+                                  );
+                                })}
+                              </AccordionBody>
+                            </AccordionItem>
+                          );
+                        })}
+                      </UncontrolledAccordion>
+                    );
 
                     return (
-                      <Col md={6} key={module} className="mb-3">
-                        <div className="p-2 border rounded">
-                          <div className="d-flex justify-content-between align-items-center mb-2">
-                            <strong>{module}</strong>
-                            <div className="d-flex align-items-center gap-2">
-                              <Input
-                                type="checkbox"
-                                checked={allSelected}
-                                onChange={() => toggleModuleSelectAll(values, setFieldValue, module)}
-                              />
-                              
-                              {/* CAMBIO: Botón limpio (color="link") sin bordes, solo la flecha */}
-                              <Button
-                                size="sm"
-                                color="link" 
-                                className="text-decoration-none text-dark p-0"
-                                style={{ fontSize: '1.2rem', lineHeight: 1, width: '24px' }}
-                                onClick={() => toggleCollapse(module)}
-                              >
-                                {collapsedModule ? '▸' : '▾'}
-                              </Button>
-                            </div>
-                          </div>
-
-                          {!collapsedModule && (
-                            <div>
-                              {perms.map((perm) => {
-                                const checked = values.selected_permissions.includes(perm);
-                                return (
-                                  <div key={perm} className="form-check mb-1">
-                                    <Input
-                                      type="checkbox"
-                                      className="form-check-input"
-                                      id={`${module}-${perm}`}
-                                      checked={checked}
-                                      onChange={() => {
-                                        if (checked) {
-                                          setFieldValue(
-                                            'selected_permissions',
-                                            values.selected_permissions.filter((p: string) => p !== perm)
-                                          );
-                                        } else {
-                                          setFieldValue('selected_permissions', [
-                                            ...values.selected_permissions,
-                                            perm,
-                                          ]);
-                                        }
-                                      }}
-                                    />
-                                    <Label
-                                      className="form-check-label"
-                                      htmlFor={`${module}-${perm}`}
-                                    >
-                                      {formatPermissionLabel(perm)}
-                                    </Label>
-                                  </div>
-                                );
-                              })}
-                            </div>
-                          )}
-                        </div>
-                      </Col>
+                      <>
+                        <Col md={6} className="mb-3">{renderAccordionCol(left)}</Col>
+                        <Col md={6} className="mb-3">{renderAccordionCol(right)}</Col>
+                      </>
                     );
-                  })}
+                  })()}
                 </Row>
 
                 <div className="d-flex justify-content-end mt-4">
@@ -207,13 +249,15 @@ const RolePermissionsForm = ({ isOpen, toggle, onSubmit, data }: Props) => {
                     Cancel
                   </Button>
                   &nbsp;&nbsp;
-                  <LoadingButton
-                    color="primary"
-                    type="submit"
-                    isLoading={isSubmitting}
-                    loadingText={data ? 'Updating...' : 'Saving...'}
-                    defaultText={data ? 'Update' : 'Save'}
-                  />
+                  {!readOnly && (
+                    <LoadingButton
+                      color="primary"
+                      type="submit"
+                      isLoading={isSubmitting}
+                      loadingText={data ? 'Updating...' : 'Saving...'}
+                      defaultText={data ? 'Update' : 'Save'}
+                    />
+                  )}
                 </div>
               </form>
             );

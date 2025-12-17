@@ -15,11 +15,18 @@ import usePermission from '../../../../hooks/usePermission';
 import { PERMISSIONS } from '../../../../utils/permissions';
 
 const Users = () => {
-  const { can } = usePermission();
+  const { userRole, permissionSet, can } = usePermission();
   const router = useRouter();
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [isReloading, setIsReloading] = useState(false);
   const limit = 10;
+  const allowed = can(PERMISSIONS.VIEW_USERS);
+
+  useEffect(() => {
+    if ((userRole || permissionSet) && !allowed) {
+      router.replace('/dashboard');
+    }
+  }, [allowed, router, userRole, permissionSet]);
 
   const page = router.query.page ? Number(router.query.page) : 1;
   const rowPerPage = router.query.rowPerPage ? Number(router.query.rowPerPage) : 10;
@@ -153,7 +160,9 @@ const Users = () => {
     },
   ];
 
-  return (
+  if (!userRole && !permissionSet) return null;
+
+  return allowed ? (
     <div className='page-body'>
       <Container
         className='basic_table'
@@ -192,7 +201,7 @@ const Users = () => {
         data={null}
       />
     </div>
-  );
+  ) : null;
 };
 
 export default Users;

@@ -5,23 +5,25 @@ import TableHeaderActions from '@/components/own/table-header-actions/table-head
 import TableFilters from '@/components/own/table-filters/table-filters';
 import RolesPermissionsTable from '../../../components/own/tables/roles-permissions-table';
 import RolePermissionsForm from '../../../components/own/form/role-permissions-form';
+import { useRouter } from 'next/router';
 import { 
   getPermissionsByRole, 
   updatePermissionsByRole, 
   syncPermissionsCatalog
 } from '../../../../helper/api-data/permissions';
-import { getRoles } from '../../../../helper/api-data/role';
-import { STATUS_FILTER, USER_ROLES } from '../../../../utils/constants';
-import { SelectOption } from 'Types/SelectType';
+import { getRoles, updateRoleMeta, createRole } from '../../../../helper/api-data/role';
+import { STATUS_FILTER } from '../../../../utils/constants';
 import { FiltersProps } from '../../../../Types/types';
+import { getFiltersString } from '../../../../utils/utils';
 
 const PageRolesPermissions = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedRoleOpt, setSelectedRoleOpt] = useState<SelectOption | null>(null);
-  const [selectedStatusOpt, setSelectedStatusOpt] = useState<SelectOption | null>(null);
   const [editingRole, setEditingRole] = useState<string | null>(null);
+  const [isReloading, setIsReloading] = useState(false);
+  const router = useRouter();
 
-  const { data: rolesResponse, isLoading: loadingRoles } = useSWR('/roles', getRoles);
+  const filters = getFiltersString(router);
+  const { data: rolesResponse, isLoading: loadingRoles, isValidating } = useSWR([`/roles${filters ? `?${filters}` : ''}`], getRoles);
 
   const rolesData = useMemo(() => {
     return Array.isArray(rolesResponse?.data) ? rolesResponse.data : [];
@@ -34,9 +36,16 @@ const PageRolesPermissions = () => {
 
   useEffect(() => {
     syncPermissionsCatalog().then(() => {
-      mutate('/roles');
+      mutate([`/roles${filters ? `?${filters}` : ''}`]);
     }).catch(() => {});
   }, []);
+
+  useEffect(() => {
+    setIsReloading(true);
+    mutate([`/roles${filters ? `?${filters}` : ''}`]);
+    const t = setTimeout(() => setIsReloading(false), 500);
+    return () => clearTimeout(t);
+  }, [router.query.role, router.query.status]);
 
   const { data: rolePerms } = useSWR(
     editingRole ? ['/permissions/by-role', editingRole] : null,
@@ -50,12 +59,17 @@ const PageRolesPermissions = () => {
     }
 
     try {
+      if (!editingRole) {
+        await createRole({ name: payload.role_name, status: payload.status });
+      } else {
+        await updateRoleMeta(editingRole, { name: payload.role_name, status: payload.status });
+      }
+
       await updatePermissionsByRole(payload.role_name, payload.permissions || []);
 
-       mutate(['/permissions/by-role', payload.role_name]);
-       mutate(['/permissions/me']);
-      
-       mutate('/roles');
+      mutate(['/permissions/by-role', payload.role_name]);
+      mutate(['/permissions/me']);
+      mutate([`/roles${filters ? `?${filters}` : ''}`]);
 
       setIsOpen(false);
     } catch (error) {
@@ -63,44 +77,46 @@ const PageRolesPermissions = () => {
     }
   };
 
-  const roleOptions: SelectOption[] = useMemo(
-    () => USER_ROLES.map((r) => ({ value: r.value, label: r.label.toUpperCase() })),
-    []
+  const roleOptions = useMemo(
+    () => rolesData.map((r: any) => ({ value: String(r.name), label: String(r.name).toUpperCase() })),
+    [rolesData]
   );
-
+  const handleReload = async () => {
+    setIsReloading(true);
+    try {
+      await mutate([`/roles${filters ? `?${filters}` : ''}`]);
+    } finally {
+      setTimeout(() => setIsReloading(false), 500);
+    }
+  };
+  const roleFilter = typeof router.query.role === 'string' ? router.query.role : '';
+  const statusFilter = typeof router.query.status === 'string' ? router.query.status : '';
   const filtered = useMemo(() => {
     return rolesData.filter((r: any) => {
-      const matchRole = selectedRoleOpt
-        ? String(r.name).toUpperCase() === selectedRoleOpt.label.toUpperCase()
+      const matchRole = roleFilter
+        ? String(r.name).toLowerCase() === String(roleFilter).toLowerCase()
         : true;
-      
       const isActive = r.status === 1 || r.status === 'active' || r.status === true;
       const statusString = isActive ? 'active' : 'inactive';
-      
-      const matchStatus = selectedStatusOpt
-        ? statusString === String(selectedStatusOpt.value).toLowerCase()
+      const matchStatus = statusFilter
+        ? statusString === String(statusFilter).toLowerCase()
         : true;
-      
       return matchRole && matchStatus;
     });
-  }, [rolesData, selectedRoleOpt, selectedStatusOpt]);
+  }, [rolesData, roleFilter, statusFilter]);
 
   const selectFilters: FiltersProps[] = [
     {
       labelName: 'Select a role',
       name: 'role',
       type: 'select',
-      value: selectedRoleOpt,
       items: roleOptions,
-      onChange: setSelectedRoleOpt,
     },
     {
       labelName: 'Select Status',
       name: 'status',
       type: 'select',
-      value: selectedStatusOpt,
       items: STATUS_FILTER,
-      onChange: setSelectedStatusOpt,
     },
   ];
 
@@ -114,7 +130,7 @@ const PageRolesPermissions = () => {
           <Card>
             <CardHeader className='d-flex justify-content-end'>
               <TableHeaderActions
-                onReload={() => mutate('/roles')} 
+                onReload={handleReload} 
                 addButton={{
                   title: 'create role and permissions',
                   onClick: () => {
@@ -127,7 +143,7 @@ const PageRolesPermissions = () => {
             <CardBody>
               <RolesPermissionsTable
                 data={filtered} 
-                loading={loadingRoles}
+                loading={loadingRoles || isValidating || isReloading}
                 onView={(row: { name: string }) => {
                   setEditingRole(row.name);
                   setIsOpen(true);
@@ -163,3 +179,4 @@ const PageRolesPermissions = () => {
 };
 
 export default PageRolesPermissions;
+
