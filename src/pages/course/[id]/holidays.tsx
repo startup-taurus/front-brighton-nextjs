@@ -31,9 +31,9 @@ import { ImgPath } from '../../../../utils/Constant';
 import { FaPencil, FaPlus, FaTrash } from 'react-icons/fa6';
 import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
-import { USER_TYPES } from 'utils/constants';
+import { USER_TYPES, COURSE_TAB_NAMES, PERMISSION_TOOLTIPS } from 'utils/constants';
 
-const tabsName = 'HOLIDAYS';
+ 
 
 const TeachersHolidays: NextPageWithLayout = () => {
   const router = useRouter();
@@ -91,7 +91,7 @@ const TeachersHolidays: NextPageWithLayout = () => {
             color='danger'
             onClick={() => deleteRow(row)}
             disabled={!canDeleteCancelled}
-            title={!canDeleteCancelled ? 'No permission to delete' : 'Delete cancelled lesson'}
+            title={!canDeleteCancelled ? PERMISSION_TOOLTIPS.NO_PERMISSION_DELETE : PERMISSION_TOOLTIPS.DELETE_CANCELLED_LESSON}
           >
             <FaTrash />
           </Button>
@@ -146,7 +146,7 @@ const TeachersHolidays: NextPageWithLayout = () => {
         <CardBody>
           <TabsTeachers
             numberOfClass={course_number}
-            tabsName={tabsName}
+            tabsName={COURSE_TAB_NAMES.HOLIDAYS}
           />
           <Row>
             <Col

@@ -17,13 +17,12 @@ import AttendanceHelpBox from '@/components/own/attendance-help-box/attendance-h
 import { getCourseScheduleDates } from '../../../../helper/api-data/course-schedule';
 import { decrypt } from 'utils/encryption';
 import { UserContext } from 'helper/User';
-import { USER_TYPES } from 'utils/constants';
+import { USER_TYPES, COURSE_TAB_NAMES } from 'utils/constants';
 import usePermission from '../../../../hooks/usePermission';
 import { PERMISSIONS } from '../../../../utils/permissions';
 
-const tabsName = 'ATTENDANCE';
+ 
 
-// TeachersAttendance (componente de página)
 const TeachersAttendance: NextPageWithLayout = () => {
   const router = useRouter();
   const courseId = router.query.id as string;
@@ -90,7 +89,7 @@ const TeachersAttendance: NextPageWithLayout = () => {
         )}
         <TabsTeachers
           numberOfClass={course_number}
-          tabsName={tabsName}
+          tabsName={COURSE_TAB_NAMES.ATTENDANCE}
         />
         {shouldRenderStudentAttendance && (
           <AttendanceTable

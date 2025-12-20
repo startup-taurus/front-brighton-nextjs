@@ -12,7 +12,7 @@ import {
   syncPermissionsCatalog
 } from '../../../../helper/api-data/permissions';
 import { getRoles, updateRoleMeta, createRole } from '../../../../helper/api-data/role';
-import { STATUS_FILTER } from '../../../../utils/constants';
+import { STATUS_FILTER, FILTER_KEYS } from '../../../../utils/constants';
 import { FiltersProps } from '../../../../Types/types';
 import { getFiltersString } from '../../../../utils/utils';
 
@@ -73,7 +73,6 @@ const PageRolesPermissions = () => {
 
       setIsOpen(false);
     } catch (error) {
-      console.error('Error updating permissions:', error);
     }
   };
 
@@ -92,11 +91,11 @@ const PageRolesPermissions = () => {
   const roleFilter = typeof router.query.role === 'string' ? router.query.role : '';
   const statusFilter = typeof router.query.status === 'string' ? router.query.status : '';
   const filtered = useMemo(() => {
-    return rolesData.filter((r: any) => {
+    return rolesData.filter((roleItem: any) => {
       const matchRole = roleFilter
-        ? String(r.name).toLowerCase() === String(roleFilter).toLowerCase()
+        ? String(roleItem.name).toLowerCase() === String(roleFilter).toLowerCase()
         : true;
-      const isActive = r.status === 1 || r.status === 'active' || r.status === true;
+      const isActive = roleItem.status === 1 || roleItem.status === 'active' || roleItem.status === true;
       const statusString = isActive ? 'active' : 'inactive';
       const matchStatus = statusFilter
         ? statusString === String(statusFilter).toLowerCase()
@@ -108,13 +107,13 @@ const PageRolesPermissions = () => {
   const selectFilters: FiltersProps[] = [
     {
       labelName: 'Select a role',
-      name: 'role',
+      name: FILTER_KEYS.ROLE,
       type: 'select',
       items: roleOptions,
     },
     {
       labelName: 'Select Status',
-      name: 'status',
+      name: FILTER_KEYS.STATUS,
       type: 'select',
       items: STATUS_FILTER,
     },
