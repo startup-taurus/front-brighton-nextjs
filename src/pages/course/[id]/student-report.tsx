@@ -21,8 +21,7 @@ import { getFinalPercentageBySyllabusId } from '../../../../helper/api-data/syll
 import useFilteredGradingItems from '../../../../hooks/useFilteredGradingItems';
 import usePermission from '../../../../hooks/usePermission';
 import { PERMISSIONS } from '../../../../utils/permissions';
-
-const tabsName = 'STUDENT REPORT';
+import { COURSE_TAB_NAMES } from 'utils/constants';
 
 const StudentReport: NextPageWithLayout = () => {
   const router = useRouter();
@@ -111,7 +110,7 @@ const StudentReport: NextPageWithLayout = () => {
         {courseDetail?.data?.data && (
           <TabsTeachers
             numberOfClass={courseDetail?.data?.data?.course_number}
-            tabsName={tabsName}
+            tabsName={COURSE_TAB_NAMES.STUDENT_REPORT}
           />
         )}
 

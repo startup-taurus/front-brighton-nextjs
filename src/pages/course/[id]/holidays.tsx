@@ -110,11 +110,6 @@ const TeachersHolidays: NextPageWithLayout = () => {
     setIsOpenModal(() => !isOpenModal);
   };
 
-  // const onRowSelected = (row: any) => {
-  //   setSelectedData(() => row);
-  //   toggleModal();
-  // };
-
   const deleteRow = (row: any) => {
     if (!canDeleteCancelled) {
       toast.error(

@@ -1,25 +1,28 @@
 'use client';
 import Link from 'next/link';
-import { sidebarMenuType } from 'Types/LayoutDataType';
-import { useContext } from 'react';
+import {sidebarMenuType} from 'Types/LayoutDataType';
+import {useContext} from 'react';
 import Image from 'next/image';
 import SidebarLogo from './SidebarLogo';
 import SidebarMenu from './SidebarMenu';
 import ConfigDB from 'config/ThemeConfig';
 import CustomizerContext from 'helper/Customizer';
 import layoutContext from 'helper/Layout';
-import { UserContext } from '../../../helper/User';
-import { ImgPath } from 'utils/Constant';
+import {UserContext} from '../../../helper/User';
+import {ImgPath} from 'utils/Constant';
 import usePermission from '../../../hooks/usePermission';
-import { PERMISSIONS } from 'utils/permissions';
+import {PERMISSIONS} from 'utils/permissions';
+import { APP_PATHS } from 'utils/constants';
 
-const Sidebar = ({ menuList }: { menuList: sidebarMenuType[] }) => {
-  const { sidebarIconType } = useContext(CustomizerContext);
-  const { sideBarToggle } = useContext(layoutContext);
-  const { user } = useContext(UserContext);
-  const { canPermission } = usePermission();
+const Sidebar = ({menuList}: {menuList: sidebarMenuType[]}) => {
+  const {sidebarIconType} = useContext(CustomizerContext);
+  const {sideBarToggle} = useContext(layoutContext);
+  const {user} = useContext(UserContext);
+  const {canPermission} = usePermission();
 
-  const mainLink = canPermission(PERMISSIONS.VIEW_DASHBOARD) ? '/dashboard' : '/teachers';
+  const mainLink = canPermission(PERMISSIONS.VIEW_DASHBOARD)
+    ? APP_PATHS.DASHBOARD
+    : APP_PATHS.TEACHERS;
   const IconType = sidebarIconType || ConfigDB.data.settings.sidebar.iconType;
 
   return (

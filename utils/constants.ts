@@ -152,9 +152,19 @@ export const TEACHER_PATHS = [
   '/course/:id/faq',
 ];
 
+export const APP_PATHS = {
+  DASHBOARD: '/dashboard',
+  TEACHERS: '/teachers',
+} as const;
+export const ROLES_PERMISSIONS_TEXTS = {
+  CREATE_ROLE_AND_PERMISSIONS: 'create role and permissions',
+} as const;
+
 export const COURSE_TAB_NAMES = {
   ATTENDANCE: 'ATTENDANCE',
   HOLIDAYS: 'HOLIDAYS',
+  GRADEBOOK: 'GRADEBOOK',
+  STUDENT_REPORT: 'STUDENT REPORT',
 } as const;
 
 export const PERMISSION_TOOLTIPS = {
