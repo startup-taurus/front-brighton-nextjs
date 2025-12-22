@@ -103,6 +103,7 @@ export const ROLE_PERMISSIONS = {
     PERMISSIONS.DUPLICATE_SYLLABUS,
     PERMISSIONS.VIEW_ATTENDANCE,
     PERMISSIONS.MARK_ATTENDANCE,
+    PERMISSIONS.EDIT_ATTENDANCE,
     PERMISSIONS.VIEW_GRADEBOOK,
     PERMISSIONS.ADD_GRADES,
     PERMISSIONS.EDIT_GRADES,
@@ -137,10 +138,12 @@ export const ROLE_PERMISSIONS = {
   // Professor permissions
   professor: [
     PERMISSIONS.VIEW_DASHBOARD,
+    PERMISSIONS.VIEW_STUDENTS,
     PERMISSIONS.VIEW_COURSES,
     PERMISSIONS.VIEW_SYLLABUS,
     PERMISSIONS.VIEW_ATTENDANCE,
     PERMISSIONS.MARK_ATTENDANCE,
+    PERMISSIONS.EDIT_ATTENDANCE,
     PERMISSIONS.VIEW_GRADEBOOK,
     PERMISSIONS.ADD_GRADES,
     PERMISSIONS.EDIT_GRADES,
@@ -303,6 +306,19 @@ export const ACTION_PERMISSIONS: Record<string, Record<string, string>> = {
     block: PERMISSIONS.REJECT_TRANSFER,
   },
 };
+
+export const ACTION_TYPES = {
+  VIEW: 'view',
+  ATTENDANCE: 'attendance',
+  GRADEBOOK: 'gradebook',
+  ACTIVATE: 'activate',
+  BLOCK: 'block',
+  EDIT: 'edit',
+  COPY: 'copy',
+  TRANSFER: 'transfer',
+  TRANSFER_COURSE: 'transfer_course',
+  DELETE: 'delete',
+} as const;
 
 export const hasPermission = (
   userRole: string,

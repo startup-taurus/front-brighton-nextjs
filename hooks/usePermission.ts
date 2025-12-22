@@ -10,34 +10,31 @@ import { getMyPermissions } from '../helper/api-data/permissions';
 import { isBrowser } from 'utils/utils';
 
 const usePermission = () => {
-  const [userRole, setUserRole] = useState<string | null>(null);
-  const [permissionSet, setPermissionSet] = useState<Set<string> | null>(null);
-
-  useEffect(() => {
-    if (!isBrowser()) return;
-
+  const getStoredRole = (): string | null => {
+    if (!isBrowser()) return null;
     try {
       const cookieToken = Cookies.get('token');
-      
       if (cookieToken) {
         const user = JSON.parse(cookieToken);
         if (user && user.role) {
-          setUserRole(user.role);
-          return;
+          return user.role;
         }
       }
-
       const userStr = localStorage.getItem('token');
-      if (!userStr) return;
-
+      if (!userStr) return null;
       const user = JSON.parse(userStr);
       if (user && user.role) {
-        setUserRole(user.role);
+        return user.role;
       }
     } catch (error) {
-      console.error('Error getting user role:', error);
+      return null;
     }
-  }, []);
+    return null;
+  };
+
+  const [userRole] = useState<string | null>(() => getStoredRole());
+  const [permissionSet, setPermissionSet] = useState<Set<string> | null>(null);
+ 
 
   const { data: backendPermissions } = useSWR(
     userRole ? ['/permissions/me'] : null,
@@ -65,13 +62,13 @@ const usePermission = () => {
   };
 
   const canAny = (permissions: string[]): boolean => {
-    if (permissionSet) return permissions.some((p) => permissionSet.has(p));
+    if (permissionSet) return permissions.some((requiredPermission) => permissionSet.has(requiredPermission));
     if (!userRole) return false;
     return hasAnyPermission(userRole, permissions);
   };
 
   const canAll = (permissions: string[]): boolean => {
-    if (permissionSet) return permissions.every((p) => permissionSet.has(p));
+    if (permissionSet) return permissions.every((requiredPermission) => permissionSet.has(requiredPermission));
     if (!userRole) return false;
     return hasAllPermissions(userRole, permissions);
   };

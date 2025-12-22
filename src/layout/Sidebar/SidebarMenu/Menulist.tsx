@@ -24,7 +24,7 @@ const Menulist = ({setActive,handleActive,active,MENUITEMS,level,activeLink,setA
   const REQUIRED: Record<string, string> = {
     Dashboard: PERMISSIONS.VIEW_DASHBOARD,
     Students: PERMISSIONS.VIEW_STUDENTS,
-    "Transfer Students": PERMISSIONS.VIEW_TRANSFER_STUDENTS,
+    TransferStudents: PERMISSIONS.VIEW_TRANSFER_STUDENTS,
     Syllabus: PERMISSIONS.VIEW_SYLLABUS,
     Courses: PERMISSIONS.VIEW_COURSES,
     Professors: PERMISSIONS.VIEW_TEACHERS,

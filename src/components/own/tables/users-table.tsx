@@ -38,8 +38,8 @@ const UsersTable = ({
           ...users,
           data: {
             ...users.data,
-            result: users.data.result.map((u: any) =>
-              u.id === data.id ? { ...u, status: newStatus } : u
+            result: users.data.result.map((userItem: any) =>
+              userItem.id === data.id ? { ...userItem, status: newStatus } : userItem
             ),
           },
         };

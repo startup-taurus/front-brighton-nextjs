@@ -5,16 +5,9 @@ import { toast } from 'react-toastify';
 import LoadingButton from '../common/loading-button/LoadingButton';
 import { STATUS } from 'utils/constants';
 import { PERMISSION_MODULES } from 'utils/permissions';
+import { RolePermissionsFormProps } from 'Types/RolePermissionsForm';
 
-type Props = {
-  isOpen: boolean;
-  toggle: () => void;
-  onSubmit: (data: any) => Promise<void> | void;
-  data?: { role_name: string; status: string; permissions: string[] } | null;
-  readOnly?: boolean;
-};
-
-const RolePermissionsForm = ({ isOpen, toggle, onSubmit, data, readOnly = false }: Props) => {
+const RolePermissionsForm = ({ isOpen, toggle, onSubmit, data, readOnly = false }: RolePermissionsFormProps) => {
   const modules = useMemo(() => Object.keys(PERMISSION_MODULES), []);
 
   const formatPermissionLabel = (key: string) => {
@@ -46,7 +39,7 @@ const RolePermissionsForm = ({ isOpen, toggle, onSubmit, data, readOnly = false 
 
   const isModuleAllSelected = (values: any, module: string, visiblePerms: string[]) => {
     const perms = visiblePerms || [];
-    return perms.length > 0 && perms.every((p) => values.selected_permissions.includes(p));
+    return perms.length > 0 && perms.every((permissionIdentifier) => values.selected_permissions.includes(permissionIdentifier));
   };
 
   const toggleModuleSelectAll = (values: any, setFieldValue: any, module: string, visiblePerms: string[]) => {
@@ -56,7 +49,7 @@ const RolePermissionsForm = ({ isOpen, toggle, onSubmit, data, readOnly = false 
     if (allSelected) {
       setFieldValue(
         'selected_permissions',
-        values.selected_permissions.filter((p: string) => !perms.includes(p))
+        values.selected_permissions.filter((permissionIdentifier: string) => !perms.includes(permissionIdentifier))
       );
     } else {
       const merged = new Set<string>([...values.selected_permissions, ...perms]);
@@ -86,7 +79,7 @@ const RolePermissionsForm = ({ isOpen, toggle, onSubmit, data, readOnly = false 
       'create_student_report',
       'edit_student_report',
     ]);
-    return isProfessor ? base.filter((p) => allowedProf.has(p)) : base;
+    return isProfessor ? base.filter((permissionIdentifier) => allowedProf.has(permissionIdentifier)) : base;
   };
 
   return (
@@ -149,7 +142,6 @@ const RolePermissionsForm = ({ isOpen, toggle, onSubmit, data, readOnly = false 
                     />
                   </Col>
                   <Col md={6}>
-                    {/* CAMBIO: Clases fw-bold y fs-5 */}
                     <Label className="fw-bold fs-6">Status</Label>
                     <Input
                       type="select"
@@ -168,15 +160,15 @@ const RolePermissionsForm = ({ isOpen, toggle, onSubmit, data, readOnly = false 
                 <Row className="mt-2">
                   {(() => {
                     const filteredModules = modules.filter((module) => {
-                      const rn = String(values.role_name || '').trim().toLowerCase();
-                      const isProfessor = rn === 'professor';
+                      const normalizedRoleName = String(values.role_name || '').trim().toLowerCase();
+                      const isProfessor = normalizedRoleName === 'professor';
                       if (isProfessor && module === 'Courses') return false;
                       const visible = getVisiblePermsForModule(values.role_name, module);
                       return visible.length > 0;
                     });
-                    const mid = Math.ceil(filteredModules.length / 2);
-                    const left = filteredModules.slice(0, mid);
-                    const right = filteredModules.slice(mid);
+                    const splitIndex = Math.ceil(filteredModules.length / 2);
+                    const left = filteredModules.slice(0, splitIndex);
+                    const right = filteredModules.slice(splitIndex);
 
                     const renderAccordionCol = (list: string[]) => (
                       <UncontrolledAccordion stayOpen className="w-100">
@@ -212,7 +204,7 @@ const RolePermissionsForm = ({ isOpen, toggle, onSubmit, data, readOnly = false 
                                           if (checked) {
                                             setFieldValue(
                                               'selected_permissions',
-                                              values.selected_permissions.filter((p: string) => p !== perm)
+                                              values.selected_permissions.filter((permissionIdentifier: string) => permissionIdentifier !== perm)
                                             );
                                           } else {
                                             setFieldValue('selected_permissions', [
