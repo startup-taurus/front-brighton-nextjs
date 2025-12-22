@@ -41,13 +41,13 @@ const TeachersHolidays: NextPageWithLayout = () => {
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
   const { user } = useContext(UserContext);
-  const { can } = usePermission();
+  const { canPermission } = usePermission();
   const isCoordinator = user?.role === USER_TYPES.COORDINATOR;
   const isReceptionist = user?.role === USER_TYPES.RECEPTIONIST;
-  const canCreateCancelled = can(PERMISSIONS.CREATE_CANCELLED_LESSON);
-  const canEditCancelled = can(PERMISSIONS.EDIT_CANCELLED_LESSON);
-  const canDeleteCancelled = can(PERMISSIONS.VIEW_CANCELLED_LESSONS);
-  const canViewHolidays = can(PERMISSIONS.VIEW_HOLIDAYS);
+  const canCreateCancelled = canPermission(PERMISSIONS.CREATE_CANCELLED_LESSON);
+  const canEditCancelled = canPermission(PERMISSIONS.EDIT_CANCELLED_LESSON);
+  const canDeleteCancelled = canPermission(PERMISSIONS.VIEW_CANCELLED_LESSONS);
+  const canViewHolidays = canPermission(PERMISSIONS.VIEW_HOLIDAYS);
 
   const courseDetail = useSWR(
     courseId ? `/course/get-one/${courseId}` : null,
@@ -109,11 +109,6 @@ const TeachersHolidays: NextPageWithLayout = () => {
     }
     setIsOpenModal(() => !isOpenModal);
   };
-
-  // const onRowSelected = (row: any) => {
-  //   setSelectedData(() => row);
-  //   toggleModal();
-  // };
 
   const deleteRow = (row: any) => {
     if (!canDeleteCancelled) {

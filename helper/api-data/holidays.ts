@@ -1,8 +1,7 @@
 import exp from "constants";
 import { getFetcher, postFetcher, putFetcher } from "../api";
-export const getAllHolidays = (page: number, limit: number, filters?: string) => {
-  const query = `/holidays/get-all?page=${page}&limit=${limit}${filters ? `&${filters}` : ""}`;
-  return getFetcher(query, false);
+export const getAllHolidays = (page: number, limit: number) => {
+  return getFetcher(`/holidays/get-all?page=${page}&limit=${limit}`, false);
 };
 
 export const getAllActiveHolidays = () => {

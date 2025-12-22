@@ -1,20 +1,29 @@
-import React, { useMemo, useState, useEffect } from 'react';
-import { Card, CardHeader, CardBody, Container, Row } from 'reactstrap';
-import useSWR, { mutate } from 'swr';
+import React, {useMemo, useState, useEffect} from 'react';
+import {Card, CardHeader, CardBody, Container, Row} from 'reactstrap';
+import useSWR, {mutate} from 'swr';
 import TableHeaderActions from '@/components/own/table-header-actions/table-header-actions';
 import TableFilters from '@/components/own/table-filters/table-filters';
 import RolesPermissionsTable from '../../../components/own/tables/roles-permissions-table';
 import RolePermissionsForm from '../../../components/own/form/role-permissions-form';
-import { useRouter } from 'next/router';
-import { 
-  getPermissionsByRole, 
-  updatePermissionsByRole, 
-  syncPermissionsCatalog
+import {useRouter} from 'next/router';
+import {
+  getPermissionsByRole,
+  updatePermissionsByRole,
+  syncPermissionsCatalog,
 } from '../../../../helper/api-data/permissions';
-import { getRoles, updateRoleMeta, createRole } from '../../../../helper/api-data/role';
-import { STATUS_FILTER, FILTER_KEYS } from '../../../../utils/constants';
-import { FiltersProps } from '../../../../Types/types';
-import { getFiltersString } from '../../../../utils/utils';
+import {
+  getRoles,
+  updateRoleMeta,
+  createRole,
+} from '../../../../helper/api-data/role';
+import {
+  STATUS_FILTER,
+  FILTER_KEYS,
+  STATUS,
+  ROLES_PERMISSIONS_TEXTS,
+} from '../../../../utils/constants';
+import {FiltersProps} from '../../../../Types/types';
+import {getFiltersString} from '../../../../utils/utils';
 
 const PageRolesPermissions = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -23,7 +32,11 @@ const PageRolesPermissions = () => {
   const router = useRouter();
 
   const filters = getFiltersString(router);
-  const { data: rolesResponse, isLoading: loadingRoles, isValidating } = useSWR([`/roles${filters ? `?${filters}` : ''}`], getRoles);
+  const {
+    data: rolesResponse,
+    isLoading: loadingRoles,
+    isValidating,
+  } = useSWR([`/roles${filters ? `?${filters}` : ''}`], getRoles);
 
   const rolesData = useMemo(() => {
     return Array.isArray(rolesResponse?.data) ? rolesResponse.data : [];
@@ -31,23 +44,36 @@ const PageRolesPermissions = () => {
 
   const currentRole = useMemo(() => {
     if (!editingRole) return null;
-    return rolesData.find((r: any) => String(r.name) === String(editingRole)) || null;
+    return (
+      rolesData.find((r: any) => String(r.name) === String(editingRole)) || null
+    );
   }, [rolesData, editingRole]);
 
+  const roleOptions = useMemo(
+    () =>
+      rolesData.map((roleItem: any) => ({
+        value: String(roleItem.name),
+        label: String(roleItem.name).toUpperCase(),
+      })),
+    [rolesData]
+  );
+
   useEffect(() => {
-    syncPermissionsCatalog().then(() => {
-      mutate([`/roles${filters ? `?${filters}` : ''}`]);
-    }).catch(() => {});
+    syncPermissionsCatalog()
+      .then(() => {
+        mutate([`/roles${filters ? `?${filters}` : ''}`]);
+      })
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
     setIsReloading(true);
     mutate([`/roles${filters ? `?${filters}` : ''}`]);
-    const t = setTimeout(() => setIsReloading(false), 500);
-    return () => clearTimeout(t);
+    const reloadTimeout = setTimeout(() => setIsReloading(false), 500);
+    return () => clearTimeout(reloadTimeout);
   }, [router.query.role, router.query.status]);
 
-  const { data: rolePerms } = useSWR(
+  const {data: rolePerms} = useSWR(
     editingRole ? ['/permissions/by-role', editingRole] : null,
     () => getPermissionsByRole(editingRole!)
   );
@@ -60,26 +86,27 @@ const PageRolesPermissions = () => {
 
     try {
       if (!editingRole) {
-        await createRole({ name: payload.role_name, status: payload.status });
+        await createRole({name: payload.role_name, status: payload.status});
       } else {
-        await updateRoleMeta(editingRole, { name: payload.role_name, status: payload.status });
+        await updateRoleMeta(editingRole, {
+          name: payload.role_name,
+          status: payload.status,
+        });
       }
 
-      await updatePermissionsByRole(payload.role_name, payload.permissions || []);
+      await updatePermissionsByRole(
+        payload.role_name,
+        payload.permissions || []
+      );
 
       mutate(['/permissions/by-role', payload.role_name]);
       mutate(['/permissions/me']);
       mutate([`/roles${filters ? `?${filters}` : ''}`]);
 
       setIsOpen(false);
-    } catch (error) {
-    }
+    } catch (error) {}
   };
 
-  const roleOptions = useMemo(
-    () => rolesData.map((r: any) => ({ value: String(r.name), label: String(r.name).toUpperCase() })),
-    [rolesData]
-  );
   const handleReload = async () => {
     setIsReloading(true);
     try {
@@ -88,15 +115,21 @@ const PageRolesPermissions = () => {
       setTimeout(() => setIsReloading(false), 500);
     }
   };
-  const roleFilter = typeof router.query.role === 'string' ? router.query.role : '';
-  const statusFilter = typeof router.query.status === 'string' ? router.query.status : '';
+  const roleFilter =
+    typeof router.query.role === 'string' ? router.query.role : '';
+  const statusFilter =
+    typeof router.query.status === 'string' ? router.query.status : '';
   const filtered = useMemo(() => {
     return rolesData.filter((roleItem: any) => {
       const matchRole = roleFilter
-        ? String(roleItem.name).toLowerCase() === String(roleFilter).toLowerCase()
+        ? String(roleItem.name).toLowerCase() ===
+          String(roleFilter).toLowerCase()
         : true;
-      const isActive = roleItem.status === 1 || roleItem.status === 'active' || roleItem.status === true;
-      const statusString = isActive ? 'active' : 'inactive';
+      const isActive =
+        roleItem.status === 1 ||
+        roleItem.status === STATUS.ACTIVE ||
+        roleItem.status === true;
+      const statusString = isActive ? STATUS.ACTIVE : STATUS.INACTIVE;
       const matchStatus = statusFilter
         ? statusString === String(statusFilter).toLowerCase()
         : true;
@@ -129,9 +162,9 @@ const PageRolesPermissions = () => {
           <Card>
             <CardHeader className='d-flex justify-content-end'>
               <TableHeaderActions
-                onReload={handleReload} 
+                onReload={handleReload}
                 addButton={{
-                  title: 'create role and permissions',
+                  title: ROLES_PERMISSIONS_TEXTS.CREATE_ROLE_AND_PERMISSIONS,
                   onClick: () => {
                     setEditingRole(null);
                     setIsOpen(true);
@@ -141,13 +174,13 @@ const PageRolesPermissions = () => {
             </CardHeader>
             <CardBody>
               <RolesPermissionsTable
-                data={filtered} 
+                data={filtered}
                 loading={loadingRoles || isValidating || isReloading}
-                onView={(row: { name: string }) => {
+                onView={(row: {name: string}) => {
                   setEditingRole(row.name);
                   setIsOpen(true);
                 }}
-                onEdit={(row: { name: string }) => {
+                onEdit={(row: {name: string}) => {
                   setEditingRole(row.name);
                   setIsOpen(true);
                 }}
@@ -165,9 +198,12 @@ const PageRolesPermissions = () => {
             ? {
                 role_name: editingRole,
                 status:
-                  currentRole && (currentRole.status === 1 || currentRole.status === 'active' || currentRole.status === true)
-                    ? 'active'
-                    : 'inactive',
+                  currentRole &&
+                  (currentRole.status === 1 ||
+                    currentRole.status === STATUS.ACTIVE ||
+                    currentRole.status === true)
+                    ? STATUS.ACTIVE
+                    : STATUS.INACTIVE,
                 permissions: rolePerms?.data || [],
               }
             : null
@@ -178,4 +214,3 @@ const PageRolesPermissions = () => {
 };
 
 export default PageRolesPermissions;
-

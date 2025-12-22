@@ -1,7 +1,6 @@
-import {useState, useContext, useEffect} from 'react';
+import {useState, useContext} from 'react';
 import TableHeaderActions from '@/components/own/table-header-actions/table-header-actions';
 import {Alert, Card, CardHeader, Container, Row} from 'reactstrap';
-import TableFilters from '@/components/own/table-filters/table-filters';
 import {UserContext} from '../../../../helper/User';
 import usePermission from '../../../../hooks/usePermission';
 import {PERMISSIONS} from '../../../../utils/permissions';
@@ -12,111 +11,57 @@ import {USER_TYPES} from 'utils/constants';
 import useSWR, {mutate} from 'swr';
 import {useRouter} from 'next/router';
 import {getAllHolidays} from '../../../../helper/api-data/holidays';
-import { FiltersProps } from 'Types/types';
-import { getFiltersString } from '../../../../utils/utils';
 
 const Holidays = () => {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenModal, setIsOpenModal] = useState(false);
-  const [isReloading, setIsReloading] = useState(false);
   const {user} = useContext(UserContext);
-  const { userRole, permissionSet, can } = usePermission();
+  const {canPermission} = usePermission();
   const isCoordinator = user?.role === USER_TYPES.COORDINATOR;
-  const canCreateHoliday = can(PERMISSIONS.CREATE_HOLIDAY);
-  const allowed = can(PERMISSIONS.VIEW_HOLIDAYS);
-
-  useEffect(() => {
-    if ((userRole || permissionSet) && !allowed) {
-      router.replace('/dashboard');
-    }
-  }, [allowed, router, userRole, permissionSet]);
+  const canCreateHoliday = canPermission(PERMISSIONS.CREATE_HOLIDAY);
 
   const page = router.query.page ? Number(router.query.page) : 1;
   const rowPerPage = router.query.rowPerPage
     ? Number(router.query.rowPerPage)
     : 10;
-  const filters = getFiltersString(router);
 
-  const hasFilters = !!filters;
-  const effectivePage = hasFilters ? 1 : page;
-  const effectiveRowPerPage = hasFilters ? 1000 : rowPerPage;
   const {
     data: holidays,
     isLoading,
     isValidating,
-  } = useSWR([`/holidays/get-all`, effectivePage, effectiveRowPerPage, filters], () =>
-    getAllHolidays(effectivePage, effectiveRowPerPage, filters || undefined)
+  } = useSWR([`/holidays/get-all`, page, rowPerPage], () =>
+    getAllHolidays(page, rowPerPage)
   );
-
-  const selectFilters: FiltersProps[] = [
-    {
-      labelName: 'Start Date',
-      name: 'start_date',
-      type: 'date',
-    },
-    {
-      labelName: 'End Date',
-      name: 'end_date',
-      type: 'date',
-    },
-  ];
 
   const toggle = () => {
     setIsOpenModal(!isOpenModal);
   };
 
   const handleReload = () => {
-    setIsReloading(true);
-    mutate([`/holidays/get-all`, effectivePage, effectiveRowPerPage, filters]).finally(() => {
-      setTimeout(() => setIsReloading(false), 500);
-    });
+    mutate([`/holidays/get-all`, page, rowPerPage]);
   };
 
-
-
-  const startDateParam = typeof router.query.start_date === 'string' ? router.query.start_date : undefined;
-  const endDateParam = typeof router.query.end_date === 'string' ? router.query.end_date : undefined;
-  const list = holidays?.data?.result || [];
-  const filteredList = startDateParam || endDateParam
-    ? list.filter((h: any) => {
-        const d = h?.holiday_date;
-        return (!startDateParam || d >= startDateParam) && (!endDateParam || d <= endDateParam);
-      })
-    : list;
-  const filteredHolidays = holidays
-    ? { result: filteredList, totalCount: filteredList.length }
-    : undefined;
-
-  if (!userRole && !permissionSet) return null;
-
-  return allowed ? (
+  return (
     <div className='page-body'>
       <Container className='basic_table' fluid>
-        <Row>
-          <TableFilters selectFilters={selectFilters} />
-        </Row>
         <Row>
           <Card>
             <CardHeader className='d-flex justify-content-end'>
               <TableHeaderActions
                 onReload={handleReload}
-                addButton={
-                  canCreateHoliday
-                    ? {
-                        title: 'Create holiday',
-                        onClick: () => toggle(),
-                      }
-                    : undefined
-                }
+                addButton={{
+                  title: 'Create holiday',
+                  onClick: () => toggle(),
+                }}
               />
             </CardHeader>
             <div className='pb-4'>
               <HolidaysTable
                 page={page}
                 rowPerPage={rowPerPage}
-                holidays={filteredHolidays}
-                loading={isLoading || isValidating || isReloading}
+                holidays={holidays?.data}
+                loading={isLoading || isValidating}
               />
             </div>
           </Card>
@@ -129,7 +74,7 @@ const Holidays = () => {
         onReload={handleReload}
       />
     </div>
-  ) : null;
+  );
 };
 
 export default Holidays;

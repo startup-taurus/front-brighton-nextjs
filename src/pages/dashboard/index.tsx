@@ -9,8 +9,6 @@ import TodayTask from '@/components/Dashboard/SchoolManagenement/TodayTask';
 import Breadcrumbs from 'CommonElements/Breadcrumbs';
 import dynamic from 'next/dynamic';
 import {Col, Container, Row} from 'reactstrap';
-import usePermission from 'hooks/usePermission';
-import { PERMISSIONS } from 'utils/permissions';
 import {SchoolManage, SchoolManagementHeading} from 'utils/Constant';
 import CardSkeleton from '@/components/own/common/card-skeleton';
 import TableSkeleton from '@/components/own/common/table-skeleton/TableSkeleton';
@@ -23,7 +21,6 @@ const SchoolManagement = () => {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const {access_denied} = router.query;
-  const { can } = usePermission();
 
   useEffect(() => {
     if (access_denied) {
@@ -163,11 +160,9 @@ const SchoolManagement = () => {
                   <StudentPerformanceChart />
 
                   {/* Calendario de Cursos */}
-                  {can(PERMISSIONS.VIEW_DASHBOARD_CALENDAR) && (
-                    <Col xxl={12}>
-                      <CoursesCalendar />
-                    </Col>
-                  )}
+                  <Col xxl={12}>
+                    <CoursesCalendar />
+                  </Col>
                 </>
               )}
             </Row>
@@ -202,16 +197,9 @@ const SchoolManagement = () => {
                   {' '}
                   <Row className='dashboard-tables'>
                     {' '}
-                    {can(PERMISSIONS.VIEW_DASHBOARD_PROFESSORS_SUMMARY) && (
-                      <ProfessorsTable />
-                    )}
-                    {can(PERMISSIONS.VIEW_DASHBOARD_LAST_STUDENT_TRANSFER) && (
-                      <StudentTransferTable />
-                    )}
-                    {can(PERMISSIONS.VIEW_DASHBOARD_CONSECUTIVE_ABSENCES_REPORT) && (
-                      <AbsenceReportTable />
-                    )}
-                    </Row>{' '}
+                    <ProfessorsTable /> <StudentTransferTable />{' '}
+                    <AbsenceReportTable />{' '}
+                  </Row>{' '}
                 </>
               )}
             </Row>

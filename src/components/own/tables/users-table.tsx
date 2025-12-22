@@ -22,7 +22,7 @@ const UsersTable = ({
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
-  const { can } = usePermission();
+  const { canPermission } = usePermission();
 
   const toggle = (data: any) => {
     setSelectedData(data);
@@ -132,14 +132,14 @@ const UsersTable = ({
       name: 'Actions',
       cell: (row: any) => (
         <TableActionButtons
-          onEdit={can(PERMISSIONS.EDIT_USER) ? () => toggle(row) : undefined}
+          onEdit={canPermission(PERMISSIONS.EDIT_USER) ? () => toggle(row) : undefined}
           onBlock={
-            can(PERMISSIONS.EDIT_USER) && can(PERMISSIONS.ACTIVATE_USER)
+            canPermission(PERMISSIONS.EDIT_USER) && canPermission(PERMISSIONS.ACTIVATE_USER)
               ? () => handleAlert(row)
               : undefined
           }
           onActivate={
-            can(PERMISSIONS.ACTIVATE_USER) && row.status === 'inactive' && (row.failed_attempts ?? 0) >= 5
+            canPermission(PERMISSIONS.ACTIVATE_USER) && row.status === 'inactive' && (row.failed_attempts ?? 0) >= 5
               ? () => activateUser(row)
               : undefined
           }

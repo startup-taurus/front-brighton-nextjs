@@ -47,7 +47,16 @@ export const handleError = (
     ) {
       throw e;
     }
-    return e;
+    
+    Swal.fire({
+      title: "Access Denied",
+      text: "You don't have access to this section.",
+      icon: "error",
+      confirmButtonText: "OK",
+    }).then(() => {
+      window.location.href = "/teachers";
+    });
+    return e; 
   }
 
   if (

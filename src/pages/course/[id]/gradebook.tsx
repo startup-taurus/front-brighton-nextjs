@@ -19,11 +19,9 @@ import { getFinalPercentageBySyllabusId } from '../../../../helper/api-data/syll
 import useFilteredGradingItems from '../../../../hooks/useFilteredGradingItems';
 import { decrypt } from 'utils/encryption';
 import { UserContext } from 'helper/User';
-import { USER_TYPES } from 'utils/constants';
+import { USER_TYPES, COURSE_TAB_NAMES } from 'utils/constants';
 import usePermission from '../../../../hooks/usePermission';
 import { PERMISSIONS } from '../../../../utils/permissions';
-
-const tabsName = 'GRADEBOOK';
 
 const Gradebook: NextPageWithLayout = () => {
   const router = useRouter();
@@ -31,8 +29,8 @@ const Gradebook: NextPageWithLayout = () => {
   const [studentId, setStudentId] = useState<string | number | null>(null);
   const { user } = useContext(UserContext);
   const isProfessor = user?.role === USER_TYPES.PROFESSOR;
-  const { can, userRole, permissionSet } = usePermission();
-  const canViewGradebook = can(PERMISSIONS.VIEW_GRADEBOOK);
+  const { canPermission, userRole, permissionSet } = usePermission();
+  const canViewGradebook = canPermission(PERMISSIONS.VIEW_GRADEBOOK);
   
   useEffect(() => {
     const encrypted = localStorage.getItem('studentDetailId');
@@ -104,7 +102,7 @@ const Gradebook: NextPageWithLayout = () => {
         )}
         <TabsTeachers
           numberOfClass={courseDetail?.data?.data?.course_number ?? ''}
-          tabsName={tabsName}
+          tabsName={COURSE_TAB_NAMES.GRADEBOOK}
         />
 
         {filteredGradingItems.length > 0 &&

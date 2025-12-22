@@ -13,23 +13,12 @@ import {
 import { getAllCourses } from '../../../../helper/api-data/course';
 import useSWR, { mutate } from 'swr';
 import { SelectOption } from 'Types/SelectType';
-import usePermission from '../../../../hooks/usePermission';
-import { PERMISSIONS } from '../../../../utils/permissions';
-import { useRouter } from 'next/router';
 
 const Students = () => {
   const limit = 10;
-  const router = useRouter();
   const [page, setPage] = useState(1);
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [reload, setReload] = useState(false);
-  const { can, permissionSet } = usePermission();
-  
-  useEffect(() => {
-    if (permissionSet && !permissionSet.has(PERMISSIONS.VIEW_COURSES)) {
-      router.replace('/dashboard');
-    }
-  }, [permissionSet, router]);
 
   const [professorOptions, setProfessorOptions] = useState<
     Array<{ label: string; value: string }>
@@ -196,14 +185,10 @@ const Students = () => {
             <CardHeader className='d-flex justify-content-end'>
               <TableHeaderActions
                 onReload={handleReload}
-                addButton={
-                  can(PERMISSIONS.CREATE_COURSE)
-                    ? {
-                        title: 'Create Course',
-                        onClick: () => toggle(),
-                      }
-                    : undefined
-                }
+                addButton={{
+                  title: 'Create Course',
+                  onClick: () => toggle(),
+                }}
               />
             </CardHeader>
             <div className='pb-4'>

@@ -33,12 +33,12 @@ const TableActionButtons = ({
   transferTooltip = 'Transfer to course',
   module,
 }: any) => {
-  const { can } = usePermission();
+  const { canPermission } = usePermission();
   const canAction = (action: string): boolean => {
     if (!module) return true;
     const required = ACTION_PERMISSIONS[module]?.[action];
     if (!required) return true;
-    return can(required);
+    return canPermission(required);
   };
   return (
     <>

@@ -8,8 +8,6 @@ import { FiltersProps } from '../../../../Types/types';
 import { getAllLevels } from '../../../../helper/api-data/level';
 import { getActiveCourses } from '../../../../helper/api-data/course';
 import { STATUS_LEVEL_CHANGE, USER_TYPES } from '../../../../utils/constants';
-import { PERMISSIONS } from 'utils/permissions';
-import usePermission from '../../../../hooks/usePermission';
 import StudentTransferForm from '@/components/own/form/student-transfer-form';
 import TransferStudentsTable from '@/components/own/tables/transfer-students-table';
 import StudentSelectorModal, {
@@ -27,7 +25,6 @@ const TransferStudents = () => {
   );
   const [isGroupMode, setIsGroupMode] = useState(false);
   const [transferDescription, setTransferDescription] = useState('');
-  const { can, canAny } = usePermission();
 
   const [reload, setReload] = useState(false);
 
@@ -49,13 +46,6 @@ const TransferStudents = () => {
     ['/level/get-all', levelPage, limit, levelSearch],
     () => getAllLevels(levelPage, limit, levelSearch)
   );
-
-  const { permissionSet } = usePermission();
-  useEffect(() => {
-    if (permissionSet && !permissionSet.has(PERMISSIONS.VIEW_TRANSFER_STUDENTS)) {
-      router.replace('/dashboard');
-    }
-  }, [permissionSet, router]);
 
   useEffect(() => {
     if (courseData?.data) {
@@ -201,8 +191,11 @@ const TransferStudents = () => {
               <TableHeaderActions
                 onReload={() => setReload((r) => !r)}
                 addButton={
-                  canAny([PERMISSIONS.TRANSFER_STUDENT, PERMISSIONS.APPROVE_TRANSFER])
-                    ? { title: 'Create Transfer Students', onClick: toggleSelectorModal }
+                  userRole === USER_TYPES.RECEPTIONIST
+                    ? {
+                        title: 'Create Transfer',
+                        onClick: toggleSelectorModal,
+                      }
                     : undefined
                 }
               />

@@ -47,7 +47,7 @@ const TeacherNavMenu = ({ fromProfessorId }: TeacherNavMenuProps) => {
     courseId ? `/course/get-students/${courseId}` : null,
     () => getCourseWithStudents(courseId!.toString())
   );
-  const { can, permissionSet } = usePermission();
+  const { canPermission, permissionSet } = usePermission();
 
   const isCoordinatorOrAdmin = user?.role === USER_TYPES.COORDINATOR || 
                                user?.role === USER_TYPES.PROFESSOR || 
@@ -71,19 +71,19 @@ const TeacherNavMenu = ({ fromProfessorId }: TeacherNavMenuProps) => {
       }
       switch (item.id) {
         case 'attendance':
-          return can(PERMISSIONS.VIEW_ATTENDANCE);
+          return canPermission(PERMISSIONS.VIEW_ATTENDANCE);
         case 'gradebook':
-          return can(PERMISSIONS.VIEW_GRADEBOOK);
+          return canPermission(PERMISSIONS.VIEW_GRADEBOOK);
         case 'holidays':
-          return can(PERMISSIONS.VIEW_HOLIDAYS);
+          return canPermission(PERMISSIONS.VIEW_HOLIDAYS);
         case 'student-report':
-          return can(PERMISSIONS.VIEW_STUDENT_REPORTS);
+          return canPermission(PERMISSIONS.VIEW_STUDENT_REPORTS);
         default:
           return true;
       }
     });
     return filtered;
-  }, [isCoordinatorOrAdmin, isPrivateClass, courseData, permissionSet, can]);
+  }, [isCoordinatorOrAdmin, isPrivateClass, courseData, permissionSet, canPermission]);
 
   useEffect(() => {
     const currentPath = router.asPath;

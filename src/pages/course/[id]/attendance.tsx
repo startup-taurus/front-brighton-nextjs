@@ -29,8 +29,8 @@ const TeachersAttendance: NextPageWithLayout = () => {
   const [studentId, setStudentId] = useState<string | number | null>(null);
   const { user } = useContext(UserContext);
   const isProfessor = user?.role === USER_TYPES.PROFESSOR;
-  const { can, userRole, permissionSet } = usePermission();
-  const canViewAttendance = can(PERMISSIONS.VIEW_ATTENDANCE);
+  const { canPermission, userRole, permissionSet } = usePermission();
+  const canViewAttendance = canPermission(PERMISSIONS.VIEW_ATTENDANCE);
 
   useEffect(() => {
     const encrypted = localStorage.getItem('studentDetailId');
