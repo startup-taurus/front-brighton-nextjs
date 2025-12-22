@@ -41,10 +41,10 @@ const CancelledLessonsForm = ({
 }: CancelledLessonsFormProps) => {
   const router = useRouter();
   const { user } = useContext(UserContext);
-  const { can } = usePermission();
+  const { canPermission } = usePermission();
   const isCoordinator = user?.role === USER_TYPES.COORDINATOR;
-  const canCreateHoliday = can(PERMISSIONS.CREATE_HOLIDAY);
-  const canEditHoliday = can(PERMISSIONS.EDIT_HOLIDAY);
+  const canCreateHoliday = canPermission(PERMISSIONS.CREATE_HOLIDAY);
+  const canEditHoliday = canPermission(PERMISSIONS.EDIT_HOLIDAY);
 
   const validations = Yup.object().shape({
     cancel_reason: Yup.string()

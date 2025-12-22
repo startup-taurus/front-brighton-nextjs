@@ -10,9 +10,9 @@ import { PERMISSIONS } from "../../../../utils/permissions";
 const SidebarLogo = () => {
   const { setSideBarToggle, sideBarToggle } = useContext(layoutContext);
   const { user } = useContext(UserContext);
-  const { can } = usePermission();
+  const { canPermission } = usePermission();
 
-  const mainLink = can(PERMISSIONS.VIEW_DASHBOARD) ? "/dashboard" : "/teachers";
+  const mainLink = canPermission(PERMISSIONS.VIEW_DASHBOARD) ? "/dashboard" : "/teachers";
 
   return (
     <div className="logo-wrapper">

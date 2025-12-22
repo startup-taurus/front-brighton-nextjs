@@ -17,9 +17,9 @@ const Holidays = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isOpenModal, setIsOpenModal] = useState(false);
   const {user} = useContext(UserContext);
-  const {can} = usePermission();
+  const {canPermission} = usePermission();
   const isCoordinator = user?.role === USER_TYPES.COORDINATOR;
-  const canCreateHoliday = can(PERMISSIONS.CREATE_HOLIDAY);
+  const canCreateHoliday = canPermission(PERMISSIONS.CREATE_HOLIDAY);
 
   const page = router.query.page ? Number(router.query.page) : 1;
   const rowPerPage = router.query.rowPerPage

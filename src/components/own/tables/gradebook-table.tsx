@@ -48,11 +48,11 @@ const GradebookTable = ({
   const router = useRouter();
   const courseId = router.query.id as string;
   const { user } = useContext(UserContext);
-  const { can } = usePermission();
+  const { canPermission } = usePermission();
   const isCoordinator = user?.role === USER_TYPES.COORDINATOR;
   const isReceptionist = user?.role === USER_TYPES.RECEPTIONIST;
-  const canAddGrades = can(PERMISSIONS.ADD_GRADES);
-  const canEditGrades = can(PERMISSIONS.EDIT_GRADES);
+  const canAddGrades = canPermission(PERMISSIONS.ADD_GRADES);
+  const canEditGrades = canPermission(PERMISSIONS.EDIT_GRADES);
 
   const isTransferredCourse =
     typeof courseStatus === 'string' &&

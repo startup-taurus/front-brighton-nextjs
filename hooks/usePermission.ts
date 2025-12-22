@@ -55,7 +55,7 @@ const usePermission = () => {
     setPermissionSet(new Set(list));
   }, [backendPermissions]);
 
-  const can = (permission: string): boolean => {
+  const canPermission = (permission: string): boolean => {
     if (permissionSet) return permissionSet.has(permission);
     if (!userRole) return false;
     return hasPermission(userRole, permission);
@@ -76,7 +76,7 @@ const usePermission = () => {
   return {
     userRole,
     permissionSet,
-    can,
+    canPermission,
     canAny,
     canAll,
   };

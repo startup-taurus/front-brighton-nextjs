@@ -45,8 +45,8 @@ const TableAttendance: React.FC<TableAttendanceProps> = ({
   const [scheduleItems, setScheduleItems] = useState(courseSchedule);
   const [showInactive, setShowInactive] = useState(false);
   const { user } = useContext(UserContext);
-  const { can } = usePermission();
-  const canMarkAttendance = can(PERMISSIONS.MARK_ATTENDANCE);
+  const { canPermission } = usePermission();
+  const canMarkAttendance = canPermission(PERMISSIONS.MARK_ATTENDANCE);
 
   useEffect(() => setDates(studentsAttendance), [studentsAttendance]);
   useEffect(() => setScheduleItems(courseSchedule), [courseSchedule]);

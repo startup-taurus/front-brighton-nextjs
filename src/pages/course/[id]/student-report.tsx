@@ -30,8 +30,8 @@ const StudentReport: NextPageWithLayout = () => {
   const [selectedStudentId, setSelectedStudentId] = useState('');
   const [selectedStudent, setSelectedStudent] = useState('');
 
-  const { can } = usePermission();
-  const canViewStudentReports = can(PERMISSIONS.VIEW_STUDENT_REPORTS);
+  const { canPermission } = usePermission();
+  const canViewStudentReports = canPermission(PERMISSIONS.VIEW_STUDENT_REPORTS);
 
   const courseDetail = useSWR(
     courseId ? `/course/get-one/${courseId}` : null,

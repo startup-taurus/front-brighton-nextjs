@@ -17,9 +17,9 @@ const Sidebar = ({ menuList }: { menuList: sidebarMenuType[] }) => {
   const { sidebarIconType } = useContext(CustomizerContext);
   const { sideBarToggle } = useContext(layoutContext);
   const { user } = useContext(UserContext);
-  const { can } = usePermission();
+  const { canPermission } = usePermission();
 
-  const mainLink = can(PERMISSIONS.VIEW_DASHBOARD) ? '/dashboard' : '/teachers';
+  const mainLink = canPermission(PERMISSIONS.VIEW_DASHBOARD) ? '/dashboard' : '/teachers';
   const IconType = sidebarIconType || ConfigDB.data.settings.sidebar.iconType;
 
   return (

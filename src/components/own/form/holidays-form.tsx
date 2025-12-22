@@ -20,11 +20,11 @@ import {USER_TYPES} from 'utils/constants';
 
 const HolidayForm = ({data, isOpen, toggle, onReload}: any) => {
   const {user} = useContext(UserContext);
-  const {can} = usePermission();
+  const {canPermission} = usePermission();
   const [isLoading, setIsLoading] = useState(false);
   const isCoordinator = user?.role === USER_TYPES.COORDINATOR;
-  const canCreateHoliday = can(PERMISSIONS.CREATE_HOLIDAY);
-  const canEditHoliday = can(PERMISSIONS.EDIT_HOLIDAY);
+  const canCreateHoliday = canPermission(PERMISSIONS.CREATE_HOLIDAY);
+  const canEditHoliday = canPermission(PERMISSIONS.EDIT_HOLIDAY);
 
   const save = async (data: any) => {
     try {
