@@ -141,7 +141,7 @@ const PermissionBasedNavigation: React.FC<PermissionBasedNavigationProps> = ({
   if (!userRole) return null;
 
   const filteredNavItems = navigationItems.filter((item) => {
-    return hasPermission(userRole, item.permission);
+    return item.title === 'Dashboard' || hasPermission(userRole, item.permission);
   });
 
   return (

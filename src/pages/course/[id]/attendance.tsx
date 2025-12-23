@@ -17,7 +17,7 @@ import AttendanceHelpBox from '@/components/own/attendance-help-box/attendance-h
 import { getCourseScheduleDates } from '../../../../helper/api-data/course-schedule';
 import { decrypt } from 'utils/encryption';
 import { UserContext } from 'helper/User';
-import { USER_TYPES, COURSE_TAB_NAMES } from 'utils/constants';
+import { USER_TYPES, COURSE_TAB_NAMES, APP_PATHS } from 'utils/constants';
 import usePermission from '../../../../hooks/usePermission';
 import { PERMISSIONS } from '../../../../utils/permissions';
 
@@ -60,10 +60,10 @@ const TeachersAttendance: NextPageWithLayout = () => {
   );
 
   useEffect(() => {
-    if ((userRole || permissionSet) && !canViewAttendance) {
-      router.replace('/dashboard');
+    if (permissionSet && !canViewAttendance) {
+      router.replace(APP_PATHS.DASHBOARD);
     }
-  }, [canViewAttendance, router, userRole, permissionSet]);
+  }, [canViewAttendance, router, permissionSet]);
 
   if (!courseDetail?.data?.data) return null;
   if (!userRole && !permissionSet) return null;

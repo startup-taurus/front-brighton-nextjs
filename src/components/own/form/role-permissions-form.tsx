@@ -14,6 +14,10 @@ const RolePermissionsForm = ({ isOpen, toggle, onSubmit, data, readOnly = false 
     const overrides: Record<string, string> = {
       transfer_student: 'Create Transfer Students',
       add_grades: 'Add Assignments',
+      toggle_course_status: 'Block or enable status',
+      toggle_student_status: 'Block or enable status',
+      toggle_teacher_status: 'Block or enable status',
+      toggle_user_status: 'Block or enable status',
     };
     if (overrides[key]) return overrides[key];
     return key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());

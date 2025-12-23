@@ -21,7 +21,7 @@ import { getFinalPercentageBySyllabusId } from '../../../../helper/api-data/syll
 import useFilteredGradingItems from '../../../../hooks/useFilteredGradingItems';
 import usePermission from '../../../../hooks/usePermission';
 import { PERMISSIONS } from '../../../../utils/permissions';
-import { COURSE_TAB_NAMES } from 'utils/constants';
+import { COURSE_TAB_NAMES, APP_PATHS } from 'utils/constants';
 
 const StudentReport: NextPageWithLayout = () => {
   const router = useRouter();
@@ -29,8 +29,13 @@ const StudentReport: NextPageWithLayout = () => {
   const [selectedStudentId, setSelectedStudentId] = useState('');
   const [selectedStudent, setSelectedStudent] = useState('');
 
-  const { canPermission } = usePermission();
+  const { canPermission, permissionSet } = usePermission();
   const canViewStudentReports = canPermission(PERMISSIONS.VIEW_STUDENT_REPORTS);
+  React.useEffect(() => {
+    if (permissionSet && !canViewStudentReports) {
+      router.replace(APP_PATHS.DASHBOARD);
+    }
+  }, [permissionSet, canViewStudentReports, router]);
 
   const courseDetail = useSWR(
     courseId ? `/course/get-one/${courseId}` : null,
@@ -104,7 +109,7 @@ const StudentReport: NextPageWithLayout = () => {
     courseDetail?.data?.data &&
     notesPercentages?.data?.data &&
     selectedStudentId;
-  return canViewStudentReports ? (
+  return permissionSet && canViewStudentReports ? (
     <Card tag='section'>
       <CardBody>
         {courseDetail?.data?.data && (

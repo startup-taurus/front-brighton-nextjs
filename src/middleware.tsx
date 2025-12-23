@@ -21,13 +21,13 @@ const coordinatorPaths = [
 ];
 
 const receptionistRestrictedPaths = [
-  "/admin/syllabus",
-  "/admin/holidays",
-  "/admin/users", 
+  "/admin/users",
+  "/admin/roles-permissions",
 ];
 
 const coordinatorRestrictedPaths = [
-  "/admin/users", 
+  "/admin/users",
+  "/admin/roles-permissions",
 ];
 
 export function middleware(request: NextRequest) {
@@ -134,6 +134,7 @@ export const config = {
     "/admin/syllabus",
     "/admin/teachers",
     "/admin/users",
+    "/admin/roles-permissions",
     "/admin/courses",
     "/admin/transfer-students",
     "/coordinator/faq",

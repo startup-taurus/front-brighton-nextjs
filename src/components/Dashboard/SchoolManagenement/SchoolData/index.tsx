@@ -13,6 +13,8 @@ import DashboardHead from '../../DashboardCommon/DashboardHead';
 import Image from 'next/image';
 import { ImgPath } from 'utils/Constant';
 import { useState, useEffect } from 'react';
+import usePermission from '../../../../../hooks/usePermission';
+import { PERMISSIONS } from '../../../../../utils/permissions';
 import { getProfessorsCourses } from 'helper/api-data/professor';
 import { Clock, Calendar } from 'react-feather';
 import { Course, Professor } from 'Types/DashboardType';
@@ -31,6 +33,19 @@ const SchoolData = () => {
   const [isOpenStarting, setIsOpenStarting] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [errorStarting, setErrorStarting] = useState<string | null>(null);
+
+  const { canPermission, permissionSet } = usePermission();
+  const canViewCompletedSoon = !!permissionSet && canPermission(PERMISSIONS.VIEW_DASHBOARD_COURSES_TO_BE_COMPLETED);
+  const canViewStartingSoon = !!permissionSet && canPermission(PERMISSIONS.VIEW_DASHBOARD_COURSES_STARTING_SOON);
+
+  const canShowCard = (header: string) => {
+    if (!permissionSet) return false;
+    const key = String(header || '').toLowerCase();
+    if (key.includes('teachers')) return canPermission(PERMISSIONS.VIEW_DASHBOARD_TOTAL_TEACHERS);
+    if (key.includes('students')) return canPermission(PERMISSIONS.VIEW_DASHBOARD_TOTAL_STUDENTS);
+    if (key.includes('total courses')) return canPermission(PERMISSIONS.VIEW_DASHBOARD_TOTAL_COURSES);
+    return true;
+  };
 
   useEffect(() => {
     const fetchCourses = async () => {
@@ -87,7 +102,9 @@ const SchoolData = () => {
 
   return (
     <>
-      {schoolCardData?.data?.map((schoolCardItem: any) => (
+      {schoolCardData?.data
+        ?.filter((schoolCardItem: any) => canShowCard(schoolCardItem.header))
+        .map((schoolCardItem: any) => (
         <Col
           md={3}
           className={schoolCardItem.smallScreenClass ? 'col-sm-6' : ''}
@@ -126,7 +143,8 @@ const SchoolData = () => {
         </Col>
       ))}
 
-      <Col md={3}>
+      {canViewCompletedSoon && (
+        <Col md={3}>
         <Card className='widget-hover overflow-hidden'>
           <DashboardHead
             title='Courses to be completed soon'
@@ -150,9 +168,11 @@ const SchoolData = () => {
             )}
           </CardBody>
         </Card>
-      </Col>
+        </Col>
+      )}
 
-      <Col md={3}>
+      {canViewStartingSoon && (
+        <Col md={3}>
         <Card className='widget-hover overflow-hidden'>
           <DashboardHead
             title='Courses starting soon'
@@ -176,7 +196,8 @@ const SchoolData = () => {
             )}
           </CardBody>
         </Card>
-      </Col>
+        </Col>
+      )}
 
       <Modal
         isOpen={isOpen}

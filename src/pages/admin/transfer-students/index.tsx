@@ -15,6 +15,9 @@ import StudentSelectorModal, {
 } from '@/components/own/student-slector-modal/StudentSelectorModal';
 import { getUserRoleFromLocalStorage } from 'utils/auth';
 import { SelectOption } from 'Types/SelectType';
+import usePermission from '../../../../hooks/usePermission';
+import { PERMISSIONS } from '../../../../utils/permissions';
+import { APP_PATHS } from 'utils/constants';
 
 const TransferStudents = () => {
   const router = useRouter();
@@ -175,6 +178,14 @@ const TransferStudents = () => {
   };
 
   const userRole = getUserRoleFromLocalStorage();
+  const { canPermission, permissionSet } = usePermission();
+  const canCreateTransfer = canPermission(PERMISSIONS.TRANSFER_STUDENT);
+  const canViewTransfers = canPermission(PERMISSIONS.VIEW_TRANSFER_STUDENTS);
+  useEffect(() => {
+    if (permissionSet && !canViewTransfers) {
+      router.replace(APP_PATHS.DASHBOARD);
+    }
+  }, [permissionSet, canViewTransfers, router]);
 
   return (
     <div className='page-body'>
@@ -191,7 +202,7 @@ const TransferStudents = () => {
               <TableHeaderActions
                 onReload={() => setReload((r) => !r)}
                 addButton={
-                  userRole === USER_TYPES.RECEPTIONIST
+                  canCreateTransfer
                     ? {
                         title: 'Create Transfer',
                         onClick: toggleSelectorModal,

@@ -5,6 +5,8 @@ import Swal from 'sweetalert2';
 import DataTable from 'react-data-table-component';
 import {updateStatusStudent, deleteStudent, getStudent} from 'helper/api-data/student';
 import TableActionButtons from '@/components/own/table-action-buttons/table-action-buttons';
+import usePermission from '../../../../hooks/usePermission';
+import { PERMISSIONS } from '../../../../utils/permissions';
 import StudentForm from '../form/student-form';
 import StudentDetail from '../student-detail/student-datail';
 import TableSkeleton from '@/components/own/common/table-skeleton/TableSkeleton';
@@ -26,6 +28,11 @@ const StudentsTable = ({
   const [isLoadingStudent, setIsLoadingStudent] = useState(false);
 
   const [toggleClearRows, setToggleClearRows] = useState(false);
+  const { canPermission } = usePermission();
+  const canView = canPermission(PERMISSIONS.VIEW_STUDENTS);
+  const canEdit = canPermission(PERMISSIONS.EDIT_STUDENT);
+  const canDelete = canPermission(PERMISSIONS.DELETE_STUDENT);
+  const showActions = canView || canEdit || canDelete;
 
   const clearSelections = () => {
     setToggleClearRows((prev) => !prev);
@@ -134,32 +141,36 @@ const StudentsTable = ({
 
   if (!students?.data?.result) return null;
 
+  
+
   const columns = [
     {
-      name: 'Actions',
-      cell: (row: any) => {
-        return (
-          <div className='d-flex align-items-center gap-2 justify-content-end'>
-            {' '}
-          <TableActionButtons
-            onView={() => toggleDetail(row)}
-            onBlock={() => handleAlert(row)}
-            onEdit={() => toggle(row)}
-            onDelete={() => handleDeleteAlert(row)}
-            status={row.status === 'active' ? false : true}
-            module={'Students'}
-          />{' '}
-          </div>
-        );
-      },
-      width: '200px',
-      minWidth: '200px',
-      maxWidth: '200px',
-      sortable: false,
-      right: true,
-      center: true,
-
-    },
+      ...(showActions
+        ? {
+            name: 'Actions',
+            cell: (row: any) => {
+              return (
+                <div className='d-flex align-items-center gap-2 justify-content-end'>
+                  <TableActionButtons
+                    onView={canView ? () => toggleDetail(row) : undefined}
+                    onBlock={canEdit ? () => handleAlert(row) : undefined}
+                    onEdit={canEdit ? () => toggle(row) : undefined}
+                    onDelete={canDelete ? () => handleDeleteAlert(row) : undefined}
+                    status={row.status === 'active' ? false : true}
+                    module={'Students'}
+                  />
+                </div>
+              );
+            },
+            width: '200px',
+            minWidth: '200px',
+            maxWidth: '200px',
+            sortable: false,
+            right: true,
+            center: true,
+          }
+        : {}),
+    } as any,
     {
       name: 'ID',
       selector: (row: any) => row.cedula,

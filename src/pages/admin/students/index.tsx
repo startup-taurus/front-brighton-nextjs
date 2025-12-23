@@ -20,6 +20,9 @@ import {
   STATUS_LEVEL_CHANGE,
 } from '../../../../utils/constants';
 import { SelectOption } from 'Types/SelectType';
+import usePermission from '../../../../hooks/usePermission';
+import { PERMISSIONS } from '../../../../utils/permissions';
+import { APP_PATHS } from 'utils/constants';
 
 const Students = () => {
   const router = useRouter();
@@ -192,6 +195,15 @@ const Students = () => {
     ]);
   };
 
+  const { canPermission, permissionSet } = usePermission();
+  const canCreateStudent = canPermission(PERMISSIONS.CREATE_STUDENT);
+  const canViewStudents = canPermission(PERMISSIONS.VIEW_STUDENTS);
+  useEffect(() => {
+    if (permissionSet && !canViewStudents) {
+      router.replace(APP_PATHS.DASHBOARD);
+    }
+  }, [permissionSet, canViewStudents, router]);
+
   return (
     <div className='page-body'>
       <Container
@@ -211,10 +223,14 @@ const Students = () => {
                 ></div>
                 <TableHeaderActions
                   onReload={handleReload}
-                  addButton={{
-                    title: 'Create Student',
-                    onClick: () => toggle(),
-                  }}
+                  addButton={
+                    canCreateStudent
+                      ? {
+                          title: 'Create Student',
+                          onClick: () => toggle(),
+                        }
+                      : undefined
+                  }
                 />
               </div>
             </CardHeader>

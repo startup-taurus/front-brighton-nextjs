@@ -12,6 +12,9 @@ import { getAllProfessors } from '../../../../helper/api-data/professor';
 import { SelectOption } from 'Types/SelectType';
 import { mutate } from 'swr';
 import { getFiltersString } from '../../../../utils/utils';
+import usePermission from '../../../../hooks/usePermission';
+import { PERMISSIONS } from '../../../../utils/permissions';
+import { APP_PATHS } from 'utils/constants';
 
 const Teachers = () => {
   const limit = 10;
@@ -81,6 +84,15 @@ const Teachers = () => {
     );
   };
 
+  const { canPermission, permissionSet } = usePermission();
+  const canCreateTeacher = canPermission(PERMISSIONS.CREATE_TEACHER);
+  const canViewTeachers = canPermission(PERMISSIONS.VIEW_TEACHERS);
+  useEffect(() => {
+    if (permissionSet && !canViewTeachers) {
+      router.replace(APP_PATHS.DASHBOARD);
+    }
+  }, [permissionSet, canViewTeachers, router]);
+
   const selectFilters: FiltersProps[] = [
     {
       labelName: 'Name',
@@ -119,10 +131,14 @@ const Teachers = () => {
             <CardHeader className='d-flex justify-content-end'>
               <TableHeaderActions
                 onReload={handleReload}
-                addButton={{
-                  title: 'Create Teacher',
-                  onClick: () => toggle(),
-                }}
+                addButton={
+                  canCreateTeacher
+                    ? {
+                        title: 'Create Teacher',
+                        onClick: () => toggle(),
+                      }
+                    : undefined
+                }
               />
             </CardHeader>
             <div className='pb-4'>

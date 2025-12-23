@@ -109,22 +109,28 @@ const HolidaysTable = ({
 
   if (!holidaysData?.result) return null;
 
+  const showActions = canEditHoliday || canDeleteHoliday;
   const columns = [
-    {
-      name: 'Actions',
-      cell: (row: any) => (
-        <TableActionButtons
-          onBlock={() => handleAlert(row)}
-          onEdit={() => toggle(row)}
-          stauts={row.status === 'active' ? false : true}
-        />
-      ),
-      width: '180px',
-      minWidth: '180px',
-      maxWidth: '180px',
-      sortable: false,
-      center: true,
-    },
+    ...(showActions
+      ? [
+          {
+            name: 'Actions',
+            cell: (row: any) => (
+              <TableActionButtons
+                onBlock={canEditHoliday ? () => handleAlert(row) : undefined}
+                onEdit={canEditHoliday ? () => toggle(row) : undefined}
+                status={row.status === 'active' ? false : true}
+                module='Holidays'
+              />
+            ),
+            width: '180px',
+            minWidth: '180px',
+            maxWidth: '180px',
+            sortable: false,
+            center: true,
+          },
+        ]
+      : []),
     {
       name: 'Holiday Name',
       selector: (row: any) => `${row.holiday_name}`.toUpperCase(),

@@ -11,6 +11,9 @@ import useSWR, { mutate } from 'swr';
 import { getAllSyllabus } from '../../../../helper/api-data/syllabus';
 import { getAllLevels } from '../../../../helper/api-data/level';
 import { SelectOption } from 'Types/SelectType';
+import usePermission from '../../../../hooks/usePermission';
+import { PERMISSIONS } from '../../../../utils/permissions';
+import { APP_PATHS } from 'utils/constants';
 
 const Syllabus = () => {
   const router = useRouter();
@@ -106,6 +109,15 @@ const Syllabus = () => {
     ]);
   };
 
+  const { canPermission, permissionSet } = usePermission();
+  const canCreateSyllabus = canPermission(PERMISSIONS.CREATE_SYLLABUS);
+  const canViewSyllabus = canPermission(PERMISSIONS.VIEW_SYLLABUS);
+  useEffect(() => {
+    if (permissionSet && !canViewSyllabus) {
+      router.replace(APP_PATHS.DASHBOARD);
+    }
+  }, [permissionSet, canViewSyllabus, router]);
+
   return (
     <div className='page-body'>
       <Container
@@ -121,10 +133,14 @@ const Syllabus = () => {
               <div className='d-flex align-items-center'>
                 <TableHeaderActions
                   onReload={handleReload}
-                  addButton={{
-                    title: 'Create Syllabus',
-                    onClick: () => toggle(),
-                  }}
+                  addButton={
+                    canCreateSyllabus
+                      ? {
+                          title: 'Create Syllabus',
+                          onClick: () => toggle(),
+                        }
+                      : undefined
+                  }
                 />
               </div>
             </CardHeader>

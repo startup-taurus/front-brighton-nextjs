@@ -53,24 +53,26 @@ const usePermission = () => {
       ? backendPermissions.data
       : backendPermissions.data.permissions || [];
     setPermissionSet(new Set(list));
+    try {
+      if (isBrowser()) {
+        localStorage.setItem('permissions', JSON.stringify(list));
+      }
+    } catch {}
   }, [backendPermissions]);
 
   const canPermission = (permission: string): boolean => {
-    if (permissionSet) return permissionSet.has(permission);
-    if (!userRole) return false;
-    return hasPermission(userRole, permission);
+    if (!permissionSet) return false;
+    return permissionSet.has(permission);
   };
 
   const canAny = (permissions: string[]): boolean => {
-    if (permissionSet) return permissions.some((requiredPermission) => permissionSet.has(requiredPermission));
-    if (!userRole) return false;
-    return hasAnyPermission(userRole, permissions);
+    if (!permissionSet) return false;
+    return permissions.some((requiredPermission) => permissionSet.has(requiredPermission));
   };
 
   const canAll = (permissions: string[]): boolean => {
-    if (permissionSet) return permissions.every((requiredPermission) => permissionSet.has(requiredPermission));
-    if (!userRole) return false;
-    return hasAllPermissions(userRole, permissions);
+    if (!permissionSet) return false;
+    return permissions.every((requiredPermission) => permissionSet.has(requiredPermission));
   };
 
   return {

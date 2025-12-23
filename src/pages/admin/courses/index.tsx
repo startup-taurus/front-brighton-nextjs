@@ -13,8 +13,13 @@ import {
 import { getAllCourses } from '../../../../helper/api-data/course';
 import useSWR, { mutate } from 'swr';
 import { SelectOption } from 'Types/SelectType';
+import usePermission from '../../../../hooks/usePermission';
+import { PERMISSIONS } from '../../../../utils/permissions';
+import { APP_PATHS } from 'utils/constants';
+import { useRouter } from 'next/router';
 
 const Students = () => {
+  const router = useRouter();
   const limit = 10;
   const [page, setPage] = useState(1);
   const [isOpenModal, setIsOpenModal] = useState(false);
@@ -171,6 +176,15 @@ const Students = () => {
     },
   ];
 
+  const { canPermission, permissionSet } = usePermission();
+  const canCreateCourse = canPermission(PERMISSIONS.CREATE_COURSE);
+  const canViewCourses = canPermission(PERMISSIONS.VIEW_COURSES);
+  useEffect(() => {
+    if (permissionSet && !canViewCourses) {
+      router.replace(APP_PATHS.DASHBOARD);
+    }
+  }, [permissionSet, canViewCourses, router]);
+
   return (
     <div className='page-body'>
       <Container
@@ -185,10 +199,14 @@ const Students = () => {
             <CardHeader className='d-flex justify-content-end'>
               <TableHeaderActions
                 onReload={handleReload}
-                addButton={{
-                  title: 'Create Course',
-                  onClick: () => toggle(),
-                }}
+                addButton={
+                  canCreateCourse
+                    ? {
+                        title: 'Create Course',
+                        onClick: () => toggle(),
+                      }
+                    : undefined
+                }
               />
             </CardHeader>
             <div className='pb-4'>

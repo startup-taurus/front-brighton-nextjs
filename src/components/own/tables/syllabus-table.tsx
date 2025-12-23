@@ -7,6 +7,8 @@ import SyllabusItemsModal from '../form/syllabus-item';
 import TableActionButtons from '../table-action-buttons/table-action-buttons';
 import SyllabusForm from '../form/syllabus-form';
 import TableSkeleton from '../common/table-skeleton/TableSkeleton';
+import usePermission from '../../../../hooks/usePermission';
+import { PERMISSIONS } from '../../../../utils/permissions';
 
 const SyllabusTable = ({
   syllabuses,
@@ -97,22 +99,32 @@ const SyllabusTable = ({
 
   if (!finalSyllabusData?.data?.results) return null;
 
+  const { canPermission } = usePermission();
+  const canView = canPermission(PERMISSIONS.VIEW_SYLLABUS);
+  const canEdit = canPermission(PERMISSIONS.EDIT_SYLLABUS);
+  const canCopy = canPermission(PERMISSIONS.DUPLICATE_SYLLABUS);
+  const showActions = canView || canEdit || canCopy;
+
   const columns = [
     {
-      name: 'Actions',
-      cell: (row: any) => (
-        <TableActionButtons
-          onView={() => toggle(row)}
-          onEdit={() => toggleDetail(row)}
-          onCopy={() => handleCopy(row)}
-          module={'Syllabus'}
-        />
-      ),
-      width: '220px',
-      minWidth: '220px',
-      maxWidth: '220px',
-      sortable: false,
-      center: true,
+      ...(showActions
+        ? {
+            name: 'Actions',
+            cell: (row: any) => (
+              <TableActionButtons
+                onView={canView ? () => toggle(row) : undefined}
+                onEdit={canEdit ? () => toggleDetail(row) : undefined}
+                onCopy={canCopy ? () => handleCopy(row) : undefined}
+                module={'Syllabus'}
+              />
+            ),
+            width: '220px',
+            minWidth: '220px',
+            maxWidth: '220px',
+            sortable: false,
+            center: true,
+          }
+        : {}),
     },
     {
       name: 'Syllabus Name',

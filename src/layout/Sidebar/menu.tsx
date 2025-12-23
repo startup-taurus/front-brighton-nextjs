@@ -129,6 +129,15 @@ export const AdminMenuList: sidebarMenuType[] = [
         path: 'dashboard',
       },
       {
+        title: 'Professors View',
+        id: 2,
+        pathSlice: 'coodinator/teachers',
+        type: 'link',
+        icon: 'task',
+        badge: 'badge badge-light-primary',
+        path: 'coordinator/professors',
+      },
+      {
         title: 'Students',
         id: 4,
         pathSlice: 'admin/students',

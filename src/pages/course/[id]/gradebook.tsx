@@ -19,7 +19,7 @@ import { getFinalPercentageBySyllabusId } from '../../../../helper/api-data/syll
 import useFilteredGradingItems from '../../../../hooks/useFilteredGradingItems';
 import { decrypt } from 'utils/encryption';
 import { UserContext } from 'helper/User';
-import { USER_TYPES, COURSE_TAB_NAMES } from 'utils/constants';
+import { USER_TYPES, COURSE_TAB_NAMES, APP_PATHS } from 'utils/constants';
 import usePermission from '../../../../hooks/usePermission';
 import { PERMISSIONS } from '../../../../utils/permissions';
 
@@ -86,10 +86,10 @@ const Gradebook: NextPageWithLayout = () => {
 
 
   useEffect(() => {
-    if ((userRole || permissionSet) && !canViewGradebook) {
-      router.replace('/dashboard');
+    if (permissionSet && !canViewGradebook) {
+      router.replace(APP_PATHS.DASHBOARD);
     }
-  }, [canViewGradebook, router, userRole, permissionSet]);
+  }, [canViewGradebook, router, permissionSet]);
 
   if (!userRole && !permissionSet) return null;
   if (!canViewGradebook) return null;

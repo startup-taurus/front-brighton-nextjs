@@ -30,6 +30,7 @@ import {
 import Swal from "sweetalert2";
 import { Role } from "./Constant";
 import { CalendarEvent, Course } from "Types/CalendarTypes";
+import { PERMISSIONS } from "./permissions";
 
 export const isBrowser = () => typeof window !== "undefined";
 
@@ -39,6 +40,31 @@ export const handleError = (
   stopRedirect?: boolean
 ) => {
   if (e?.response?.status === 403 && isBrowser()) {
+    const requestUrl: string =
+      (e?.config?.url || e?.response?.config?.url || e?.request?.responseURL || '');
+    const requiredPermission =
+      requestUrl.includes('/course/')
+        ? PERMISSIONS.VIEW_COURSES
+        : requestUrl.includes('/professor/')
+        ? PERMISSIONS.VIEW_TEACHERS
+        : requestUrl.includes('/attendance/')
+        ? PERMISSIONS.VIEW_ATTENDANCE
+        : requestUrl.includes('/syllabus/')
+        ? PERMISSIONS.VIEW_SYLLABUS
+        : requestUrl.includes('/user/')
+        ? PERMISSIONS.VIEW_USERS
+        : requestUrl.includes('/holidays/')
+        ? PERMISSIONS.VIEW_HOLIDAYS
+        : null;
+
+    try {
+      const permsStr = localStorage.getItem('permissions');
+      const perms = permsStr ? JSON.parse(permsStr) : [];
+      if (requiredPermission && Array.isArray(perms) && perms.includes(requiredPermission)) {
+        return e;
+      }
+    } catch {}
+
     const errorMessage = e?.response?.data?.message;
     if (
       errorMessage &&
@@ -54,7 +80,7 @@ export const handleError = (
       icon: "error",
       confirmButtonText: "OK",
     }).then(() => {
-      window.location.href = "/teachers";
+      window.location.href = "/dashboard";
     });
     return e; 
   }

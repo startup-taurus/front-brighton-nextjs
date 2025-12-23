@@ -20,9 +20,9 @@ type menuListType = {
 };
 const Menulist = ({setActive,handleActive,active,MENUITEMS,level,activeLink,setActiveLink}: menuListType) => {
   const { pinedMenu, setPinedMenu } = useContext(layoutContext);
-  const { canPermission } = usePermission();
+  const { canPermission, userRole } = usePermission();
   const REQUIRED: Record<string, string> = {
-    Dashboard: PERMISSIONS.VIEW_DASHBOARD,
+    'Professors View': PERMISSIONS.VIEW_TEACHERS,
     Students: PERMISSIONS.VIEW_STUDENTS,
     TransferStudents: PERMISSIONS.VIEW_TRANSFER_STUDENTS,
     Syllabus: PERMISSIONS.VIEW_SYLLABUS,
@@ -46,6 +46,9 @@ const Menulist = ({setActive,handleActive,active,MENUITEMS,level,activeLink,setA
   return (
     <>
       {MENUITEMS.filter((item) => {
+        if (item.title === 'User Management') {
+          return userRole === 'admin_staff';
+        }
         const req = item.title ? REQUIRED[item.title] : undefined;
         return !req || canPermission(req);
       }).map((item, i) => (
