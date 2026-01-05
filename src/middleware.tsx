@@ -92,10 +92,12 @@ export function middleware(request: NextRequest) {
       .join("|")})`
   );
 
+  const professorIdQuery = request.nextUrl.searchParams.get('professorId');
   if (
     pathTeacherRegex.test(path) &&
     user &&
-    user?.role_id !== 2
+    user?.role_id !== 2 &&
+    !professorIdQuery
   ) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }

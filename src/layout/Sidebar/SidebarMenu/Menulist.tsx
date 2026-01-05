@@ -22,7 +22,7 @@ const Menulist = ({setActive,handleActive,active,MENUITEMS,level,activeLink,setA
   const { pinedMenu, setPinedMenu } = useContext(layoutContext);
   const { canPermission, userRole } = usePermission();
   const REQUIRED: Record<string, string> = {
-    'Professors View': PERMISSIONS.VIEW_TEACHERS,
+    ProfessorsView: PERMISSIONS.VIEW_TEACHERS,
     Students: PERMISSIONS.VIEW_STUDENTS,
     TransferStudents: PERMISSIONS.VIEW_TRANSFER_STUDENTS,
     Syllabus: PERMISSIONS.VIEW_SYLLABUS,
@@ -49,11 +49,11 @@ const Menulist = ({setActive,handleActive,active,MENUITEMS,level,activeLink,setA
         if (item.title === 'User Management') {
           return userRole === 'admin_staff';
         }
-        const req = item.title ? REQUIRED[item.title] : undefined;
+        const reqKey = (item.title || '').replace(/\s+/g, '');
+        const req = reqKey ? REQUIRED[reqKey] : undefined;
         return !req || canPermission(req);
       }).map((item, i) => (
         <li key={i} className={`${pinedMenu.includes(item.title || "") ? "pined" : ""} ${level == 0 ? "sidebar-list" : ""}  `} >
-          {/*{level === 0 && ( <i className="fa fa-thumb-tack" onClick={() => handlePined(item.title)}></i>)}*/}
           <a
             style={{ cursor: "pointer" }}
             className={

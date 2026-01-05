@@ -4,18 +4,21 @@ import DataTable from 'react-data-table-component';
 import TableSkeleton from '@/components/own/common/table-skeleton/TableSkeleton';
 import { CommonHeader } from '@/components/Dashboard/SchoolManagenement/AcademicPerformance/CommonHeader';
 import { getConsecutiveAbsencesReport } from 'helper/api-data/attendance';
-import { Badge } from 'reactstrap';
 import { AbsenceReportData } from '../../../../Types/ReportTypes';
 import useSWR from 'swr';
+import usePermission from '../../../../hooks/usePermission';
+import { PERMISSIONS } from '../../../../utils/permissions';
 
 const AbsenceReportTable: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage, setPerPage] = useState(10);
-  
+  const { canPermission, permissionSet } = usePermission();
+  const canViewConsecutiveAbsencesReport = !!permissionSet && canPermission(PERMISSIONS.VIEW_DASHBOARD_CONSECUTIVE_ABSENCES_REPORT);
   const { data: reportData, error, isLoading } = useSWR<AbsenceReportData[]>(
-    '/attendance/consecutive-absences-report',
+    canViewConsecutiveAbsencesReport ? '/attendance/consecutive-absences-report' : null,
     getConsecutiveAbsencesReport
   );
+  if (!canViewConsecutiveAbsencesReport) return null;
 
   const getBadgeStyle = (absences: number) => {
     if (absences >= 5) {
