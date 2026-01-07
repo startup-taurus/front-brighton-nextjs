@@ -44,11 +44,7 @@ const Holidays = () => {
     mutate([`/holidays/get-all`, page, rowPerPage]);
   };
 
-  useEffect(() => {
-    if (permissionSet && !canViewHolidays) {
-      router.replace(APP_PATHS.DASHBOARD);
-    }
-  }, [permissionSet, canViewHolidays, router]);
+  useEffect(() => {}, [permissionSet, canViewHolidays, router]);
 
   return (
     <div className='page-body'>

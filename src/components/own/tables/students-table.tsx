@@ -32,7 +32,8 @@ const StudentsTable = ({
   const canView = canPermission(PERMISSIONS.VIEW_STUDENTS);
   const canEdit = canPermission(PERMISSIONS.EDIT_STUDENT);
   const canDelete = canPermission(PERMISSIONS.DELETE_STUDENT);
-  const showActions = canView || canEdit || canDelete;
+  const canBlock = canPermission(PERMISSIONS.TOGGLE_STUDENT_STATUS);
+  const showActions = canView || canEdit || canDelete || canBlock;
 
   const clearSelections = () => {
     setToggleClearRows((prev) => !prev);
@@ -153,7 +154,7 @@ const StudentsTable = ({
                 <div className='d-flex align-items-center gap-2 justify-content-end'>
                   <TableActionButtons
                     onView={canView ? () => toggleDetail(row) : undefined}
-                    onBlock={canEdit ? () => handleAlert(row) : undefined}
+                    onBlock={canBlock ? () => handleAlert(row) : undefined}
                     onEdit={canEdit ? () => toggle(row) : undefined}
                     onDelete={canDelete ? () => handleDeleteAlert(row) : undefined}
                     status={row.status === 'active' ? false : true}

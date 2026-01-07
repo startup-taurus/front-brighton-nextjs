@@ -6,29 +6,8 @@ const teacherPaths = [
   "/teachers/faq",
 ];
 
-const adminOnlyPaths = [
-  "/admin/transfer-students",
-  "/admin/users",
-  "/admin/dashboard",
-  "/admin/students",
-  "/admin/syllabus",
-  "/admin/teachers",
-];
-
-const coordinatorPaths = [
-  "/coordinator/faq",
-  "/coordinator/professors",
-];
-
-const receptionistRestrictedPaths = [
-  "/admin/users",
-  "/admin/roles-permissions",
-];
-
-const coordinatorRestrictedPaths = [
-  "/admin/users",
-  "/admin/roles-permissions",
-];
+const adminOnlyPaths: string[] = [];
+const coordinatorPaths: string[] = [];
 
 export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
@@ -63,11 +42,9 @@ export function middleware(request: NextRequest) {
   }
 
   if (user?.role_id === 2 && adminOnlyPaths.some(adminPath => path.startsWith(adminPath))) {
-    return NextResponse.redirect(new URL("/teachers", request.url));
   }
 
   if (user?.role_id === 2 && coordinatorPaths.some(coordinatorPath => path.startsWith(coordinatorPath))) {
-    return NextResponse.redirect(new URL("/teachers", request.url));
   }
 
   if (user?.role_id === 2) {
@@ -78,13 +55,7 @@ export function middleware(request: NextRequest) {
     }
   }
 
-  if (user?.role_id === 5 && coordinatorRestrictedPaths.some(restrictedPath => path.startsWith(restrictedPath))) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
-  }
-
-  if (user?.role_id === 6 && receptionistRestrictedPaths.some(restrictedPath => path.startsWith(restrictedPath))) {
-    return NextResponse.redirect(new URL("/dashboard", request.url));
-  }
+  
 
   const pathTeacherRegex = new RegExp(
     `^(${teacherPaths
@@ -102,16 +73,7 @@ export function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
-  if (
-    new RegExp(`^(/dashboard|/admin(\\/.*)?)$`).test(path) &&
-    user &&
-    user?.role_id !== 1 &&
-    user?.role_id !== 5 &&
-    user?.role_id !== 4 &&
-    user?.role_id !== 6
-  ) {
-    return NextResponse.redirect(new URL("/teachers", request.url));
-  }
+  
 
   return NextResponse.next();
 }

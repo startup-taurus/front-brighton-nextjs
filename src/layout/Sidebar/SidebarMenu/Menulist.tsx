@@ -30,6 +30,7 @@ const Menulist = ({setActive,handleActive,active,MENUITEMS,level,activeLink,setA
     Professors: PERMISSIONS.VIEW_TEACHERS,
     Holidays: PERMISSIONS.VIEW_HOLIDAYS,
     Users: PERMISSIONS.VIEW_USERS,
+    RolesAndPermissions: PERMISSIONS.VIEW_USERS,
   };
   const handlePined = (value: string | undefined) => {
     if (!pinedMenu.includes(value || "")) {
@@ -47,7 +48,7 @@ const Menulist = ({setActive,handleActive,active,MENUITEMS,level,activeLink,setA
     <>
       {MENUITEMS.filter((item) => {
         if (item.title === 'User Management') {
-          return userRole === 'admin_staff';
+          return canPermission(PERMISSIONS.VIEW_USERS);
         }
         const reqKey = (item.title || '').replace(/\s+/g, '');
         const req = reqKey ? REQUIRED[reqKey] : undefined;

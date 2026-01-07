@@ -337,16 +337,17 @@ const CoursesTable = ({ reload, loading }: any) => {
       cell: (row: any) => {
         const transferred = isCourseTransferred(row);
         const canEdit = canPermission(PERMISSIONS.EDIT_COURSE);
+        const canBlock = canPermission(PERMISSIONS.TOGGLE_COURSE_STATUS);
         const canAttendance = canPermission(PERMISSIONS.VIEW_ATTENDANCE);
         const canGradebook = canPermission(PERMISSIONS.VIEW_GRADEBOOK);
         const canTransfer = canPermission(PERMISSIONS.TRANSFER_COURSE);
         const showActions =
-          canEdit || canAttendance || (transferred && canGradebook) || canTransfer;
+          canEdit || canBlock || canAttendance || (transferred && canGradebook) || canTransfer;
         return (
           showActions ? (
             <TableActionButtons
               onEdit={canEdit && !transferred ? () => toggle(row) : undefined}
-              onBlock={canEdit && !transferred ? () => handleAlert(row) : undefined}
+              onBlock={canBlock && !transferred ? () => handleAlert(row) : undefined}
               onAttendance={canAttendance ? () => handleAttendance(row) : undefined}
               onGradebook={canGradebook && transferred && user?.role !== USER_TYPES.ADMIN ? () => handleGradebook(row) : undefined}
               onTransfer={

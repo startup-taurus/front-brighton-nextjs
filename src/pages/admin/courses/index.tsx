@@ -179,11 +179,7 @@ const Students = () => {
   const { canPermission, permissionSet } = usePermission();
   const canCreateCourse = canPermission(PERMISSIONS.CREATE_COURSE);
   const canViewCourses = canPermission(PERMISSIONS.VIEW_COURSES);
-  useEffect(() => {
-    if (permissionSet && !canViewCourses) {
-      router.replace(APP_PATHS.DASHBOARD);
-    }
-  }, [permissionSet, canViewCourses, router]);
+  useEffect(() => {}, [permissionSet, canViewCourses, router]);
 
   return (
     <div className='page-body'>

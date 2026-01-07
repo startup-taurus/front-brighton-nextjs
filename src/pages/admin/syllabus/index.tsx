@@ -112,11 +112,8 @@ const Syllabus = () => {
   const { canPermission, permissionSet } = usePermission();
   const canCreateSyllabus = canPermission(PERMISSIONS.CREATE_SYLLABUS);
   const canViewSyllabus = canPermission(PERMISSIONS.VIEW_SYLLABUS);
-  useEffect(() => {
-    if (permissionSet && !canViewSyllabus) {
-      router.replace(APP_PATHS.DASHBOARD);
-    }
-  }, [permissionSet, canViewSyllabus, router]);
+  
+  useEffect(() => {}, [permissionSet, canViewSyllabus, router]);
 
   return (
     <div className='page-body'>

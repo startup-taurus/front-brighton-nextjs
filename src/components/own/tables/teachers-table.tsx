@@ -26,7 +26,8 @@ const TeachersTable = ({reload}: any) => {
   const { canPermission } = usePermission();
   const canEdit = canPermission(PERMISSIONS.EDIT_TEACHER);
   const canDelete = canPermission(PERMISSIONS.DELETE_TEACHER);
-  const showActions = canEdit || canDelete;
+  const canBlock = canPermission(PERMISSIONS.TOGGLE_TEACHER_STATUS);
+  const showActions = canEdit || canDelete || canBlock;
 
   const toggle = (data: any, forceUpdate = false) => {
     setSelectedData(data);
@@ -101,7 +102,7 @@ const TeachersTable = ({reload}: any) => {
             name: 'Actions',
             cell: (row: any) => (
               <TableActionButtons
-                onBlock={canEdit ? () => handleAlert(row) : undefined}
+                onBlock={canBlock ? () => handleAlert(row) : undefined}
                 onEdit={canEdit ? () => toggle(row) : undefined}
                 status={row.status === 'active' ? false : true}
                 module={'Professors'}

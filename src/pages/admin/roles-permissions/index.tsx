@@ -24,12 +24,22 @@ import {
 } from '../../../../utils/constants';
 import {FiltersProps} from '../../../../Types/types';
 import {getFiltersString} from '../../../../utils/utils';
+import usePermission from '../../../../hooks/usePermission';
+import { PERMISSIONS } from '../../../../utils/permissions';
+import { APP_PATHS } from 'utils/constants';
 
 const PageRolesPermissions = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [editingRole, setEditingRole] = useState<string | null>(null);
   const [isReloading, setIsReloading] = useState(false);
   const router = useRouter();
+  const { canPermission, permissionSet } = usePermission();
+  const canViewUsers = canPermission(PERMISSIONS.VIEW_USERS);
+  useEffect(() => {
+    if (permissionSet && !canViewUsers) {
+      router.replace(APP_PATHS.DASHBOARD);
+    }
+  }, [permissionSet, canViewUsers, router]);
 
   const filters = getFiltersString(router);
   const {

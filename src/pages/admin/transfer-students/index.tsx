@@ -7,7 +7,7 @@ import TableFilters from '@/components/own/table-filters/table-filters';
 import { FiltersProps } from '../../../../Types/types';
 import { getAllLevels } from '../../../../helper/api-data/level';
 import { getActiveCourses } from '../../../../helper/api-data/course';
-import { STATUS_LEVEL_CHANGE, USER_TYPES } from '../../../../utils/constants';
+import { APP_PATHS, STATUS_LEVEL_CHANGE, USER_TYPES } from '../../../../utils/constants';
 import StudentTransferForm from '@/components/own/form/student-transfer-form';
 import TransferStudentsTable from '@/components/own/tables/transfer-students-table';
 import StudentSelectorModal, {
@@ -17,7 +17,7 @@ import { getUserRoleFromLocalStorage } from 'utils/auth';
 import { SelectOption } from 'Types/SelectType';
 import usePermission from '../../../../hooks/usePermission';
 import { PERMISSIONS } from '../../../../utils/permissions';
-import { APP_PATHS } from 'utils/constants';
+ 
 
 const TransferStudents = () => {
   const router = useRouter();

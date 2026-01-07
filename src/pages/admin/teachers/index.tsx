@@ -87,11 +87,8 @@ const Teachers = () => {
   const { canPermission, permissionSet } = usePermission();
   const canCreateTeacher = canPermission(PERMISSIONS.CREATE_TEACHER);
   const canViewTeachers = canPermission(PERMISSIONS.VIEW_TEACHERS);
-  useEffect(() => {
-    if (permissionSet && !canViewTeachers) {
-      router.replace(APP_PATHS.DASHBOARD);
-    }
-  }, [permissionSet, canViewTeachers, router]);
+  
+  useEffect(() => {}, [permissionSet, canViewTeachers, router]);
 
   const selectFilters: FiltersProps[] = [
     {
