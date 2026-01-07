@@ -21,12 +21,16 @@ import {toast} from 'react-toastify';
 import Swal from 'sweetalert2';
 import {PRIVATE_COURSE_TYPES, CONFLICT_TYPES, ConflictType, STATUS, COURSE_TYPES} from '../../../../utils/constants';
 import { formatScheduleLinear, scanScheduleConflicts } from '../../../../utils/utils';
+import usePermission from 'hooks/usePermission';
+import { PERMISSIONS } from 'utils/permissions';
 const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const CourseForm = ({data, isOpen, toggle, onSuccess, isTransferMode = false, transferInfo, isDuplicateMode = false, duplicateInfo}: any) => {
   const limit = 1000;
   const page = 1;
   const [searchTermSyllabus, setSearchTermSyllabus] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const { canPermission } = usePermission();
+  const canToggleStatus = canPermission(PERMISSIONS.TOGGLE_COURSE_STATUS);
 
   const validateScheduleConflicts = async (courseData: any) => {
     try {
@@ -424,7 +428,7 @@ const CourseForm = ({data, isOpen, toggle, onSuccess, isTransferMode = false, tr
                   }
                 >
                   <Label for='status'>Status</Label>
-                  <Field name='status' as={Input} type='select'>
+                  <Field name='status' as={Input} type='select' disabled={!canToggleStatus}>
                     <option value='' disabled>
                       Select course status
                     </option>

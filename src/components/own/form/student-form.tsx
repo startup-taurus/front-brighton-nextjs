@@ -21,6 +21,8 @@ import { toast } from 'react-toastify';
 import * as Yup from 'yup';
 import { parse } from 'date-fns';
 import { DATA_TYPE } from 'utils/constants';
+import usePermission from 'hooks/usePermission';
+import { PERMISSIONS } from 'utils/permissions';
 
 const validations = Yup.object().shape({
   first_name: Yup.string().required('The first name is required'),
@@ -94,6 +96,8 @@ const StudentForm = ({
   const [courseOptions, setCourseOptions] = useState<any[]>([]);
   const [levelOptions, setLevelOptions] = useState<any[]>([]);
   const [levelSearchTerm, setLevelSearchTerm] = useState('');
+  const { canPermission } = usePermission();
+  const canToggleStatus = canPermission(PERMISSIONS.TOGGLE_STUDENT_STATUS);
 const { data: course } = useSWR(
   ['/course/get-active', coursePage, limit, searchTerm],
   () => getActiveCourses(coursePage, limit, searchTerm)
@@ -639,6 +643,7 @@ const { data: levels } = useSWR(
                       type='select'
                       id='studentFilter'
                       invalid={touched.status && !!errors.status}
+                      disabled={!canToggleStatus}
                     >
                       <option
                         value=''
@@ -802,7 +807,7 @@ const { data: levels } = useSWR(
                     className='d-flex justify-content-end mt-5'
                   >
                     <Button
-                      color='cancel'
+                      color='danger'
                       onClick={toggle}
                     >
                       Close

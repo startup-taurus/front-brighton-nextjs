@@ -20,9 +20,13 @@ import { USER_ROLES } from '../../../../utils/constants';
 import { validateEmailFormat } from '../../../../utils/utils';
 import { ImgPath, UrlImage } from 'utils/Constant';
 import { mutate } from 'swr';
+import usePermission from 'hooks/usePermission';
+import { PERMISSIONS } from 'utils/permissions';
 
 const UserForm = ({ data, isOpen, toggle }: any) => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const { canPermission } = usePermission();
+  const canToggleStatus = canPermission(PERMISSIONS.TOGGLE_USER_STATUS);
 
   useEffect(() => {
     if (data && data.image) {
@@ -316,6 +320,7 @@ const validations = Yup.object().shape({
                     name='status'
                     as={Input}
                     type='select'
+                    disabled={!canToggleStatus}
                   >
                     <option
                       value=''
@@ -336,7 +341,7 @@ const validations = Yup.object().shape({
                   className='d-flex justify-content-end mt-5'
                 >
                   <Button
-                    color='cancel'
+                    color='danger'
                     onClick={toggle}
                   >
                     Close

@@ -147,7 +147,7 @@ const HolidayForm = ({data, isOpen, toggle, onReload}: any) => {
                   <ErrorMessage name='status' component={FormFeedback} />
                 </Col>
                 <Col xs={12} className='d-flex justify-content-end mt-5'>
-                  <Button color='cancel' onClick={toggle}>
+                  <Button color='danger' onClick={toggle}>
                     Close
                   </Button>
                   &nbsp; &nbsp;

@@ -19,9 +19,13 @@ import LoadingButton from '../common/loading-button/LoadingButton';
 import { createProfessor, updateProfessor } from 'helper/api-data/professor';
 import { ImgPath, UrlImage } from 'utils/Constant';
 import { validateEmailFormat } from '../../../../utils/utils';
+import usePermission from 'hooks/usePermission';
+import { PERMISSIONS } from 'utils/permissions';
 
 const TeacherForm = ({ data, isOpen, toggle, onReload }: any) => {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const { canPermission } = usePermission();
+  const canToggleStatus = canPermission(PERMISSIONS.TOGGLE_TEACHER_STATUS);
 
   useEffect(() => {
     if (data && data.user?.image) {
@@ -275,6 +279,7 @@ const update = async (values: any) => {
                     name='status'
                     as={Input}
                     type='select'
+                    disabled={!canToggleStatus}
                   >
                     <option
                       value=''
@@ -344,7 +349,7 @@ const update = async (values: any) => {
                   className='d-flex justify-content-end mt-5'
                 >
                   <Button
-                    color='cancel'
+                    color='danger'
                     onClick={toggle}
                   >
                     Close

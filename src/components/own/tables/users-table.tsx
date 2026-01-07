@@ -129,7 +129,8 @@ const UsersTable = ({
 
   const canEditUser = canPermission(PERMISSIONS.EDIT_USER);
   const canActivateUser = canPermission(PERMISSIONS.ACTIVATE_USER);
-  const showActions = canEditUser || canActivateUser;
+  const canBlockUser = canPermission(PERMISSIONS.TOGGLE_USER_STATUS);
+  const showActions = canEditUser || canActivateUser || canBlockUser;
 
   const columns = [
     {
@@ -139,11 +140,7 @@ const UsersTable = ({
             cell: (row: any) => (
               <TableActionButtons
                 onEdit={canEditUser ? () => toggle(row) : undefined}
-                onBlock={
-                  canEditUser && canActivateUser
-                    ? () => handleAlert(row)
-                    : undefined
-                }
+                onBlock={canBlockUser ? () => handleAlert(row) : undefined}
                 onActivate={
                   canActivateUser &&
                   row.status === 'inactive' &&
