@@ -1,5 +1,5 @@
 import { getFetcher } from '../api';
-import { patchFetcher } from '../api';
+import { putFetcher } from '../api';
 import { postFetcher } from '../api';
 
 export const getRoles = () => {
@@ -15,7 +15,7 @@ export const getPermissionsByRole = (role: string) => {
 };
 
 export const updatePermissionsByRole = (role: string, permissions: string[]) => {
-  return patchFetcher(`/permissions/by-role/${role}`, { permissions });
+  return putFetcher(`/permissions/by-role/${role}`, { permissions });
 };
 
 export const syncPermissionsCatalog = () => {

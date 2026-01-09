@@ -81,6 +81,7 @@ const RolePermissionsForm = ({ isOpen, toggle, onSubmit, data, readOnly = false 
       'view_holidays',
       'view_cancelled_lessons',
       'create_cancelled_lesson',
+      'delete_cancelled_lesson',
       'view_student_reports',
       'create_student_report',
       'edit_student_report',
