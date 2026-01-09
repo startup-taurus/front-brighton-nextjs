@@ -127,31 +127,38 @@ const UsersTable = ({
 
   if (!users?.data?.result) return null;
 
+  const canEditUser = canPermission(PERMISSIONS.EDIT_USER);
+  const canActivateUser = canPermission(PERMISSIONS.ACTIVATE_USER);
+  const canBlockUser = canPermission(PERMISSIONS.TOGGLE_USER_STATUS);
+  const showActions = canEditUser || canActivateUser || canBlockUser;
+
   const columns = [
     {
-      name: 'Actions',
-      cell: (row: any) => (
-        <TableActionButtons
-          onEdit={canPermission(PERMISSIONS.EDIT_USER) ? () => toggle(row) : undefined}
-          onBlock={
-            canPermission(PERMISSIONS.EDIT_USER) && canPermission(PERMISSIONS.ACTIVATE_USER)
-              ? () => handleAlert(row)
-              : undefined
+      ...(showActions
+        ? {
+            name: 'Actions',
+            cell: (row: any) => (
+              <TableActionButtons
+                onEdit={canEditUser ? () => toggle(row) : undefined}
+                onBlock={canBlockUser ? () => handleAlert(row) : undefined}
+                onActivate={
+                  canActivateUser &&
+                  row.status === 'inactive' &&
+                  (row.failed_attempts ?? 0) >= 5
+                    ? () => activateUser(row)
+                    : undefined
+                }
+                status={row.status === 'active' ? false : true}
+                module={'Users'}
+              />
+            ),
+            width: '200px',
+            minWidth: '200px',
+            maxWidth: '200px',
+            sortable: false,
+            center: true,
           }
-          onActivate={
-            canPermission(PERMISSIONS.ACTIVATE_USER) && row.status === 'inactive' && (row.failed_attempts ?? 0) >= 5
-              ? () => activateUser(row)
-              : undefined
-          }
-          status={row.status === 'active' ? false : true}
-          module={'Users'}
-        />
-      ),
-      width: '200px',
-      minWidth: '200px',
-      maxWidth: '200px',
-      sortable: false,
-      center: true,
+        : {}),
     },
     {
       name: 'Names',

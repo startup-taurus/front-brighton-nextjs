@@ -1,16 +1,20 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import TableHeaderActions from '@/components/own/table-header-actions/table-header-actions';
+import { useRouter } from 'next/router';
+import useSWR, { mutate } from 'swr';
 import { Card, CardHeader, Container, Row } from 'reactstrap';
+
+import TableHeaderActions from '@/components/own/table-header-actions/table-header-actions';
 import UsersTable from '@/components/own/tables/users-table';
 import UserForm from '@/components/own/form/user-form';
-import { FiltersProps } from '../../../../Types/types';
-import { STATUS_FILTER, USER_ROLES } from '../../../../utils/constants';
 import TableFilters from '@/components/own/table-filters/table-filters';
-import { getAllUsers } from '../../../../helper/api-data/user';
-import useSWR, { mutate } from 'swr';
+import { FiltersProps } from '../../../../Types/types';
 import { SelectOption } from 'Types/SelectType';
-import { useRouter } from 'next/router';
+import usePermission from '../../../../hooks/usePermission';
+import { PERMISSIONS } from '../../../../utils/permissions';
+import { STATUS_FILTER, USER_ROLES } from '../../../../utils/constants';
+import { APP_PATHS } from 'utils/constants';
 import { getFiltersString } from '../../../../utils/utils';
+import { getAllUsers } from '../../../../helper/api-data/user';
 
 const Users = () => {
   const router = useRouter();
@@ -37,6 +41,15 @@ const Users = () => {
   const [userPage, setUserPage] = useState(1);
   const [loadingMoreUsers, setLoadingMoreUsers] = useState(false);
   const [hasMoreUsers, setHasMoreUsers] = useState(true);
+
+  const { canPermission, permissionSet } = usePermission();
+  const canCreateUser = canPermission(PERMISSIONS.CREATE_USER);
+  const canViewUsers = canPermission(PERMISSIONS.VIEW_USERS);
+  useEffect(() => {
+    if (permissionSet && !canViewUsers) {
+      router.replace(APP_PATHS.DASHBOARD);
+    }
+  }, [permissionSet, canViewUsers, router]);
 
   useEffect(() => {
     setUserOptions([]);
@@ -160,16 +173,16 @@ const Users = () => {
           <TableFilters selectFilters={selectFilters} />
         </Row>
         <Row>
-          <Card>
-            <CardHeader className='d-flex justify-content-end'>
-              <TableHeaderActions
-                onReload={handleReload}
-                addButton={{ title: 'Create User', onClick: toggle }}
-              />
-            </CardHeader>
-            <div className='pb-4'>
-              <UsersTable 
-                users={usersData}
+            <Card>
+              <CardHeader className='d-flex justify-content-end'>
+                <TableHeaderActions
+                  onReload={handleReload}
+                addButton={canCreateUser ? { title: 'Create User', onClick: toggle } : undefined}
+                />
+              </CardHeader>
+              <div className='pb-4'>
+                <UsersTable 
+                  users={usersData}
                 page={page}
                 rowPerPage={rowPerPage}
                 filters={filters}

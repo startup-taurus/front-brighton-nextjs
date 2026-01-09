@@ -1,4 +1,4 @@
-import { getFetcher, patchFetcher, postFetcher, putFetcher } from "../api";
+import { getFetcher, postFetcher, putFetcher } from "../api";
 
 export const getCancelledLessonsByCourse = (courseId: string) => {
   return getFetcher(`/cancelled-lesson/get-all-by-course/${courseId}`, false);
@@ -9,7 +9,7 @@ export const createCancelLesson = (data: any) => {
 };
 
 export const updateCancelLesson = (id: number, data: any) => {
-  return patchFetcher(`/cancelled-lesson/update/${id}`, data);
+  return putFetcher(`/cancelled-lesson/update/${id}`, data);
 };
 
 export const deleteCancelledLesson = (row: any) => {

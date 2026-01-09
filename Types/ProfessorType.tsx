@@ -5,6 +5,13 @@ export interface ProfessorData {
   totalStudents: number;
 }
 
+export interface PaginatedProfessors {
+  result: ProfessorData[];
+  totalCount: number;
+  page: number;
+  limit: number;
+}
+
 export interface StudentTransferData {
   id: number;
   selected_course_id: number;

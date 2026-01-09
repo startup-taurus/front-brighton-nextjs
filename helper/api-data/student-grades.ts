@@ -1,4 +1,4 @@
-import { getFetcher, patchFetcher } from "../api";
+import { getFetcher, putFetcher } from "../api";
 
 export const getGradesByCourse = (courseId: string) => {
   return getFetcher(`/student-grades/get-grades-by-course/${courseId}`, false);
@@ -15,5 +15,5 @@ export const getGradesByCourseAndStudent = (
 };
 
 export const updateStudentGrade = (data: any) => {
-  return patchFetcher(`/student-grades/update`, data);
+  return putFetcher(`/student-grades/update`, data);
 };

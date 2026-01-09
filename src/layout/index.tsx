@@ -64,7 +64,7 @@ const Layout = ({ children }: layoutProps) => {
       case USER_TYPES.ADMIN:
         return AdminMenuList;
       case USER_TYPES.RECEPTIONIST:
-        return ReceptionistMenuList;
+        return AdminMenuList;
       case USER_TYPES.PROFESSOR:
       default:
         return TeacherMenuList;

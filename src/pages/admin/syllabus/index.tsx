@@ -1,16 +1,20 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/router';
+import useSWR, { mutate } from 'swr';
 import { Card, CardHeader, Container, Row } from 'reactstrap';
+
 import SyllabusTable from '@/components/own/tables/syllabus-table';
 import TableHeaderActions from '@/components/own/table-header-actions/table-header-actions';
 import SyllabusForm from '@/components/own/form/syllabus-form';
-import { useRouter } from 'next/router';
-import { FiltersProps } from '../../../../Types/types';
 import TableFilters from '@/components/own/table-filters/table-filters';
+import { FiltersProps } from '../../../../Types/types';
+import { SelectOption } from 'Types/SelectType';
+import usePermission from '../../../../hooks/usePermission';
+import { PERMISSIONS } from '../../../../utils/permissions';
 import { getFiltersString } from '../../../../utils/utils';
-import useSWR, { mutate } from 'swr';
+import { APP_PATHS } from 'utils/constants';
 import { getAllSyllabus } from '../../../../helper/api-data/syllabus';
 import { getAllLevels } from '../../../../helper/api-data/level';
-import { SelectOption } from 'Types/SelectType';
 
 const Syllabus = () => {
   const router = useRouter();
@@ -106,6 +110,12 @@ const Syllabus = () => {
     ]);
   };
 
+  const { canPermission, permissionSet } = usePermission();
+  const canCreateSyllabus = canPermission(PERMISSIONS.CREATE_SYLLABUS);
+  const canViewSyllabus = canPermission(PERMISSIONS.VIEW_SYLLABUS);
+  
+  useEffect(() => {}, [permissionSet, canViewSyllabus, router]);
+
   return (
     <div className='page-body'>
       <Container
@@ -121,10 +131,14 @@ const Syllabus = () => {
               <div className='d-flex align-items-center'>
                 <TableHeaderActions
                   onReload={handleReload}
-                  addButton={{
-                    title: 'Create Syllabus',
-                    onClick: () => toggle(),
-                  }}
+                  addButton={
+                    canCreateSyllabus
+                      ? {
+                          title: 'Create Syllabus',
+                          onClick: () => toggle(),
+                        }
+                      : undefined
+                  }
                 />
               </div>
             </CardHeader>

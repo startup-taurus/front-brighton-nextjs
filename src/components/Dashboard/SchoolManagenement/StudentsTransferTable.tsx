@@ -9,22 +9,28 @@ import { ApiResponse } from '../../../../Types/ApiResponse';
 import useSWR from 'swr';
 import { useRouter } from 'next/router';
 import { setQueryStringValue, clearQueryString } from '../../../../utils/utils';
+import usePermission from '../../../../hooks/usePermission';
+import { PERMISSIONS } from '../../../../utils/permissions';
 
 const StudentTransferTable: React.FC = () => {
   const router = useRouter();
   const page = parseInt((router.query.transferPage as string) || '1', 10);
   const limit = parseInt((router.query.transferLimit as string) || '10', 10);
+  const { canPermission, permissionSet } = usePermission();
+  const canViewLastStudentTransfer = !!permissionSet && canPermission(PERMISSIONS.VIEW_DASHBOARD_LAST_STUDENT_TRANSFER);
 
-  const key = `/transfer/get-approved?page=${page}&limit=${limit}`;
+  const approvedTransfersKey = canViewLastStudentTransfer ? `/transfer/get-approved?page=${page}&limit=${limit}` : null;
   const { data: response, error } = useSWR<ApiResponse<{
     result: StudentTransferData[];
     totalCount: number;
     page: number;
     limit: number;
   }>>(
-    key,
+    approvedTransfersKey,
     () => getApprovedTransfers({ page, limit })
   );
+
+  if (!canViewLastStudentTransfer) return null;
 
   const isLoading = !response && !error;
   const allRows = response?.data?.result || [];

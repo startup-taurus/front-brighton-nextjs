@@ -42,11 +42,9 @@ const TeachersHolidays: NextPageWithLayout = () => {
   const [selectedData, setSelectedData] = useState(null);
   const { user } = useContext(UserContext);
   const { canPermission } = usePermission();
-  const isCoordinator = user?.role === USER_TYPES.COORDINATOR;
-  const isReceptionist = user?.role === USER_TYPES.RECEPTIONIST;
   const canCreateCancelled = canPermission(PERMISSIONS.CREATE_CANCELLED_LESSON);
   const canEditCancelled = canPermission(PERMISSIONS.EDIT_CANCELLED_LESSON);
-  const canDeleteCancelled = canPermission(PERMISSIONS.VIEW_CANCELLED_LESSONS);
+  const canDeleteCancelled = canPermission(PERMISSIONS.DELETE_CANCELLED_LESSON);
   const canViewHolidays = canPermission(PERMISSIONS.VIEW_HOLIDAYS);
 
   const courseDetail = useSWR(
@@ -101,7 +99,7 @@ const TeachersHolidays: NextPageWithLayout = () => {
   ];
 
   const toggleModal = () => {
-    if ((isCoordinator || isReceptionist) && !canCreateCancelled) {
+    if (!canCreateCancelled) {
       toast.error(
         'You do not have permission to create cancelled lessons'
       );
@@ -169,12 +167,12 @@ const TeachersHolidays: NextPageWithLayout = () => {
                 <h3>CANCELED LESSONS</h3>
                 <Button
                   onClick={toggleModal}
-                  disabled={(isCoordinator || isReceptionist) && !canCreateCancelled}
+                  disabled={!canCreateCancelled}
                 >
                   <FaPlus />
                 </Button>
               </div>
-              {(isCoordinator || isReceptionist) && (
+              {!canCreateCancelled && (
                 <Alert
                   color='warning'
                   className='mb-3'

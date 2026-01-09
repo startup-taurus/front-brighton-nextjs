@@ -15,6 +15,13 @@ const RolePermissionsForm = ({ isOpen, toggle, onSubmit, data, readOnly = false 
       transfer_student: 'Create Transfer Students',
       add_grades: 'Add Assignments',
     };
+    const toggleKeys = new Set([
+      'toggle_course_status',
+      'toggle_student_status',
+      'toggle_teacher_status',
+      'toggle_user_status',
+    ]);
+    if (toggleKeys.has(key)) return 'Block or enable status';
     if (overrides[key]) return overrides[key];
     return key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
   };
@@ -57,7 +64,6 @@ const RolePermissionsForm = ({ isOpen, toggle, onSubmit, data, readOnly = false 
     }
   };
 
-  const toggleAccordion = (_id: string) => {};
 
   const getVisiblePermsForModule = (roleName: string, module: string) => {
     const rn = String(roleName || '').trim().toLowerCase();
@@ -75,6 +81,7 @@ const RolePermissionsForm = ({ isOpen, toggle, onSubmit, data, readOnly = false 
       'view_holidays',
       'view_cancelled_lessons',
       'create_cancelled_lesson',
+      'delete_cancelled_lesson',
       'view_student_reports',
       'create_student_report',
       'edit_student_report',

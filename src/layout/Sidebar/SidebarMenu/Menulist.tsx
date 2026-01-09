@@ -20,9 +20,9 @@ type menuListType = {
 };
 const Menulist = ({setActive,handleActive,active,MENUITEMS,level,activeLink,setActiveLink}: menuListType) => {
   const { pinedMenu, setPinedMenu } = useContext(layoutContext);
-  const { canPermission } = usePermission();
+  const { canPermission, userRole } = usePermission();
   const REQUIRED: Record<string, string> = {
-    Dashboard: PERMISSIONS.VIEW_DASHBOARD,
+    ProfessorsView: PERMISSIONS.VIEW_TEACHERS,
     Students: PERMISSIONS.VIEW_STUDENTS,
     TransferStudents: PERMISSIONS.VIEW_TRANSFER_STUDENTS,
     Syllabus: PERMISSIONS.VIEW_SYLLABUS,
@@ -30,6 +30,7 @@ const Menulist = ({setActive,handleActive,active,MENUITEMS,level,activeLink,setA
     Professors: PERMISSIONS.VIEW_TEACHERS,
     Holidays: PERMISSIONS.VIEW_HOLIDAYS,
     Users: PERMISSIONS.VIEW_USERS,
+    RolesAndPermissions: PERMISSIONS.VIEW_USERS,
   };
   const handlePined = (value: string | undefined) => {
     if (!pinedMenu.includes(value || "")) {
@@ -46,11 +47,14 @@ const Menulist = ({setActive,handleActive,active,MENUITEMS,level,activeLink,setA
   return (
     <>
       {MENUITEMS.filter((item) => {
-        const req = item.title ? REQUIRED[item.title] : undefined;
+        if (item.title === 'User Management') {
+          return canPermission(PERMISSIONS.VIEW_USERS);
+        }
+        const reqKey = (item.title || '').replace(/\s+/g, '');
+        const req = reqKey ? REQUIRED[reqKey] : undefined;
         return !req || canPermission(req);
       }).map((item, i) => (
         <li key={i} className={`${pinedMenu.includes(item.title || "") ? "pined" : ""} ${level == 0 ? "sidebar-list" : ""}  `} >
-          {/*{level === 0 && ( <i className="fa fa-thumb-tack" onClick={() => handlePined(item.title)}></i>)}*/}
           <a
             style={{ cursor: "pointer" }}
             className={

@@ -7,11 +7,13 @@ import { UserContext } from 'helper/User';
 import useSWR from 'swr';
 import { getProfessorCourses } from 'helper/api-data/professor';
 import { TeacherCardProps } from 'Types/TeacherType';
-import { USER_TYPES } from 'utils/constants';
+import usePermission from '../../../../hooks/usePermission';
+import { PERMISSIONS } from '../../../../utils/permissions';
 
 const TeacherCard = ({ teacher }: TeacherCardProps) => {
   const router = useRouter();
   const { user } = useContext(UserContext);
+  const { canPermission, permissionSet } = usePermission();
 
   const { data: professorData } = useSWR(
     teacher.user?.id ? `professor/${teacher.user.id}/courses` : null,
@@ -29,10 +31,8 @@ const TeacherCard = ({ teacher }: TeacherCardProps) => {
       : teacher.courses;
 
   const handleViewDashboard = () => {
-    if (
-      (user?.role === USER_TYPES.COORDINATOR && teacher.user?.id) ||
-      (USER_TYPES.RECEPTIONIST && teacher.user?.id)
-    ) {
+    const canViewTeachers = !!permissionSet && canPermission(PERMISSIONS.VIEW_TEACHERS);
+    if (canViewTeachers && teacher.user?.id) {
       router.push({
         pathname: '/teachers',
         query: {

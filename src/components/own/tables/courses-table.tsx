@@ -20,10 +20,13 @@ import { getClassroomLabel } from '../../../../utils/courseUtils';
 import { FaCertificate, FaFileAlt } from 'react-icons/fa';
 import { generateBatchCertificatesZIP, generateBatchReportsZIP } from '../../../../utils/pdfGenerator';
 import { toast } from 'react-toastify';
+import usePermission from '../../../../hooks/usePermission';
+import { PERMISSIONS } from '../../../../utils/permissions';
 
 const CoursesTable = ({ reload, loading }: any) => {
   const router = useRouter();
   const { user } = useContext(UserContext);
+  const { canPermission, permissionSet } = usePermission();
   const [isOpen, setIsOpen] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
   const [selectedCourses, setSelectedCourses] = useState<any[]>([]);
@@ -333,19 +336,29 @@ const CoursesTable = ({ reload, loading }: any) => {
       name: 'Actions',
       cell: (row: any) => {
         const transferred = isCourseTransferred(row);
+        const canEdit = canPermission(PERMISSIONS.EDIT_COURSE);
+        const canBlock = canPermission(PERMISSIONS.TOGGLE_COURSE_STATUS);
+        const canAttendance = canPermission(PERMISSIONS.VIEW_ATTENDANCE);
+        const canGradebook = canPermission(PERMISSIONS.VIEW_GRADEBOOK);
+        const canTransfer = canPermission(PERMISSIONS.TRANSFER_COURSE);
+        const showActions =
+          canEdit || canBlock || canAttendance || (transferred && canGradebook) || canTransfer;
         return (
-          <TableActionButtons
-            onEdit={transferred ? undefined : () => toggle(row)}
-            onBlock={transferred ? undefined : () => handleAlert(row)}
-            onAttendance={user?.role !== USER_TYPES.ADMIN ? () => handleAttendance(row) : undefined}
-            onGradebook={transferred && user?.role !== USER_TYPES.ADMIN ? () => handleGradebook(row) : undefined}
-            onTransfer={
-              !transferred && isCourseCompleted(row) && hasActiveStudents(row)
-                ? () => handleTransferCourseWithStudents(row)
-                : undefined
-            }
-            stauts={row.status !== 'active'}
-          />
+          showActions ? (
+            <TableActionButtons
+              onEdit={canEdit && !transferred ? () => toggle(row) : undefined}
+              onBlock={canBlock && !transferred ? () => handleAlert(row) : undefined}
+              onAttendance={canAttendance ? () => handleAttendance(row) : undefined}
+              onGradebook={canGradebook && transferred && user?.role !== USER_TYPES.ADMIN ? () => handleGradebook(row) : undefined}
+              onTransfer={
+                canTransfer && !transferred && isCourseCompleted(row) && hasActiveStudents(row)
+                  ? () => handleTransferCourseWithStudents(row)
+                  : undefined
+              }
+              status={row.status !== 'active'}
+              module='Courses'
+            />
+          ) : null
         );
       },
       width: '200px',
@@ -400,7 +413,7 @@ const CoursesTable = ({ reload, loading }: any) => {
       selector: (row: any) => formatText(row.schedule),
       sortable: true,
     },
-  ], [user?.role, toggle, handleAlert, handleAttendance, handleTransferCourseWithStudents]);
+  ], [user?.role, toggle, handleAlert, handleAttendance, handleTransferCourseWithStudents, permissionSet]);
 
   const resetTransferModal = useCallback(() => {
     setIsTransferModalOpen(false);

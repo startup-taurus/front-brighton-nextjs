@@ -1,17 +1,20 @@
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
+import useSWR, { mutate } from 'swr';
+import { Card, CardHeader, Container, Row } from 'reactstrap';
+
 import TeacherForm from '@/components/own/form/teacher-form';
 import TableHeaderActions from '@/components/own/table-header-actions/table-header-actions';
 import TeachersTable from '@/components/own/tables/teachers-table';
-import React, { useState, useEffect } from 'react';
-import { Card, CardHeader, Container, Row } from 'reactstrap';
 import TableFilters from '@/components/own/table-filters/table-filters';
 import { FiltersProps } from '../../../../Types/types';
-import { STATUS_FILTER } from '../../../../utils/constants';
-import { useRouter } from 'next/router';
-import useSWR from 'swr';
-import { getAllProfessors } from '../../../../helper/api-data/professor';
 import { SelectOption } from 'Types/SelectType';
-import { mutate } from 'swr';
+import usePermission from '../../../../hooks/usePermission';
+import { PERMISSIONS } from '../../../../utils/permissions';
+import { STATUS_FILTER } from '../../../../utils/constants';
+import { APP_PATHS } from 'utils/constants';
 import { getFiltersString } from '../../../../utils/utils';
+import { getAllProfessors } from '../../../../helper/api-data/professor';
 
 const Teachers = () => {
   const limit = 10;
@@ -81,6 +84,12 @@ const Teachers = () => {
     );
   };
 
+  const { canPermission, permissionSet } = usePermission();
+  const canCreateTeacher = canPermission(PERMISSIONS.CREATE_TEACHER);
+  const canViewTeachers = canPermission(PERMISSIONS.VIEW_TEACHERS);
+  
+  useEffect(() => {}, [permissionSet, canViewTeachers, router]);
+
   const selectFilters: FiltersProps[] = [
     {
       labelName: 'Name',
@@ -119,10 +128,14 @@ const Teachers = () => {
             <CardHeader className='d-flex justify-content-end'>
               <TableHeaderActions
                 onReload={handleReload}
-                addButton={{
-                  title: 'Create Teacher',
-                  onClick: () => toggle(),
-                }}
+                addButton={
+                  canCreateTeacher
+                    ? {
+                        title: 'Create Teacher',
+                        onClick: () => toggle(),
+                      }
+                    : undefined
+                }
               />
             </CardHeader>
             <div className='pb-4'>

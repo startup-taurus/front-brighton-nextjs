@@ -1,4 +1,4 @@
-import { getFetcher, patchFetcher } from "../api";
+import { getFetcher, putFetcher } from "../api";
 
 export const getCourseScheduleDates = (courseId: string) => {
   return getFetcher(
@@ -8,7 +8,7 @@ export const getCourseScheduleDates = (courseId: string) => {
 };
 
 export const updateLessonTaught = (lessonId: number, data: any) => {
-  return patchFetcher(
+  return putFetcher(
     `/course-schedule/update-course-schedule/${lessonId}`,
     data,
   );

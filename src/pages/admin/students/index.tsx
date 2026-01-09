@@ -1,25 +1,22 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Card, CardHeader, Container, Row } from 'reactstrap';
+import React, {useState, useEffect, useRef} from 'react';
+import {useRouter} from 'next/router';
+import useSWR, {mutate} from 'swr';
+import {Card, CardHeader, Container, Row} from 'reactstrap';
+
 import StudentsTable from '@/components/own/tables/students-table';
 import TableHeaderActions from '@/components/own/table-header-actions/table-header-actions';
 import StudentForm from '@/components/own/form/student-form';
-import { useRouter } from 'next/router';
-import { FiltersProps } from '../../../../Types/types';
 import TableFilters from '@/components/own/table-filters/table-filters';
-import { getFiltersString } from '../../../../utils/utils';
-import useSWR, { mutate } from 'swr';
-import { getAllStudent } from '../../../../helper/api-data/student';
-import { getAllLevels } from '../../../../helper/api-data/level';
-import {
-  getAllCourses,
-  getActiveCourses,
-} from '../../../../helper/api-data/course';
-import {
-  PROMOTION_FILTER,
-  STATUS_FILTER,
-  STATUS_LEVEL_CHANGE,
-} from '../../../../utils/constants';
-import { SelectOption } from 'Types/SelectType';
+import {FiltersProps} from '../../../../Types/types';
+import {SelectOption} from 'Types/SelectType';
+import usePermission from '../../../../hooks/usePermission';
+import {PERMISSIONS} from '../../../../utils/permissions';
+import {getFiltersString} from '../../../../utils/utils';
+import {PROMOTION_FILTER, STATUS_FILTER, STATUS_LEVEL_CHANGE} from '../../../../utils/constants';
+import {APP_PATHS} from 'utils/constants';
+import {getAllStudent} from '../../../../helper/api-data/student';
+import {getAllLevels} from '../../../../helper/api-data/level';
+import {getAllCourses, getActiveCourses} from '../../../../helper/api-data/course';
 
 const Students = () => {
   const router = useRouter();
@@ -60,12 +57,12 @@ const Students = () => {
       )
   );
 
-  const { data: course } = useSWR(
+  const {data: course} = useSWR(
     ['/course/get-active', coursePage, limit, courseSearchTerm],
     () => getActiveCourses(coursePage, limit, courseSearchTerm)
   );
 
-  const { data: levels } = useSWR(
+  const {data: levels} = useSWR(
     ['/level/get-all', levelPage, limit, levelSearchTerm],
     () => getAllLevels(levelPage, limit, levelSearchTerm)
   );
@@ -192,12 +189,15 @@ const Students = () => {
     ]);
   };
 
+  const {canPermission, permissionSet} = usePermission();
+  const canCreateStudent = canPermission(PERMISSIONS.CREATE_STUDENT);
+  const canViewStudents = canPermission(PERMISSIONS.VIEW_STUDENTS);
+  
+  useEffect(() => {}, [permissionSet, canViewStudents, router]);
+
   return (
     <div className='page-body'>
-      <Container
-        className='basic_table'
-        fluid
-      >
+      <Container className='basic_table' fluid>
         <Row>
           <TableFilters selectFilters={selectFilters} />
         </Row>
@@ -205,16 +205,17 @@ const Students = () => {
           <Card>
             <CardHeader className='d-flex justify-content-end'>
               <div className='d-flex align-items-center'>
-                <div
-                  className='mr-3'
-                  id='transferTooltip'
-                ></div>
+                <div className='mr-3' id='transferTooltip'></div>
                 <TableHeaderActions
                   onReload={handleReload}
-                  addButton={{
-                    title: 'Create Student',
-                    onClick: () => toggle(),
-                  }}
+                  addButton={
+                    canCreateStudent
+                      ? {
+                          title: 'Create Student',
+                          onClick: () => toggle(),
+                        }
+                      : undefined
+                  }
                 />
               </div>
             </CardHeader>

@@ -7,26 +7,27 @@ import TableSkeleton from '@/components/own/common/table-skeleton/TableSkeleton'
 import { CommonHeader } from './AcademicPerformance/CommonHeader';
 import { getProfessorsCoursesAndStudents } from 'helper/api-data/professor';
 import { ApiResponse } from 'Types/ApiResponse';
-import { ProfessorData } from 'Types/ProfessorType';
+import { ProfessorData, PaginatedProfessors } from 'Types/ProfessorType';
 import { setQueryStringValue, clearQueryString } from '../../../../utils/utils';
+import usePermission from '../../../../hooks/usePermission';
+import { PERMISSIONS } from '../../../../utils/permissions';
 
-interface PaginatedProfessors {
-  result: ProfessorData[];
-  totalCount: number;
-  page: number;
-  limit: number;
-}
+ 
 
 const ProfessorsTable: React.FC = () => {
   const router = useRouter();
   const page = parseInt((router.query.professorPage as string) || '1', 10);
   const limit = parseInt((router.query.professorLimit as string) || '10', 10);
+  const { canPermission, permissionSet } = usePermission();
+  const canViewProfessorsSummary = !!permissionSet && canPermission(PERMISSIONS.VIEW_DASHBOARD_PROFESSORS_SUMMARY);
 
-  const key = `/professor/get-courses-and-students?page=${page}&limit=${limit}`;
+  const key = canViewProfessorsSummary ? `/professor/get-courses-and-students?page=${page}&limit=${limit}` : null;
   const { data: response, error } = useSWR<ApiResponse<PaginatedProfessors>>(
     key,
     () => getProfessorsCoursesAndStudents(page, limit)
   );
+
+  if (!canViewProfessorsSummary) return null;
 
   const loading = !response && !error;
   const professors = response?.data.result ?? [];

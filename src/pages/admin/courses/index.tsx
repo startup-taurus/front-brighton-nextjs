@@ -1,20 +1,23 @@
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
+import useSWR, { mutate } from 'swr';
 import { Card, CardHeader, Container, Row } from 'reactstrap';
+
 import TableHeaderActions from '@/components/own/table-header-actions/table-header-actions';
 import CoursesTable from '@/components/own/tables/courses-table';
 import CourseForm from '@/components/own/form/course-form';
-import { FiltersProps } from '../../../../Types/types';
-import { COURSE_TYPE_FILTER, STATUS_FILTER, STATUS_FILTER_COURSE } from '../../../../utils/constants';
 import TableFilters from '@/components/own/table-filters/table-filters';
-import {
-  getActiveProfessors,
-  getAllProfessors,
-} from '../../../../helper/api-data/professor';
-import { getAllCourses } from '../../../../helper/api-data/course';
-import useSWR, { mutate } from 'swr';
+import { FiltersProps } from '../../../../Types/types';
 import { SelectOption } from 'Types/SelectType';
+import usePermission from '../../../../hooks/usePermission';
+import { PERMISSIONS } from '../../../../utils/permissions';
+import { COURSE_TYPE_FILTER, STATUS_FILTER, STATUS_FILTER_COURSE } from '../../../../utils/constants';
+import { APP_PATHS } from 'utils/constants';
+import { getActiveProfessors, getAllProfessors } from '../../../../helper/api-data/professor';
+import { getAllCourses } from '../../../../helper/api-data/course';
 
 const Students = () => {
+  const router = useRouter();
   const limit = 10;
   const [page, setPage] = useState(1);
   const [isOpenModal, setIsOpenModal] = useState(false);
@@ -171,6 +174,11 @@ const Students = () => {
     },
   ];
 
+  const { canPermission, permissionSet } = usePermission();
+  const canCreateCourse = canPermission(PERMISSIONS.CREATE_COURSE);
+  const canViewCourses = canPermission(PERMISSIONS.VIEW_COURSES);
+  useEffect(() => {}, [permissionSet, canViewCourses, router]);
+
   return (
     <div className='page-body'>
       <Container
@@ -185,10 +193,14 @@ const Students = () => {
             <CardHeader className='d-flex justify-content-end'>
               <TableHeaderActions
                 onReload={handleReload}
-                addButton={{
-                  title: 'Create Course',
-                  onClick: () => toggle(),
-                }}
+                addButton={
+                  canCreateCourse
+                    ? {
+                        title: 'Create Course',
+                        onClick: () => toggle(),
+                      }
+                    : undefined
+                }
               />
             </CardHeader>
             <div className='pb-4'>

@@ -16,6 +16,8 @@ import StudentTransferTable from '@/components/Dashboard/SchoolManagenement/Stud
 import StudentPerformanceChart from '@/components/own/charts/student-performance-chart';
 import CoursesCalendar from '@/components/own/calendar/courses-calendar';
 import AbsenceReportTable from '@/components/own/absence-report-table/absence-report-table';
+import usePermission from '../../../hooks/usePermission';
+import { PERMISSIONS } from '../../../utils/permissions';
 
 const SchoolManagement = () => {
   const [loading, setLoading] = useState(true);
@@ -78,6 +80,9 @@ const SchoolManagement = () => {
     () => import('@/components/Dashboard/SchoolManagenement/SchoolIncome'),
     {ssr: false}
   );
+
+  const { canPermission, permissionSet } = usePermission();
+  const canViewCalendar = !!permissionSet && canPermission(PERMISSIONS.VIEW_DASHBOARD_CALENDAR);
 
   useEffect(() => {
     if (access_denied) {
@@ -160,9 +165,11 @@ const SchoolManagement = () => {
                   <StudentPerformanceChart />
 
                   {/* Calendario de Cursos */}
-                  <Col xxl={12}>
-                    <CoursesCalendar />
-                  </Col>
+                  {canViewCalendar && (
+                    <Col xxl={12}>
+                      <CoursesCalendar />
+                    </Col>
+                  )}
                 </>
               )}
             </Row>

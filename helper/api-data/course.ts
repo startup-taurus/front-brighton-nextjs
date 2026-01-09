@@ -1,4 +1,4 @@
-import { getFetcher, postFetcher, putFetcher, patchFetcher, deleteFetcher } from '../api';
+import { getFetcher, postFetcher, putFetcher, deleteFetcher } from '../api';
 
 export const getCourseById = (courseId: string) => {
   return getFetcher(`/course/get-one/${courseId}`, false);

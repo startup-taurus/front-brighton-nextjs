@@ -11,6 +11,8 @@ import DataTable from 'react-data-table-component';
 import TeacherForm from '../form/teacher-form';
 import {getFiltersString} from '../../../../utils/utils';
 import TableSkeleton from '@/components/own/common/table-skeleton/TableSkeleton';
+import usePermission from '../../../../hooks/usePermission';
+import { PERMISSIONS } from '../../../../utils/permissions';
 
 const TeachersTable = ({reload}: any) => {
   const router = useRouter();
@@ -21,6 +23,11 @@ const TeachersTable = ({reload}: any) => {
     ? Number(router.query.rowPerPage)
     : 10;
   const filters = getFiltersString(router);
+  const { canPermission } = usePermission();
+  const canEdit = canPermission(PERMISSIONS.EDIT_TEACHER);
+  const canDelete = canPermission(PERMISSIONS.DELETE_TEACHER);
+  const canBlock = canPermission(PERMISSIONS.TOGGLE_TEACHER_STATUS);
+  const showActions = canEdit || canDelete || canBlock;
 
   const toggle = (data: any, forceUpdate = false) => {
     setSelectedData(data);
@@ -90,18 +97,22 @@ const TeachersTable = ({reload}: any) => {
 
   const columns = [
     {
-      name: 'Actions',
-      cell: (row: any) => (
-        <TableActionButtons
-          onBlock={() => handleAlert(row)}
-          onEdit={() => toggle(row)}
-          stauts={row.status === 'active' ? false : true}
-          module={'Professors'}
-        />
-      ),
-      minWidth: '140px',
-      sortable: false,
-      center: true,
+      ...(showActions
+        ? {
+            name: 'Actions',
+            cell: (row: any) => (
+              <TableActionButtons
+                onBlock={canBlock ? () => handleAlert(row) : undefined}
+                onEdit={canEdit ? () => toggle(row) : undefined}
+                status={row.status === 'active' ? false : true}
+                module={'Professors'}
+              />
+            ),
+            minWidth: '140px',
+            sortable: false,
+            center: true,
+          }
+        : {}),
     },
     {
       name: 'ID',

@@ -8,6 +8,7 @@ import {
   LOGIN_MESSAGES, 
   CONFLICT_TYPES,
   ConflictType,
+  APP_PATHS,
 } from "./constants";
 import { NextRouter } from "next/router";
 import {
@@ -30,22 +31,48 @@ import {
 import Swal from "sweetalert2";
 import { Role } from "./Constant";
 import { CalendarEvent, Course } from "Types/CalendarTypes";
+import { PERMISSIONS } from "./permissions";
 
 export const isBrowser = () => typeof window !== "undefined";
 
 export const handleError = (
-  e: any,
+  error: any,
   hideError?: boolean,
   stopRedirect?: boolean
 ) => {
-  if (e?.response?.status === 403 && isBrowser()) {
-    const errorMessage = e?.response?.data?.message;
+  if (error?.response?.status === 403 && isBrowser()) {
+    const requestUrl: string =
+      (error?.config?.url || error?.response?.config?.url || error?.request?.responseURL || '');
+    const requiredPermission =
+      requestUrl.includes('/course/')
+        ? PERMISSIONS.VIEW_COURSES
+        : requestUrl.includes('/professor/')
+        ? PERMISSIONS.VIEW_TEACHERS
+        : requestUrl.includes('/attendance/')
+        ? PERMISSIONS.VIEW_ATTENDANCE
+        : requestUrl.includes('/syllabus/')
+        ? PERMISSIONS.VIEW_SYLLABUS
+        : requestUrl.includes('/user/')
+        ? PERMISSIONS.VIEW_USERS
+        : requestUrl.includes('/holidays/')
+        ? PERMISSIONS.VIEW_HOLIDAYS
+        : null;
+
+    try {
+      const permissionsString = localStorage.getItem('permissions');
+      const permissions = permissionsString ? JSON.parse(permissionsString) : [];
+      if (requiredPermission && Array.isArray(permissions) && permissions.includes(requiredPermission)) {
+        return error;
+      }
+    } catch {}
+
+    const errorMessage = error?.response?.data?.message;
     if (
       errorMessage &&
       (errorMessage.includes(LOGIN_MESSAGES.ACCOUNT_LOCKED) ||
         errorMessage.includes(LOGIN_MESSAGES.LOCKED_DUE_TO))
     ) {
-      throw e;
+      throw error;
     }
     
     Swal.fire({
@@ -54,14 +81,14 @@ export const handleError = (
       icon: "error",
       confirmButtonText: "OK",
     }).then(() => {
-      window.location.href = "/teachers";
+      window.location.href = APP_PATHS.DASHBOARD;
     });
-    return e; 
+    return error; 
   }
 
   if (
-    (e?.response?.data?.message == LOGIN_MESSAGES.NOT_AUTHORIZED_TOKEN_NOT_SENT ||
-      e?.response?.status == 401) &&
+    (error?.response?.data?.message == LOGIN_MESSAGES.NOT_AUTHORIZED_TOKEN_NOT_SENT ||
+      error?.response?.status == 401) &&
     isBrowser() &&
     !stopRedirect
   ) {
@@ -69,7 +96,7 @@ export const handleError = (
     window.location.replace("/authentication/login");
   }
 
-  const errorMessage = e?.response?.data?.message;
+  const errorMessage = error?.response?.data?.message;
   if (
     errorMessage &&
     (
@@ -80,13 +107,13 @@ export const handleError = (
       errorMessage.includes(LOGIN_MESSAGES.LOCKED_DUE_TO)
     )
   ) {
-    throw e;
+    throw error;
   }
 
   if (!hideError) {
-    toast.error(e?.response?.data?.message ?? ERROR_MESSAGE);
+    toast.error(error?.response?.data?.message ?? ERROR_MESSAGE);
   }
-  return e;
+  return error;
 };
 
 export const getToken = () => Cookies.get("token");

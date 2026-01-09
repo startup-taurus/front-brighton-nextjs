@@ -49,8 +49,6 @@ const GradebookTable = ({
   const courseId = router.query.id as string;
   const { user } = useContext(UserContext);
   const { canPermission } = usePermission();
-  const isCoordinator = user?.role === USER_TYPES.COORDINATOR;
-  const isReceptionist = user?.role === USER_TYPES.RECEPTIONIST;
   const canAddGrades = canPermission(PERMISSIONS.ADD_GRADES);
   const canEditGrades = canPermission(PERMISSIONS.EDIT_GRADES);
 
@@ -69,8 +67,7 @@ const GradebookTable = ({
 
   const isInputDisabled = (student: any) => {
     return (
-      isCoordinator ||
-      isReceptionist ||
+      !canEditGrades ||
       student?.is_retired ||
       student?.status === STATUS.INACTIVE
     );
@@ -314,7 +311,7 @@ const GradebookTable = ({
                 <Button
                   className='add-col-btn'
                   onClick={(e) => addAssignmentCol()}
-                  disabled={isCoordinator || isReceptionist}
+                  disabled={!canAddGrades}
                 >
                   <FaPlus />
                 </Button>
@@ -340,7 +337,7 @@ const GradebookTable = ({
             {componentsGradebook?.assignments?.map(
               (item: any, index: number) => (
                 <td
-                  className={`col-vertical border-bottom text-center text-dark ${ isCoordinator || isReceptionist ? 'cursor-no-allowed' : ''}`}
+                  className={`col-vertical border-bottom text-center text-dark ${ !canEditGrades ? 'cursor-no-allowed' : ''}`}
                   key={`assignments-title-${item.item_id}`}
                 >
                   <Input
@@ -350,7 +347,7 @@ const GradebookTable = ({
                       onChangeAssignmentCol(e, item.item_id, index)
                     }
                     value={item.item_name ?? ''}
-                    disabled={isCoordinator || isReceptionist || item.origin === 'syllabus'}
+                    disabled={!canEditGrades || item.origin === 'syllabus'}
                   />
                 </td>
               )
@@ -415,7 +412,7 @@ const GradebookTable = ({
                     key={`grade-note-${j}`}
                   >
                     <Input
-                      className={`td-input input-percentage bg-transparent text-black ${isCoordinator || isReceptionist ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark cursor-no-allowed'}`}
+                      className={`td-input input-percentage bg-transparent text-black ${!canEditGrades ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark cursor-no-allowed'}`}
                       onChange={(event) =>
                         onChangeGrades(
                           event,
@@ -433,7 +430,7 @@ const GradebookTable = ({
                   </td>
                 ))}
                 <td
-                  className={`text-black ${isCoordinator || isReceptionist || student?.is_retired ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark cursor-no-allowed'}`}
+                  className={`text-black ${!canEditGrades || student?.is_retired ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark cursor-no-allowed'}`}
                 >
                   {calculateAverage(
                     grades,
@@ -448,7 +445,7 @@ const GradebookTable = ({
                     key={`grade-note-progressTest-${j}`}
                   >
                     <Input
-                      className={`td-input input-percentage bg-transparent text-black ${isCoordinator || isReceptionist ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark cursor-no-allowed'}`}
+                      className={`td-input input-percentage bg-transparent text-black ${!canEditGrades ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark cursor-no-allowed'}`}
                       onChange={(event) =>
                         onChangeGrades(
                           event,
@@ -481,7 +478,7 @@ const GradebookTable = ({
                     key={`grade-note-progressTest-${j}`}
                   >
                     <Input
-                      className={`td-input input-percentage bg-transparent text-black ${isCoordinator || isReceptionist || student?.is_retired ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark'}`}
+                      className={`td-input input-percentage bg-transparent text-black ${!canEditGrades || student?.is_retired ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark'}`}
                       onChange={(event) =>
                         onChangeGrades(
                           event,
@@ -499,7 +496,7 @@ const GradebookTable = ({
                   </td>
                 ))}
                 <td
-                  className={`text-black ${isCoordinator || isReceptionist || student?.is_retired ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark'}`}
+                  className={`text-black ${!canEditGrades || student?.is_retired ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark'}`}
                 >
                   {calculateAverage(
                     grades,
@@ -528,7 +525,7 @@ const GradebookTable = ({
                   {showInactive ? 'Hide' : 'Show'} {isTransferredCourse ? 'inactive' : 'inactive/retired'} students ({inactive.length})
                 </span>
                 <span
-                  className={`toggle-icon  ${isCoordinator || isReceptionist ? 'toggle-icon no-professor ' : ''}  `}
+                  className={`toggle-icon  ${!canEditGrades ? 'toggle-icon no-professor ' : ''}  `}
                 >
                   {showInactive ? <FaChevronUp /> : <FaChevronDown />}
                 </span>
@@ -576,7 +573,7 @@ const GradebookTable = ({
                   key={`grade-note-inactive-${j}`}
                 >
                   <Input
-                    className={`td-input input-percentage bg-transparent text-black ${ isCoordinator || isReceptionist ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark cursor-no-allowed'}`}
+                    className={`td-input input-percentage bg-transparent text-black ${ !canEditGrades ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark cursor-no-allowed'}`}
                     onChange={(event) =>
                       onChangeGrades(
                         event,
@@ -594,7 +591,7 @@ const GradebookTable = ({
                 </td>
               ))}
               <td
-                className={`text-black ${isCoordinator || isReceptionist || student?.is_retired ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark cursor-no-allowed'}`}
+                className={`text-black ${!canEditGrades || student?.is_retired ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark cursor-no-allowed'}`}
               >
                 {calculateAverage(
                   grades,
@@ -609,7 +606,7 @@ const GradebookTable = ({
                   key={`grade-note-progressTest-inactive-${j}`}
                 >
                   <Input
-                    className={`td-input input-percentage bg-transparent text-black ${isCoordinator || isReceptionist || student?.is_retired ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark cursor-no-allowed'}`}
+                    className={`td-input input-percentage bg-transparent text-black ${!canEditGrades || student?.is_retired ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark cursor-no-allowed'}`}
                     onChange={(event) =>
                       onChangeGrades(
                         event,
@@ -642,7 +639,7 @@ const GradebookTable = ({
                   key={`grade-note-progressTest-inactive-${j}`}
                 >
                   <Input
-                    className={`td-input input-percentage bg-transparent text-black ${isCoordinator || isReceptionist || student?.is_retired ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark'}`}
+                    className={`td-input input-percentage bg-transparent text-black ${!canEditGrades || student?.is_retired ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark'}`}
                     onChange={(event) =>
                       onChangeGrades(
                         event,
@@ -660,7 +657,7 @@ const GradebookTable = ({
                 </td>
               ))}
               <td
-                className={`text-black ${isCoordinator || isReceptionist || student?.is_retired ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark'}`}
+                className={`text-black ${!canEditGrades || student?.is_retired ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark'}`}
               >
                 {calculateAverage(
                   grades,

@@ -2,16 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import useSWR, { mutate } from 'swr';
 import { Card, CardHeader, Container, Row } from 'reactstrap';
+
 import TableHeaderActions from '@/components/own/table-header-actions/table-header-actions';
+import StudentsRegisteredTable from '@/components/own/tables/students-registered-table';
 import StudentForm from '@/components/own/form/student-form';
-import { FiltersProps } from '../../../../Types/types';
 import TableFilters from '@/components/own/table-filters/table-filters';
+import { FiltersProps } from '../../../../Types/types';
+import { SelectOption } from 'Types/SelectType';
 import { getFiltersString } from '../../../../utils/utils';
+import { PROMOTION_FILTER, STATUS_FILTER } from '../../../../utils/constants';
 import { getAllRegisteredStudents } from '../../../../helper/api-data/registered-student';
 import { getAllLevels } from '../../../../helper/api-data/level';
-import { PROMOTION_FILTER, STATUS_FILTER } from '../../../../utils/constants';
-import StudentsRegisteredTable from '@/components/own/tables/students-registered-table';
-import { SelectOption } from 'Types/SelectType';
 
 const Students = () => {
   const router = useRouter();
