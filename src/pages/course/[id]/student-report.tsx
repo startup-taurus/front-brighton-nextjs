@@ -19,14 +19,18 @@ import Image from 'next/image';
 import { ImgPath } from '../../../../utils/Constant';
 import { getFinalPercentageBySyllabusId } from '../../../../helper/api-data/syllabus';
 import useFilteredGradingItems from '../../../../hooks/useFilteredGradingItems';
-
-const tabsName = 'STUDENT REPORT';
+import usePermission from '../../../../hooks/usePermission';
+import { PERMISSIONS } from '../../../../utils/permissions';
+import { COURSE_TAB_NAMES } from 'utils/constants';
 
 const StudentReport: NextPageWithLayout = () => {
   const router = useRouter();
   const courseId = router.query.id as string;
   const [selectedStudentId, setSelectedStudentId] = useState('');
   const [selectedStudent, setSelectedStudent] = useState('');
+
+  const { canPermission } = usePermission();
+  const canViewStudentReports = canPermission(PERMISSIONS.VIEW_STUDENT_REPORTS);
 
   const courseDetail = useSWR(
     courseId ? `/course/get-one/${courseId}` : null,
@@ -100,14 +104,13 @@ const StudentReport: NextPageWithLayout = () => {
     courseDetail?.data?.data &&
     notesPercentages?.data?.data &&
     selectedStudentId;
-
-  return (
+  return canViewStudentReports ? (
     <Card tag='section'>
       <CardBody>
         {courseDetail?.data?.data && (
           <TabsTeachers
             numberOfClass={courseDetail?.data?.data?.course_number}
-            tabsName={tabsName}
+            tabsName={COURSE_TAB_NAMES.STUDENT_REPORT}
           />
         )}
 
@@ -168,7 +171,7 @@ const StudentReport: NextPageWithLayout = () => {
         </div>
       </CardBody>
     </Card>
-  );
+  ) : null;
 };
 
 StudentReport.getLayout = function getLayout(page: ReactElement) {

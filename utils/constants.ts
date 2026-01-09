@@ -37,6 +37,12 @@ export const STATUS_FILTER = [
   { label: 'Active', value: 'active' },
   { label: 'Inactive', value: 'inactive' },
 ];
+
+export const FILTER_KEYS = {
+  ROLE: 'role',
+  STATUS: 'status',
+} as const;
+
 export const STATUS_FILTER_COURSE = [
   { label: 'Active', value: 'active' },
   { label: 'Inactive', value: 'inactive' },
@@ -146,6 +152,26 @@ export const TEACHER_PATHS = [
   '/course/:id/faq',
 ];
 
+export const APP_PATHS = {
+  DASHBOARD: '/dashboard',
+  TEACHERS: '/teachers',
+} as const;
+export const ROLES_PERMISSIONS_TEXTS = {
+  CREATE_ROLE_AND_PERMISSIONS: 'create role and permissions',
+} as const;
+
+export const COURSE_TAB_NAMES = {
+  ATTENDANCE: 'ATTENDANCE',
+  HOLIDAYS: 'HOLIDAYS',
+  GRADEBOOK: 'GRADEBOOK',
+  STUDENT_REPORT: 'STUDENT REPORT',
+} as const;
+
+export const PERMISSION_TOOLTIPS = {
+  NO_PERMISSION_DELETE: 'No permission to delete',
+  DELETE_CANCELLED_LESSON: 'Delete cancelled lesson'
+} as const;
+
 export const EXAMS_TYPE = {
   STARTERS: 'STARTERS',
   MOVERS: 'MOVERS',
@@ -192,17 +218,18 @@ export const PRIVATE_COURSE_TYPES = {
   PRIVATE: 'private',
   PRIVATE_ONLINE: 'private - online'  
 };
-export const DATA_TYPE = {
-  STRING: 'string',
-  TRUE: 'true',
-  FALSE: 'false',
-  OBJECT: 'object',
-};
+
 export const COURSE_TYPES = {
   ONLINE: 'online',
   ON_SITE: 'on-site',
   PRIVATE: 'private',
   PRIVATE_ONLINE: 'private - online'
+};
+export const DATA_TYPE = {
+  STRING: 'string',
+  TRUE: 'true',
+  FALSE: 'false',
+  OBJECT: 'object',
 };
 
 

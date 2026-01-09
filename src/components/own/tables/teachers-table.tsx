@@ -96,6 +96,7 @@ const TeachersTable = ({reload}: any) => {
           onBlock={() => handleAlert(row)}
           onEdit={() => toggle(row)}
           stauts={row.status === 'active' ? false : true}
+          module={'Professors'}
         />
       ),
       minWidth: '140px',

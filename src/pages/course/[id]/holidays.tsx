@@ -31,9 +31,9 @@ import { ImgPath } from '../../../../utils/Constant';
 import { FaPencil, FaPlus, FaTrash } from 'react-icons/fa6';
 import { toast } from 'react-toastify';
 import Swal from 'sweetalert2';
-import { USER_TYPES } from 'utils/constants';
+import { USER_TYPES, COURSE_TAB_NAMES, PERMISSION_TOOLTIPS } from 'utils/constants';
 
-const tabsName = 'HOLIDAYS';
+ 
 
 const TeachersHolidays: NextPageWithLayout = () => {
   const router = useRouter();
@@ -41,12 +41,13 @@ const TeachersHolidays: NextPageWithLayout = () => {
   const [isOpenModal, setIsOpenModal] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
   const { user } = useContext(UserContext);
-  const { can } = usePermission();
+  const { canPermission } = usePermission();
   const isCoordinator = user?.role === USER_TYPES.COORDINATOR;
   const isReceptionist = user?.role === USER_TYPES.RECEPTIONIST;
-  const canCreateHoliday = can(PERMISSIONS.CREATE_HOLIDAY);
-  const canEditHoliday = can(PERMISSIONS.EDIT_HOLIDAY);
-  const canDeleteHoliday = can(PERMISSIONS.DELETE_HOLIDAY);
+  const canCreateCancelled = canPermission(PERMISSIONS.CREATE_CANCELLED_LESSON);
+  const canEditCancelled = canPermission(PERMISSIONS.EDIT_CANCELLED_LESSON);
+  const canDeleteCancelled = canPermission(PERMISSIONS.VIEW_CANCELLED_LESSONS);
+  const canViewHolidays = canPermission(PERMISSIONS.VIEW_HOLIDAYS);
 
   const courseDetail = useSWR(
     courseId ? `/course/get-one/${courseId}` : null,
@@ -86,12 +87,11 @@ const TeachersHolidays: NextPageWithLayout = () => {
       name: 'ACTIONS',
       cell: (row: any) => (
         <ButtonGroup>
-          {/*<Button color="primary" onClick={() => onRowSelected(row)}>*/}
-          {/*  <FaPencil />*/}
-          {/*</Button>*/}
           <Button
             color='danger'
             onClick={() => deleteRow(row)}
+            disabled={!canDeleteCancelled}
+            title={!canDeleteCancelled ? PERMISSION_TOOLTIPS.NO_PERMISSION_DELETE : PERMISSION_TOOLTIPS.DELETE_CANCELLED_LESSON}
           >
             <FaTrash />
           </Button>
@@ -101,7 +101,7 @@ const TeachersHolidays: NextPageWithLayout = () => {
   ];
 
   const toggleModal = () => {
-    if ((isCoordinator || isReceptionist) && !canCreateHoliday) {
+    if ((isCoordinator || isReceptionist) && !canCreateCancelled) {
       toast.error(
         'You do not have permission to create cancelled lessons'
       );
@@ -110,13 +110,8 @@ const TeachersHolidays: NextPageWithLayout = () => {
     setIsOpenModal(() => !isOpenModal);
   };
 
-  // const onRowSelected = (row: any) => {
-  //   setSelectedData(() => row);
-  //   toggleModal();
-  // };
-
   const deleteRow = (row: any) => {
-    if ((isCoordinator || isReceptionist) && !canDeleteHoliday) {
+    if (!canDeleteCancelled) {
       toast.error(
         'You do not have permission to delete cancelled lessons'
       );
@@ -137,7 +132,7 @@ const TeachersHolidays: NextPageWithLayout = () => {
     });
   };
 
-  if (!courseDetail?.data?.data) return null;
+  if (!canViewHolidays || !courseDetail?.data?.data) return null;
   const { course_number } = courseDetail?.data?.data;
 
   return (
@@ -146,7 +141,7 @@ const TeachersHolidays: NextPageWithLayout = () => {
         <CardBody>
           <TabsTeachers
             numberOfClass={course_number}
-            tabsName={tabsName}
+            tabsName={COURSE_TAB_NAMES.HOLIDAYS}
           />
           <Row>
             <Col
@@ -174,7 +169,7 @@ const TeachersHolidays: NextPageWithLayout = () => {
                 <h3>CANCELED LESSONS</h3>
                 <Button
                   onClick={toggleModal}
-                  disabled={(isCoordinator || isReceptionist) && !canCreateHoliday}
+                  disabled={(isCoordinator || isReceptionist) && !canCreateCancelled}
                 >
                   <FaPlus />
                 </Button>

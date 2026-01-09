@@ -28,6 +28,7 @@ const TableHeaderActions = ({ onReload, addButton }: TableHeaderActions) => {
           type="button"
           className="btn btn-save small-btn"
           onClick={addButton.onClick}
+          disabled={!!addButton.disabled}
         >
           <FaCirclePlus /> <span>{addButton.title}</span>
         </button>

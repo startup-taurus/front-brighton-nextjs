@@ -7,6 +7,8 @@ import { UserContext } from '../../../../helper/User';
 import { USER_TYPES } from '../../../../utils/constants';
 import useSWR from 'swr';
 import { getCourseWithStudents } from '../../../../helper/api-data/course';
+import usePermission from '../../../../hooks/usePermission';
+import { PERMISSIONS } from '../../../../utils/permissions';
 
 const BASE_NAV_ITEMS = [
   { id: 'home', name: '🏠 HOME', link: '/course/${id}/home' },
@@ -45,6 +47,7 @@ const TeacherNavMenu = ({ fromProfessorId }: TeacherNavMenuProps) => {
     courseId ? `/course/get-students/${courseId}` : null,
     () => getCourseWithStudents(courseId!.toString())
   );
+  const { canPermission, permissionSet } = usePermission();
 
   const isCoordinatorOrAdmin = user?.role === USER_TYPES.COORDINATOR || 
                                user?.role === USER_TYPES.PROFESSOR || 
@@ -61,8 +64,26 @@ const TeacherNavMenu = ({ fromProfessorId }: TeacherNavMenuProps) => {
       return PRIVATE_CLASS_NAV_ITEMS;
     }
     
-    return BASE_NAV_ITEMS;
-  }, [isCoordinatorOrAdmin, isPrivateClass, courseData]);
+    const items = BASE_NAV_ITEMS;
+    const filtered = items.filter((item) => {
+      if (!permissionSet) {
+        return item.id === 'home' || item.id === 'faq';
+      }
+      switch (item.id) {
+        case 'attendance':
+          return canPermission(PERMISSIONS.VIEW_ATTENDANCE);
+        case 'gradebook':
+          return canPermission(PERMISSIONS.VIEW_GRADEBOOK);
+        case 'holidays':
+          return canPermission(PERMISSIONS.VIEW_HOLIDAYS);
+        case 'student-report':
+          return canPermission(PERMISSIONS.VIEW_STUDENT_REPORTS);
+        default:
+          return true;
+      }
+    });
+    return filtered;
+  }, [isCoordinatorOrAdmin, isPrivateClass, courseData, permissionSet, canPermission]);
 
   useEffect(() => {
     const currentPath = router.asPath;

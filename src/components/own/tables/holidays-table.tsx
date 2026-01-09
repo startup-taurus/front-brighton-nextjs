@@ -27,11 +27,11 @@ const HolidaysTable = ({
   const [isOpenDetail, setIsOpenDetail] = useState(false);
   const [selectedData, setSelectedData] = useState(null);
   const { user } = useContext(UserContext);
-  const { can } = usePermission();
+  const { canPermission } = usePermission();
   const isCoordinator = user?.role === USER_TYPES.COORDINATOR;
-  const canCreateHoliday = can(PERMISSIONS.CREATE_HOLIDAY);
-  const canEditHoliday = can(PERMISSIONS.EDIT_HOLIDAY);
-  const canDeleteHoliday = can(PERMISSIONS.DELETE_HOLIDAY);
+  const canCreateHoliday = canPermission(PERMISSIONS.CREATE_HOLIDAY);
+  const canEditHoliday = canPermission(PERMISSIONS.EDIT_HOLIDAY);
+  const canDeleteHoliday = canPermission(PERMISSIONS.DELETE_HOLIDAY);
 
   const page = propPage ?? (router.query.page ? Number(router.query.page) : 1);
   const rowPerPage = propRowPerPage ?? (router.query.rowPerPage ? Number(router.query.rowPerPage) : 10);

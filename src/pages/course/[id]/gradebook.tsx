@@ -19,9 +19,9 @@ import { getFinalPercentageBySyllabusId } from '../../../../helper/api-data/syll
 import useFilteredGradingItems from '../../../../hooks/useFilteredGradingItems';
 import { decrypt } from 'utils/encryption';
 import { UserContext } from 'helper/User';
-import { USER_TYPES } from 'utils/constants';
-
-const tabsName = 'GRADEBOOK';
+import { USER_TYPES, COURSE_TAB_NAMES } from 'utils/constants';
+import usePermission from '../../../../hooks/usePermission';
+import { PERMISSIONS } from '../../../../utils/permissions';
 
 const Gradebook: NextPageWithLayout = () => {
   const router = useRouter();
@@ -29,7 +29,9 @@ const Gradebook: NextPageWithLayout = () => {
   const [studentId, setStudentId] = useState<string | number | null>(null);
   const { user } = useContext(UserContext);
   const isProfessor = user?.role === USER_TYPES.PROFESSOR;
-
+  const { canPermission, userRole, permissionSet } = usePermission();
+  const canViewGradebook = canPermission(PERMISSIONS.VIEW_GRADEBOOK);
+  
   useEffect(() => {
     const encrypted = localStorage.getItem('studentDetailId');
     const savedStudentId = encrypted ? Number(decrypt(encrypted)) : 0;
@@ -82,18 +84,25 @@ const Gradebook: NextPageWithLayout = () => {
       )
   );
 
+
+  useEffect(() => {
+    if ((userRole || permissionSet) && !canViewGradebook) {
+      router.replace('/dashboard');
+    }
+  }, [canViewGradebook, router, userRole, permissionSet]);
+
+  if (!userRole && !permissionSet) return null;
+  if (!canViewGradebook) return null;
+
   return (
-    <Card
-      tag='section'
-      className='gradebook'
-    >
+    <Card tag='section' className='gradebook'>
       <CardBody>
         {!isProfessor && (
           <NavigationBackButton professorId={router.query.professorId} />
         )}
         <TabsTeachers
           numberOfClass={courseDetail?.data?.data?.course_number ?? ''}
-          tabsName={tabsName}
+          tabsName={COURSE_TAB_NAMES.GRADEBOOK}
         />
 
         {filteredGradingItems.length > 0 &&

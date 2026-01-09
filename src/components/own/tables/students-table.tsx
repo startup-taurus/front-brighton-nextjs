@@ -141,13 +141,14 @@ const StudentsTable = ({
         return (
           <div className='d-flex align-items-center gap-2 justify-content-end'>
             {' '}
-            <TableActionButtons
-              onView={() => toggleDetail(row)}
-              onBlock={() => handleAlert(row)}
-              onEdit={() => toggle(row)}
-              onDelete={() => handleDeleteAlert(row)}
-              status={row.status === 'active' ? false : true}
-            />{' '}
+          <TableActionButtons
+            onView={() => toggleDetail(row)}
+            onBlock={() => handleAlert(row)}
+            onEdit={() => toggle(row)}
+            onDelete={() => handleDeleteAlert(row)}
+            status={row.status === 'active' ? false : true}
+            module={'Students'}
+          />{' '}
           </div>
         );
       },

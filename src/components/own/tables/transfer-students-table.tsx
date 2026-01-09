@@ -178,54 +178,33 @@ const TransferStudentsTable = ({ reload }: { reload: boolean }) => {
   const data = transfersData?.data?.result || [];
 
   const columns = [
-    ...(userRole !== USER_TYPES.RECEPTIONIST
-      ? [
-          {
-            name: 'Actions',
-            cell: (row: any) => (
-              <div className='d-flex align-items-center gap-2'>
-                <TableActionButtons
-                  blockButtonVariant='danger'
-                  onBlock={() => handleRejectTransfer(row.id)}
-                  onTransfer={() => handleOpenTransferDetail(row.id, false)}
-                  transferTooltip="Transfer to student"
-                  onView={() => handleOpenTransferDetail(row.id, true)}
-                  status={row.status_level_change === 'n/a'}
-                  disabled={
-                    row.status_level_change === 'approved' ||
-                    row.status_level_change === 'rejected'
-                  }
-                  viewDisabled={false}
-                />
-              </div>
-            ),
-            width: '160px',
-            minWidth: '160px',
-            maxWidth: '160px',
-            allowOverflow: true,
-            sortable: false,
-            center: true,
-          },
-        ]
-      : [
-          {
-            name: 'Actions',
-            cell: (row: any) => (
-              <div className='d-flex align-items-center gap-2'>
-                <TableActionButtons
-                  blockButtonVariant='danger'
-                  onView={() => handleOpenTransferDetail(row.id, true)}
-                  status={row.status_level_change === 'n/a'}
-                />
-              </div>
-            ),
-            width: '80px',
-            minWidth: '80px',
-            maxWidth: '80px',
-            sortable: false,
-            center: true,
-          },
-        ]),
+    {
+      name: 'Actions',
+      cell: (row: any) => (
+        <div className='d-flex align-items-center gap-2'>
+          <TableActionButtons
+            blockButtonVariant='danger'
+            onBlock={() => handleRejectTransfer(row.id)}
+            onTransfer={() => handleOpenTransferDetail(row.id, false)}
+            transferTooltip={'Transfer to student'}
+            onView={() => handleOpenTransferDetail(row.id, true)}
+            status={row.status_level_change === 'n/a'}
+            disabled={
+              row.status_level_change === 'approved' ||
+              row.status_level_change === 'rejected'
+            }
+            viewDisabled={false}
+            module={'TransferStudents'}
+          />
+        </div>
+      ),
+      width: '160px',
+      minWidth: '160px',
+      maxWidth: '160px',
+      allowOverflow: true,
+      sortable: false,
+      center: true,
+    },
     {
       name: 'Description',
       selector: (row: any) => row.description,
