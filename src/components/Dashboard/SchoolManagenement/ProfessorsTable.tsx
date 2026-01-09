@@ -7,17 +7,12 @@ import TableSkeleton from '@/components/own/common/table-skeleton/TableSkeleton'
 import { CommonHeader } from './AcademicPerformance/CommonHeader';
 import { getProfessorsCoursesAndStudents } from 'helper/api-data/professor';
 import { ApiResponse } from 'Types/ApiResponse';
-import { ProfessorData } from 'Types/ProfessorType';
+import { ProfessorData, PaginatedProfessors } from 'Types/ProfessorType';
 import { setQueryStringValue, clearQueryString } from '../../../../utils/utils';
 import usePermission from '../../../../hooks/usePermission';
 import { PERMISSIONS } from '../../../../utils/permissions';
 
-interface PaginatedProfessors {
-  result: ProfessorData[];
-  totalCount: number;
-  page: number;
-  limit: number;
-}
+ 
 
 const ProfessorsTable: React.FC = () => {
   const router = useRouter();

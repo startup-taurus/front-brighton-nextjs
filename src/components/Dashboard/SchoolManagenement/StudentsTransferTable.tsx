@@ -19,14 +19,14 @@ const StudentTransferTable: React.FC = () => {
   const { canPermission, permissionSet } = usePermission();
   const canViewLastStudentTransfer = !!permissionSet && canPermission(PERMISSIONS.VIEW_DASHBOARD_LAST_STUDENT_TRANSFER);
 
-  const key = canViewLastStudentTransfer ? `/transfer/get-approved?page=${page}&limit=${limit}` : null;
+  const approvedTransfersKey = canViewLastStudentTransfer ? `/transfer/get-approved?page=${page}&limit=${limit}` : null;
   const { data: response, error } = useSWR<ApiResponse<{
     result: StudentTransferData[];
     totalCount: number;
     page: number;
     limit: number;
   }>>(
-    key,
+    approvedTransfersKey,
     () => getApprovedTransfers({ page, limit })
   );
 

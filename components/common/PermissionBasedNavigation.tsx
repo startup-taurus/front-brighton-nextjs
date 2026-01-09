@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import { hasPermission } from '../../utils/permissions';
 import { PERMISSIONS } from '../../utils/permissions';
 import { isBrowser } from 'utils/utils';
+import { PERMISSION_NAVIGATION } from 'utils/constants';
 
 interface NavItem {
   title: string;
@@ -141,7 +142,7 @@ const PermissionBasedNavigation: React.FC<PermissionBasedNavigationProps> = ({
   if (!userRole) return null;
 
   const filteredNavItems = navigationItems.filter((item) => {
-    return item.title === 'Dashboard' || hasPermission(userRole, item.permission);
+    return item.title === PERMISSION_NAVIGATION.DASHBOARD || hasPermission(userRole, item.permission);
   });
 
   return (

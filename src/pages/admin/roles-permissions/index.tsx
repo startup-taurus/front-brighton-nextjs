@@ -1,11 +1,12 @@
 import React, {useMemo, useState, useEffect} from 'react';
-import {Card, CardHeader, CardBody, Container, Row} from 'reactstrap';
+import {useRouter} from 'next/router';
 import useSWR, {mutate} from 'swr';
+import {Card, CardHeader, CardBody, Container, Row} from 'reactstrap';
+
 import TableHeaderActions from '@/components/own/table-header-actions/table-header-actions';
 import TableFilters from '@/components/own/table-filters/table-filters';
 import RolesPermissionsTable from '../../../components/own/tables/roles-permissions-table';
 import RolePermissionsForm from '../../../components/own/form/role-permissions-form';
-import {useRouter} from 'next/router';
 import {
   getPermissionsByRole,
   updatePermissionsByRole,
@@ -16,17 +17,12 @@ import {
   updateRoleMeta,
   createRole,
 } from '../../../../helper/api-data/role';
-import {
-  STATUS_FILTER,
-  FILTER_KEYS,
-  STATUS,
-  ROLES_PERMISSIONS_TEXTS,
-} from '../../../../utils/constants';
 import {FiltersProps} from '../../../../Types/types';
-import {getFiltersString} from '../../../../utils/utils';
 import usePermission from '../../../../hooks/usePermission';
 import { PERMISSIONS } from '../../../../utils/permissions';
+import { STATUS_FILTER, FILTER_KEYS, STATUS, ROLES_PERMISSIONS_TEXTS } from '../../../../utils/constants';
 import { APP_PATHS } from 'utils/constants';
+import {getFiltersString} from '../../../../utils/utils';
 
 const PageRolesPermissions = () => {
   const [isOpen, setIsOpen] = useState(false);

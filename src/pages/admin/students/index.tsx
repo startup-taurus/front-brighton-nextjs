@@ -1,28 +1,22 @@
 import React, {useState, useEffect, useRef} from 'react';
+import {useRouter} from 'next/router';
+import useSWR, {mutate} from 'swr';
 import {Card, CardHeader, Container, Row} from 'reactstrap';
+
 import StudentsTable from '@/components/own/tables/students-table';
 import TableHeaderActions from '@/components/own/table-header-actions/table-header-actions';
 import StudentForm from '@/components/own/form/student-form';
-import {useRouter} from 'next/router';
-import {FiltersProps} from '../../../../Types/types';
 import TableFilters from '@/components/own/table-filters/table-filters';
-import {getFiltersString} from '../../../../utils/utils';
-import useSWR, {mutate} from 'swr';
-import {getAllStudent} from '../../../../helper/api-data/student';
-import {getAllLevels} from '../../../../helper/api-data/level';
-import {
-  getAllCourses,
-  getActiveCourses,
-} from '../../../../helper/api-data/course';
-import {
-  PROMOTION_FILTER,
-  STATUS_FILTER,
-  STATUS_LEVEL_CHANGE,
-} from '../../../../utils/constants';
+import {FiltersProps} from '../../../../Types/types';
 import {SelectOption} from 'Types/SelectType';
 import usePermission from '../../../../hooks/usePermission';
 import {PERMISSIONS} from '../../../../utils/permissions';
+import {getFiltersString} from '../../../../utils/utils';
+import {PROMOTION_FILTER, STATUS_FILTER, STATUS_LEVEL_CHANGE} from '../../../../utils/constants';
 import {APP_PATHS} from 'utils/constants';
+import {getAllStudent} from '../../../../helper/api-data/student';
+import {getAllLevels} from '../../../../helper/api-data/level';
+import {getAllCourses, getActiveCourses} from '../../../../helper/api-data/course';
 
 const Students = () => {
   const router = useRouter();

@@ -1,4 +1,4 @@
-import React, { ChangeEvent, ReactElement, useState } from 'react';
+import React, { ChangeEvent, ReactElement, useEffect, useState } from 'react';
 import { Card, CardBody, Col, Input, Row } from 'reactstrap';
 import { NextPageWithLayout } from '@/pages/_app';
 
@@ -29,18 +29,20 @@ const StudentReport: NextPageWithLayout = () => {
   const [selectedStudentId, setSelectedStudentId] = useState('');
   const [selectedStudent, setSelectedStudent] = useState('');
 
+  
   const { canPermission, permissionSet } = usePermission();
   const canViewStudentReports = canPermission(PERMISSIONS.VIEW_STUDENT_REPORTS);
-  React.useEffect(() => {
-    if (permissionSet && !canViewStudentReports) {
-      router.replace(APP_PATHS.DASHBOARD);
-    }
-  }, [permissionSet, canViewStudentReports, router]);
-
+  
   const courseDetail = useSWR(
     courseId ? `/course/get-one/${courseId}` : null,
     () => getCourseById(courseId)
   );
+  
+  useEffect(() => {
+    if (permissionSet && !canViewStudentReports) {
+      router.replace(APP_PATHS.DASHBOARD);
+    }
+  }, [permissionSet, canViewStudentReports, router]);
 
   const courseStudents = useSWR(
     courseId ? `/course/get-students/${courseId}` : null,

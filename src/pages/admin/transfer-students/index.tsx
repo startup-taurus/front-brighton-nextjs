@@ -1,22 +1,21 @@
 import React, { useState, useEffect } from 'react';
-import { Card, CardHeader, Container, Row } from 'reactstrap';
 import { useRouter } from 'next/router';
 import useSWR from 'swr';
+import { Card, CardHeader, Container, Row } from 'reactstrap';
+
 import TableHeaderActions from '@/components/own/table-header-actions/table-header-actions';
 import TableFilters from '@/components/own/table-filters/table-filters';
-import { FiltersProps } from '../../../../Types/types';
-import { getAllLevels } from '../../../../helper/api-data/level';
-import { getActiveCourses } from '../../../../helper/api-data/course';
-import { APP_PATHS, STATUS_LEVEL_CHANGE, USER_TYPES } from '../../../../utils/constants';
 import StudentTransferForm from '@/components/own/form/student-transfer-form';
 import TransferStudentsTable from '@/components/own/tables/transfer-students-table';
-import StudentSelectorModal, {
-  StudentOption,
-} from '@/components/own/student-slector-modal/StudentSelectorModal';
-import { getUserRoleFromLocalStorage } from 'utils/auth';
+import StudentSelectorModal, { StudentOption } from '@/components/own/student-slector-modal/StudentSelectorModal';
+import { FiltersProps } from '../../../../Types/types';
 import { SelectOption } from 'Types/SelectType';
 import usePermission from '../../../../hooks/usePermission';
 import { PERMISSIONS } from '../../../../utils/permissions';
+import { APP_PATHS, STATUS_LEVEL_CHANGE, USER_TYPES } from '../../../../utils/constants';
+import { getUserRoleFromLocalStorage } from 'utils/auth';
+import { getAllLevels } from '../../../../helper/api-data/level';
+import { getActiveCourses } from '../../../../helper/api-data/course';
  
 
 const TransferStudents = () => {

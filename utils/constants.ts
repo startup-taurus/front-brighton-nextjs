@@ -181,6 +181,10 @@ export const EXAMS_TYPE = {
   FIRST: 'FIRST',
 };
 
+export const PERMISSION_NAVIGATION={
+  DASHBOARD: 'Dashboard',
+  TEACHERS: 'Teachers',
+}
 export const EXAM_TYPE_OPTIONS = [
   { value: EXAMS_TYPE.STARTERS, label: 'STARTERS (PRE-A1 KIDS) - 3 Modules' },
   { value: EXAMS_TYPE.MOVERS, label: 'MOVERS (A1 KIDS/ADULTS) - 3 Modules' },

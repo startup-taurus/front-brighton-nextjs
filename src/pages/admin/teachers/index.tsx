@@ -1,20 +1,20 @@
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
+import useSWR, { mutate } from 'swr';
+import { Card, CardHeader, Container, Row } from 'reactstrap';
+
 import TeacherForm from '@/components/own/form/teacher-form';
 import TableHeaderActions from '@/components/own/table-header-actions/table-header-actions';
 import TeachersTable from '@/components/own/tables/teachers-table';
-import React, { useState, useEffect } from 'react';
-import { Card, CardHeader, Container, Row } from 'reactstrap';
 import TableFilters from '@/components/own/table-filters/table-filters';
 import { FiltersProps } from '../../../../Types/types';
-import { STATUS_FILTER } from '../../../../utils/constants';
-import { useRouter } from 'next/router';
-import useSWR from 'swr';
-import { getAllProfessors } from '../../../../helper/api-data/professor';
 import { SelectOption } from 'Types/SelectType';
-import { mutate } from 'swr';
-import { getFiltersString } from '../../../../utils/utils';
 import usePermission from '../../../../hooks/usePermission';
 import { PERMISSIONS } from '../../../../utils/permissions';
+import { STATUS_FILTER } from '../../../../utils/constants';
 import { APP_PATHS } from 'utils/constants';
+import { getFiltersString } from '../../../../utils/utils';
+import { getAllProfessors } from '../../../../helper/api-data/professor';
 
 const Teachers = () => {
   const limit = 10;

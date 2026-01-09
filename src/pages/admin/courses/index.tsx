@@ -1,22 +1,20 @@
 import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
+import useSWR, { mutate } from 'swr';
 import { Card, CardHeader, Container, Row } from 'reactstrap';
+
 import TableHeaderActions from '@/components/own/table-header-actions/table-header-actions';
 import CoursesTable from '@/components/own/tables/courses-table';
 import CourseForm from '@/components/own/form/course-form';
-import { FiltersProps } from '../../../../Types/types';
-import { COURSE_TYPE_FILTER, STATUS_FILTER, STATUS_FILTER_COURSE } from '../../../../utils/constants';
 import TableFilters from '@/components/own/table-filters/table-filters';
-import {
-  getActiveProfessors,
-  getAllProfessors,
-} from '../../../../helper/api-data/professor';
-import { getAllCourses } from '../../../../helper/api-data/course';
-import useSWR, { mutate } from 'swr';
+import { FiltersProps } from '../../../../Types/types';
 import { SelectOption } from 'Types/SelectType';
 import usePermission from '../../../../hooks/usePermission';
 import { PERMISSIONS } from '../../../../utils/permissions';
+import { COURSE_TYPE_FILTER, STATUS_FILTER, STATUS_FILTER_COURSE } from '../../../../utils/constants';
 import { APP_PATHS } from 'utils/constants';
-import { useRouter } from 'next/router';
+import { getActiveProfessors, getAllProfessors } from '../../../../helper/api-data/professor';
+import { getAllCourses } from '../../../../helper/api-data/course';
 
 const Students = () => {
   const router = useRouter();
