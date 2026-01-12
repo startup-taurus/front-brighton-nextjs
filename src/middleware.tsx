@@ -13,6 +13,8 @@ export function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
   const userCookie = request.cookies.get("token")?.value;
   let user;
+  const accept = request.headers.get('accept') || '';
+  const isHTML = accept.includes('text/html');
 
   try {
     user = userCookie ? JSON.parse(userCookie) : null;
@@ -20,37 +22,40 @@ export function middleware(request: NextRequest) {
     user = null;
   }
 
+  const roleId = Number(user?.role_id);
+  const isProfessor = roleId === 2;
+
   if (!user && path.split("/")[1] !== "authentication") {
     return NextResponse.redirect(new URL("/authentication/login", request.url));
   }
 
-  if (user && path.split("/")[1] === "authentication") {
-    if (user?.role_id === 2) {
+  if (isHTML && user && path.split("/")[1] === "authentication") {
+    if (isProfessor) {
       return NextResponse.redirect(new URL(`/teachers`, request.url));
     }
-    if (user?.role_id === 3) {
+    if (roleId === 3) {
       return NextResponse.redirect(new URL(`/dashboard/student`, request.url));
     }
     if (
-      user?.role_id === 1 ||
-      user?.role_id === 4 ||
-      user?.role_id === 5 ||
-      user?.role_id === 6
+      roleId === 1 ||
+      roleId === 4 ||
+      roleId === 5 ||
+      roleId === 6
     ) {
       return NextResponse.redirect(new URL(`/dashboard`, request.url));
     }
   }
 
-  if (user?.role_id === 2 && adminOnlyPaths.some(adminPath => path.startsWith(adminPath))) {
+  if (isProfessor && adminOnlyPaths.some(adminPath => path.startsWith(adminPath))) {
   }
 
-  if (user?.role_id === 2 && coordinatorPaths.some(coordinatorPath => path.startsWith(coordinatorPath))) {
+  if (isProfessor && coordinatorPaths.some(coordinatorPath => path.startsWith(coordinatorPath))) {
   }
 
-  if (user?.role_id === 2) {
+  if (isProfessor) {
     const professorIdFromQuery = request.nextUrl.searchParams.get('professorId');
     
-    if (professorIdFromQuery && parseInt(professorIdFromQuery) !== user.professor_id) {
+    if (professorIdFromQuery && parseInt(professorIdFromQuery) !== Number(user.professor_id)) {
       return NextResponse.redirect(new URL("/teachers", request.url));
     }
   }
@@ -65,9 +70,10 @@ export function middleware(request: NextRequest) {
 
   const professorIdQuery = request.nextUrl.searchParams.get('professorId');
   if (
+    isHTML &&
     pathTeacherRegex.test(path) &&
     user &&
-    user?.role_id !== 2 &&
+    !isProfessor &&
     !professorIdQuery
   ) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
