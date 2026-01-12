@@ -53,8 +53,12 @@ const TeacherDashboard = ({
 }: TeacherDashboardProps) => {
   const { user } = useContext(UserContext);
 
+  const shouldFetchDisplayUser =
+    Boolean(professorId) &&
+    ((user?.role_id !== 2) || (user?.id !== professorId));
+
   const userData = useSWR(
-    isCoordinator || isReceptionist ? `/user/get-one/${professorId}` : null,
+    shouldFetchDisplayUser ? `/user/get-one/${professorId}` : null,
     () => getFetcher(`/user/get-one/${professorId}`, false)
   );
 
@@ -71,7 +75,7 @@ const TeacherDashboard = ({
   if (!courses?.data?.data?.courses) return null;
 
   const displayUser =
-    isCoordinator || isReceptionist ? userData?.data?.data || {} : user;
+    shouldFetchDisplayUser ? userData?.data?.data || {} : user;
 
   const rawCalendarCourses = calendarCourses?.data?.data?.courses || [];
   const fallbackCourses = courses?.data?.data?.courses || [];
