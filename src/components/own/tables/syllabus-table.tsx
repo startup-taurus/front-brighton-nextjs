@@ -25,7 +25,12 @@ const SyllabusTable = ({
   const [selectedData, setSelectedData] = useState(null);
   const [isCopyMode, setIsCopyMode] = useState(false);
   
-
+  const { canPermission } = usePermission();
+  const canView = canPermission(PERMISSIONS.VIEW_SYLLABUS);
+  const canEdit = canPermission(PERMISSIONS.EDIT_SYLLABUS);
+  const canCopy = canPermission(PERMISSIONS.DUPLICATE_SYLLABUS);
+  const showActions = canView || canEdit || canCopy;
+  
   const toggle = (syllabus: any, forceUpdate = false) => {
     setIsOpen(!isOpen);
     setSelectedItems(syllabus.items || []);
@@ -91,6 +96,7 @@ const SyllabusTable = ({
   const finalSyllabusData = syllabuses || syllabus;
   const showLoading = loading || (isLoading && !syllabuses);
 
+
   if (showLoading) {
     return (
       <TableSkeleton rows={10} columns={6} showHeader={true} animated={true} />
@@ -98,12 +104,6 @@ const SyllabusTable = ({
   }
 
   if (!finalSyllabusData?.data?.results) return null;
-
-  const { canPermission } = usePermission();
-  const canView = canPermission(PERMISSIONS.VIEW_SYLLABUS);
-  const canEdit = canPermission(PERMISSIONS.EDIT_SYLLABUS);
-  const canCopy = canPermission(PERMISSIONS.DUPLICATE_SYLLABUS);
-  const showActions = canView || canEdit || canCopy;
 
   const columns = [
     {
