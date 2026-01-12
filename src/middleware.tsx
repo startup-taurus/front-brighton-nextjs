@@ -36,16 +36,18 @@ export function middleware(request: NextRequest) {
     if (roleId === 3) {
       return NextResponse.redirect(new URL(`/dashboard/student`, request.url));
     }
-    if (
-      roleId === 1 ||
-      roleId === 4 ||
-      roleId === 5 ||
-      roleId === 6
-    ) {
-      return NextResponse.redirect(new URL(`/dashboard`, request.url));
-    }
+    return NextResponse.redirect(new URL(`/dashboard`, request.url));
   }
 
+  if (isHTML && user && path === "/") {
+    if (isProfessor) {
+      return NextResponse.redirect(new URL(`/teachers`, request.url));
+    }
+    if (roleId === 3) {
+      return NextResponse.redirect(new URL(`/dashboard/student`, request.url));
+    }
+    return NextResponse.redirect(new URL(`/dashboard`, request.url));
+  }
   if (isProfessor && adminOnlyPaths.some(adminPath => path.startsWith(adminPath))) {
   }
 
