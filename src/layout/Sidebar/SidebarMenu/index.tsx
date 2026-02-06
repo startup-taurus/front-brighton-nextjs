@@ -25,23 +25,23 @@ const SidebarMenu = ({ menuList }: { menuList: sidebarMenuType[] }) => {
   );
 
   useEffect(() => {
-    const current = pathname.split('/')[pathname.split('/').length - 1];
-    for (const mainMenu of menuList) {
-      for (const item of mainMenu.Items || []) {
-        if (item.type === 'sub' && Array.isArray(item.children)) {
-          const match = item.children.some((child) => {
+    const current = pathname.split('/').pop();
+    const parent = menuList
+      .flatMap((mainMenu) => mainMenu.Items || [])
+      .find(
+        (item) =>
+          item.type === 'sub' &&
+          Array.isArray(item.children) &&
+          item.children.some((child) => {
             const childLast = (child.path || '').split('/').pop();
             const fullMatch = `/${child.path}` === pathname;
             const lastMatch = childLast === current;
             return fullMatch || lastMatch;
-          });
-          if (match) {
-            setActive(`/${item.pathSlice || ''}`);
-            setActiveLink(current);
-            return;
-          }
-        }
-      }
+          })
+      );
+    if (parent) {
+      setActive(`/${parent.pathSlice || ''}`);
+      setActiveLink(current);
     }
   }, [pathname, menuList]);
 
