@@ -94,6 +94,27 @@ export const CoordinatorMenuList: sidebarMenuType[] = [
         path: 'admin/teachers',
       },
       {
+        title: 'User Management',
+        id: 11,
+        pathSlice: 'admin/user-management',
+        type: 'sub',
+        icon: 'user',
+        children: [
+          {
+            title: 'Users',
+            type: 'link',
+            path: 'admin/users',
+            pathSlice: 'users'
+          },
+          {
+            title: 'Roles And Permissions',
+            type: 'link',
+            path: 'admin/roles-permissions',
+            pathSlice: 'admin/roles-permissions'
+          }
+        ]
+      },
+      {
         title: 'Holidays',
         id: 7,
         pathSlice: 'holidays',
