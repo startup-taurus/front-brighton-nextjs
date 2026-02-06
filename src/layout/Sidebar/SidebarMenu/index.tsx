@@ -1,4 +1,4 @@
-import { Fragment, useContext, useState } from 'react';
+import { Fragment, useContext, useState, useEffect } from 'react';
 import Menulist from './Menulist';
 import { sidebarMenuType } from 'Types/LayoutDataType';
 import { useTranslation } from 'react-i18next';
@@ -23,6 +23,27 @@ const SidebarMenu = ({ menuList }: { menuList: sidebarMenuType[] }) => {
   const [activeLink, setActiveLink] = useState<string | undefined>(
     active.split('/')[active.split('/').length - 1]
   );
+
+  useEffect(() => {
+    const current = pathname.split('/').pop();
+    const parent = menuList
+      .flatMap((mainMenu) => mainMenu.Items || [])
+      .find(
+        (item) =>
+          item.type === 'sub' &&
+          Array.isArray(item.children) &&
+          item.children.some((child) => {
+            const childLast = (child.path || '').split('/').pop();
+            const fullMatch = `/${child.path}` === pathname;
+            const lastMatch = childLast === current;
+            return fullMatch || lastMatch;
+          })
+      );
+    if (parent) {
+      setActive(`/${parent.pathSlice || ''}`);
+      setActiveLink(current);
+    }
+  }, [pathname, menuList]);
 
   const handleActive = (title: string, level: number) => {
     if (active.includes(title)) {
