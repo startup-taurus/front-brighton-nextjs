@@ -87,6 +87,23 @@ const GradebookTable = ({
     setGrades(gradingGrade);
   }, [gradingGrade]);
 
+  const getGradeDisplayValue = (gradingItemId: any, studentId: any) => {
+    const value = grades?.[gradingItemId]?.[studentId];
+
+    if (value === null || value === undefined || value === '') {
+      return '';
+    }
+
+    const numericValue = Number(value);
+
+    if (Number.isNaN(numericValue)) {
+      return '';
+    }
+
+    const [integerPart, decimalPart] = numericValue.toFixed(2).split('.');
+    return `${integerPart.padStart(3, '0')}.${decimalPart}`;
+  };
+
   const onChangeGrades = async (
     event: any,
     gradingItemId: any,
@@ -104,14 +121,14 @@ const GradebookTable = ({
         ...grades,
         [gradingItemId]: {
           ...grades[gradingItemId],
-          [studentId]: '000.00',
+          [studentId]: '',
         },
       }));
       onSaveGrade({
         course_id: courseId,
         student_id: studentId,
         grading_item_id: gradingItemId,
-        grade: 0,
+        grade: null,
       });
       return;
     }
@@ -120,8 +137,6 @@ const GradebookTable = ({
     const paddedDigits = last5digits.padStart(5, '0');
     let finalGrade = paddedDigits.slice(0, -2) + '.' + paddedDigits.slice(-2);
     let numericGrade = Number(finalGrade);
-
-    const prev = grades[gradingItemId]?.[studentId];
 
     if (numericGrade > 100) {
       numericGrade = 100;
@@ -149,22 +164,84 @@ const GradebookTable = ({
     gradingItemId: any,
     studentId: any
   ) => {
+    if (event.key === 'Delete') {
+      event.preventDefault();
+      setGrades((grades: any) => ({
+        ...grades,
+        [gradingItemId]: {
+          ...grades[gradingItemId],
+          [studentId]: '',
+        },
+      }));
+
+      onSaveGrade({
+        course_id: courseId,
+        student_id: studentId,
+        grading_item_id: gradingItemId,
+        grade: null,
+      });
+      return;
+    }
 
     if (event.key === 'Backspace') {
       event.preventDefault();
-      let rawGrade = (grades[gradingItemId]?.[studentId] ?? '000.00').replace(
-        '.',
+      const currentValue = grades?.[gradingItemId]?.[studentId];
+      const currentNumeric = Number(currentValue);
+
+      if (currentValue !== '' && !Number.isNaN(currentNumeric) && currentNumeric === 0) {
+        setGrades((grades: any) => ({
+          ...grades,
+          [gradingItemId]: {
+            ...grades[gradingItemId],
+            [studentId]: '',
+          },
+        }));
+
+        onSaveGrade({
+          course_id: courseId,
+          student_id: studentId,
+          grading_item_id: gradingItemId,
+          grade: null,
+        });
+        return;
+      }
+
+      let rawGrade = String(grades?.[gradingItemId]?.[studentId] ?? '').replace(
+        /\D/g,
         ''
       );
 
+      if (!rawGrade.length) {
+        return;
+      }
+
       rawGrade = rawGrade.slice(0, -1);
 
-      let finalGrade: string | number;
-      if (rawGrade.length === 0 || Number(rawGrade) === 0) {
-        finalGrade = '000.00';
-      } else {
-        const padded = rawGrade.padStart(5, '0');
-        finalGrade = padded.slice(0, -2) + '.' + padded.slice(-2);
+      if (!rawGrade.length) {
+        setGrades((grades: any) => ({
+          ...grades,
+          [gradingItemId]: {
+            ...grades[gradingItemId],
+            [studentId]: '',
+          },
+        }));
+
+        onSaveGrade({
+          course_id: courseId,
+          student_id: studentId,
+          grading_item_id: gradingItemId,
+          grade: null,
+        });
+        return;
+      }
+
+      const padded = rawGrade.padStart(5, '0');
+      let finalGrade = padded.slice(0, -2) + '.' + padded.slice(-2);
+      let numeric = Number(finalGrade);
+
+      if (numeric > 100) {
+        numeric = 100;
+        finalGrade = '100.00';
       }
 
       setGrades((grades: any) => ({
@@ -175,13 +252,11 @@ const GradebookTable = ({
         },
       }));
 
-      const numeric = Number(finalGrade);
-      const clamped = numeric > 100 ? 100 : numeric;
       onSaveGrade({
         course_id: courseId,
         student_id: studentId,
         grading_item_id: gradingItemId,
-        grade: clamped,
+        grade: numeric,
       });
     }
   };
@@ -291,6 +366,9 @@ const GradebookTable = ({
 
   return (
     <>
+      <div className='small text-muted mb-2'>
+        Empty = pending (not averaged), 0 = recorded grade.
+      </div>
       <Table
         responsive
         bordered
@@ -424,7 +502,7 @@ const GradebookTable = ({
                       onKeyDown={(event) =>
                         handleBackSpace(event, item.item_id, student?.id)
                       }
-                      value={grades[item.item_id][student.id] ?? ''}
+                      value={getGradeDisplayValue(item.item_id, student.id)}
                       disabled={isInputDisabled(student)}
                     />
                   </td>
@@ -457,7 +535,7 @@ const GradebookTable = ({
                       onKeyDown={(event) =>
                         handleBackSpace(event, item.item_id, student?.id)
                       }
-                      value={grades[item.item_id][student.id] ?? ''}
+                      value={getGradeDisplayValue(item.item_id, student.id)}
                       disabled={isInputDisabled(student)}
                     />
                   </td>
@@ -490,7 +568,7 @@ const GradebookTable = ({
                       onKeyDown={(event) =>
                         handleBackSpace(event, item.item_id, student?.id)
                       }
-                      value={grades[item.item_id][student.id] ?? ''}
+                      value={getGradeDisplayValue(item.item_id, student.id)}
                       disabled={isInputDisabled(student)}
                     />
                   </td>
@@ -585,7 +663,7 @@ const GradebookTable = ({
                     onKeyDown={(event) =>
                       handleBackSpace(event, item.item_id, student?.id)
                     }
-                    value={grades[item.item_id][student.id] ?? ''}
+                    value={getGradeDisplayValue(item.item_id, student.id)}
                     disabled={isInputDisabled(student)}
                   />
                 </td>
@@ -618,7 +696,7 @@ const GradebookTable = ({
                     onKeyDown={(event) =>
                       handleBackSpace(event, item.item_id, student?.id)
                     }
-                    value={grades[item.item_id][student.id] ?? ''}
+                    value={getGradeDisplayValue(item.item_id, student.id)}
                     disabled={isInputDisabled(student)}
                   />
                 </td>
@@ -651,7 +729,7 @@ const GradebookTable = ({
                     onKeyDown={(event) =>
                       handleBackSpace(event, item.item_id, student?.id)
                     }
-                    value={grades[item.item_id][student.id] ?? ''}
+                    value={getGradeDisplayValue(item.item_id, student.id)}
                     disabled={isInputDisabled(student)}
                   />
                 </td>

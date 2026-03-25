@@ -396,7 +396,7 @@ export const initializeGradebookStructure = (
   courseGrading?.forEach((courseGradingItem: any) => {
     studentsGrades[courseGradingItem.item_id] = {};
     students?.forEach((student: any) => {
-      studentsGrades[courseGradingItem.item_id][student.id] = "";
+      studentsGrades[courseGradingItem.item_id][student.id] = null;
     });
   });
 };
@@ -429,18 +429,26 @@ export const calculateAverage = (
   studentId: string
 ) => {
   let sumResult = 0;
-  let totalExpected = notes.length * 100;
-  let averageResult = "0";
+  let gradedCount = 0;
 
   notes.map((note) => {
-    sumResult += !!grades[note.item_id][studentId]
-      ? Number(grades[note.item_id][studentId])
-      : 0;
+    const value = grades?.[note.item_id]?.[studentId];
+
+    if (value !== null && value !== undefined && value !== "") {
+      const numericGrade = Number(value);
+
+      if (!Number.isNaN(numericGrade)) {
+        sumResult += numericGrade;
+        gradedCount += 1;
+      }
+    }
   });
 
-  averageResult = (sumResult / totalExpected * 100).toFixed(2) ?? 0;
+  if (!gradedCount) {
+    return "0.00";
+  }
 
-  return averageResult;
+  return (sumResult / gradedCount).toFixed(2);
 };
 
 export const calculateTotalAverage = (
