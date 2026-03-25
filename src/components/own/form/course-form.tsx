@@ -24,6 +24,19 @@ import { formatScheduleLinear, scanScheduleConflicts } from '../../../../utils/u
 import usePermission from 'hooks/usePermission';
 import { PERMISSIONS } from 'utils/permissions';
 const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+
+const normalizeCourseNumber = (courseNumber: string) =>
+  String(courseNumber || '')
+    .trim()
+    .replace(/[°º˚ᵒ⁰○◦]/g, '')
+    .replace(/\s+/g, '')
+    .toUpperCase();
+
+const formatCourseNumberForStorage = (courseNumber: string) => {
+  const normalized = normalizeCourseNumber(courseNumber);
+  return normalized ? `${normalized}°` : '';
+};
+
 const CourseForm = ({data, isOpen, toggle, onSuccess, isTransferMode = false, transferInfo, isDuplicateMode = false, duplicateInfo}: any) => {
   const limit = 1000;
   const page = 1;
@@ -35,10 +48,10 @@ const CourseForm = ({data, isOpen, toggle, onSuccess, isTransferMode = false, tr
   const validateScheduleConflicts = async (courseData: any) => {
     try {
       const { data: { result: courses } } = await getAllCourses();
+      const normalizedNewCourseNumber = normalizeCourseNumber(courseData.course_number);
       const duplicateCourse = courses?.find((c: any) => 
-        c.status === STATUS.ACTIVE && 
         (data ? c.id !== data.id : true) &&
-        c.course_number?.toLowerCase() === courseData.course_number?.toLowerCase()
+        normalizeCourseNumber(c.course_number) === normalizedNewCourseNumber
       );
       if (duplicateCourse) {
         return { hasConflict: true, type: CONFLICT_TYPES.DUPLICATE, message: `A course with the same number already exists:<br>
@@ -111,12 +124,7 @@ const CourseForm = ({data, isOpen, toggle, onSuccess, isTransferMode = false, tr
       }
       setIsLoading(true);
       const payload = { ...formData };
-      if (!isUpdate) {
-        const num = String(payload.course_number || '').trim();
-        if (num && !num.endsWith('°')) {
-          payload.course_number = `${num}°`;
-        }
-      }
+      payload.course_number = formatCourseNumberForStorage(payload.course_number);
       if (isDuplicateMode && payload.id) {
         delete payload.id;
       }
@@ -162,8 +170,15 @@ const CourseForm = ({data, isOpen, toggle, onSuccess, isTransferMode = false, tr
     }
   };
 
-  const save = (data: any) => handleSubmit(data, false);
-  const update = (data: any) => handleSubmit(data, true);
+  const save = (data: any) => {
+    setIsLoading(true);
+    handleSubmit(data, false).finally(() => setIsLoading(false));
+  };
+
+  const update = (data: any) => {
+    setIsLoading(true);
+    handleSubmit(data, true).finally(() => setIsLoading(false));
+  };
 
 
 
