@@ -190,7 +190,11 @@ const { data: levels } = useSWR(
       }
     }
   } catch (error) {
-    toast.error('Error updating student', error);
+    const apiMessage =
+      (error as any)?.response?.data?.message ||
+      (error as any)?.message ||
+      'Error updating student';
+    toast.error(apiMessage);
   } finally {
     setIsLoading(false);
   }
