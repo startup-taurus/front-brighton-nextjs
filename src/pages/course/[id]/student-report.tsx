@@ -1,4 +1,4 @@
-import React, { ChangeEvent, ReactElement, useEffect, useState } from 'react';
+import React, { ChangeEvent, ReactElement, useEffect, useMemo, useState } from 'react';
 import { Button, Card, CardBody, Col, Input, Row } from 'reactstrap';
 import { NextPageWithLayout } from '@/pages/_app';
 
@@ -15,7 +15,7 @@ import {
   getGradingPercentageBySyllabus,
 } from '../../../../helper/api-data/course';
 import { getAttendanceByCourseAndStudent } from '../../../../helper/api-data/attendance';
-import { getGradesByCourseAndStudent } from '../../../../helper/api-data/student-grades';
+import { getGradesByCourse, getGradesByCourseAndStudent } from '../../../../helper/api-data/student-grades';
 import StudentReportTable from '@/components/own/tables/student-report-table';
 import Image from 'next/image';
 import { ImgPath } from '../../../../utils/Constant';
@@ -26,6 +26,12 @@ import { PERMISSIONS } from '../../../../utils/permissions';
 import { COURSE_TAB_NAMES, APP_PATHS } from 'utils/constants';
 import { generateBatchCertificatesZIP, generateBatchReportsZIP } from '../../../../utils/pdfGenerator';
 import { STUDENT_REPORT_CONSTANTS } from '../../../../utils/studentReportConstants';
+import {
+  buildGradebookStructure,
+  calculateFinalGradingStatus,
+  calculateTotalAverage,
+  formatGradebookComponents,
+} from '../../../../utils/utils';
 
 const StudentReport: NextPageWithLayout = () => {
   const router = useRouter();
@@ -33,6 +39,9 @@ const StudentReport: NextPageWithLayout = () => {
   const [selectedStudentId, setSelectedStudentId] = useState('');
   const [selectedStudent, setSelectedStudent] = useState('');
   const [isDownloading, setIsDownloading] = useState(false);
+  const [statusFilter, setStatusFilter] = useState(
+    STUDENT_REPORT_CONSTANTS.FILTERS.ALL
+  );
 
   
   const { canPermission, permissionSet } = usePermission();
@@ -69,6 +78,11 @@ const StudentReport: NextPageWithLayout = () => {
     () => getGradesByCourseAndStudent(courseId!.toString(), selectedStudentId)
   );
 
+  const gradesByCourse = useSWR(
+    courseId ? `/student-grades/get-grades-by-course/${courseId}` : null,
+    () => getGradesByCourse(courseId!.toString())
+  );
+
   const gradingItems = useSWR(
     courseId ? `/course/get-grading-items/${courseId}` : null,
     () => getGradingItems(courseId)
@@ -101,12 +115,133 @@ const StudentReport: NextPageWithLayout = () => {
   const changeSelectedStudent = (e: ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setSelectedStudentId(value);
-    const student = courseStudents?.data?.data?.students?.find(
+    const student = filteredStudents?.find(
       (s: any) => s.id == value
     );
 
     setSelectedStudent(student);
   };
+
+  const normalizeStatus = (value?: string) =>
+    (value || '')
+      .toUpperCase()
+      .replace(/[_\s]+/g, ' ')
+      .trim();
+
+  const isPassStatus = (status?: string) => {
+    const normalized = normalizeStatus(status);
+    return normalized === normalizeStatus(STUDENT_REPORT_CONSTANTS.STATUS.PASS);
+  };
+
+  const isFailStatus = (status?: string) => {
+    const normalized = normalizeStatus(status);
+    return normalized === normalizeStatus(STUDENT_REPORT_CONSTANTS.STATUS.FAIL);
+  };
+
+  const isNotReportedStatus = (status?: string) => {
+    const normalized = normalizeStatus(status);
+    return [
+      normalizeStatus(STUDENT_REPORT_CONSTANTS.STATUS.NOT_REPORTED),
+      normalizeStatus(STUDENT_REPORT_CONSTANTS.STATUS.NOT_RESULTED),
+    ].includes(normalized);
+  };
+
+  const allStudents = courseStudents?.data?.data?.students || [];
+
+  const componentsGradebook = useMemo(
+    () => formatGradebookComponents(filteredGradingItems),
+    [filteredGradingItems]
+  );
+
+  const gradebookStructure = useMemo(
+    () =>
+      buildGradebookStructure(
+        filteredGradingItems,
+        allStudents,
+        gradesByCourse?.data?.data || []
+      ),
+    [filteredGradingItems, allStudents, gradesByCourse?.data?.data]
+  );
+
+  const studentStatusMap = useMemo(() => {
+    if (!allStudents?.length) return {};
+    if (!gradingPercentage?.data?.data || !notesPercentages?.data?.data) return {};
+
+    return allStudents.reduce((acc: Record<string, string>, student: any) => {
+      const totalAverage = calculateTotalAverage(
+        gradebookStructure,
+        componentsGradebook,
+        String(student.id),
+        gradingPercentage.data.data
+      );
+      const status = calculateFinalGradingStatus(
+        notesPercentages.data.data,
+        totalAverage
+      );
+      acc[String(student.id)] = status;
+      return acc;
+    }, {});
+  }, [
+    allStudents,
+    gradingPercentage?.data?.data,
+    notesPercentages?.data?.data,
+    gradebookStructure,
+    componentsGradebook,
+  ]);
+
+  const filteredStudents = useMemo(() => {
+    if (statusFilter === STUDENT_REPORT_CONSTANTS.FILTERS.ALL) {
+      return allStudents;
+    }
+
+    return allStudents.filter((student: any) => {
+      const studentStatus = studentStatusMap[String(student.id)] || '';
+
+      if (statusFilter === STUDENT_REPORT_CONSTANTS.FILTERS.PASS) {
+        return isPassStatus(studentStatus);
+      }
+
+      if (statusFilter === STUDENT_REPORT_CONSTANTS.FILTERS.FAIL) {
+        return isFailStatus(studentStatus);
+      }
+
+      if (statusFilter === STUDENT_REPORT_CONSTANTS.FILTERS.NOT_REPORTED) {
+        return isNotReportedStatus(studentStatus);
+      }
+
+      return true;
+    });
+  }, [allStudents, statusFilter, studentStatusMap]);
+
+  useEffect(() => {
+    if (!selectedStudentId) return;
+    const existsInFilteredList = filteredStudents.some(
+      (student: any) => String(student.id) === String(selectedStudentId)
+    );
+
+    if (!existsInFilteredList) {
+      setSelectedStudentId('');
+      setSelectedStudent('');
+    }
+  }, [filteredStudents, selectedStudentId]);
+
+  const selectedCourseNumericId = Number(courseId);
+  const filteredStudentIdsForBatch = filteredStudents
+    .map((student: any) => Number(student.id))
+    .filter((id: number) => Number.isFinite(id));
+
+  const shouldApplyBatchFilter =
+    Number.isFinite(selectedCourseNumericId) &&
+    allStudents.length > 0 &&
+    filteredStudentIdsForBatch.length >= 0;
+
+  const batchFilterOptions = shouldApplyBatchFilter
+    ? {
+        studentIdsByCourse: {
+          [selectedCourseNumericId]: filteredStudentIdsForBatch,
+        },
+      }
+    : undefined;
 
   const handleBatchDownloadReports = async () => {
     if (!courseId) return;
@@ -124,7 +259,10 @@ const StudentReport: NextPageWithLayout = () => {
       }
     });
     try {
-      await generateBatchReportsZIP([parseInt(courseId as string, 10)]);
+      await generateBatchReportsZIP(
+        [parseInt(courseId as string, 10)],
+        batchFilterOptions
+      );
       Swal.close();
       Swal.fire({
         title: 'Download Completed!',
@@ -166,7 +304,10 @@ const StudentReport: NextPageWithLayout = () => {
       }
     });
     try {
-      await generateBatchCertificatesZIP([parseInt(courseId as string, 10)]);
+      await generateBatchCertificatesZIP(
+        [parseInt(courseId as string, 10)],
+        batchFilterOptions
+      );
       Swal.close();
       Swal.fire({
         title: 'Download Completed!',
@@ -223,14 +364,34 @@ const StudentReport: NextPageWithLayout = () => {
 
                 <Input
                   type='select'
+                  name='statusFilter'
+                  id='statusFilter'
+                  className='report-student-filter'
+                  value={statusFilter}
+                  onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                    setStatusFilter(e.target.value)
+                  }
+                >
+                  {STUDENT_REPORT_CONSTANTS.FILTERS.OPTIONS.map((option) => (
+                    <option
+                      key={`student-report-status-filter-${option.value}`}
+                      value={option.value}
+                    >
+                      {option.label}
+                    </option>
+                  ))}
+                </Input>
+
+                <Input
+                  type='select'
                   name='student'
                   id='studentFilter'
                   className='report-student-filter'
-                  defaultValue={selectedStudentId}
+                  value={selectedStudentId}
                   onChange={changeSelectedStudent}
                 >
                   <option value=''>Select the student</option>
-                  {courseStudents?.data?.data?.students?.map((student: any) => (
+                  {filteredStudents?.map((student: any) => (
                     <option
                       value={student?.id}
                       key={`student-report-${student?.id}`}
@@ -258,7 +419,7 @@ const StudentReport: NextPageWithLayout = () => {
                 <Button
                   color="secondary"
                   onClick={handleBatchDownloadReports}
-                  disabled={isDownloading || !courseId}
+                  disabled={isDownloading || !courseId || filteredStudents.length === 0}
                   className={STUDENT_REPORT_CONSTANTS.CSS_CLASSES.ALIGN_ITEMS_CENTER}
                   title="Download all reports of this course"
                 >
@@ -268,7 +429,7 @@ const StudentReport: NextPageWithLayout = () => {
                 <Button
                   color="primary"
                   onClick={handleBatchDownloadCertificates}
-                  disabled={isDownloading || !courseId}
+                  disabled={isDownloading || !courseId || filteredStudents.length === 0}
                   className={STUDENT_REPORT_CONSTANTS.CSS_CLASSES.ALIGN_ITEMS_CENTER}
                   title="Download all certificates of this course"
                 >

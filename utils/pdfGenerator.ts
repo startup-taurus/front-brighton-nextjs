@@ -19,6 +19,10 @@ import {
 import JSZip from 'jszip';
 import { EXAMS_TYPE } from './constants';
 
+type BatchGenerationOptions = {
+  studentIdsByCourse?: Record<number, number[]>;
+};
+
 const norm = (s?: string) =>
   (s || "")
     .toUpperCase()
@@ -64,6 +68,25 @@ const pickGeneral = (examRows: any[]) => {
 const isYLEorKEY = (t?: string) =>
   [EXAMS_TYPE.STARTERS, EXAMS_TYPE.MOVERS, EXAMS_TYPE.FLYERS, EXAMS_TYPE.KEY]
     .includes((t || "").toUpperCase());
+
+const filterStudentsByCourse = (
+  students: any[],
+  courseId: number,
+  options?: BatchGenerationOptions
+) => {
+  const studentIdsByCourse = options?.studentIdsByCourse;
+  if (!studentIdsByCourse) return students;
+
+  const allowedIds = studentIdsByCourse[courseId];
+  if (!Array.isArray(allowedIds)) return students;
+
+  if (allowedIds.length === 0) return [];
+
+  const allowedSet = new Set(allowedIds.map((id) => String(id)));
+  return students.filter((student: any) =>
+    allowedSet.has(String(student?.id))
+  );
+};
 
 class PDFLibLoader {
   private static instance: any = null;
@@ -708,7 +731,10 @@ const processStudentsInBatchesForCertificates = async (
  * Genera un archivo ZIP con todos los certificados de los estudiantes de los cursos seleccionados
  * @param courseIds - Array de IDs de cursos seleccionados
  */
-export const generateBatchCertificatesZIP = async (courseIds: number[]): Promise<void> => {
+export const generateBatchCertificatesZIP = async (
+  courseIds: number[],
+  options?: BatchGenerationOptions
+): Promise<void> => {
   if (!Array.isArray(courseIds)) {
     throw new Error(`❌ courseIds is not an array: ${typeof courseIds}`);
   }
@@ -743,12 +769,23 @@ export const generateBatchCertificatesZIP = async (courseIds: number[]): Promise
         
         const courseFolderName = `${courseData.course_name}_${courseData.course_number}`.replace(/[^a-zA-Z0-9_-]/g, '_');
         const courseFolder = certificatesFolder?.folder(courseFolderName);
-        if (!studentsData?.students || studentsData.students.length === 0) {
+        const studentsToProcess = filterStudentsByCourse(
+          studentsData?.students || [],
+          Number(courseId),
+          options
+        );
+
+        if (!studentsToProcess?.length) {
+          const infoContent = `Course: ${courseData.course_name} (${courseData.course_number})
+            Status: No students to process
+            Date: ${new Date().toISOString().split('T')[0]}
+            Note: This course has no students matching the current filter for certificates.`;
+          courseFolder?.file('Course_Info.txt', infoContent);
           coursesProcessed++;
           continue;
         }
         const { processed, errors } = await processStudentsInBatchesForCertificates(
-          studentsData.students, 
+          studentsToProcess,
           courseData, 
           courseFolder
         );
@@ -839,7 +876,10 @@ const processStudentsInBatches = async (
  * Genera un archivo ZIP con todos los reportes de los estudiantes de los cursos seleccionados
  * @param courseIds - Array de IDs de cursos seleccionados
  */
-export const generateBatchReportsZIP = async (courseIds: number[]): Promise<void> => {
+export const generateBatchReportsZIP = async (
+  courseIds: number[],
+  options?: BatchGenerationOptions
+): Promise<void> => {
   
   try {
     const zip = new JSZip();
@@ -864,19 +904,25 @@ export const generateBatchReportsZIP = async (courseIds: number[]): Promise<void
         const courseFolderName = `${courseData.course_name}_${courseData.course_number}`.replace(/[^a-zA-Z0-9_-]/g, '_');
         const courseFolder = reportsFolder?.folder(courseFolderName);
 
-        if (!studentsData?.students || studentsData.students.length === 0) {
+        const studentsToProcess = filterStudentsByCourse(
+          studentsData?.students || [],
+          Number(courseId),
+          options
+        );
+
+        if (!studentsToProcess?.length) {
           
           const infoContent = `Course: ${courseData.course_name} (${courseData.course_number})
-            Status: No students enrolled
+            Status: No students to process
             Date: ${new Date().toISOString().split('T')[0]}
-            Note: This course has no students to generate reports for.`;
+            Note: This course has no students matching the current filter to generate reports.`;
           
           courseFolder?.file('Course_Info.txt', infoContent);
           coursesProcessed++;
           continue;
         }
         const { processed, errors } = await processStudentsInBatches(
-          studentsData.students, 
+          studentsToProcess,
           courseData, 
           courseFolder
         );

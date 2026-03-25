@@ -21,8 +21,22 @@ export const STUDENT_REPORT_CONSTANTS = {
     YOUNG_LEARNERS: 'Young Learners',
   },
   STATUS: {
+    PASS: 'PASS',
+    FAIL: 'FAIL',
     NOT_REPORTED: 'Not Reported',
     NOT_RESULTED: 'NOT RESULTED',
+  },
+  FILTERS: {
+    ALL: 'ALL',
+    PASS: 'PASS',
+    FAIL: 'FAIL',
+    NOT_REPORTED: 'NOT_REPORTED',
+    OPTIONS: [
+      { label: 'All', value: 'ALL' },
+      { label: 'PASS', value: 'PASS' },
+      { label: 'FAIL', value: 'FAIL' },
+      { label: 'Not Reported', value: 'NOT_REPORTED' },
+    ],
   },
   DEFAULT_VALUES: {
     ZERO: '0',
