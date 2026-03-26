@@ -60,12 +60,14 @@ const StudentTransferForm: React.FC<Props> = ({
   isViewOnly = false,
   onSuccess,
 }) => {
+  type CourseListStatus = 'active' | 'inactive';
   const [isLoading, setIsLoading] = useState(false);
   const [courseOptions, setCourseOptions] = useState<Option[]>([]);
   const [selectedCourse, setSelectedCourse] = useState<Option | null>(null);
   const [selectedLevel, setSelectedLevel] = useState<Option | null>(null);
   const [coursePage, setCoursePage] = useState(1);
   const [courseSearchTerm, setCourseSearchTerm] = useState('');
+  const [courseListStatus, setCourseListStatus] = useState<CourseListStatus>('active');
   const [hasMoreCourses, setHasMoreCourses] = useState(true);
   const [selectedStudents, setSelectedStudents] = useState<Set<number>>(new Set());
   const [selectAll, setSelectAll] = useState(false);
@@ -73,8 +75,8 @@ const StudentTransferForm: React.FC<Props> = ({
   const limit = 10;
 
   const { data: coursesData, isLoading: isLoadingCourses } = useSWR(
-    [`/course/get-active`, coursePage, limit, courseSearchTerm],
-    () => getActiveCourses(coursePage, limit, courseSearchTerm),
+    [`/course/get-active`, coursePage, limit, courseSearchTerm, courseListStatus],
+    () => getActiveCourses(coursePage, limit, courseSearchTerm, courseListStatus),
     { revalidateOnFocus: false }
   );
   const formatCourseLabel = (c: any) => {
@@ -121,25 +123,61 @@ const StudentTransferForm: React.FC<Props> = ({
     return ids.length > 0 ? ids[0] : null;
   }, [students]);
 
+  const isCourseCompleted = (course: any) =>
+    !(
+      typeof course?.status === 'string' &&
+      course.status.toLowerCase() === 'transferred'
+    ) &&
+    course?.last_class_date &&
+    new Date(course.last_class_date) < new Date();
+
+  const matchesCourseListStatus = (course: any, status: CourseListStatus) => {
+    const normalizedStatus = String(course?.status || '').toLowerCase();
+    if (status === 'inactive') {
+      return !isCourseCompleted(course) && normalizedStatus === 'inactive';
+    }
+    return !isCourseCompleted(course) && normalizedStatus === 'active';
+  };
+
   useEffect(() => {
     if (coursesData?.data) {
 
-      const opts = coursesData.data
-        .filter((course: any) => course.syllabus?.level)
-        .map((course: any) => {
+      const rawCourses = Array.isArray(coursesData.data) ? coursesData.data : [];
+      const filteredCourses = rawCourses.filter((course: any) =>
+        matchesCourseListStatus(course, courseListStatus)
+      );
+
+      console.log('[StudentTransferForm] Courses fetched', {
+        requestedStatus: courseListStatus,
+        rawCount: rawCourses.length,
+        rawStatuses: rawCourses.reduce((acc: Record<string, number>, course: any) => {
+          const status = String(course?.status || 'unknown').toLowerCase();
+          acc[status] = (acc[status] || 0) + 1;
+          return acc;
+        }, {}),
+        filteredCount: filteredCourses.length,
+      });
+
+      const opts = filteredCourses.map((course: any) => {
           const name = (course.course_name || '').trim();
-          const level = (course.syllabus.level.full_level || '').trim();
+          const level = (course?.syllabus?.level?.full_level || '').trim();
           const base = `${course.course_number} - ${name}`;
-          const label = name.toUpperCase() === level.toUpperCase()
-            ? base
-            : `${base} - ${level}`;
+          const label = level && name.toUpperCase() !== level.toUpperCase()
+            ? `${base} - ${level}`
+            : base;
           return {
             value: course.id,
             label,
-            levelId: course.syllabus.level.id,
-            levelLabel: course.syllabus.level.full_level,
+            levelId: course?.syllabus?.level?.id ?? null,
+            levelLabel: level || String(course?.course_type || '').toUpperCase(),
           } as any;
         });
+
+      console.log('[StudentTransferForm] Options rendered', {
+        requestedStatus: courseListStatus,
+        optionsCount: opts.length,
+        page: coursePage,
+      });
 
       if (coursePage === 1) {
         setCourseOptions(opts);
@@ -150,7 +188,8 @@ const StudentTransferForm: React.FC<Props> = ({
           return [...prevOpts, ...filteredNewOpts];
         });
       }
-      setHasMoreCourses(opts.length === limit);
+
+      setHasMoreCourses(rawCourses.length === limit);
 
       if (initialTransferData?.selected_course) {
         const foundCourse = opts.find((o: Option) => o.value === initialTransferData.selected_course!.value);
@@ -169,7 +208,7 @@ const StudentTransferForm: React.FC<Props> = ({
         setSelectedLevel(lvl as any);
       }
     }
-  }, [coursesData, initialTransferData, coursePage, limit, selectedCourse]);
+  }, [coursesData, initialTransferData, coursePage, limit, selectedCourse, courseListStatus]);
 
   useEffect(() => {
     if (courseByIdData?.data && initialTransferData?.selected_course && !selectedCourse) {
@@ -201,6 +240,16 @@ const StudentTransferForm: React.FC<Props> = ({
     setCourseSearchTerm(inputValue);
     setCoursePage(1);
     setHasMoreCourses(true);
+  };
+
+  const handleCourseStatusSwitch = () => {
+    setCourseListStatus((prev) => (prev === 'active' ? 'inactive' : 'active'));
+    setCoursePage(1);
+    setCourseSearchTerm('');
+    setCourseOptions([]);
+    setHasMoreCourses(true);
+    setSelectedCourse(null);
+    setSelectedLevel(null);
   };
   useEffect(() => {
     if (isOpen && students.length > 0) {
@@ -342,6 +391,23 @@ const StudentTransferForm: React.FC<Props> = ({
                 <Col md="12">
                   <FormGroup>
                     <Label for="course">Destination Course</Label>
+                    <div className='d-flex align-items-center justify-content-between mb-2'>
+                      <small className='text-muted'>
+                        Showing {courseListStatus === 'active' ? 'ACTIVE' : 'INACTIVE'} courses
+                      </small>
+                      <div className='form-check form-switch mb-0'>
+                        <Input
+                          id='courseStatusSwitch'
+                          type='switch'
+                          role='switch'
+                          checked={courseListStatus === 'inactive'}
+                          onChange={handleCourseStatusSwitch}
+                        />
+                        <Label for='courseStatusSwitch' className='mb-0 ms-2'>
+                          Show inactive
+                        </Label>
+                      </div>
+                    </div>
                     <Select
                       id="course"
                       options={courseOptions}

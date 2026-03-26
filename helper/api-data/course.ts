@@ -21,10 +21,11 @@ export const getGradingPercentageBySyllabus = (syllabusId: string) => {
 export const getActiveCourses = (
   page: number,
   limit: number,
-  searchTerm = ''
+  searchTerm = '',
+  status: 'active' | 'inactive' = 'active'
 ) => {
   return getFetcher(
-    `/course/get-active?page=${page}&limit=${limit}&search=${searchTerm}`,
+    `/course/get-active?page=${page}&limit=${limit}&search=${searchTerm}&status=${status}`,
     false
   );
 };
