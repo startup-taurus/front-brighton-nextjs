@@ -5,7 +5,9 @@ import {
   getCourseWithProfessors,
   updateStatusCourse,
   getCourseWithStudents,
+  getGradingItems,
 } from 'helper/api-data/course';
+import { getGradesByCourse } from 'helper/api-data/student-grades';
 import { transferAndProgressStudents } from 'helper/api-data/student';
 import TableActionButtons from '@/components/own/table-action-buttons/table-action-buttons';
 import Swal from 'sweetalert2';
@@ -37,6 +39,7 @@ const CoursesTable = ({ reload, loading }: any) => {
   const [isDuplicateModalOpen, setIsDuplicateModalOpen] = useState(false);
   const [courseToDuplicate, setCourseToDuplicate] = useState(null);
   const [lastTransferredCourseId, setLastTransferredCourseId] = useState<number | null>(null);
+  const [pendingBlockCourseId, setPendingBlockCourseId] = useState<number | null>(null);
 
   const page = Number(router.query.page) || 1;
   const rowPerPage = Number(router.query.rowPerPage) || 10;
@@ -127,22 +130,90 @@ const CoursesTable = ({ reload, loading }: any) => {
     if (isOpen) refreshData();
   }, [isOpen, refreshData]);
 
-  const handleAlert = useCallback((row: any) => {
-    const action = getStatusAction(row?.status);
-    
-    Swal.fire({
-      title: `Are you sure to ${action}?`,
-      text: `You are about to ${action} this course`,
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonText: `Yes, ${action}!`,
-      cancelButtonText: 'Cancel',
-      reverseButtons: true,
-    }).then((result) => {
-      if (result.isConfirmed) {
-        updateStatus(row);
+  const getMissingGradesSummary = useCallback(async (courseId: number) => {
+    try {
+      const [studentsResponse, gradingItemsResponse, gradesResponse] = await Promise.all([
+        getCourseWithStudents(String(courseId)),
+        getGradingItems(String(courseId)),
+        getGradesByCourse(String(courseId)),
+      ]);
+
+      const students = Array.isArray(studentsResponse?.data?.students)
+        ? studentsResponse.data.students
+        : Array.isArray(studentsResponse?.data?.data?.students)
+        ? studentsResponse.data.data.students
+        : [];
+
+      const isStudentRetired = (student: any) => {
+        const retiredValue = student?.is_retired;
+        const normalized = String(retiredValue ?? '').toLowerCase();
+        return (
+          retiredValue === true ||
+          retiredValue === 1 ||
+          normalized === '1' ||
+          normalized === 'true'
+        );
+      };
+
+      const activeStudents = students.filter((student: any) => {
+        const status = String(student?.status || '').toLowerCase();
+        return !isStudentRetired(student) && status !== STATUS.INACTIVE;
+      });
+
+      const gradingItems = Array.isArray(gradingItemsResponse?.data?.data)
+        ? gradingItemsResponse.data.data
+        : Array.isArray(gradingItemsResponse?.data)
+        ? gradingItemsResponse.data
+        : [];
+
+      const gradingItemIds = gradingItems
+        .map((item: any) => Number(item?.item_id))
+        .filter((id: number) => Number.isFinite(id));
+
+      if (activeStudents.length === 0 || gradingItemIds.length === 0) {
+        return { missingCount: 0, studentsWithMissing: 0 };
       }
-    });
+
+      const grades = Array.isArray(gradesResponse?.data?.data)
+        ? gradesResponse.data.data
+        : Array.isArray(gradesResponse?.data)
+        ? gradesResponse.data
+        : [];
+
+      const gradeMap = new Map<string, any>();
+      grades.forEach((gradeRow: any) => {
+        const key = `${Number(gradeRow?.student_id)}-${Number(
+          gradeRow?.grading_item_id
+        )}`;
+        gradeMap.set(key, gradeRow?.grade);
+      });
+
+      let missingCount = 0;
+      const studentsWithMissing = new Set<number>();
+
+      activeStudents.forEach((student: any) => {
+        const studentId = Number(student?.id);
+        gradingItemIds.forEach((gradingItemId: number) => {
+          const key = `${studentId}-${gradingItemId}`;
+          const value = gradeMap.get(key);
+
+          if (value === undefined || value === null || value === '') {
+            missingCount += 1;
+            studentsWithMissing.add(studentId);
+          }
+        });
+      });
+
+      const summary = {
+        missingCount,
+        studentsWithMissing: studentsWithMissing.size,
+      };
+
+      return summary;
+    } catch (error) {
+      console.error('Error checking missing grades before closing course:', error);
+      return null;
+    }
   }, []);
 
   const updateStatus = useCallback(async (data: any) => {
@@ -158,6 +229,51 @@ const CoursesTable = ({ reload, loading }: any) => {
       toast.error('Error updating course status');
     }
   }, [refreshData]);
+
+  const handleAlert = useCallback(async (row: any) => {
+    const courseId = Number(row?.id);
+
+    if (!Number.isFinite(courseId)) {
+      return;
+    }
+
+    setPendingBlockCourseId(courseId);
+
+    const action = getStatusAction(row?.status);
+    const willCloseCourse =
+      String(row?.status || '').toLowerCase() === STATUS.ACTIVE;
+
+    let missingSummary: { missingCount: number; studentsWithMissing: number } | null = null;
+
+    try {
+      if (willCloseCourse) {
+        missingSummary = await getMissingGradesSummary(courseId);
+      }
+    } finally {
+      setPendingBlockCourseId(null);
+    }
+
+    const showMissingGradesWarning =
+      willCloseCourse &&
+      !!missingSummary &&
+      missingSummary.missingCount > 0;
+    
+    Swal.fire({
+      title: `Are you sure to ${action}?`,
+      html: showMissingGradesWarning
+        ? `You are about to ${action} this course.<br/><br/><strong>⚠️ Warning:</strong> There are <strong>${missingSummary?.missingCount}</strong> unentered grades in <strong>${missingSummary?.studentsWithMissing}</strong> student(s).`
+        : `You are about to ${action} this course.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: willCloseCourse ? `Yes, close anyway` : `Yes, ${action}!`,
+      cancelButtonText: 'Cancel',
+      reverseButtons: true,
+    }).then((result) => {
+      if (result.isConfirmed) {
+        updateStatus(row);
+      }
+    });
+  }, [getMissingGradesSummary, updateStatus]);
 
   const handleAttendance = useCallback((row: any) => {
     router.push({
@@ -355,6 +471,7 @@ const CoursesTable = ({ reload, loading }: any) => {
                   ? () => handleTransferCourseWithStudents(row)
                   : undefined
               }
+              blockLoading={pendingBlockCourseId === Number(row.id)}
               status={row.status !== 'active'}
               module='Courses'
             />
@@ -413,7 +530,7 @@ const CoursesTable = ({ reload, loading }: any) => {
       selector: (row: any) => formatText(row.schedule),
       sortable: true,
     },
-  ], [user?.role, toggle, handleAlert, handleAttendance, handleTransferCourseWithStudents, permissionSet]);
+  ], [user?.role, toggle, handleAlert, handleAttendance, handleTransferCourseWithStudents, permissionSet, pendingBlockCourseId]);
 
   const resetTransferModal = useCallback(() => {
     setIsTransferModalOpen(false);

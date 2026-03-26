@@ -27,6 +27,7 @@ const TableActionButtons = ({
   onGradebook,
   onActivate,
   onTransferCourse,
+  blockLoading = false,
   disabled = false,
   viewDisabled,
   blockButtonVariant = 'cancel',
@@ -97,9 +98,19 @@ const TableActionButtons = ({
             className={`btn btn-${blockButtonVariant}`}
             onClick={onBlock}
             data-tooltip-id='on-block'
-            disabled={disabled}
+            disabled={disabled || blockLoading}
           >
-            {!status ? <FaBan /> : <FaCheck />}
+            {blockLoading ? (
+              <span
+                className='spinner-border spinner-border-sm'
+                role='status'
+                aria-hidden='true'
+              />
+            ) : !status ? (
+              <FaBan />
+            ) : (
+              <FaCheck />
+            )}
           </button>
         )}
         {onEdit && canAction(ACTION_TYPES.EDIT) && (

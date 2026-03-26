@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { Card, CardBody, Button } from 'reactstrap';
@@ -10,10 +10,22 @@ import { TeacherCardProps } from 'Types/TeacherType';
 import usePermission from '../../../../hooks/usePermission';
 import { PERMISSIONS } from '../../../../utils/permissions';
 
+const teacherNameClampStyle: React.CSSProperties = {
+  display: '-webkit-box',
+  WebkitLineClamp: 2,
+  WebkitBoxOrient: 'vertical',
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  lineHeight: 1.25,
+  maxHeight: '2.5em',
+  wordBreak: 'break-word',
+};
+
 const TeacherCard = ({ teacher }: TeacherCardProps) => {
   const router = useRouter();
-  const { user } = useContext(UserContext);
+  useContext(UserContext);
   const { canPermission, permissionSet } = usePermission();
+  const [showInitialsAvatar, setShowInitialsAvatar] = useState(!teacher.image);
 
   const { data: professorData } = useSWR(
     teacher.user?.id ? `professor/${teacher.user.id}/courses` : null,
@@ -45,15 +57,16 @@ const TeacherCard = ({ teacher }: TeacherCardProps) => {
   return (
     <Card className='overflow-hidden mb-4 shadow-sm border-0 h-100 '>
       <CardBody className='p-4 d-flex flex-column '>
-        <div className='d-flex flex-column flex-sm-row align-items-center gap-3 '>
+        <div className='d-flex flex-column align-items-center gap-3 h-100'>
           <div className='flex-shrink-0'>
-            {teacher.image ? (
+            {!showInitialsAvatar ? (
               <Image
                 src={`${UrlImage}/${teacher.image}`}
                 alt={teacher.name}
                 width={80}
                 height={80}
-                className='rounded-circle object-fit-cover'
+                className='rounded-circle object-fit-cover d-block'
+                onError={() => setShowInitialsAvatar(true)}
               />
             ) : (
               <div
@@ -67,46 +80,57 @@ const TeacherCard = ({ teacher }: TeacherCardProps) => {
               </div>
             )}
           </div>
-          <div className='text-center text-sm-start'>
-            <h5 className='fw-bold mb-1'>{teacher.name}</h5>
-            <p className='text-muted '>{teacher.role}</p>
-            <div className='d-flex flex-wrap gap-3 justify-content-center justify-content-sm-start'>
-              <div className='d-flex align-items-center gap-2'>
+
+          <div className='text-center w-100 px-1' style={{ minWidth: 0 }}>
+            <h5 className='fw-bold mb-1' title={teacher.name} style={teacherNameClampStyle}>
+              {teacher.name}
+            </h5>
+
+            <p className='text-muted mb-0'>{teacher.role}</p>
+
+            <div
+              className='d-grid gap-2 mt-3 w-100'
+              style={{ gridTemplateColumns: 'repeat(2, minmax(0, 1fr))' }}
+            >
+              <div className='d-flex align-items-center justify-content-center gap-2 w-100 overflow-hidden'>
                 <Image
                   src={`${ImgPath}/own/bag-icon.png`}
                   alt='students icon'
                   width={20}
                   height={20}
                 />
-                <div>
+                <div className='overflow-hidden'>
                   <div className='fw-bold'>
                     {professorData?.data?.total_students || studentsCount}
                   </div>
-                  <small className='text-muted'>Students</small>
+                  <small className='text-muted d-block text-nowrap'>Students</small>
                 </div>
               </div>
-              <div className='d-flex align-items-center gap-2'>
+
+              <div className='d-flex align-items-center justify-content-center gap-2 w-100 overflow-hidden'>
                 <Image
                   src={`${ImgPath}/own/hat-icon.png`}
                   alt='courses icon'
                   width={20}
                   height={20}
                 />
-                <div>
+                <div className='overflow-hidden'>
                   <div className='fw-bold'>
                     {professorData?.data?.total_courses || coursesCount}
                   </div>
-                  <small className='text-muted'>Courses</small>
+                  <small className='text-muted d-block text-nowrap'>Courses</small>
                 </div>
               </div>
             </div>
           </div>
         </div>
-        <div className='mt-auto d-flex justify-content-end pt-3 border-top'>
+
+        <div className='mt-auto d-flex justify-content-end pt-3 border-top w-100'>
           <Button
             color='warning'
             size='sm'
             onClick={handleViewDashboard}
+            className='w-100'
           >
             View Dashboard
           </Button>

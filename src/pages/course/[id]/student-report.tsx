@@ -130,20 +130,31 @@ const StudentReport: NextPageWithLayout = () => {
 
   const isPassStatus = (status?: string) => {
     const normalized = normalizeStatus(status);
-    return normalized === normalizeStatus(STUDENT_REPORT_CONSTANTS.STATUS.PASS);
+    const passLabel = normalizeStatus(STUDENT_REPORT_CONSTANTS.STATUS.PASS);
+    return normalized === passLabel || normalized.startsWith(`${passLabel} (`);
   };
 
   const isFailStatus = (status?: string) => {
     const normalized = normalizeStatus(status);
-    return normalized === normalizeStatus(STUDENT_REPORT_CONSTANTS.STATUS.FAIL);
+    const failLabel = normalizeStatus(STUDENT_REPORT_CONSTANTS.STATUS.FAIL);
+    return (
+      normalized === failLabel ||
+      normalized.startsWith(`${failLabel} (`) ||
+      normalized.startsWith('FAILED')
+    );
   };
 
   const isNotReportedStatus = (status?: string) => {
     const normalized = normalizeStatus(status);
-    return [
-      normalizeStatus(STUDENT_REPORT_CONSTANTS.STATUS.NOT_REPORTED),
-      normalizeStatus(STUDENT_REPORT_CONSTANTS.STATUS.NOT_RESULTED),
-    ].includes(normalized);
+    const notReported = normalizeStatus(STUDENT_REPORT_CONSTANTS.STATUS.NOT_REPORTED);
+    const notResulted = normalizeStatus(STUDENT_REPORT_CONSTANTS.STATUS.NOT_RESULTED);
+
+    return (
+      normalized === notReported ||
+      normalized === notResulted ||
+      normalized.startsWith(notReported) ||
+      normalized.startsWith(notResulted)
+    );
   };
 
   const allStudents = courseStudents?.data?.data?.students || [];
