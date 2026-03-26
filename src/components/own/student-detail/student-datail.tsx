@@ -23,6 +23,18 @@ const StudentDetail = ({ data, isOpen, toggle }: any) => {
 
   const isReceptionist = user?.role === USER_TYPES.RECEPTIONIST;
 
+  const getCourseHistory = () => {
+    if (!Array.isArray(data?.course)) return [];
+
+    return [...data.course].sort((a, b) => {
+      const dateA = a?.enrollment_date ? new Date(a.enrollment_date).getTime() : 0;
+      const dateB = b?.enrollment_date ? new Date(b.enrollment_date).getTime() : 0;
+      return dateB - dateA;
+    });
+  };
+
+  const courseHistory = getCourseHistory();
+
   const navigateToAttendance = () => {
     if (data?.course?.length > 0 && data.course[0]?.id) {
       const encryptedId = encrypt(data.id.toString());
@@ -87,9 +99,31 @@ const StudentDetail = ({ data, isOpen, toggle }: any) => {
               <span>Course</span>
             </div>
             <div className='font-success col-3'>
-              {data?.course?.length > 0
-                ? data.course[0]?.course_name
-                : 'Curso no disponible'}
+              {data?.course?.length > 0 ? data.course[0]?.course_name : 'Curso no disponible'}
+            </div>
+            <div className='col-12 mt-2'>
+              <span>Course history</span>
+            </div>
+            <div className='col-12'>
+              {Array.isArray(courseHistory) && courseHistory.length > 0 ? (
+                <ul className='list-unstyled mb-2'>
+                  {courseHistory.map((course: any) => (
+                    <li
+                      key={course.course_student_id || `${course.id}-${course.enrollment_date}`}
+                      className='position-relative border-start border-2 ps-3 ms-2 mb-3'
+                    >
+                      <span className='position-absolute top-0 start-0 translate-middle p-1 bg-primary border border-light rounded-circle'></span>
+                      <span className='text-dark'>
+                        {`${course.course_number || ''} - ${course.course_name || ''}`.trim()}
+                        {course.professor ? ` | Prof. ${course.professor}` : ''}
+                        {course.enrollment_date ? ` | ${new Date(course.enrollment_date).toLocaleDateString()}` : ''}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <span>No course history available</span>
+              )}
             </div>
             <div className='col-3'>
               <span>Payment Amount </span>

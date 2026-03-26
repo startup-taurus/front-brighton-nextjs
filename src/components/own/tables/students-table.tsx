@@ -67,10 +67,26 @@ const StudentsTable = ({
     }
   };
 
-  const toggleDetail = (data: any) => {
-    setSelectedData(data);
-    setIsOpenDetail(!isOpenDetail);
-    if (!isOpenDetail) clearSelections();
+  const toggleDetail = async (data: any) => {
+    try {
+      setIsLoadingStudent(true);
+      if (!data.id) {
+        setSelectedData(data);
+      } else {
+        const response = await getStudent(data.id);
+        if (response.statusCode === 200) {
+          setSelectedData(response.data);
+        } else {
+          setSelectedData(data);
+        }
+      }
+    } catch (error) {
+      setSelectedData(data);
+    } finally {
+      setIsLoadingStudent(false);
+      setIsOpenDetail(!isOpenDetail);
+      if (!isOpenDetail) clearSelections();
+    }
   };
 
   const updateStatus = async (data: any) => {
