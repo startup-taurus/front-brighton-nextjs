@@ -23,6 +23,25 @@ import {PRIVATE_COURSE_TYPES, CONFLICT_TYPES, ConflictType, STATUS, COURSE_TYPES
 import { formatScheduleLinear, scanScheduleConflicts } from '../../../../utils/utils';
 import usePermission from 'hooks/usePermission';
 import { PERMISSIONS } from 'utils/permissions';
+
+type NoConflict = { hasConflict: false };
+
+type DuplicateConflict = {
+  hasConflict: true;
+  type: 'duplicate';
+  duplicateCourse: any;
+  canDeactivate: boolean;
+  message: string;
+};
+
+type OtherConflict = {
+  hasConflict: true;
+  type: ConflictType;
+  message: string;
+};
+
+type ConflictValidationResult = NoConflict | DuplicateConflict | OtherConflict;
+
 const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 const normalizeCourseNumber = (courseNumber: string) =>
@@ -81,7 +100,7 @@ const CourseForm = ({data, isOpen, toggle, onSuccess, isTransferMode = false, tr
     return payload;
   };
 
-  const validateScheduleConflicts = async (courseData: any) => {
+  const validateScheduleConflicts = async (courseData: any): Promise<ConflictValidationResult> => {
     try {
       const { data: { result: courses } } = await getAllCourses();
       const normalizedNewCourseNumber = normalizeCourseNumber(courseData.course_number);
@@ -102,7 +121,7 @@ const CourseForm = ({data, isOpen, toggle, onSuccess, isTransferMode = false, tr
         const canDeactivate = canToggleStatus && isActive;
         return { 
           hasConflict: true, 
-          type: CONFLICT_TYPES.DUPLICATE,
+          type: CONFLICT_TYPES.DUPLICATE as 'duplicate',
           duplicateCourse,
           canDeactivate,
           message: isActive && canDeactivate 
@@ -137,12 +156,23 @@ const CourseForm = ({data, isOpen, toggle, onSuccess, isTransferMode = false, tr
         (data ? c.id !== data.id : true)
       ) || [];
 
-
       const profResult = scanScheduleConflicts(activeCourses, CONFLICT_TYPES.SCHEDULE, newDays, newTime, startEffective, newEndDate, newSchedule);
-      if (profResult.hasConflict) return profResult;
+      if (profResult.hasConflict) {
+        return {
+          hasConflict: true,
+          type: CONFLICT_TYPES.SCHEDULE,
+          message: profResult.message || 'Schedule conflict detected'
+        };
+      }
       if (courseData.course_type === COURSE_TYPES.ON_SITE) {
         const roomResult = scanScheduleConflicts(classroomCourses, CONFLICT_TYPES.CLASSROOM, newDays, newTime, startEffective, newEndDate, newSchedule);
-        if (roomResult.hasConflict) return roomResult;
+        if (roomResult.hasConflict) {
+          return {
+            hasConflict: true,
+            type: CONFLICT_TYPES.CLASSROOM,
+            message: roomResult.message || 'Classroom conflict detected'
+          };
+        }
       }
       return { hasConflict: false };
     } catch (error) {
@@ -163,10 +193,17 @@ const CourseForm = ({data, isOpen, toggle, onSuccess, isTransferMode = false, tr
       if (conflictValidation.hasConflict) {
         debugLog('handleSubmit:conflict', conflictValidation);
 
-        if (conflictValidation.type === CONFLICT_TYPES.DUPLICATE && conflictValidation.canDeactivate) {
+        // Type guard: check if it's a duplicate conflict with canDeactivate capability
+        if (
+          conflictValidation.type === CONFLICT_TYPES.DUPLICATE &&
+          'canDeactivate' in conflictValidation &&
+          conflictValidation.canDeactivate &&
+          'duplicateCourse' in conflictValidation
+        ) {
+          const duplicateConflict = conflictValidation as DuplicateConflict;
           const result = await Swal.fire({
             title: 'Duplicate Active Course Detected',
-            html: `${conflictValidation.message}<br><br><strong>Deactivate as:</strong>`,
+            html: `${duplicateConflict.message}<br><br><strong>Deactivate as:</strong>`,
             icon: 'warning',
             input: 'select',
             inputValue: STATUS.INACTIVE,
@@ -188,14 +225,14 @@ const CourseForm = ({data, isOpen, toggle, onSuccess, isTransferMode = false, tr
             const selectedStatus = result.value || STATUS.INACTIVE;
             debugLog('duplicate-confirmed', {
               selectedStatus,
-              duplicateCourseId: conflictValidation.duplicateCourse?.id,
+              duplicateCourseId: duplicateConflict.duplicateCourse?.id,
             });
 
             setIsLoading(true);
             try {
-              await updateStatusCourse(conflictValidation.duplicateCourse.id, selectedStatus);
+              await updateStatusCourse(duplicateConflict.duplicateCourse.id, selectedStatus);
               debugLog('updateStatusCourse:success', {
-                duplicateCourseId: conflictValidation.duplicateCourse?.id,
+                duplicateCourseId: duplicateConflict.duplicateCourse?.id,
                 selectedStatus,
               });
 
@@ -219,13 +256,14 @@ const CourseForm = ({data, isOpen, toggle, onSuccess, isTransferMode = false, tr
             }
           }
         } else {
+          const otherConflict = conflictValidation as OtherConflict;
           await Swal.fire({
             title: conflictValidation.type === CONFLICT_TYPES.CLASSROOM
               ? 'Classroom Conflict Detected'
               : conflictValidation.type === CONFLICT_TYPES.DUPLICATE
               ? 'Duplicate Course Detected'
               : 'Schedule Conflict Detected',
-            html: conflictValidation.message,
+            html: otherConflict.message,
             icon: 'error',
             confirmButtonText: 'OK',
             confirmButtonColor: '#d33',
