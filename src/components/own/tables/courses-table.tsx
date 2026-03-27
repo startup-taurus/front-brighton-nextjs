@@ -108,16 +108,29 @@ const CoursesTable = ({ reload, loading }: any) => {
     });
   };
 
-  const isCourseCompleted = (row: any) =>
-    !(
-      typeof row.status === 'string' &&
-      row.status.toLowerCase() === STATUS.TRANSFERRED
-    ) &&
-    row.last_class_date &&
-    new Date(row.last_class_date) < new Date();
+  const debugLog = (...args: any[]) => {
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('[CoursesTable]', ...args);
+    }
+  };
+
+  const normalizeStatus = (status: any) =>
+    typeof status === 'string' ? status.trim().toLowerCase() : '';
+
+  const isCourseCompleted = (row: any) => {
+    const normalizedStatus = normalizeStatus(row?.status);
+
+    if (normalizedStatus === STATUS.TRANSFERRED) return false;
+    if (normalizedStatus === STATUS.COMPLETED) return true;
+
+    return Boolean(
+      row.last_class_date &&
+      new Date(row.last_class_date) < new Date()
+    );
+  };
   
   const isCourseTransferred = (row: any) =>
-    typeof row.status === 'string' && row.status.toLowerCase() === STATUS.TRANSFERRED;
+    normalizeStatus(row?.status) === STATUS.TRANSFERRED;
   
   const hasActiveStudents = (row: any) =>
     typeof row.active_student_count === 'number' && row.active_student_count > 0;
@@ -401,8 +414,8 @@ const CoursesTable = ({ reload, loading }: any) => {
   const preFilteredData = baseData;
   const statusPredicateMap: Record<string, (row: any) => boolean> = {
     [STATUS.COMPLETED]: (row: any) => isCourseCompleted(row),
-    [STATUS.INACTIVE]: (row: any) => !isCourseCompleted(row) && row.status?.toLowerCase() === STATUS.INACTIVE,
-    [STATUS.ACTIVE]: (row: any) => !isCourseCompleted(row) && row.status?.toLowerCase() === STATUS.ACTIVE,
+    [STATUS.INACTIVE]: (row: any) => !isCourseCompleted(row) && normalizeStatus(row?.status) === STATUS.INACTIVE,
+    [STATUS.ACTIVE]: (row: any) => !isCourseCompleted(row) && normalizeStatus(row?.status) === STATUS.ACTIVE,
     [STATUS.TRANSFERRED]: (row: any) => isCourseTransferred(row),
   };
 
@@ -437,7 +450,16 @@ const CoursesTable = ({ reload, loading }: any) => {
   const getStatusBadgeClass = (row: any) => {
     if (isCourseTransferred(row)) return 'badge-info';
     if (isCourseCompleted(row)) return 'badge-warning';
-    const status = row.status?.toLowerCase();
+    const status = normalizeStatus(row?.status);
+
+    debugLog('status-badge-evaluation', {
+      id: row?.id,
+      rawStatus: row?.status,
+      normalizedStatus: status,
+      lastClassDate: row?.last_class_date,
+      resolvedCompleted: isCourseCompleted(row),
+    });
+
     return status === STATUS.ACTIVE ? 'badge-success' : 'badge-danger';
   };
 

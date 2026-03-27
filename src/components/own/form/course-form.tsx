@@ -13,7 +13,7 @@ import {
 import LoadingButton from '../common/loading-button/LoadingButton';
 import useSWR, {mutate} from 'swr';
 import Select from 'react-select';
-import {createCourse, updateCourse, getAllCourses} from 'helper/api-data/course';
+import {createCourse, updateCourse, getAllCourses, updateStatusCourse} from 'helper/api-data/course';
 import {getActiveProfessors} from 'helper/api-data/professor';
 import {getAllSyllabus} from 'helper/api-data/syllabus';
 
@@ -37,6 +37,11 @@ const formatCourseNumberForStorage = (courseNumber: string) => {
   return normalized ? `${normalized}°` : '';
 };
 
+const debugLog = (...args: any[]) => {
+  if (process.env.NODE_ENV !== 'production') {
+  }
+};
+
 const CourseForm = ({data, isOpen, toggle, onSuccess, isTransferMode = false, transferInfo, isDuplicateMode = false, duplicateInfo}: any) => {
   const limit = 1000;
   const page = 1;
@@ -44,6 +49,37 @@ const CourseForm = ({data, isOpen, toggle, onSuccess, isTransferMode = false, tr
   const [isLoading, setIsLoading] = useState(false);
   const { canPermission } = usePermission();
   const canToggleStatus = canPermission(PERMISSIONS.TOGGLE_COURSE_STATUS);
+
+  const buildCoursePayload = (formData: any) => {
+    const payload = { ...formData };
+    payload.course_number = formatCourseNumberForStorage(payload.course_number);
+
+    if (isDuplicateMode && payload.id) {
+      delete payload.id;
+    }
+
+    const isPrivate = [PRIVATE_COURSE_TYPES.PRIVATE, PRIVATE_COURSE_TYPES.PRIVATE_ONLINE].includes(formData.course_type);
+
+    if (isPrivate) {
+      payload.start_date = formData.start_date || new Date().toISOString().split('T')[0];
+      payload.syllabus_id = null;
+      payload.classroom = null;
+      payload.schedule = null;
+    } else {
+      payload.schedule = formatScheduleLinear(formData.schedules);
+    }
+
+    if (isDuplicateMode && duplicateInfo?.students) {
+      payload.students = duplicateInfo.students
+        .filter((student: any) => student?.status?.toLowerCase() === STATUS.ACTIVE && !student?.is_retired)
+        .map((student: any) => ({
+          student_id: student.id,
+          enrollment_date: new Date().toISOString().split('T')[0],
+        }));
+    }
+
+    return payload;
+  };
 
   const validateScheduleConflicts = async (courseData: any) => {
     try {
@@ -53,11 +89,32 @@ const CourseForm = ({data, isOpen, toggle, onSuccess, isTransferMode = false, tr
         (data ? c.id !== data.id : true) &&
         normalizeCourseNumber(c.course_number) === normalizedNewCourseNumber
       );
+
+      debugLog('validateScheduleConflicts', {
+        normalizedNewCourseNumber,
+        foundDuplicate: Boolean(duplicateCourse),
+        duplicateId: duplicateCourse?.id,
+        duplicateStatus: duplicateCourse?.status,
+      });
+
       if (duplicateCourse) {
-        return { hasConflict: true, type: CONFLICT_TYPES.DUPLICATE, message: `A course with the same number already exists:<br>
-                   Existing course: ${duplicateCourse.course_name} (${duplicateCourse.course_number})<br>
-                   Professor: ${duplicateCourse.professor_name || 'Not assigned'}<br>
-                   Please use a different course number.` };
+        const isActive = duplicateCourse.status === STATUS.ACTIVE;
+        const canDeactivate = canToggleStatus && isActive;
+        return { 
+          hasConflict: true, 
+          type: CONFLICT_TYPES.DUPLICATE,
+          duplicateCourse,
+          canDeactivate,
+          message: isActive && canDeactivate 
+            ? `A <strong>ACTIVE</strong> course with the same number already exists:<br>
+               <strong>Course:</strong> ${duplicateCourse.course_name} (${duplicateCourse.course_number})<br>
+               <strong>Status:</strong> ${duplicateCourse.status}<br><br>
+               To create this new course for the current period, deactivate the existing one.` 
+            : `A course with the same number already exists:<br>
+               Existing course: ${duplicateCourse.course_name} (${duplicateCourse.course_number})<br>
+               Status: ${duplicateCourse.status}<br>
+               Please use a different course number.`
+        };
       }
       if (courseData.course_type === PRIVATE_COURSE_TYPES.PRIVATE || courseData.course_type === PRIVATE_COURSE_TYPES.PRIVATE_ONLINE) {
         return { hasConflict: false };
@@ -95,19 +152,85 @@ const CourseForm = ({data, isOpen, toggle, onSuccess, isTransferMode = false, tr
 
   const handleSubmit = async (formData: any, isUpdate = false) => {
     try {
+      debugLog('handleSubmit:start', {
+        isUpdate,
+        courseName: formData?.course_name,
+        courseNumber: formData?.course_number,
+        courseType: formData?.course_type,
+      });
+
       const conflictValidation = await validateScheduleConflicts(formData);
       if (conflictValidation.hasConflict) {
-        await Swal.fire({
-          title: conflictValidation.type === CONFLICT_TYPES.CLASSROOM
-            ? 'Classroom Conflict Detected'
-            : conflictValidation.type === CONFLICT_TYPES.DUPLICATE
-            ? 'Duplicate Course Detected'
-            : 'Schedule Conflict Detected',
-          html: conflictValidation.message,
-          icon: 'error',
-          confirmButtonText: 'OK',
-          confirmButtonColor: '#d33',
-        });
+        debugLog('handleSubmit:conflict', conflictValidation);
+
+        if (conflictValidation.type === CONFLICT_TYPES.DUPLICATE && conflictValidation.canDeactivate) {
+          const result = await Swal.fire({
+            title: 'Duplicate Active Course Detected',
+            html: `${conflictValidation.message}<br><br><strong>Deactivate as:</strong>`,
+            icon: 'warning',
+            input: 'select',
+            inputValue: STATUS.INACTIVE,
+            inputOptions: {
+              [STATUS.INACTIVE]: 'INACTIVE - Course paused, can be reactivated',
+              [STATUS.COMPLETED]: 'COMPLETED - Marks the course as finished',
+            },
+            showCancelButton: true,
+            confirmButtonText: 'Deactivate Active Course and Create New One',
+            confirmButtonColor: '#0080ff',
+            cancelButtonText: 'Cancel',
+            inputValidator: (value) => {
+              if (!value) return 'Please select a deactivation status';
+              return undefined;
+            },
+          });
+
+          if (result.isConfirmed) {
+            const selectedStatus = result.value || STATUS.INACTIVE;
+            debugLog('duplicate-confirmed', {
+              selectedStatus,
+              duplicateCourseId: conflictValidation.duplicateCourse?.id,
+            });
+
+            setIsLoading(true);
+            try {
+              await updateStatusCourse(conflictValidation.duplicateCourse.id, selectedStatus);
+              debugLog('updateStatusCourse:success', {
+                duplicateCourseId: conflictValidation.duplicateCourse?.id,
+                selectedStatus,
+              });
+
+              const payload = buildCoursePayload(formData);
+              const response = await createCourse(payload);
+              debugLog('createCourse:response', {
+                statusCode: response?.statusCode,
+                id: response?.data?.id,
+              });
+
+              if (response.statusCode === 200 || response.statusCode === 201) {
+                toast.success('Active course updated and new course created successfully!');
+                mutate([`/course/get-all-with-professors?page=1&rowPerPage=10`]);
+                toggle();
+              }
+            } catch (error: any) {
+              debugLog('duplicate-flow:error', error);
+              toast.error(error?.message || 'Error processing deactivate and create. Please try again.');
+            } finally {
+              setIsLoading(false);
+            }
+          }
+        } else {
+          await Swal.fire({
+            title: conflictValidation.type === CONFLICT_TYPES.CLASSROOM
+              ? 'Classroom Conflict Detected'
+              : conflictValidation.type === CONFLICT_TYPES.DUPLICATE
+              ? 'Duplicate Course Detected'
+              : 'Schedule Conflict Detected',
+            html: conflictValidation.message,
+            icon: 'error',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#d33',
+          });
+        }
         return;
       }
 
@@ -123,34 +246,21 @@ const CourseForm = ({data, isOpen, toggle, onSuccess, isTransferMode = false, tr
         if (!result.isConfirmed) return;
       }
       setIsLoading(true);
-      const payload = { ...formData };
-      payload.course_number = formatCourseNumberForStorage(payload.course_number);
-      if (isDuplicateMode && payload.id) {
-        delete payload.id;
-      }
-      
-      const isPrivate = [PRIVATE_COURSE_TYPES.PRIVATE, PRIVATE_COURSE_TYPES.PRIVATE_ONLINE].includes(formData.course_type);
-      
-      if (isPrivate) {
-        payload.start_date = formData.start_date || new Date().toISOString().split('T')[0];
-        payload.syllabus_id = null;
-        payload.classroom = null;
-        payload.schedule = null;
-      } else {
-        payload.schedule = formatScheduleLinear(formData.schedules);
-      }
-      if (isDuplicateMode && duplicateInfo?.students) {
-        payload.students = duplicateInfo.students
-          .filter((student: any) => student?.status?.toLowerCase() === STATUS.ACTIVE && !student?.is_retired)
-          .map((student: any) => ({
-            student_id: student.id,
-            enrollment_date: new Date().toISOString().split('T')[0],
-          }));
-      }
+      const payload = buildCoursePayload(formData);
+      debugLog('normal-create-or-update:payload', {
+        isUpdate,
+        status: payload?.status,
+        courseNumber: payload?.course_number,
+      });
 
       const response = isUpdate 
         ? await updateCourse(formData.id, payload)
         : await createCourse(payload);
+
+      debugLog('normal-create-or-update:response', {
+        statusCode: response?.statusCode,
+        isUpdate,
+      });
 
       if (response.statusCode === 200 || response.statusCode === 201) {
         if (isTransferMode && onSuccess) {
@@ -164,6 +274,7 @@ const CourseForm = ({data, isOpen, toggle, onSuccess, isTransferMode = false, tr
         }
       }
     } catch (error) {
+      debugLog('handleSubmit:error', error);
       toast.error(`Error ${isUpdate ? 'updating' : 'creating'} course. Please try again.`);
     } finally {
       setIsLoading(false);

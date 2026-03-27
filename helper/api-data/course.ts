@@ -65,6 +65,16 @@ export const updateStatusCourse = (courseId: number, status: string) => {
   return putFetcher(`/course/update-status/${courseId}`, { status });
 };
 
+export const deactivateAndCreateCourse = (
+  existingCourseId: number,
+  newCourseData: any,
+  deactivateStatus: string
+) => {
+  return putFetcher(`/course/update-status/${existingCourseId}`, {
+    status: deactivateStatus,
+  }).then(() => postFetcher(`/course/create`, newCourseData));
+};
+
 export const upsertCourseAssignmentItem = (courseId: string, payload: { itemId?: number | string, name: string }) => {
   return putFetcher(`/course/${courseId}/assignment`, payload);
 };
