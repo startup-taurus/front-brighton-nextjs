@@ -28,23 +28,24 @@ const TeachersTable = ({reload}: any) => {
   const canDelete = canPermission(PERMISSIONS.DELETE_TEACHER);
   const canBlock = canPermission(PERMISSIONS.TOGGLE_TEACHER_STATUS);
   const showActions = canEdit || canDelete || canBlock;
+  const professorsListKey = `/professor/get-all?page=${page}&limit=${rowPerPage}${filters ? `&${filters}` : ''}`;
 
   const toggle = (data: any, forceUpdate = false) => {
     setSelectedData(data);
     setIsOpen(!isOpen);
 
-    if (isOpen && forceUpdate) {
+    if (forceUpdate) {
       mutateData();
     }
   };
 
   const mutateData = () => {
-    mutate([
-      `/professor/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters} ` : ''}`,
-    ]);
+    mutate(professorsListKey);
 
     mutate(
-      (key) => typeof key === 'string' && key.startsWith('/professor/'),
+      (key) =>
+        (typeof key === 'string' && key.startsWith('/professor/')) ||
+        (Array.isArray(key) && key[0] === '/professor/get-all'),
       undefined,
       {revalidate: true}
     );
@@ -82,10 +83,7 @@ const TeachersTable = ({reload}: any) => {
     data: professors,
     error,
     isLoading,
-  } = useSWR(
-    `/professor/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}`,
-    () => getAllProfessors(page, rowPerPage, filters)
-  );
+  } = useSWR(professorsListKey, () => getAllProfessors(page, rowPerPage, filters));
 
   if (isLoading) {
     return (
@@ -93,7 +91,13 @@ const TeachersTable = ({reload}: any) => {
     );
   }
 
-  if (!professors?.data?.result) return null;
+  if (error) {
+    return <div className='text-center py-4'>Error loading teachers</div>;
+  }
+
+  if (!professors?.data?.result) {
+    return <div className='text-center py-4'>No teachers found</div>;
+  }
 
   const columns = [
     {

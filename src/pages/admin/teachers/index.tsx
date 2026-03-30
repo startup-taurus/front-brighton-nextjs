@@ -73,12 +73,12 @@ const Teachers = () => {
   };
 
   const handleReload = () => {
-    mutate([
-      `/professor/get-all?page=${page}&rowPerPage=${rowPerPage}${filters ? `&${filters}` : ''}`,
-    ]);
+    mutate(`/professor/get-all?page=${page}&limit=${rowPerPage}${filters ? `&${filters}` : ''}`);
     
     mutate(
-      (key) => typeof key === 'string' && key.startsWith('/professor/'),
+      (key) =>
+        (typeof key === 'string' && key.startsWith('/professor/')) ||
+        (Array.isArray(key) && key[0] === '/professor/get-all'),
       undefined,
       { revalidate: true }
     );

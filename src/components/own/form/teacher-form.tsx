@@ -76,12 +76,12 @@ const update = async (values: any) => {
     const formData = new FormData();
     
     Object.entries(rest).forEach(([key, value]) => {
-      formData.append(key, value as any);
+      if (value !== undefined && value !== null) {
+        formData.append(key, String(value));
+      }
     });
 
     if (image instanceof File) {
-      formData.append('image', image);
-    } else if (typeof image === 'string' && image) {
       formData.append('image', image);
     }
 
@@ -97,9 +97,11 @@ const update = async (values: any) => {
         onReload();
       }
       toggle(null, true);
+    } else {
+      toast.error(res?.message || 'Error updating teacher');
     }
-  } catch (error) {
-    toast.error('Error updating teacher');
+  } catch (error: any) {
+    toast.error(error?.response?.data?.message || error?.message || 'Error updating teacher');
   }
 };
 
