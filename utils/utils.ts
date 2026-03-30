@@ -462,18 +462,26 @@ export const calculateTotalAverage = (
   const progressTest = calculateAverage(grades, notes.progressTest, studentId);
   const moversExam = calculateAverage(grades, notes.moversExam, studentId);
 
+  const assigPercentage = Number((gradingPercentages as any)?.assig_percentage ?? 0);
+  const testPercentage = Number((gradingPercentages as any)?.test_percentage ?? 0);
+  const examPercentage = Number((gradingPercentages as any)?.exam_percentage ?? 0);
+
   const totalPercentage = 
-    Number(gradingPercentages.assig_percentage) +
-    Number(gradingPercentages.test_percentage) +
-    Number(gradingPercentages.exam_percentage);
+    assigPercentage +
+    testPercentage +
+    examPercentage;
+
+  if (!Number.isFinite(totalPercentage) || totalPercentage <= 0) {
+    return "0.00";
+  }
 
   result =
     Number(assignments) *
-      (Number(gradingPercentages.assig_percentage) / totalPercentage) +
+      (assigPercentage / totalPercentage) +
     Number(progressTest) *
-      (Number(gradingPercentages.test_percentage) / totalPercentage) +
+      (testPercentage / totalPercentage) +
     Number(moversExam) *
-      (Number(gradingPercentages.exam_percentage) / totalPercentage);
+      (examPercentage / totalPercentage);
 
   return Number(result).toFixed(2);
 };
@@ -589,15 +597,22 @@ export const calculateAssignmentAverage = (
   let totalPercentage = 0;
   let average = 0;
 
+  const assigPercentage = Number((gradingPercentage as any)?.assig_percentage ?? 0);
+  const testPercentage = Number((gradingPercentage as any)?.test_percentage ?? 0);
+
   totalPercentage =
-    Number(gradingPercentage.assig_percentage) +
-    Number(gradingPercentage.test_percentage);
+    assigPercentage +
+    testPercentage;
+
+  if (!Number.isFinite(totalPercentage) || totalPercentage <= 0) {
+    return "0.00";
+  }
 
   average =
     scoreGrades.assignments *
-      (Number(gradingPercentage.assig_percentage) / totalPercentage) +
+      (assigPercentage / totalPercentage) +
     scoreGrades.progressTest *
-      (Number(gradingPercentage.test_percentage) / totalPercentage);
+      (testPercentage / totalPercentage);
 
   return Number(average).toFixed(2);
 };
@@ -609,18 +624,26 @@ export const calculateStudentAverage = (
   let totalPercentage = 0;
   let average = 0;
 
+  const assigPercentage = Number((gradingPercentage as any)?.assig_percentage ?? 0);
+  const testPercentage = Number((gradingPercentage as any)?.test_percentage ?? 0);
+  const examPercentage = Number((gradingPercentage as any)?.exam_percentage ?? 0);
+
   totalPercentage =
-    Number(gradingPercentage.assig_percentage) +
-    Number(gradingPercentage.test_percentage) +
-    Number(gradingPercentage.exam_percentage);
+    assigPercentage +
+    testPercentage +
+    examPercentage;
+
+  if (!Number.isFinite(totalPercentage) || totalPercentage <= 0) {
+    return "0.00";
+  }
 
   average =
     scoreGrades.assignments *
-      (Number(gradingPercentage.assig_percentage) / totalPercentage) +
+      (assigPercentage / totalPercentage) +
     scoreGrades.progressTest *
-      (Number(gradingPercentage.test_percentage) / totalPercentage) +
+      (testPercentage / totalPercentage) +
     scoreGrades.moversExam *
-      (Number(gradingPercentage.exam_percentage) / totalPercentage);
+      (examPercentage / totalPercentage);
 
   return Number(average).toFixed(2);
 };

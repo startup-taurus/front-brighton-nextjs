@@ -18,6 +18,7 @@ export const PERMISSIONS = {
   DELETE_STUDENT: 'delete_student',
   TRANSFER_STUDENT: 'transfer_student',
   TOGGLE_STUDENT_STATUS: 'toggle_student_status',
+  DOWNLOAD_STUDENT_DOCUMENT: 'download_student_document',
 
   // Teacher management permissions
   VIEW_TEACHERS: 'view_teachers',
@@ -221,6 +222,7 @@ export const PERMISSION_MODULES: Record<string, string[]> = {
     PERMISSIONS.EDIT_STUDENT,
     PERMISSIONS.DELETE_STUDENT,
     PERMISSIONS.TOGGLE_STUDENT_STATUS,
+    PERMISSIONS.DOWNLOAD_STUDENT_DOCUMENT,
     PERMISSIONS.VIEW_STUDENT_REPORTS,
   ],
   Courses: [
@@ -290,6 +292,7 @@ export const ACTION_PERMISSIONS: Record<string, Record<string, string>> = {
     delete: PERMISSIONS.DELETE_STUDENT,
     transfer: PERMISSIONS.VIEW_STUDENTS,
     block: PERMISSIONS.TOGGLE_STUDENT_STATUS,
+    download_document: PERMISSIONS.DOWNLOAD_STUDENT_DOCUMENT,
   },
   Professors: {
     view: PERMISSIONS.VIEW_TEACHERS,
@@ -326,6 +329,7 @@ export const ACTION_TYPES = {
   COPY: 'copy',
   TRANSFER: 'transfer',
   TRANSFER_COURSE: 'transfer_course',
+  DOWNLOAD_DOCUMENT: 'download_document',
   DELETE: 'delete',
 } as const;
 

@@ -27,6 +27,10 @@ import { COURSE_TAB_NAMES, APP_PATHS } from 'utils/constants';
 import { generateBatchCertificatesZIP, generateBatchReportsZIP } from '../../../../utils/pdfGenerator';
 import { STUDENT_REPORT_CONSTANTS } from '../../../../utils/studentReportConstants';
 import {
+  formatMissingItemsHtml,
+  getMissingGradeItemsByStudent,
+} from '../../../../utils/emissionValidation';
+import {
   buildGradebookStructure,
   calculateFinalGradingStatus,
   calculateTotalAverage,
@@ -256,6 +260,38 @@ const StudentReport: NextPageWithLayout = () => {
 
   const handleBatchDownloadReports = async () => {
     if (!courseId) return;
+
+    const missingByStudent = filteredStudents
+      .map((student: any) => {
+        const missingItems = getMissingGradeItemsByStudent(
+          filteredGradingItems,
+          gradesByCourse?.data?.data || [],
+          student.id
+        );
+        return {
+          student,
+          missingItems,
+        };
+      })
+      .filter((entry: any) => entry.missingItems.length > 0);
+
+    if (missingByStudent.length > 0) {
+      const html = missingByStudent
+        .map(({ student, missingItems }: any) => {
+          const studentName = student?.name || `Student ${student?.id}`;
+          return `<div style="text-align:left;margin-bottom:12px;"><p style="margin:0 0 6px 0;"><strong>${studentName}</strong></p>${formatMissingItemsHtml(missingItems)}</div>`;
+        })
+        .join('');
+
+      await Swal.fire({
+        title: 'Missing grades detected',
+        html: `<p style="text-align:left;">Complete missing grades before generating reports:</p>${html}`,
+        icon: 'warning',
+        confirmButtonText: 'Understood',
+      });
+      return;
+    }
+
     setIsDownloading(true);
     Swal.fire({
       title: 'Generating Reports...',
@@ -301,6 +337,38 @@ const StudentReport: NextPageWithLayout = () => {
 
   const handleBatchDownloadCertificates = async () => {
     if (!courseId) return;
+
+    const missingByStudent = filteredStudents
+      .map((student: any) => {
+        const missingItems = getMissingGradeItemsByStudent(
+          filteredGradingItems,
+          gradesByCourse?.data?.data || [],
+          student.id
+        );
+        return {
+          student,
+          missingItems,
+        };
+      })
+      .filter((entry: any) => entry.missingItems.length > 0);
+
+    if (missingByStudent.length > 0) {
+      const html = missingByStudent
+        .map(({ student, missingItems }: any) => {
+          const studentName = student?.name || `Student ${student?.id}`;
+          return `<div style="text-align:left;margin-bottom:12px;"><p style="margin:0 0 6px 0;"><strong>${studentName}</strong></p>${formatMissingItemsHtml(missingItems)}</div>`;
+        })
+        .join('');
+
+      await Swal.fire({
+        title: 'Missing grades detected',
+        html: `<p style="text-align:left;">Complete missing grades before generating certificates:</p>${html}`,
+        icon: 'warning',
+        confirmButtonText: 'Understood',
+      });
+      return;
+    }
+
     setIsDownloading(true);
     Swal.fire({
       title: 'Generating Certificates...',

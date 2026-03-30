@@ -3,11 +3,13 @@ import { Col, Button } from "reactstrap";
 import ReportTable from "@/components/own/report-table/report-table";
 import ReportStatus from "@/components/own/report-status/report-status";
 import Link from "next/link";
-import { FaRegFilePdf, FaCertificate, FaFileAlt } from "react-icons/fa";
+import { FaRegFilePdf, FaFileAlt } from "react-icons/fa";
 import { generateCertificatePDF, generateReportPDF } from "../../../../utils/pdfGenerator";
 import { StudentData } from "../../../../Types/ReportTypes";
 import { toast } from "react-toastify";
 import { Bar } from "react-chartjs-2";
+import Swal from 'sweetalert2';
+import { mutate } from 'swr';
 import { generateBarChartOptions } from "../../../../Data/Charts/ChartJsData";
 import {
   buildGradebookStructure,
@@ -30,6 +32,12 @@ import {
   EXAMS_TYPE,
 } from "../../../../utils/constants";
 import { STUDENT_REPORT_CONSTANTS } from "../../../../utils/studentReportConstants";
+import {
+  formatMissingItemsHtml,
+  getMissingGradeItems,
+  MissingGradeItem,
+} from '../../../../utils/emissionValidation';
+import CompleteMissingGradesModal from '@/components/own/modals/complete-missing-grades-modal';
 
 const assignmentsTestCols = [
   {
@@ -109,6 +117,9 @@ const StudentReportTable = ({
   );
   const [resultGPA, setResultGPA] = useState<string>(STUDENT_REPORT_CONSTANTS.STATUS.NOT_RESULTED);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isMissingModalOpen, setIsMissingModalOpen] = useState(false);
+  const [missingItems, setMissingItems] = useState<MissingGradeItem[]>([]);
+  const [pendingDownloadType, setPendingDownloadType] = useState<string | null>(null);
 
   const norm = (s?: string) =>
     (s || "")
@@ -214,6 +225,28 @@ const StudentReportTable = ({
     }
 
     try {
+      const detectedMissingItems = getMissingGradeItems(gradingItems, gradesByStudent);
+
+      if (detectedMissingItems.length > 0) {
+        const htmlDetails = formatMissingItemsHtml(detectedMissingItems);
+        setMissingItems(detectedMissingItems);
+
+        const decision = await Swal.fire({
+          title: 'Missing grades detected',
+          html: `<p style="text-align:left;">You need to complete the following grades before issuing this document:</p>${htmlDetails}`,
+          icon: 'warning',
+          showCancelButton: true,
+          confirmButtonText: 'Complete now',
+          cancelButtonText: 'Cancel',
+        });
+
+        if (decision.isConfirmed) {
+          setPendingDownloadType(type);
+          setIsMissingModalOpen(true);
+        }
+        return;
+      }
+
       setIsGenerating(true);
       
       const studentData = generateStudentData(type === STUDENT_REPORT_CONSTANTS.MESSAGES.CERTIFICATE);
@@ -234,12 +267,70 @@ const StudentReportTable = ({
     }
   };
 
+  const refreshGrades = async () => {
+    if (!selectedStudentId || !courseDetail?.id) return;
+
+    await Promise.all([
+      mutate(
+        `/student-grades/get-grades-by-course-and-student/${courseDetail.id}/${selectedStudentId}`
+      ),
+      mutate(`/student-grades/get-grades-by-course/${courseDetail.id}`),
+    ]);
+  };
+
   const handleGenerateCertificate = async () => {
     await handlePDFGeneration(STUDENT_REPORT_CONSTANTS.MESSAGES.CERTIFICATE, generateCertificatePDF);
   };
 
   const handleGenerateReport = async () => {
     await handlePDFGeneration(STUDENT_REPORT_CONSTANTS.MESSAGES.REPORT, generateReportPDF);
+  };
+
+  const handleOpenDownloadModal = async () => {
+    if (!selectedStudent || !courseDetail || isGenerating) {
+      return;
+    }
+
+    const decision = await Swal.fire({
+      title: 'Download document',
+      text: 'Choose what you want to download for this student.',
+      icon: 'question',
+      showDenyButton: true,
+      confirmButtonText: 'Certificate',
+      denyButtonText: 'Report',
+      allowOutsideClick: true,
+      allowEscapeKey: true,
+    });
+
+    if (decision.isConfirmed) {
+      await handleGenerateCertificate();
+      return;
+    }
+
+    if (decision.isDenied) {
+      await handleGenerateReport();
+    }
+  };
+
+  const handleMissingModalSubmit = async () => {
+    const downloadType = pendingDownloadType;
+
+    setPendingDownloadType(null);
+    setIsMissingModalOpen(false);
+
+    if (!downloadType) {
+      return;
+    }
+
+    await refreshGrades();
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    if (downloadType === STUDENT_REPORT_CONSTANTS.MESSAGES.CERTIFICATE) {
+      await handleGenerateCertificate();
+      return;
+    }
+
+    await handleGenerateReport();
   };
 
   const gradingGrade = useMemo(
@@ -340,6 +431,21 @@ const StudentReportTable = ({
 
   return (
     <>
+      <CompleteMissingGradesModal
+        isOpen={isMissingModalOpen}
+        toggle={() => setIsMissingModalOpen((prev) => !prev)}
+        courseId={courseDetail?.id}
+        studentId={selectedStudentId}
+        missingItems={missingItems}
+        gradingItems={gradingItems}
+        gradesByStudent={gradesByStudent}
+        gradingPercentages={gradingPercentage}
+        notesPercentages={notesPercentages}
+        studentName={selectedStudent?.name}
+        onCompleted={refreshGrades}
+        onSubmit={handleMissingModalSubmit}
+        submitLabel={pendingDownloadType === STUDENT_REPORT_CONSTANTS.MESSAGES.CERTIFICATE ? 'Save & Download Certificate' : 'Save & Download Report'}
+      />
       <Col xs={12} sm={12} md={12} lg={8}>
         <div className={STUDENT_REPORT_CONSTANTS.CSS_CLASSES.MT_4}>
           <div className={STUDENT_REPORT_CONSTANTS.CSS_CLASSES.ATTENDANCE_RESUME}>
@@ -374,21 +480,12 @@ const StudentReportTable = ({
           <div className={STUDENT_REPORT_CONSTANTS.CSS_CLASSES.DOWNLOAD_CONTAINER}>
             <Button
               color="primary"
-              onClick={handleGenerateCertificate}
-              disabled={!selectedStudent || !courseDetail || isGenerating}
-              className={STUDENT_REPORT_CONSTANTS.CSS_CLASSES.ALIGN_ITEMS_CENTER}
-            >
-              <FaCertificate />
-              {isGenerating ? STUDENT_REPORT_CONSTANTS.MESSAGES.GENERATING : STUDENT_REPORT_CONSTANTS.MESSAGES.DOWNLOAD_CERTIFICATE}
-            </Button>
-            <Button
-              color="secondary"
-              onClick={handleGenerateReport}
+              onClick={handleOpenDownloadModal}
               disabled={!selectedStudent || !courseDetail || isGenerating}
               className={STUDENT_REPORT_CONSTANTS.CSS_CLASSES.ALIGN_ITEMS_CENTER}
             >
               <FaFileAlt />
-              {isGenerating ? STUDENT_REPORT_CONSTANTS.MESSAGES.GENERATING : STUDENT_REPORT_CONSTANTS.MESSAGES.DOWNLOAD_REPORT}
+              {isGenerating ? STUDENT_REPORT_CONSTANTS.MESSAGES.GENERATING : 'Download Document'}
             </Button>
           </div>
         </div>

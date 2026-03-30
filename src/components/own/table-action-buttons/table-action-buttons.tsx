@@ -1,5 +1,6 @@
 import React from 'react';
 import { FaCopy } from 'react-icons/fa';
+import { FaFileAlt } from 'react-icons/fa';
 import {
   FaMagnifyingGlass,
   FaBan,
@@ -27,11 +28,14 @@ const TableActionButtons = ({
   onGradebook,
   onActivate,
   onTransferCourse,
+  onDownload,
   blockLoading = false,
   disabled = false,
   viewDisabled,
+  downloadDisabled,
   blockButtonVariant = 'cancel',
   transferTooltip = 'Transfer to course',
+  downloadTooltip = 'Download document',
   module,
 }: any) => {
   const { canPermission } = usePermission();
@@ -157,6 +161,17 @@ const TableActionButtons = ({
             <FaArrowRightArrowLeft />
           </button>
         )}
+        {onDownload && canAction(ACTION_TYPES.DOWNLOAD_DOCUMENT) && (
+          <button
+            type='button'
+            className='btn btn-light'
+            onClick={onDownload}
+            data-tooltip-id='on-download-document'
+            disabled={downloadDisabled ?? disabled}
+          >
+            <FaFileAlt />
+          </button>
+        )}
         {onDelete && canAction(ACTION_TYPES.DELETE) && (
           <button
             type='button'
@@ -212,6 +227,11 @@ const TableActionButtons = ({
           id='on-transfer-course'
           place='top'
           content='Transfer to course'
+        />
+        <Tooltip
+          id='on-download-document'
+          place='top'
+          content={downloadTooltip}
         />
         <Tooltip
           id='on-delete'

@@ -517,7 +517,7 @@ const withTimeout = <T>(promise: Promise<T>, timeoutMs: number): Promise<T> => {
 /**
  * Genera datos de estudiante con manejo mejorado de errores y timeouts
  */
-const generateRealStudentData = async (
+export const generateRealStudentData = async (
   student: any, 
   courseData: any, 
   includeCertificateFields = false
