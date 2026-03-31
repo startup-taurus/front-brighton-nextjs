@@ -226,9 +226,42 @@ const StudentsTable = ({
           title: 'Missing grades detected',
           html: `<p style="text-align:left;">You need to complete the following grades before issuing this document:</p>${formatMissingItemsHtml(missingItems)}`,
           icon: 'warning',
+          showCloseButton: false,
           showCancelButton: true,
           confirmButtonText: 'Complete now',
           cancelButtonText: 'Cancel',
+          cancelButtonColor: '#6c757d',
+          heightAuto: false,
+          scrollbarPadding: false,
+          didOpen: () => {
+            const popup = Swal.getPopup();
+            const actions = Swal.getActions();
+            const htmlContainer = Swal.getHtmlContainer();
+
+            if (popup) {
+              popup.style.maxHeight = '88vh';
+              popup.style.display = 'flex';
+              popup.style.flexDirection = 'column';
+              popup.style.overflow = 'hidden';
+            }
+
+            if (htmlContainer) {
+              htmlContainer.style.flex = '1 1 auto';
+              htmlContainer.style.minHeight = '0';
+              htmlContainer.style.maxHeight = 'none';
+              htmlContainer.style.overflowY = 'auto';
+              htmlContainer.style.paddingRight = '0.5rem';
+            }
+
+            if (actions) {
+              actions.style.position = 'sticky';
+              actions.style.bottom = '0';
+              actions.style.background = '#fff';
+              actions.style.paddingTop = '0.75rem';
+              actions.style.marginTop = '0';
+              actions.style.zIndex = '2';
+            }
+          },
         });
 
         if (decision.isConfirmed) {

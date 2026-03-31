@@ -680,22 +680,24 @@ const GradebookTable = ({
                 className='py-3 bg-light cursor-pointer position-relative'
                 onClick={toggleInactive}
               >
-                <div className='d-flex justify-content-between align-items-center pe-4'>
+                <div className='d-flex align-items-center gap-2 pe-4'>
                   <span className='text-dark'>
                     {showInactive ? 'Hide' : 'Show'} {isTransferredCourse ? 'inactive' : 'inactive/retired'} students ({inactive.length})
                   </span>
-                  <Button
-                    color='primary'
-                    size='sm'
-                    outline
-                    disabled={!canEditGrades}
-                    onClick={(event) => {
-                      event.stopPropagation();
-                      openReactivateModal();
-                    }}
-                  >
-                    Move to active
-                  </Button>
+                  {showInactive && (
+                    <Button
+                      color='primary'
+                      size='sm'
+                      outline
+                      disabled={!canEditGrades}
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        openReactivateModal();
+                      }}
+                    >
+                      Move to active
+                    </Button>
+                  )}
                 </div>
                 <span
                   className={`toggle-icon  ${!canEditGrades ? 'toggle-icon no-professor ' : ''}  `}

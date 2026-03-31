@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Button, Input, Modal, ModalBody, ModalFooter, ModalHeader, Table } from 'reactstrap';
+import { FaTimes } from 'react-icons/fa';
 import { toast } from 'react-toastify';
 
 import { updateStudentGrade } from '../../../../helper/api-data/student-grades';
@@ -315,8 +316,20 @@ const CompleteMissingGradesModal = ({
 
   return (
     <Modal isOpen={isOpen} toggle={toggle} size='lg'>
-      <ModalHeader toggle={toggle}>Complete missing grades</ModalHeader>
-      <ModalBody style={{ maxHeight: '70vh', overflowY: 'auto', overflowX: 'auto' }}>
+      <ModalHeader className='d-flex justify-content-between align-items-center'>
+        <span>Complete missing grades</span>
+        <Button
+          color='link'
+          onClick={toggle}
+          disabled={isSubmitting}
+          className='btn-close p-0 m-0'
+          style={{ textDecoration: 'none', color: '#6c757d' }}
+          title='Close'
+        >
+          <FaTimes size={18} />
+        </Button>
+      </ModalHeader>
+      <ModalBody style={{ maxHeight: 'calc(100vh - 250px)', overflowY: 'auto', overflowX: 'auto' }}>
         {gradingItems.length === 0 ? (
           <p>No missing grades found.</p>
         ) : (
@@ -415,7 +428,7 @@ const CompleteMissingGradesModal = ({
           </>
         )}
       </ModalBody>
-      <ModalFooter>
+      <ModalFooter style={{ position: 'sticky', bottom: 0, backgroundColor: '#f8f9fa', borderTop: '1px solid #dee2e6', zIndex: 1000 }}>
         <Button color='secondary' onClick={toggle} disabled={isSubmitting}>
           Cancel
         </Button>

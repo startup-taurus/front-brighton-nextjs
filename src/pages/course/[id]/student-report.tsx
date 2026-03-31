@@ -37,6 +37,13 @@ import {
   formatGradebookComponents,
 } from '../../../../utils/utils';
 
+type BatchDownloadType = 'report' | 'certificate';
+
+type MissingByStudentEntry = {
+  student: any;
+  missingItems: any[];
+};
+
 const StudentReport: NextPageWithLayout = () => {
   const router = useRouter();
   const courseId = router.query.id as string;
@@ -259,119 +266,63 @@ const StudentReport: NextPageWithLayout = () => {
     : undefined;
 
   const handleBatchDownloadReports = async () => {
-    if (!courseId) return;
-
-    const missingByStudent = filteredStudents
-      .map((student: any) => {
-        const missingItems = getMissingGradeItemsByStudent(
-          filteredGradingItems,
-          gradesByCourse?.data?.data || [],
-          student.id
-        );
-        return {
-          student,
-          missingItems,
-        };
-      })
-      .filter((entry: any) => entry.missingItems.length > 0);
-
-    if (missingByStudent.length > 0) {
-      const html = missingByStudent
-        .map(({ student, missingItems }: any) => {
-          const studentName = student?.name || `Student ${student?.id}`;
-          return `<div style="text-align:left;margin-bottom:12px;"><p style="margin:0 0 6px 0;"><strong>${studentName}</strong></p>${formatMissingItemsHtml(missingItems)}</div>`;
-        })
-        .join('');
-
-      await Swal.fire({
-        title: 'Missing grades detected',
-        html: `<p style="text-align:left;">Complete missing grades before generating reports:</p>${html}`,
-        icon: 'warning',
-        confirmButtonText: 'Understood',
-      });
-      return;
-    }
-
-    setIsDownloading(true);
-    Swal.fire({
-      title: 'Generating Reports...',
-      text: `Processing 1 course. This may take several minutes depending on the number of students. Please keep this tab open and wait for completion.`,
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-      showConfirmButton: false,
-      showClass: { popup: '' },
-      hideClass: { popup: '' },
-      didOpen: () => {
-        Swal.showLoading();
-      }
-    });
-    try {
-      await generateBatchReportsZIP(
-        [parseInt(courseId as string, 10)],
-        batchFilterOptions
-      );
-      Swal.close();
-      Swal.fire({
-        title: 'Download Completed!',
-        text: `Reports have been generated successfully. The ZIP file should start downloading automatically.`,
-        icon: 'success',
-        confirmButtonText: 'Perfect',
-        confirmButtonColor: '#28a745',
-        showClass: { popup: '' },
-        hideClass: { popup: '' }
-      });
-    } catch (error) {
-      console.error('Error downloading reports:', error);
-      Swal.close();
-      Swal.fire({
-        title: 'Download Failed',
-        text: `We couldn't generate reports. Please try again or contact support.`,
-        icon: 'error',
-        confirmButtonText: 'Understood',
-        showClass: { popup: '' },
-        hideClass: { popup: '' }
-      });
-    }
-    setIsDownloading(false);
+    await handleBatchDownload('report');
   };
 
   const handleBatchDownloadCertificates = async () => {
-    if (!courseId) return;
+    await handleBatchDownload('certificate');
+  };
 
-    const missingByStudent = filteredStudents
+  const getStudentsWithMissingGrades = (): MissingByStudentEntry[] => {
+    return filteredStudents
       .map((student: any) => {
         const missingItems = getMissingGradeItemsByStudent(
           filteredGradingItems,
           gradesByCourse?.data?.data || [],
           student.id
         );
-        return {
-          student,
-          missingItems,
-        };
+        return { student, missingItems };
       })
-      .filter((entry: any) => entry.missingItems.length > 0);
+      .filter((entry: MissingByStudentEntry) => entry.missingItems.length > 0);
+  };
 
-    if (missingByStudent.length > 0) {
-      const html = missingByStudent
-        .map(({ student, missingItems }: any) => {
-          const studentName = student?.name || `Student ${student?.id}`;
-          return `<div style="text-align:left;margin-bottom:12px;"><p style="margin:0 0 6px 0;"><strong>${studentName}</strong></p>${formatMissingItemsHtml(missingItems)}</div>`;
-        })
-        .join('');
+  const applyMissingGradesAlertLayout = () => {
+    const popup = Swal.getPopup();
+    const actions = Swal.getActions();
+    const htmlContainer = Swal.getHtmlContainer();
 
-      await Swal.fire({
-        title: 'Missing grades detected',
-        html: `<p style="text-align:left;">Complete missing grades before generating certificates:</p>${html}`,
-        icon: 'warning',
-        confirmButtonText: 'Understood',
-      });
-      return;
+    if (popup) {
+      popup.style.maxHeight = '88vh';
+      popup.style.display = 'flex';
+      popup.style.flexDirection = 'column';
+      popup.style.overflow = 'hidden';
     }
 
+    if (htmlContainer) {
+      htmlContainer.style.flex = '1 1 auto';
+      htmlContainer.style.minHeight = '0';
+      htmlContainer.style.maxHeight = 'none';
+      htmlContainer.style.overflowY = 'auto';
+      htmlContainer.style.paddingRight = '0.5rem';
+    }
+
+    if (actions) {
+      actions.style.position = 'sticky';
+      actions.style.bottom = '0';
+      actions.style.background = '#fff';
+      actions.style.paddingTop = '0.75rem';
+      actions.style.marginTop = '0';
+      actions.style.zIndex = '2';
+    }
+  };
+
+  const performBatchDownload = async (downloadType: BatchDownloadType) => {
+    if (!courseId) return;
+
     setIsDownloading(true);
+
     Swal.fire({
-      title: 'Generating Certificates...',
+      title: downloadType === 'report' ? 'Generating Reports...' : 'Generating Certificates...',
       text: `Processing 1 course. This may take several minutes depending on the number of students. Please keep this tab open and wait for completion.`,
       allowOutsideClick: false,
       allowEscapeKey: false,
@@ -380,36 +331,98 @@ const StudentReport: NextPageWithLayout = () => {
       hideClass: { popup: '' },
       didOpen: () => {
         Swal.showLoading();
-      }
+      },
     });
+
     try {
-      await generateBatchCertificatesZIP(
-        [parseInt(courseId as string, 10)],
-        batchFilterOptions
-      );
+      if (downloadType === 'report') {
+        await generateBatchReportsZIP([
+          parseInt(courseId as string, 10),
+        ], batchFilterOptions);
+      } else {
+        await generateBatchCertificatesZIP([
+          parseInt(courseId as string, 10),
+        ], batchFilterOptions);
+      }
+
       Swal.close();
-      Swal.fire({
+      await Swal.fire({
         title: 'Download Completed!',
-        text: `Certificates have been generated successfully. The ZIP file should start downloading automatically.`,
+        text:
+          downloadType === 'report'
+            ? 'Reports have been generated successfully. The ZIP file should start downloading automatically.'
+            : 'Certificates have been generated successfully. The ZIP file should start downloading automatically.',
         icon: 'success',
         confirmButtonText: 'Perfect',
         confirmButtonColor: '#28a745',
         showClass: { popup: '' },
-        hideClass: { popup: '' }
+        hideClass: { popup: '' },
       });
     } catch (error) {
-      console.error('Error downloading certificates:', error);
+      console.error(
+        downloadType === 'report'
+          ? 'Error downloading reports:'
+          : 'Error downloading certificates:',
+        error
+      );
       Swal.close();
-      Swal.fire({
+      await Swal.fire({
         title: 'Download Failed',
-        text: `We couldn't generate certificates. Please try again or contact support.`,
+        text: `We couldn't generate ${downloadType === 'report' ? 'reports' : 'certificates'}. Please try again or contact support.`,
         icon: 'error',
         confirmButtonText: 'Understood',
         showClass: { popup: '' },
-        hideClass: { popup: '' }
+        hideClass: { popup: '' },
       });
     }
+
     setIsDownloading(false);
+  };
+
+  const handleBatchDownload = async (downloadType: BatchDownloadType) => {
+    if (!courseId) return;
+
+    const missingByStudent = getStudentsWithMissingGrades();
+
+    if (missingByStudent.length > 0) {
+      const html = missingByStudent
+        .map(({ student, missingItems }: MissingByStudentEntry) => {
+          const studentName = student?.name || `Student ${student?.id}`;
+          return `<div style="text-align:left;margin-bottom:12px;"><p style="margin:0 0 6px 0;"><strong>${studentName}</strong></p>${formatMissingItemsHtml(missingItems)}</div>`;
+        })
+        .join('');
+
+      const decision = await Swal.fire({
+        title: 'Missing grades detected',
+        html: `<p style="text-align:left;">${
+          downloadType === 'report'
+            ? 'Some students have missing grades for reports.'
+            : 'Some students have missing grades for certificates.'
+        }</p>${html}`,
+        icon: 'warning',
+        showCloseButton: false,
+        showCancelButton: true,
+        showDenyButton: true,
+        confirmButtonText: 'Complete missing fields',
+        denyButtonText: 'Download anyway',
+        cancelButtonText: 'Cancel',
+        cancelButtonColor: '#6c757d',
+        heightAuto: false,
+        scrollbarPadding: false,
+        didOpen: applyMissingGradesAlertLayout,
+      });
+
+      if (decision.isConfirmed) {
+        await router.push(`/course/${courseId}/gradebook`);
+        return;
+      }
+
+      if (!decision.isDenied) {
+        return;
+      }
+    }
+
+    await performBatchDownload(downloadType);
   };
 
   const shouldRenderStudentReport =
