@@ -86,6 +86,13 @@ export const deleteCourseAssignmentItem = (
   return deleteFetcher(`/course/${courseId}/assignment/${itemId}`);
 };
 
+export const deleteAssignmentFromGradebook = (
+  courseId: string,
+  itemId: number | string
+) => {
+  return deleteFetcher(`/course/${courseId}/assignment-gradebook/${itemId}`);
+};
+
 export const deleteCourseAssignmentsBatch = (payload: { deletes: Array<{ course_id: number | string, item_id: number | string }> }) => {
   return postFetcher(`/course/assignment/delete-batch`, payload);
 };

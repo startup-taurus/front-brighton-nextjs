@@ -242,14 +242,38 @@ th {
 }
 
 .delete-col-btn {
-  width: 22px;
-  height: 22px;
+  width: 18px;
+  height: 18px;
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  z-index: 2;
   padding: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  border-radius: 4px;
-  margin-top: 4px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: #9aa0a6;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-1px);
+  transition: opacity 0.2s ease, color 0.2s ease, background-color 0.2s ease,
+    transform 0.2s ease;
+
+  svg {
+    width: 11px;
+    height: 11px;
+  }
+
+  &:hover,
+  &:focus,
+  &:focus-visible {
+    color: #e74c3c;
+    background-color: rgba(231, 76, 60, 0.1);
+    outline: none;
+  }
 }
 
 .table-xs {
@@ -634,6 +658,13 @@ table {
     text-orientation: sideways-right;
     line-height: normal;
     position: relative;
+  }
+
+  .col-vertical:hover .delete-col-btn,
+  .col-vertical:focus-within .delete-col-btn {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
   }
 }
 

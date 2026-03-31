@@ -27,7 +27,7 @@ import { updateStudentGrade } from '../../../../helper/api-data/student-grades';
 import { ComponentsGradebook } from '../../../../Types/GradingItem';
 import { FaPlus } from 'react-icons/fa6';
 import { FaChevronUp, FaChevronDown } from 'react-icons/fa';
-import { upsertCourseAssignmentItem, deleteCourseAssignmentItem } from '../../../../helper/api-data/course';
+import { upsertCourseAssignmentItem, deleteAssignmentFromGradebook } from '../../../../helper/api-data/course';
 import { mutate } from 'swr';
 import Swal from 'sweetalert2';
 import { deleteRegisteredStudent } from '../../../../helper/api-data/registered-student';
@@ -309,6 +309,28 @@ const GradebookTable = ({
     []
   );
 
+  const handleDeleteAssignment = async (itemId: any, itemName: string) => {
+    Swal.fire({
+        title: 'Delete assignment?',
+        text: `This action will permanently delete "${itemName}" and all associated grades.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Yes, delete',
+      cancelButtonText: 'Cancel',
+      reverseButtons: true,
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await deleteAssignmentFromGradebook(courseId, itemId);
+          mutate(`/course/get-grading-items/${courseId}`);
+            toast.success('Assignment deleted successfully');
+        } catch (error: any) {
+            toast.error(error?.message || 'Error deleting assignment');
+        }
+      }
+    });
+  };
+
   const renderAverageCols = ({
     grades,
     componentsGradebook,
@@ -415,18 +437,29 @@ const GradebookTable = ({
             {componentsGradebook?.assignments?.map(
               (item: any, index: number) => (
                 <td
-                  className={`col-vertical border-bottom text-center text-dark ${ !canEditGrades ? 'cursor-no-allowed' : ''}`}
+                  className={`col-vertical border-bottom text-center text-dark ${ !canEditGrades ? 'cursor-no-called' : ''}`}
                   key={`assignments-title-${item.item_id}`}
                 >
-                  <Input
-                    type='text'
-                    className='assignments-input bg-white text-black'
-                    onChange={(e) =>
-                      onChangeAssignmentCol(e, item.item_id, index)
-                    }
-                    value={item.item_name ?? ''}
-                    disabled={!canEditGrades || item.origin === 'syllabus'}
-                  />
+                  <div className='d-flex flex-column gap-2 align-items-center'>
+                    <Input
+                      type='text'
+                      className='assignments-input bg-white text-black'
+                      onChange={(e) =>
+                        onChangeAssignmentCol(e, item.item_id, index)
+                      }
+                      value={item.item_name ?? ''}
+                      disabled={!canEditGrades || item.origin === 'syllabus'}
+                    />
+                    {canEditGrades && item.origin !== 'syllabus' && (
+                      <button
+                        className='delete-col-btn'
+                        onClick={() => handleDeleteAssignment(item.item_id, item.item_name)}
+                        title='Delete assignment'
+                      >
+                        <FaTrash size={14} />
+                      </button>
+                    )}
+                  </div>
                 </td>
               )
             )}
