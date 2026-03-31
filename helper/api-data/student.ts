@@ -96,6 +96,16 @@ export const transferAndProgressStudents = (
     });
 };
 
+export const reactivateStudentsInCourse = (
+  studentIds: number[],
+  courseId: string
+) => {
+  return putFetcher('/student/reactivate-in-course', {
+    student_ids: studentIds,
+    course_id: Number(courseId),
+  });
+};
+
 export const getStudentsByLevel = (level: string) => {
   return getFetcher(`/student/get-by-level/${level}`, false);
 };

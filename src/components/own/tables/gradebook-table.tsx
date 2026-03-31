@@ -6,7 +6,18 @@ import React, {
   useState,
   useContext,
 } from 'react';
-import { Button, Input, Table, Alert, Badge, Collapse } from 'reactstrap';
+import {
+  Button,
+  Input,
+  Table,
+  Alert,
+  Badge,
+  Collapse,
+  Modal,
+  ModalHeader,
+  ModalBody,
+  ModalFooter,
+} from 'reactstrap';
 import { FaTrash } from 'react-icons/fa';
 import {
   COMPONENTS_GRADEBOOK,
@@ -35,6 +46,7 @@ import { toast } from 'react-toastify';
 import { UserContext } from '../../../../helper/User';
 import usePermission from '../../../../hooks/usePermission';
 import { PERMISSIONS } from '../../../../utils/permissions';
+import { reactivateStudentsInCourse } from '../../../../helper/api-data/student';
 
 const GradebookTable = ({
   students,
@@ -58,6 +70,11 @@ const GradebookTable = ({
 
   const [grades, setGrades] = useState<any>({});
   const [showInactive, setShowInactive] = useState(false);
+  const [showReactivateModal, setShowReactivateModal] = useState(false);
+  const [selectedInactiveStudentIds, setSelectedInactiveStudentIds] = useState<
+    number[]
+  >([]);
+  const [isReactivating, setIsReactivating] = useState(false);
   const [componentsGradebook, setComponentsGradebook] =
     useState<ComponentsGradebook>({
       assignments: [],
@@ -66,11 +83,7 @@ const GradebookTable = ({
     });
 
   const isInputDisabled = (student: any) => {
-    return (
-      !canEditGrades ||
-      student?.is_retired ||
-      student?.status === STATUS.INACTIVE
-    );
+    return !canEditGrades;
   };
 
   const gradingGrade = useMemo(
@@ -107,13 +120,8 @@ const GradebookTable = ({
   const onChangeGrades = async (
     event: any,
     gradingItemId: any,
-    studentId: any,
-    isRetired: boolean
+    studentId: any
   ) => {
-    if (isRetired) {
-      return;
-    }
-
     const newRawDigits = event.target.value.replace(/\D/g, '');
 
     if (!newRawDigits) {
@@ -386,6 +394,49 @@ const GradebookTable = ({
 
   const toggleInactive = () => setShowInactive((p) => !p);
 
+  const openReactivateModal = () => {
+    setSelectedInactiveStudentIds([]);
+    setShowReactivateModal(true);
+  };
+
+  const closeReactivateModal = () => {
+    if (isReactivating) return;
+    setShowReactivateModal(false);
+  };
+
+  const toggleSelectStudentToReactivate = (studentId: number) => {
+    setSelectedInactiveStudentIds((previous) =>
+      previous.includes(studentId)
+        ? previous.filter((id) => id !== studentId)
+        : [...previous, studentId]
+    );
+  };
+
+  const toggleSelectAllInactive = () => {
+    const allIds = inactive.map((student: any) => Number(student.id));
+    setSelectedInactiveStudentIds((previous) =>
+      previous.length === allIds.length ? [] : allIds
+    );
+  };
+
+  const handleReactivateStudents = async () => {
+    if (!courseId || selectedInactiveStudentIds.length === 0) {
+      return;
+    }
+
+    setIsReactivating(true);
+    try {
+      await reactivateStudentsInCourse(selectedInactiveStudentIds, String(courseId));
+      await mutate(`/course/get-students/${courseId}`);
+      toast.success('Selected students are active in this course now.');
+      setShowReactivateModal(false);
+    } catch (error: any) {
+      toast.error(error?.message || 'Could not reactivate students.');
+    } finally {
+      setIsReactivating(false);
+    }
+  };
+
   return (
     <>
       <div className='small text-muted mb-2'>
@@ -523,13 +574,12 @@ const GradebookTable = ({
                     key={`grade-note-${j}`}
                   >
                     <Input
-                      className={`td-input input-percentage bg-transparent text-black ${!canEditGrades ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark cursor-no-allowed'}`}
+                      className={`td-input input-percentage bg-transparent text-black ${!canEditGrades ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark'}`}
                       onChange={(event) =>
                         onChangeGrades(
                           event,
                           item.item_id,
-                          student?.id,
-                          student?.is_retired
+                          student?.id
                         )
                       }
                       onKeyDown={(event) =>
@@ -556,13 +606,12 @@ const GradebookTable = ({
                     key={`grade-note-progressTest-${j}`}
                   >
                     <Input
-                      className={`td-input input-percentage bg-transparent text-black ${!canEditGrades ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark cursor-no-allowed'}`}
+                      className={`td-input input-percentage bg-transparent text-black ${!canEditGrades ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark'}`}
                       onChange={(event) =>
                         onChangeGrades(
                           event,
                           item.item_id,
-                          student?.id,
-                          student?.is_retired
+                          student?.id
                         )
                       }
                       onKeyDown={(event) =>
@@ -589,13 +638,12 @@ const GradebookTable = ({
                     key={`grade-note-progressTest-${j}`}
                   >
                     <Input
-                      className={`td-input input-percentage bg-transparent text-black ${!canEditGrades || student?.is_retired ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark'}`}
+                      className={`td-input input-percentage bg-transparent text-black ${!canEditGrades ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark'}`}
                       onChange={(event) =>
                         onChangeGrades(
                           event,
                           item.item_id,
-                          student?.id,
-                          student?.is_retired
+                          student?.id
                         )
                       }
                       onKeyDown={(event) =>
@@ -632,9 +680,23 @@ const GradebookTable = ({
                 className='py-3 bg-light cursor-pointer position-relative'
                 onClick={toggleInactive}
               >
-                <span className='text-dark'>
-                  {showInactive ? 'Hide' : 'Show'} {isTransferredCourse ? 'inactive' : 'inactive/retired'} students ({inactive.length})
-                </span>
+                <div className='d-flex justify-content-between align-items-center pe-4'>
+                  <span className='text-dark'>
+                    {showInactive ? 'Hide' : 'Show'} {isTransferredCourse ? 'inactive' : 'inactive/retired'} students ({inactive.length})
+                  </span>
+                  <Button
+                    color='primary'
+                    size='sm'
+                    outline
+                    disabled={!canEditGrades}
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      openReactivateModal();
+                    }}
+                  >
+                    Move to active
+                  </Button>
+                </div>
                 <span
                   className={`toggle-icon  ${!canEditGrades ? 'toggle-icon no-professor ' : ''}  `}
                 >
@@ -684,13 +746,12 @@ const GradebookTable = ({
                   key={`grade-note-inactive-${j}`}
                 >
                   <Input
-                    className={`td-input input-percentage bg-transparent text-black ${ !canEditGrades ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark cursor-no-allowed'}`}
+                    className={`td-input input-percentage bg-transparent text-black ${ !canEditGrades ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark'}`}
                     onChange={(event) =>
                       onChangeGrades(
                         event,
                         item.item_id,
-                        student?.id,
-                        student?.is_retired
+                        student?.id
                       )
                     }
                     onKeyDown={(event) =>
@@ -717,13 +778,12 @@ const GradebookTable = ({
                   key={`grade-note-progressTest-inactive-${j}`}
                 >
                   <Input
-                    className={`td-input input-percentage bg-transparent text-black ${!canEditGrades || student?.is_retired ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark cursor-no-allowed'}`}
+                    className={`td-input input-percentage bg-transparent text-black ${!canEditGrades ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark'}`}
                     onChange={(event) =>
                       onChangeGrades(
                         event,
                         item.item_id,
-                        student?.id,
-                        student?.is_retired
+                        student?.id
                       )
                     }
                     onKeyDown={(event) =>
@@ -750,13 +810,12 @@ const GradebookTable = ({
                   key={`grade-note-progressTest-inactive-${j}`}
                 >
                   <Input
-                    className={`td-input input-percentage bg-transparent text-black ${!canEditGrades || student?.is_retired ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark'}`}
+                    className={`td-input input-percentage bg-transparent text-black ${!canEditGrades ? 'cursor-no-allowed' : ''} ${(student?.is_retired || student?.status === STATUS.INACTIVE) && 'text-dark'}`}
                     onChange={(event) =>
                       onChangeGrades(
                         event,
                         item.item_id,
-                        student?.id,
-                        student?.is_retired
+                        student?.id
                       )
                     }
                     onKeyDown={(event) =>
@@ -801,6 +860,78 @@ const GradebookTable = ({
           </p>
         </div>
       </div>
+
+      <Modal
+        isOpen={showReactivateModal}
+        toggle={closeReactivateModal}
+      >
+        <ModalHeader toggle={closeReactivateModal}>
+          Move students to active list
+        </ModalHeader>
+        <ModalBody>
+          <div className='d-flex justify-content-between align-items-center mb-3'>
+            <span className='small text-muted'>
+              Select one or more inactive/retired students to reactivate in this course.
+            </span>
+            <Button
+              color='secondary'
+              size='sm'
+              outline
+              onClick={toggleSelectAllInactive}
+              disabled={!inactive.length}
+            >
+              {selectedInactiveStudentIds.length === inactive.length && inactive.length > 0
+                ? 'Unselect all'
+                : 'Select all'}
+            </Button>
+          </div>
+
+          <div className='d-flex flex-column gap-2'>
+            {inactive.map((student: any) => {
+              const studentId = Number(student.id);
+              const isChecked = selectedInactiveStudentIds.includes(studentId);
+
+              return (
+                <label
+                  key={`reactivate-student-${studentId}`}
+                  className='d-flex align-items-center justify-content-between border rounded px-3 py-2'
+                >
+                  <span className='d-flex align-items-center gap-2'>
+                    <Input
+                      type='checkbox'
+                      checked={isChecked}
+                      onChange={() => toggleSelectStudentToReactivate(studentId)}
+                    />
+                    <span>{student.name}</span>
+                  </span>
+                  <Badge color='primary' pill>
+                    {student?.status === STATUS.INACTIVE ? 'Inactive' : 'Retired'}
+                  </Badge>
+                </label>
+              );
+            })}
+          </div>
+        </ModalBody>
+        <ModalFooter>
+          <Button
+            color='secondary'
+            outline
+            onClick={closeReactivateModal}
+            disabled={isReactivating}
+          >
+            Cancel
+          </Button>
+          <Button
+            color='primary'
+            onClick={handleReactivateStudents}
+            disabled={!selectedInactiveStudentIds.length || isReactivating}
+          >
+            {isReactivating
+              ? 'Moving...'
+              : `Move selected (${selectedInactiveStudentIds.length})`}
+          </Button>
+        </ModalFooter>
+      </Modal>
     </>
   );
 };
