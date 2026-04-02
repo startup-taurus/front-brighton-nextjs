@@ -270,7 +270,6 @@ export const SmallWidgetsChartOption: ChartOptionType = {
                         size: 4,
                         fillColor: '',
                         strokeColor: 'var(--white)',
-                        radius: 2,
                     },
                 }
             ],
@@ -347,7 +346,7 @@ export const SmallWidgetsChartOption: ChartOptionType = {
                             {
                                 x: 73,
                                 y: 58,
-                                marker: { strokeColor: 'var(--white)', size: 4, radius: 2 },
+                                marker: { strokeColor: 'var(--white)', size: 4 },
                             },
                         ],
                     },
@@ -364,7 +363,7 @@ export const SmallWidgetsChartOption: ChartOptionType = {
                             {
                                 x: 115,
                                 y: 58,
-                                marker: { strokeColor: 'var(--white)', size: 4, radius: 2 },
+                                marker: { strokeColor: 'var(--white)', size: 4 },
                             },
                         ],
                     },
@@ -381,7 +380,7 @@ export const SmallWidgetsChartOption: ChartOptionType = {
                             {
                                 x: 85,
                                 y: 58,
-                                marker: { strokeColor: 'var(--white)', size: 4, radius: 2 },
+                                marker: { strokeColor: 'var(--white)', size: 4 },
                             },
                         ],
                     },
@@ -401,7 +400,6 @@ export const SmallWidgetsChartOption: ChartOptionType = {
                                 marker: {
                                     size: 4,
                                     strokeColor: 'var(--white)',
-                                    radius: 2,
                                 },
                             },
                         ],
