@@ -236,7 +236,7 @@ export const MonthlyProfitsChartData: MonthlyProfitsChartData = {
       markers: {
         width: 6,
         height: 6,
-      },
+      } as any,
       itemMargin: {
         horizontal: 7,
         vertical: 0,
@@ -736,7 +736,7 @@ export const OptionsVisitorChart = {
         width: 6,
         height: 6,
         radius: 12,
-      },
+      } as any,
       itemMargin: {
         horizontal: 10,
       },
