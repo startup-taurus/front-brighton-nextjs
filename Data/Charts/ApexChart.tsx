@@ -402,7 +402,7 @@ export const apexLineWithAnnotationCharts: ApexOptions = {
           size: 8,
           fillColor: "#fff",
           strokeColor: "red",
-          radius: 2,
+          shape: "circle",
           cssClass: "apexcharts-custom-class",
         },
         label: {
