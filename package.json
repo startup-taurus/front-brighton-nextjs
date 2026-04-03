@@ -29,7 +29,7 @@
     "@types/react": "^18.0.33",
     "@types/react-dom": "18.0.10",
     "@types/react-slick": "^0.23.10",
-    "apexcharts": "^3.37.3",
+    "apexcharts": "^3.49.1",
     "axios": "^1.4.0",
     "body-scroll-lock": "^4.0.0-beta.0",
     "bootstrap": "^5.2.3",
