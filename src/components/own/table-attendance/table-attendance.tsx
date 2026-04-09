@@ -58,13 +58,8 @@ const TableAttendance: React.FC<TableAttendanceProps> = ({
   const changeAttendance = async (
     e: ChangeEvent<HTMLSelectElement>,
     scheduleId: number,
-    studentId: number,
-    isRetired: boolean
+    studentId: number
   ) => {
-    if (isRetired) {
-      toast.error('Cannot mark attendance for retired students');
-      return;
-    }
     const status = e.target.value;
     setDates((prev) => ({
       ...prev,
@@ -190,13 +185,9 @@ const TableAttendance: React.FC<TableAttendanceProps> = ({
             className={`td-input attendance-input bg-transparent text-dark ${!canMarkAttendance ? 'cursor-no-allowed' : ''}`}
             value={dates[scheduleItem.id]?.[student.id] || ''}
             onChange={(e: any) =>
-              changeAttendance(e, scheduleItem.id, student.id, student.is_retired)
+              changeAttendance(e, scheduleItem.id, student.id)
             }
-            disabled={
-              !canMarkAttendance ||
-              student.is_retired ||
-              student.status === STATUS.INACTIVE
-            }
+            disabled={!canMarkAttendance}
           >
             <option value=''> </option>
             <option value='present'>P</option>

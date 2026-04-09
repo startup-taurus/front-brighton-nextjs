@@ -141,8 +141,9 @@ const StudentReport: NextPageWithLayout = () => {
 
   const isPassStatus = (status?: string) => {
     const normalized = normalizeStatus(status);
-    const passLabel = normalizeStatus(STUDENT_REPORT_CONSTANTS.STATUS.PASS);
-    return normalized === passLabel || normalized.startsWith(`${passLabel} (`);
+    if (!normalized) return false;
+
+    return !isFailStatus(normalized) && !isNotReportedStatus(normalized);
   };
 
   const isFailStatus = (status?: string) => {
@@ -151,6 +152,7 @@ const StudentReport: NextPageWithLayout = () => {
     return (
       normalized === failLabel ||
       normalized.startsWith(`${failLabel} (`) ||
+      normalized === 'FAILED' ||
       normalized.startsWith('FAILED')
     );
   };
